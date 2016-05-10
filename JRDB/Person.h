@@ -7,8 +7,12 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "JRPersistent.h"
 
-@interface Person : NSObject
+
+@interface Person : NSObject <JRPersistent>
+
+@property (nonatomic, copy) NSString *ID;
 
 @property (nonatomic, assign) int a_int;
 @property (nonatomic, assign) unsigned int b_unsigned_int;

@@ -23,6 +23,6 @@
 - (void)updateTable4Clazz:(Class<JRPersistent>)clazz inDB:(FMDatabase *)db;
 - (void)deleteTable4Clazz:(Class<JRPersistent>)clazz inDB:(FMDatabase *)db;
 
-- (void)registerClazz:(Class<JRPersistent>)clazz;
+//- (void)registerClazz:(Class<JRPersistent>)clazz;
 
 @end

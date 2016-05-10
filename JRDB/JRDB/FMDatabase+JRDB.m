@@ -11,6 +11,8 @@
 #import "FMDatabase+JRDB.h"
 #import <objc/runtime.h>
 #import "JRSqlGenerator.h"
+#import "JRReflectUtil.h"
+#import "JRDBMgr.h"
 static NSString *queuekey = @"queuekey";
 
 NSString * uuid() {
@@ -36,6 +38,9 @@ NSString * uuid() {
 }
 
 - (BOOL)saveObj:(id<JRPersistent>)obj synchronized:(BOOL)synchronized {
+    if (![self tableExists:[JRReflectUtil shortClazzName:[obj class]]]) {
+        [[JRDBMgr shareInstance] createTable4Clazz:[obj class] inDB:self];
+    }
     NSArray *args;
     NSString *sql = [JRSqlGenerator sql4Insert:obj args:&args];
     if (!obj.ID.length) {

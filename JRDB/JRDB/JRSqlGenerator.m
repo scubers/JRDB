@@ -11,6 +11,8 @@
 #import "NSObject+JRDB.h"
 #import <FMDB.h>
 
+#define isID(name) ([name isEqualToString:@"ID"] || [name isEqualToString:@"_ID"])
+
 @implementation JRSqlGenerator
 
 + (NSString *)createTableSql4Clazz:(Class<JRPersistent>)clazz {
@@ -74,14 +76,15 @@
     [sql appendFormat:@" insert into %@ values (ID = ?, ", tableName];
     
     NSArray *array = [JRReflectUtil ivarAndEncode4Clazz:[obj class]];
-    NSArray *excludes = [obj jr_excludePropertyNames];
+    NSArray *excludes = [[obj class] jr_excludePropertyNames];
     
     for (NSDictionary *dict in array) {
         NSString *name = dict.allKeys.firstObject;
-        if (excludes.count && [excludes containsObject:name]) {
+        if ((excludes.count && [excludes containsObject:name]) || isID(name)) {
             continue;
         }
         [sql appendFormat:@" %@ = ? ", name];
+        NSLog(@"----%@", name);
         id value = [(NSObject *)obj valueForKey:name];
         if (!value) {
             value = [NSNull null];
@@ -108,11 +111,11 @@
     [sql appendFormat:@" update %@ set ", tableName];
     
     NSArray *array = [JRReflectUtil ivarAndEncode4Clazz:[obj class]];
-    NSArray *excludes = [obj jr_excludePropertyNames];
+    NSArray *excludes = [[obj class] jr_excludePropertyNames];
     
     for (NSDictionary *dict in array) {
         NSString *name = dict.allKeys.firstObject;
-        if (excludes.count && [excludes containsObject:name] && [columns containsObject:name]) {
+        if ((excludes.count && [excludes containsObject:name] && [columns containsObject:name]) || isID(name)) {
             continue;
         }
         [sql appendFormat:@" %@ = ? ", name];
