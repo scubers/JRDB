@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5AC8B3321CE1DA2500079BC8 /* NSObject+JRDB.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AC8B3311CE1DA2500079BC8 /* NSObject+JRDB.m */; };
 		5ACBEEB21CE1B3A500371E01 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 5ACBEEB11CE1B3A500371E01 /* main.m */; };
 		5ACBEEB51CE1B3A500371E01 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 5ACBEEB41CE1B3A500371E01 /* AppDelegate.m */; };
 		5ACBEEB81CE1B3A500371E01 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5ACBEEB71CE1B3A500371E01 /* ViewController.m */; };
@@ -15,6 +16,12 @@
 		5ACBEEC01CE1B3A500371E01 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5ACBEEBE1CE1B3A500371E01 /* LaunchScreen.storyboard */; };
 		5ACBEECB1CE1B3A500371E01 /* JRDBTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 5ACBEECA1CE1B3A500371E01 /* JRDBTests.m */; };
 		5ACBEED61CE1B3A500371E01 /* JRDBUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 5ACBEED51CE1B3A500371E01 /* JRDBUITests.m */; };
+		5ACBEEE61CE1B65700371E01 /* JRDBMgr.m in Sources */ = {isa = PBXBuildFile; fileRef = 5ACBEEE51CE1B65700371E01 /* JRDBMgr.m */; };
+		5ACBEEEB1CE1B91F00371E01 /* JRSqlGenerator.m in Sources */ = {isa = PBXBuildFile; fileRef = 5ACBEEEA1CE1B91F00371E01 /* JRSqlGenerator.m */; };
+		5AD63F211CE1BE540044ACE6 /* JRReflectUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AD63F201CE1BE540044ACE6 /* JRReflectUtil.m */; };
+		5AD63F241CE1C2480044ACE6 /* Person.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AD63F231CE1C2480044ACE6 /* Person.m */; };
+		5AD63F271CE1C40F0044ACE6 /* AViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AD63F261CE1C40F0044ACE6 /* AViewController.swift */; };
+		FBF3C497220D92DE4D08E69C /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 98C53C16D7E17DA922E08153 /* libPods.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -35,6 +42,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		16D9BC35A452ABED0FB7879A /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
+		2C94FB217DD9C61722850B3C /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
+		5AC8B3301CE1DA2500079BC8 /* NSObject+JRDB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+JRDB.h"; sourceTree = "<group>"; };
+		5AC8B3311CE1DA2500079BC8 /* NSObject+JRDB.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+JRDB.m"; sourceTree = "<group>"; };
 		5ACBEEAD1CE1B3A500371E01 /* JRDB.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JRDB.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5ACBEEB11CE1B3A500371E01 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		5ACBEEB31CE1B3A500371E01 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -51,6 +62,18 @@
 		5ACBEED11CE1B3A500371E01 /* JRDBUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JRDBUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5ACBEED51CE1B3A500371E01 /* JRDBUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JRDBUITests.m; sourceTree = "<group>"; };
 		5ACBEED71CE1B3A500371E01 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		5ACBEEE41CE1B65700371E01 /* JRDBMgr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRDBMgr.h; sourceTree = "<group>"; };
+		5ACBEEE51CE1B65700371E01 /* JRDBMgr.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRDBMgr.m; sourceTree = "<group>"; };
+		5ACBEEE81CE1B8B800371E01 /* JRPersistent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRPersistent.h; sourceTree = "<group>"; };
+		5ACBEEE91CE1B91F00371E01 /* JRSqlGenerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRSqlGenerator.h; sourceTree = "<group>"; };
+		5ACBEEEA1CE1B91F00371E01 /* JRSqlGenerator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRSqlGenerator.m; sourceTree = "<group>"; };
+		5AD63F1F1CE1BE540044ACE6 /* JRReflectUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRReflectUtil.h; sourceTree = "<group>"; };
+		5AD63F201CE1BE540044ACE6 /* JRReflectUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRReflectUtil.m; sourceTree = "<group>"; };
+		5AD63F221CE1C2480044ACE6 /* Person.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Person.h; sourceTree = "<group>"; };
+		5AD63F231CE1C2480044ACE6 /* Person.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Person.m; sourceTree = "<group>"; };
+		5AD63F251CE1C40F0044ACE6 /* JRDB-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "JRDB-Bridging-Header.h"; sourceTree = "<group>"; };
+		5AD63F261CE1C40F0044ACE6 /* AViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AViewController.swift; sourceTree = "<group>"; };
+		98C53C16D7E17DA922E08153 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +81,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FBF3C497220D92DE4D08E69C /* libPods.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -85,6 +109,8 @@
 				5ACBEEC91CE1B3A500371E01 /* JRDBTests */,
 				5ACBEED41CE1B3A500371E01 /* JRDBUITests */,
 				5ACBEEAE1CE1B3A500371E01 /* Products */,
+				7CA91A8643FE10B7BEB6BABF /* Pods */,
+				E52AF4D43DD3EF3F4B30B919 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -101,6 +127,7 @@
 		5ACBEEAF1CE1B3A500371E01 /* JRDB */ = {
 			isa = PBXGroup;
 			children = (
+				5ACBEEE31CE1B3BC00371E01 /* JRDB */,
 				5ACBEEB31CE1B3A500371E01 /* AppDelegate.h */,
 				5ACBEEB41CE1B3A500371E01 /* AppDelegate.m */,
 				5ACBEEB61CE1B3A500371E01 /* ViewController.h */,
@@ -110,6 +137,10 @@
 				5ACBEEBE1CE1B3A500371E01 /* LaunchScreen.storyboard */,
 				5ACBEEC11CE1B3A500371E01 /* Info.plist */,
 				5ACBEEB01CE1B3A500371E01 /* Supporting Files */,
+				5AD63F221CE1C2480044ACE6 /* Person.h */,
+				5AD63F231CE1C2480044ACE6 /* Person.m */,
+				5AD63F261CE1C40F0044ACE6 /* AViewController.swift */,
+				5AD63F251CE1C40F0044ACE6 /* JRDB-Bridging-Header.h */,
 			);
 			path = JRDB;
 			sourceTree = "<group>";
@@ -140,6 +171,39 @@
 			path = JRDBUITests;
 			sourceTree = "<group>";
 		};
+		5ACBEEE31CE1B3BC00371E01 /* JRDB */ = {
+			isa = PBXGroup;
+			children = (
+				5ACBEEE41CE1B65700371E01 /* JRDBMgr.h */,
+				5ACBEEE51CE1B65700371E01 /* JRDBMgr.m */,
+				5ACBEEE81CE1B8B800371E01 /* JRPersistent.h */,
+				5ACBEEE91CE1B91F00371E01 /* JRSqlGenerator.h */,
+				5ACBEEEA1CE1B91F00371E01 /* JRSqlGenerator.m */,
+				5AD63F1F1CE1BE540044ACE6 /* JRReflectUtil.h */,
+				5AD63F201CE1BE540044ACE6 /* JRReflectUtil.m */,
+				5AC8B3301CE1DA2500079BC8 /* NSObject+JRDB.h */,
+				5AC8B3311CE1DA2500079BC8 /* NSObject+JRDB.m */,
+			);
+			path = JRDB;
+			sourceTree = "<group>";
+		};
+		7CA91A8643FE10B7BEB6BABF /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				16D9BC35A452ABED0FB7879A /* Pods.debug.xcconfig */,
+				2C94FB217DD9C61722850B3C /* Pods.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
+		E52AF4D43DD3EF3F4B30B919 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				98C53C16D7E17DA922E08153 /* libPods.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -147,9 +211,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 5ACBEEDA1CE1B3A500371E01 /* Build configuration list for PBXNativeTarget "JRDB" */;
 			buildPhases = (
+				4D95C77DA2CEAACFA4F68C04 /* Check Pods Manifest.lock */,
 				5ACBEEA91CE1B3A500371E01 /* Sources */,
 				5ACBEEAA1CE1B3A500371E01 /* Frameworks */,
 				5ACBEEAB1CE1B3A500371E01 /* Resources */,
+				1017BC2904B5AEBBF13D8F00 /* Embed Pods Frameworks */,
+				DC887D4D0B32D846A3E2C57C /* Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -268,14 +335,68 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		1017BC2904B5AEBBF13D8F00 /* Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods/Pods-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		4D95C77DA2CEAACFA4F68C04 /* Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		DC887D4D0B32D846A3E2C57C /* Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods/Pods-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		5ACBEEA91CE1B3A500371E01 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5AD63F271CE1C40F0044ACE6 /* AViewController.swift in Sources */,
+				5ACBEEE61CE1B65700371E01 /* JRDBMgr.m in Sources */,
 				5ACBEEB81CE1B3A500371E01 /* ViewController.m in Sources */,
+				5AD63F241CE1C2480044ACE6 /* Person.m in Sources */,
 				5ACBEEB51CE1B3A500371E01 /* AppDelegate.m in Sources */,
 				5ACBEEB21CE1B3A500371E01 /* main.m in Sources */,
+				5ACBEEEB1CE1B91F00371E01 /* JRSqlGenerator.m in Sources */,
+				5AC8B3321CE1DA2500079BC8 /* NSObject+JRDB.m in Sources */,
+				5AD63F211CE1BE540044ACE6 /* JRReflectUtil.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -414,23 +535,32 @@
 		};
 		5ACBEEDB1CE1B3A500371E01 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 16D9BC35A452ABED0FB7879A /* Pods.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				INFOPLIST_FILE = JRDB/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = jrwong.abc.JRDB;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "JRDB/JRDB-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
 		5ACBEEDC1CE1B3A500371E01 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2C94FB217DD9C61722850B3C /* Pods.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				INFOPLIST_FILE = JRDB/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = jrwong.abc.JRDB;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "JRDB/JRDB-Bridging-Header.h";
 			};
 			name = Release;
 		};
@@ -499,6 +629,7 @@
 				5ACBEEDC1CE1B3A500371E01 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		5ACBEEDD1CE1B3A500371E01 /* Build configuration list for PBXNativeTarget "JRDBTests" */ = {
 			isa = XCConfigurationList;
@@ -507,6 +638,7 @@
 				5ACBEEDF1CE1B3A500371E01 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		5ACBEEE01CE1B3A500371E01 /* Build configuration list for PBXNativeTarget "JRDBUITests" */ = {
 			isa = XCConfigurationList;
@@ -515,6 +647,7 @@
 				5ACBEEE21CE1B3A500371E01 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

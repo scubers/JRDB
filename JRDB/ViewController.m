@@ -7,6 +7,9 @@
 //
 
 #import "ViewController.h"
+#import "JRDB-Swift.h"
+#import "JRSqlGenerator.h"
+#import "Person.h"
 
 @interface ViewController ()
 
@@ -16,7 +19,11 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // Do any additional setup after loading the view, typically from a nib.
+    AViewController *v = [[AViewController alloc] init];
+    [self presentViewController:v animated:false completion:nil];
+    
+    NSString *sql = [JRSqlGenerator createTableSql4Clazz:[Person class]];
+    NSLog(@"%@", sql);
 }
 
 - (void)didReceiveMemoryWarning {
