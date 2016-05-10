@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		5AC8B3321CE1DA2500079BC8 /* NSObject+JRDB.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AC8B3311CE1DA2500079BC8 /* NSObject+JRDB.m */; };
+		5AC8B3381CE1EDA700079BC8 /* FMDatabase+JRDB.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AC8B3371CE1EDA700079BC8 /* FMDatabase+JRDB.m */; };
 		5ACBEEB21CE1B3A500371E01 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 5ACBEEB11CE1B3A500371E01 /* main.m */; };
 		5ACBEEB51CE1B3A500371E01 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 5ACBEEB41CE1B3A500371E01 /* AppDelegate.m */; };
 		5ACBEEB81CE1B3A500371E01 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5ACBEEB71CE1B3A500371E01 /* ViewController.m */; };
@@ -46,6 +47,8 @@
 		2C94FB217DD9C61722850B3C /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
 		5AC8B3301CE1DA2500079BC8 /* NSObject+JRDB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+JRDB.h"; sourceTree = "<group>"; };
 		5AC8B3311CE1DA2500079BC8 /* NSObject+JRDB.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+JRDB.m"; sourceTree = "<group>"; };
+		5AC8B3361CE1EDA700079BC8 /* FMDatabase+JRDB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "FMDatabase+JRDB.h"; sourceTree = "<group>"; };
+		5AC8B3371CE1EDA700079BC8 /* FMDatabase+JRDB.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "FMDatabase+JRDB.m"; sourceTree = "<group>"; };
 		5ACBEEAD1CE1B3A500371E01 /* JRDB.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JRDB.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5ACBEEB11CE1B3A500371E01 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		5ACBEEB31CE1B3A500371E01 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -183,6 +186,8 @@
 				5AD63F201CE1BE540044ACE6 /* JRReflectUtil.m */,
 				5AC8B3301CE1DA2500079BC8 /* NSObject+JRDB.h */,
 				5AC8B3311CE1DA2500079BC8 /* NSObject+JRDB.m */,
+				5AC8B3361CE1EDA700079BC8 /* FMDatabase+JRDB.h */,
+				5AC8B3371CE1EDA700079BC8 /* FMDatabase+JRDB.m */,
 			);
 			path = JRDB;
 			sourceTree = "<group>";
@@ -391,6 +396,7 @@
 				5AD63F271CE1C40F0044ACE6 /* AViewController.swift in Sources */,
 				5ACBEEE61CE1B65700371E01 /* JRDBMgr.m in Sources */,
 				5ACBEEB81CE1B3A500371E01 /* ViewController.m in Sources */,
+				5AC8B3381CE1EDA700079BC8 /* FMDatabase+JRDB.m in Sources */,
 				5AD63F241CE1C2480044ACE6 /* Person.m in Sources */,
 				5ACBEEB51CE1B3A500371E01 /* AppDelegate.m in Sources */,
 				5ACBEEB21CE1B3A500371E01 /* main.m in Sources */,

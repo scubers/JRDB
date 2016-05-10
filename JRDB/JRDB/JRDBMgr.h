@@ -7,21 +7,21 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <FMDB.h>
 #import "JRPersistent.h"
+
+@class FMDatabase;
 
 @interface JRDBMgr : NSObject
 
 + (instancetype)shareInstance;
 
-- (BOOL)createDBWithPath:(NSString *)path;
-- (BOOL)updateDBWithPath:(NSString *)path;
-- (BOOL)deleteDBWithPath:(NSString *)path;
-- (FMDatabase *)getDBWithPath:(NSString *)path;
+- (FMDatabase *)createDBWithPath:(NSString *)path;
+- (void)deleteDBWithPath:(NSString *)path;
+- (FMDatabase *)DBWithPath:(NSString *)path;
 
-- (BOOL)createTable4Clazz:(Class<JRPersistent>)clazz inDB:(FMDatabase *)db;
-- (BOOL)updateTable4Clazz:(Class<JRPersistent>)clazz inDB:(FMDatabase *)db;
-- (BOOL)deleteTable4Clazz:(Class<JRPersistent>)clazz inDB:(FMDatabase *)db;
+- (void)createTable4Clazz:(Class<JRPersistent>)clazz inDB:(FMDatabase *)db;
+- (void)updateTable4Clazz:(Class<JRPersistent>)clazz inDB:(FMDatabase *)db;
+- (void)deleteTable4Clazz:(Class<JRPersistent>)clazz inDB:(FMDatabase *)db;
 
 - (void)registerClazz:(Class<JRPersistent>)clazz;
 

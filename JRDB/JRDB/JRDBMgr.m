@@ -7,6 +7,9 @@
 //
 
 #import "JRDBMgr.h"
+#import <FMDB.h>
+#import "JRReflectUtil.h"
+#import "JRSqlGenerator.h"
 
 @interface JRDBMgr()
 
@@ -29,9 +32,50 @@ static JRDBMgr *__shareInstance;
     return [[self alloc] init];
 }
 
+- (FMDatabase *)createDBWithPath:(NSString *)path {
+    FMDatabase *db = [FMDatabase databaseWithPath:path];
+    [db open];
+    return db;
+}
+
+- (void)deleteDBWithPath:(NSString *)path {
+    NSFileManager *mgr = [NSFileManager defaultManager];
+    FMDatabase *db = [FMDatabase databaseWithPath:path];
+    [db close];
+    [mgr removeItemAtPath:path error:nil];
+}
+
+- (FMDatabase *)DBWithPath:(NSString *)path {
+    return [FMDatabase databaseWithPath:path];
+}
+
+- (void)createTable4Clazz:(Class<JRPersistent>)clazz inDB:(FMDatabase *)db {
+    NSString *tableName = [JRReflectUtil shortClazzName:clazz];
+    if (![db tableExists:tableName]) {
+        [db executeUpdate:[JRSqlGenerator createTableSql4Clazz:clazz]];
+    }
+}
+
+- (void)updateTable4Clazz:(Class<JRPersistent>)clazz inDB:(FMDatabase *)db {
+    NSString *sql = [JRSqlGenerator updateTableSql4Clazz:clazz inDB:db];
+    if (sql.length) {
+        [db executeUpdate:sql];
+    }
+}
+
+- (void)deleteTable4Clazz:(Class<JRPersistent>)clazz inDB:(FMDatabase *)db {
+    NSString *tableName = [JRReflectUtil shortClazzName:clazz];
+    if ([db tableExists:tableName]) {
+        [db executeUpdate:[JRSqlGenerator deleteTableSql4Clazz:clazz]];
+    }
+    
+}
+
 - (void)registerClazz:(Class<JRPersistent>)clazz {
     NSAssert(clazz != nil, @"class should not be nil");
-    [self.registeredClazz addObject:clazz];
+    if (![self.registeredClazz containsObject:clazz]) {
+        [self.registeredClazz addObject:clazz];
+    }
 }
 
 #pragma mark - lazy load

@@ -61,18 +61,20 @@
     return flag ? sql : nil;
 }
 
-+ (NSString *)deleteTableSql4Clazz:(Class<JRPersistent>)clazz {
++ (NSString *)deleteTableSql4Clazz:(Class<JRPersistent>)clazz{
     return [NSString stringWithFormat:@"drop table %@", [JRReflectUtil shortClazzName:clazz]];
 }
 
 
-+ (NSString *)sql4Insert:(Class<JRPersistent>)clazz {
++ (NSString *)sql4Insert:(id<JRPersistent>)obj args:(NSArray *__autoreleasing *)args{
+    NSMutableArray *argsList = [NSMutableArray array];
+    
     NSMutableString *sql = [NSMutableString string];
-    NSString *tableName = [JRReflectUtil shortClazzName:clazz];
+    NSString *tableName = [JRReflectUtil shortClazzName:[obj class]];
     [sql appendFormat:@" insert into %@ values (ID = ?, ", tableName];
     
-    NSArray *array = [JRReflectUtil ivarAndEncode4Clazz:clazz];
-    NSArray *excludes = [clazz jr_excludePropertyNames];
+    NSArray *array = [JRReflectUtil ivarAndEncode4Clazz:[obj class]];
+    NSArray *excludes = [obj jr_excludePropertyNames];
     
     for (NSDictionary *dict in array) {
         NSString *name = dict.allKeys.firstObject;
@@ -80,25 +82,33 @@
             continue;
         }
         [sql appendFormat:@" %@ = ? ", name];
+        id value = [(NSObject *)obj valueForKey:name];
+        if (!value) {
+            value = [NSNull null];
+        }
+        [argsList addObject:value];
+        
         if ([array indexOfObject:dict] != array.count - 1) {
             [sql appendString:@","];
         }
     }
     [sql appendString:@");"];
+    *args = argsList;
     return sql;
 }
 
-+ (NSString *)sql4Delete:(Class<JRPersistent>)clazz {
-    return [NSString stringWithFormat:@"delete from %@ where ID = ? ;", [JRReflectUtil shortClazzName:clazz]];
++ (NSString *)sql4Delete:(id<JRPersistent>)obj {
+    return [NSString stringWithFormat:@"delete from %@ where ID = ? ;", [JRReflectUtil shortClazzName:[obj class]]];
 }
 
-+ (NSString *)sql4Update:(Class<JRPersistent>)clazz columns:(NSArray<NSString *> *)columns {
++ (NSString *)sql4Update:(id<JRPersistent>)obj columns:(NSArray<NSString *> *)columns args:(NSArray *__autoreleasing *)args {
+    NSMutableArray *argsList = [NSMutableArray array];
     NSMutableString *sql = [NSMutableString string];
-    NSString *tableName = [JRReflectUtil shortClazzName:clazz];
+    NSString *tableName = [JRReflectUtil shortClazzName:[obj class]];
     [sql appendFormat:@" update %@ set ", tableName];
     
-    NSArray *array = [JRReflectUtil ivarAndEncode4Clazz:clazz];
-    NSArray *excludes = [clazz jr_excludePropertyNames];
+    NSArray *array = [JRReflectUtil ivarAndEncode4Clazz:[obj class]];
+    NSArray *excludes = [obj jr_excludePropertyNames];
     
     for (NSDictionary *dict in array) {
         NSString *name = dict.allKeys.firstObject;
@@ -106,11 +116,18 @@
             continue;
         }
         [sql appendFormat:@" %@ = ? ", name];
+        id value = [(NSObject *)obj valueForKey:name];
+        if (!value) {
+            value = [NSNull null];
+        }
+        [argsList addObject:value];
+        
         if ([array indexOfObject:dict] != array.count - 1) {
             [sql appendString:@","];
         }
     }
     [sql appendString:@" where ID = ? ;"];
+    *args = argsList;
     return sql;
 }
 

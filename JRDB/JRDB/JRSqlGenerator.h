@@ -33,16 +33,16 @@ typedef enum {
 /**
  *  返回占位符的sql insert into tablename values (name= ? , name2 = ?,)
  */
-+ (NSString *)sql4Insert:(Class<JRPersistent>)clazz;
++ (NSString *)sql4Insert:(id<JRPersistent>)obj args:(NSArray **)args;
 /**
  *  返回占位符的sql update tablename set name = ?, name2 = ? where ID = ?
  *  columns 需要更新的列，传nil则全部更新
  */
-+ (NSString *)sql4Update:(Class<JRPersistent>)clazz columns:(NSArray<NSString *> *)columns;
++ (NSString *)sql4Update:(id<JRPersistent>)obj columns:(NSArray<NSString *> *)columns args:(NSArray **)args;;
 /**
  *  返回占位符的sql delete from tablename where ID = ?
  */
-+ (NSString *)sql4Delete:(Class<JRPersistent>)clazz;
++ (NSString *)sql4Delete:(id<JRPersistent>)obj;
 
 
 @end
