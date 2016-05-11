@@ -57,9 +57,10 @@ typedef enum {
  *  查找某个类的所有对象
  *
  *  @param clazz 类
+ *  @param clazz 排序字段
  *
  *  @return sql
  */
-+ (NSString *)sql4FindAll:(Class<JRPersistent>)clazz;
++ (NSString *)sql4FindAll:(Class<JRPersistent>)clazz orderby:(NSString *)orderby isDesc:(BOOL)isDesc;
 
 @end

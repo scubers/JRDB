@@ -104,7 +104,11 @@ typedef enum {
                     *(float *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = [resultSet doubleForColumn:name];
                     break;
                 }
-                case RetDataTypeNSDate:
+                case RetDataTypeNSDate:{
+                    NSDate *date = [resultSet dateForColumn:name];
+                    [obj setValue:date forKey:name];
+                    break;
+                }
                 default:
                     break;
             }
@@ -144,6 +148,10 @@ typedef enum {
     if ([encode rangeOfString:@"NSData"].length) {
         return RetDataTypeNSData;
     }
+    if ([encode rangeOfString:@"NSDate"].length) {
+        return RetDataTypeNSDate;
+    }
+    
     return 0;
 }
 

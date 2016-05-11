@@ -12,9 +12,9 @@
 #import "JRSqlGenerator.h"
 
 @interface JRDBMgr()
-
-@property (nonatomic, strong) NSMutableArray<Class<JRPersistent>> *registeredClazz;
-@property (nonatomic, strong) NSMutableArray<FMDatabase *> *dbs;
+{
+    FMDatabase *_defaultDB;
+}
 
 @end
 
@@ -39,9 +39,9 @@ static JRDBMgr *__shareInstance;
 }
 
 - (void)deleteDBWithPath:(NSString *)path {
-    NSFileManager *mgr = [NSFileManager defaultManager];
     FMDatabase *db = [FMDatabase databaseWithPath:path];
     [db close];
+    NSFileManager *mgr = [NSFileManager defaultManager];
     [mgr removeItemAtPath:path error:nil];
 }
 
@@ -52,17 +52,15 @@ static JRDBMgr *__shareInstance;
 }
 
 #pragma mark - lazy load
-- (NSMutableArray<Class<JRPersistent>> *)registeredClazz {
-    if (!_registeredClazz) {
-        _registeredClazz = [NSMutableArray array];
+
+- (FMDatabase *)defaultDB {
+    if (!_defaultDB) {
+        NSString *path = NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES).lastObject;
+        path = [path stringByAppendingPathComponent:@"jrdb/jrdb.sqlite"];
+        _defaultDB = [FMDatabase databaseWithPath:path];
+        [_defaultDB open];
     }
-    return _registeredClazz;
-}
-- (NSMutableArray<FMDatabase *> *)dbs {
-    if (!_dbs) {
-        _dbs = [NSMutableArray array];
-    }
-    return _dbs;
+    return _defaultDB;
 }
 
 

@@ -24,7 +24,7 @@
     
     for (NSDictionary *dict in array) {
         NSString *name = dict.allKeys.firstObject;
-        if ((excludes.count && [excludes containsObject:name]) || isID(name)) {
+        if ([excludes containsObject:name] || isID(name)) {
             continue;
         }
         NSString *type = [self typeWithEncodeName:dict.allValues.firstObject];
@@ -86,7 +86,7 @@
     
     for (NSDictionary *dict in array) {
         NSString *name = dict.allKeys.firstObject;
-        if ((excludes.count && [excludes containsObject:name]) || isID(name)) {
+        if ([excludes containsObject:name] || isID(name)) {
             continue;
         }
         [sql appendFormat:@" %@ ", name];
@@ -133,8 +133,12 @@
     
     for (NSDictionary *dict in array) {
         NSString *name = dict.allKeys.firstObject;
-        if ((excludes.count && [excludes containsObject:name] && [columns containsObject:name]) || isID(name)) {
-            continue;
+        if ([excludes containsObject:name] || isID(name)) {
+            if (!columns.count) {
+                continue;
+            } else if (columns ) {
+                
+            }
         }
         [sql appendFormat:@" %@ = ? ", name];
         id value = [(NSObject *)obj valueForKey:name];
@@ -160,8 +164,14 @@
     return sql;
 }
 
-+ (NSString *)sql4FindAll:(Class<JRPersistent>)clazz {
-    NSString *sql = [NSString stringWithFormat:@"select * from %@ ;", [JRReflectUtil shortClazzName:clazz]];
++ (NSString *)sql4FindAll:(Class<JRPersistent>)clazz orderby:(NSString *)orderby isDesc:(BOOL)isDesc {
+    NSString *sql = [NSString stringWithFormat:@"select * from %@ ", [JRReflectUtil shortClazzName:clazz]];
+    if (orderby.length) {
+        sql = [sql stringByAppendingFormat:@" order by %@ ", orderby];
+    }
+    if (isDesc) {
+        sql = [sql stringByAppendingString:@" desc;"];
+    }
     NSLog(@"sql: %@", sql);
     return sql;
 }

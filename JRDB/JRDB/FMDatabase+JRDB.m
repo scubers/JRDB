@@ -25,13 +25,29 @@ NSString * uuid() {
 
 @implementation FMDatabase (JRDB)
 
-- (FMDatabaseQueue *)myQueue {
+- (FMDatabaseQueue *)transactionQueue {
     FMDatabaseQueue *q = objc_getAssociatedObject(self, &queuekey);
     if (!q) {
         q = [FMDatabaseQueue databaseQueueWithPath:self.databasePath];
         objc_setAssociatedObject(self, &queuekey, q, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
     return q;
+}
+
+- (void)inQueue:(void (^)(FMDatabase *))block {
+    [[self transactionQueue] inDatabase:^(FMDatabase *db) {
+        if (block) {
+            block(db);
+        }
+    }];
+}
+
+- (void)inTransaction:(void (^)(FMDatabase *, BOOL *))block {
+    [[self transactionQueue] inTransaction:^(FMDatabase *db, BOOL *rollback) {
+        if (block) {
+            block(db, rollback);
+        }
+    }];
 }
 
 
@@ -59,10 +75,6 @@ NSString * uuid() {
 
 
 - (BOOL)saveObj:(id<JRPersistent>)obj {
-    return [self saveObj:obj synchronized:NO];
-}
-
-- (BOOL)saveObj:(id<JRPersistent>)obj synchronized:(BOOL)synchronized {
     if (![self tableExists:[JRReflectUtil shortClazzName:[obj class]]]) {
         [self createTable4Clazz:[obj class]];
     }
@@ -80,10 +92,6 @@ NSString * uuid() {
 }
 
 - (BOOL)updateObj:(id<JRPersistent>)obj columns:(NSArray *)columns {
-    return [self updateObj:obj columns:columns synchronized:NO];
-}
-
-- (BOOL)updateObj:(id<JRPersistent>)obj columns:(NSArray *)columns synchronized:(BOOL)synchronized {
     NSAssert(obj.ID != nil, @"obj ID should not be nil");
     NSArray *args;
     NSString *sql = [JRSqlGenerator sql4Update:obj columns:columns args:&args];
@@ -92,20 +100,12 @@ NSString * uuid() {
 }
 
 - (BOOL)deleteObj:(id<JRPersistent>)obj {
-    return [self deleteObj:obj synchronized:NO];
-}
-
-- (BOOL)deleteObj:(id<JRPersistent>)obj synchronized:(BOOL)synchronized {
     NSAssert(obj.ID != nil, @"obj ID should not be nil");
     NSString *sql = [JRSqlGenerator sql4Delete:obj];
     return [self executeUpdate:sql withArgumentsInArray:@[obj.ID]];
 }
 
 - (id<JRPersistent>)getByID:(NSString *)ID clazz:(Class<JRPersistent>)clazz {
-    return [self getByID:ID clazz:clazz synchronized:clazz];
-}
-
-- (id<JRPersistent>)getByID:(NSString *)ID clazz:(Class<JRPersistent>)clazz synchronized:(BOOL)synchronized {
     NSAssert(ID != nil, @"id should be nil");
     NSString *sql = [JRSqlGenerator sql4GetByIdWithClazz:clazz];
     FMResultSet *ret = [self executeQuery:sql withArgumentsInArray:@[ID]];
@@ -113,11 +113,11 @@ NSString * uuid() {
 }
 
 - (NSArray *)findAll:(Class<JRPersistent>)clazz {
-    return [self findAll:clazz synchronized:NO];
+    return [self findAll:clazz orderBy:nil isDesc:NO];
 }
 
-- (NSArray *)findAll:(Class<JRPersistent>)clazz synchronized:(BOOL)synchronized {
-    NSString *sql = [JRSqlGenerator sql4FindAll:clazz];
+- (NSArray *)findAll:(Class<JRPersistent>)clazz orderBy:(NSString *)orderby isDesc:(BOOL)isDesc {
+    NSString *sql = [JRSqlGenerator sql4FindAll:clazz orderby:orderby isDesc:isDesc];
     FMResultSet *ret = [self executeQuery:sql];
     return [JRFMDBResultSetHandler handleResultSet:ret forClazz:clazz];
 }

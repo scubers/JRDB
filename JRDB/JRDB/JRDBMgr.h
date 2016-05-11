@@ -13,12 +13,13 @@
 
 @interface JRDBMgr : NSObject
 
+@property (nonatomic, readonly, strong) FMDatabase *defaultDB;
+
 + (instancetype)shareInstance;
 
 - (FMDatabase *)createDBWithPath:(NSString *)path;
 - (void)deleteDBWithPath:(NSString *)path;
 - (FMDatabase *)DBWithPath:(NSString *)path;
 
-//- (void)registerClazz:(Class<JRPersistent>)clazz;
 
 @end

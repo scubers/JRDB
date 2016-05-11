@@ -28,14 +28,14 @@
 
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
-//    AViewController *av = [[AViewController alloc] init];
-//    [self presentViewController:av animated:YES completion:nil];
+    AViewController *av = [[AViewController alloc] init];
+    [self presentViewController:av animated:YES completion:nil];
 }
 
 - (void)test2 {
     FMDatabase *db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/jmacmini/Desktop/aaa.sqlite"];
     Person *p = [db findAll:[Person class]].firstObject;
-    p.a_int = 11111;
+    p.a_int = 2222;
     
     if ([db updateObj:p columns:nil]) {
         NSLog(@"success");

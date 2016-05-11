@@ -10,6 +10,7 @@ import UIKit
 
 class PPP: NSObject, JRPersistent {
     var a_int: Int = 0
+    var a_int1: Int? = nil
     var b_string: String = "1"
     var b_string1: String! = "2"
     var b_string2: String? = "3"
@@ -36,11 +37,19 @@ class PPP: NSObject, JRPersistent {
 class AViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
-        let p = PPP()
-//        FMDatabase *db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/jmacmini/Desktop/aaa.sqlite"];
+        test()
+//        test2()
+    }
+    
+    func test2() {
         let db = JRDBMgr.shareInstance().DBWithPath("/Users/jmacmini/Desktop/aaa.sqlite");
+        let pp = db.findAll(PPP).first as! PPP
+        print(pp)
+    }
+    
+    func test() {
+        let db = JRDBMgr.shareInstance().DBWithPath("/Users/jmacmini/Desktop/aaa.sqlite");
+        let p = PPP()
         db .saveObj(p)
-        
-        
     }
 }
