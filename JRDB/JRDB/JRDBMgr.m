@@ -10,10 +10,12 @@
 #import "FMDB.h"
 #import "JRReflectUtil.h"
 #import "JRSqlGenerator.h"
+#import "FMDatabase+JRDB.h"
 
 @interface JRDBMgr()
 {
     FMDatabase *_defaultDB;
+    NSMutableArray *_clazzArray;
 }
 
 @end
@@ -25,6 +27,7 @@ static JRDBMgr *__shareInstance;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         __shareInstance = [super allocWithZone:zone];
+        __shareInstance->_clazzArray = [NSMutableArray array];
     });
     return __shareInstance;
 }
@@ -51,6 +54,16 @@ static JRDBMgr *__shareInstance;
     return db;
 }
 
+- (void)registerClazzForUpdateTable:(Class<JRPersistent>)clazz {
+    [_clazzArray addObject:clazz];
+}
+
+- (void)updateDefaultDB {
+    for (Class clazz in _clazzArray) {
+        [_defaultDB updateTable4Clazz:clazz];
+    }
+}
+
 #pragma mark - lazy load
 
 - (FMDatabase *)defaultDB {
@@ -62,6 +75,5 @@ static JRDBMgr *__shareInstance;
     }
     return _defaultDB;
 }
-
 
 @end
