@@ -16,7 +16,7 @@ class PPP: NSObject, JRPersistent {
     var b_string2: String? = "3"
     var c_nsstring: NSString = "4"
     var c_nsstring1: NSString! = "5"
-    var c_nsstring2: NSString? = "6"
+    var c_nsstring2: NSString? = nil
     
     var d_double: Double = 7
     var e_float: Float = 8
@@ -37,13 +37,25 @@ class PPP: NSObject, JRPersistent {
 class AViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
-        test()
+//        test()
 //        test2()
+        test3()
     }
     
+    func test3() {
+        
+        let db = JRDBMgr.shareInstance().DBWithPath("/Users/jmacmini/Desktop/aaa.sqlite");
+        
+        
+        
+        db.findByConditions([
+            
+            ], clazz: PPP.self, isDesc: false)
+        
+    }
     func test2() {
         let db = JRDBMgr.shareInstance().DBWithPath("/Users/jmacmini/Desktop/aaa.sqlite");
-        let pp = db.findAll(PPP).first as! PPP
+        let pp = db.findAll(PPP).last as! PPP
         print(pp)
     }
     

@@ -193,7 +193,7 @@
         if (condition.type == JRQueryConditionTypeLimit) {
             limit = condition;continue;
         }
-        [sql stringByAppendingFormat:@" %@ %@ ", condition.type == JRQueryConditionTypeAnd ? @"and" : @"or", condition.condition];
+        [sql appendFormat:@" %@ %@ ", condition.type == JRQueryConditionTypeAnd ? @"and" : @"or", condition.condition];
     }
     
     if (groupby) {

@@ -15,6 +15,8 @@
 #import "JRReflectUtil.h"
 #import "NSObject+JRDB.h"
 #import "FMDatabase+JRDB.h"
+#import "JRFMDBResultSetHandler.h"
+#import "JRQueryCondition.h"
 
 
 #endif /* JRDB_h */

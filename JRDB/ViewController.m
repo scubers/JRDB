@@ -13,6 +13,7 @@
 #import "JRDBMgr.h"
 #import <FMDB.h>
 #import "FMDatabase+JRDB.h"
+#import "JRQueryCondition.h"
 
 @interface ViewController ()
 
@@ -23,13 +24,24 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
 //    [self test];
-    [self test2];
+//    [self test2];
+//    [self test3];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
     AViewController *av = [[AViewController alloc] init];
     [self presentViewController:av animated:YES completion:nil];
+}
+
+- (void)test3 {
+    FMDatabase *db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/jmacmini/Desktop/aaa.sqlite"];
+    
+    NSArray *arr =[db findByConditions:@[
+//                                         [JRQueryCondition condition:@"_a_int = 2222" type:JRQueryConditionTypeAnd],
+                                         [JRQueryCondition condition:@" limit 0,5 " type:JRQueryConditionTypeLimit],
+                                         ] clazz:[Person class] isDesc:NO];
+    NSLog(@"%@", arr);
 }
 
 - (void)test2 {

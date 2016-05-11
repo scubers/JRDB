@@ -8,13 +8,13 @@
 
 #import <Foundation/Foundation.h>
 
-typedef enum {
+typedef NS_ENUM(NSInteger, JRQueryConditionType) {
     JRQueryConditionTypeAnd = 1,
     JRQueryConditionTypeOr,
-    JRQueryConditionTypeGroupBy,
-    JRQueryConditionTypeOrderBy,
-    JRQueryConditionTypeLimit
-} JRQueryConditionType;
+    JRQueryConditionTypeGroupBy, // 只需要字段名即可
+    JRQueryConditionTypeOrderBy, // 只需要字段名即可
+    JRQueryConditionTypeLimit    // limit 0,3
+};
 
 @interface JRQueryCondition : NSObject
 

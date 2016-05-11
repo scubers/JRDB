@@ -9,6 +9,8 @@
 #import <FMDB/FMDB.h>
 #import "JRPersistent.h"
 
+@class JRQueryCondition;
+
 @interface FMDatabase (JRDB)
 
 /**
@@ -80,7 +82,7 @@
  *
  *  @return 查询结果
  */
-- (NSArray *)findByConditions:(NSArray<NSString *> *)conditions clazz:(Class<JRPersistent>)clazz isDesc:(BOOL)isDesc;
+- (NSArray *)findByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz isDesc:(BOOL)isDesc;
 
 
 @end
