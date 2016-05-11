@@ -14,6 +14,7 @@
 #import "JRReflectUtil.h"
 #import "JRDBMgr.h"
 #import "JRFMDBResultSetHandler.h"
+#import "JRQueryCondition.h"
 static NSString *queuekey = @"queuekey";
 
 NSString * uuid() {
@@ -118,6 +119,12 @@ NSString * uuid() {
 
 - (NSArray *)findAll:(Class<JRPersistent>)clazz orderBy:(NSString *)orderby isDesc:(BOOL)isDesc {
     NSString *sql = [JRSqlGenerator sql4FindAll:clazz orderby:orderby isDesc:isDesc];
+    FMResultSet *ret = [self executeQuery:sql];
+    return [JRFMDBResultSetHandler handleResultSet:ret forClazz:clazz];
+}
+
+- (NSArray *)findByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz isDesc:(BOOL)isDesc {
+    NSString *sql = [JRSqlGenerator sql4FindByConditions:conditions clazz:clazz isDesc:isDesc];
     FMResultSet *ret = [self executeQuery:sql];
     return [JRFMDBResultSetHandler handleResultSet:ret forClazz:clazz];
 }

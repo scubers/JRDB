@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		5AA5B3DE1CE2D46900360DC0 /* JRFMDBResultSetHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AA5B3DD1CE2D46900360DC0 /* JRFMDBResultSetHandler.m */; };
+		5AA5B3E11CE3120B00360DC0 /* JRQueryCondition.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AA5B3E01CE3120B00360DC0 /* JRQueryCondition.m */; };
 		5AC8B3321CE1DA2500079BC8 /* NSObject+JRDB.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AC8B3311CE1DA2500079BC8 /* NSObject+JRDB.m */; };
 		5AC8B3381CE1EDA700079BC8 /* FMDatabase+JRDB.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AC8B3371CE1EDA700079BC8 /* FMDatabase+JRDB.m */; };
 		5ACBEEB21CE1B3A500371E01 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 5ACBEEB11CE1B3A500371E01 /* main.m */; };
@@ -49,6 +50,8 @@
 		5AA5B3DB1CE2CEE100360DC0 /* JRDB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRDB.h; sourceTree = "<group>"; };
 		5AA5B3DC1CE2D46900360DC0 /* JRFMDBResultSetHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRFMDBResultSetHandler.h; sourceTree = "<group>"; };
 		5AA5B3DD1CE2D46900360DC0 /* JRFMDBResultSetHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRFMDBResultSetHandler.m; sourceTree = "<group>"; };
+		5AA5B3DF1CE3120B00360DC0 /* JRQueryCondition.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRQueryCondition.h; sourceTree = "<group>"; };
+		5AA5B3E01CE3120B00360DC0 /* JRQueryCondition.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRQueryCondition.m; sourceTree = "<group>"; };
 		5AC8B3301CE1DA2500079BC8 /* NSObject+JRDB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+JRDB.h"; sourceTree = "<group>"; };
 		5AC8B3311CE1DA2500079BC8 /* NSObject+JRDB.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+JRDB.m"; sourceTree = "<group>"; };
 		5AC8B3361CE1EDA700079BC8 /* FMDatabase+JRDB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "FMDatabase+JRDB.h"; sourceTree = "<group>"; };
@@ -195,6 +198,8 @@
 				5AA5B3DB1CE2CEE100360DC0 /* JRDB.h */,
 				5AA5B3DC1CE2D46900360DC0 /* JRFMDBResultSetHandler.h */,
 				5AA5B3DD1CE2D46900360DC0 /* JRFMDBResultSetHandler.m */,
+				5AA5B3DF1CE3120B00360DC0 /* JRQueryCondition.h */,
+				5AA5B3E01CE3120B00360DC0 /* JRQueryCondition.m */,
 			);
 			path = JRDB;
 			sourceTree = "<group>";
@@ -410,6 +415,7 @@
 				5ACBEEB21CE1B3A500371E01 /* main.m in Sources */,
 				5ACBEEEB1CE1B91F00371E01 /* JRSqlGenerator.m in Sources */,
 				5AC8B3321CE1DA2500079BC8 /* NSObject+JRDB.m in Sources */,
+				5AA5B3E11CE3120B00360DC0 /* JRQueryCondition.m in Sources */,
 				5AD63F211CE1BE540044ACE6 /* JRReflectUtil.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

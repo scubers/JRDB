@@ -10,6 +10,7 @@
 #import "JRReflectUtil.h"
 #import "NSObject+JRDB.h"
 #import <FMDB.h>
+#import "JRQueryCondition.h"
 
 @implementation JRSqlGenerator
 
@@ -169,9 +170,47 @@
     if (orderby.length) {
         sql = [sql stringByAppendingFormat:@" order by %@ ", orderby];
     }
-    if (isDesc) {
-        sql = [sql stringByAppendingString:@" desc;"];
+    sql = [sql stringByAppendingFormat:@" %@ ;", isDesc ? @"desc" : @""];
+    NSLog(@"sql: %@", sql);
+    return sql;
+}
+
++ (NSString *)sql4FindByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz isDesc:(BOOL)isDesc {
+    
+    NSMutableString *sql = [NSMutableString string];
+    [sql appendFormat:@" select * from %@ where 1=1 ", [JRReflectUtil shortClazzName:clazz]];
+    
+    JRQueryCondition *orderby = nil;
+    JRQueryCondition *groupby = nil;
+    JRQueryCondition *limit = nil;
+    for (JRQueryCondition *condition in conditions) {
+        if (condition.type == JRQueryConditionTypeOrderBy) {
+            orderby = condition;continue;
+        }
+        if (condition.type == JRQueryConditionTypeGroupBy) {
+            groupby = condition;continue;
+        }
+        if (condition.type == JRQueryConditionTypeLimit) {
+            limit = condition;continue;
+        }
+        [sql stringByAppendingFormat:@" %@ %@ ", condition.type == JRQueryConditionTypeAnd ? @"and" : @"or", condition.condition];
     }
+    
+    if (groupby) {
+        [sql appendFormat:@" group by %@ ", groupby.condition];
+    }
+    if (orderby) {
+        [sql appendFormat:@" order by %@ ", orderby.condition];
+    }
+    
+    [sql appendFormat:@" %@ ", isDesc? @"desc" : @""];
+    
+    if (limit) {
+        [sql appendFormat:@" %@ ", limit.condition];
+    }
+    
+    [sql appendString:@" ; "];
+    
     NSLog(@"sql: %@", sql);
     return sql;
 }

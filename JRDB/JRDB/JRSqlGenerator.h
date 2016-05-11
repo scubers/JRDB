@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "JRPersistent.h"
 
-@class FMDatabase;
+@class FMDatabase, JRQueryCondition;
 
 typedef enum {
     DBTypeNull = 1,
@@ -62,5 +62,16 @@ typedef enum {
  *  @return sql
  */
 + (NSString *)sql4FindAll:(Class<JRPersistent>)clazz orderby:(NSString *)orderby isDesc:(BOOL)isDesc;
+
+/**
+ *  根据条件查询
+ *
+ *  @param conditions 条件数组
+ *  @param clazz      类
+ *  @param isDesc     是否倒序
+ *
+ *  @return sql
+ */
++ (NSString *)sql4FindByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz isDesc:(BOOL)isDesc;
 
 @end
