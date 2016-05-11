@@ -86,7 +86,7 @@ typedef enum {
                 }
                 case RetDataTypeUnsignedLong: {
                     Ivar ivar = class_getInstanceVariable(clazz, [name UTF8String]);
-                    *(unsigned long *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = [resultSet unsignedLongLongIntForColumn:name];
+                    *(unsigned long *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = (unsigned long)[resultSet unsignedLongLongIntForColumn:name];
                     break;
                 }
                 case RetDataTypeUnsignedLongLong:{

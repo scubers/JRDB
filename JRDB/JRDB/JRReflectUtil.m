@@ -7,7 +7,6 @@
 //
 
 #import "JRReflectUtil.h"
-#import "Person.h"
 
 @implementation JRReflectUtil
 
@@ -50,14 +49,6 @@
         }
     }
     
-//        Ivar ivar = class_getInstanceVariable([Person class], attributes[c-1].value);
-//        if ([encode isEqualToString:[NSString stringWithUTF8String:@encode(int)]]) {
-////                int ret = (int*)((unsigned char *)((__bridge void *)(p)) + ivar_getOffset(ivar));
-//            int ret = (int *)((void *)(p) + ivar_getOffset(ivar));
-//        }
-//        else if ([encode isEqualToString:[NSString stringWithUTF8String:@encode(unsigned int)]]) {
-//            unsigned int ret = (unsigned int *)((void *)(p) + ivar_getOffset(ivar));
-//        }
     return list;
 }
 

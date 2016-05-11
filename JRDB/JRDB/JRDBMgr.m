@@ -7,7 +7,7 @@
 //
 
 #import "JRDBMgr.h"
-#import <FMDB.h>
+#import "FMDB.h"
 #import "JRReflectUtil.h"
 #import "JRSqlGenerator.h"
 

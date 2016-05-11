@@ -11,7 +11,7 @@
 #import "JRSqlGenerator.h"
 #import "Person.h"
 #import "JRDBMgr.h"
-#import <FMDB.h>
+#import "FMDB.h"
 #import "FMDatabase+JRDB.h"
 #import "JRQueryCondition.h"
 

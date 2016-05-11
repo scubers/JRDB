@@ -46,14 +46,6 @@
  */
 + (NSArray *)ivarAndEncode4Clazz:(Class)clazz;
 
-/**
- *  检查是否实现了
- *
- *  @param clazz <#clazz description#>
- *
- *  @return <#return value description#>
- */
-+ (BOOL)clazzImplJR_excludeMethod:(Class<JRPersistent>)clazz;
 
 
 @end

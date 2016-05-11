@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "JRPersistent.h"
-#import <FMDB.h>
+#import "FMDB.h"
 
 @interface JRFMDBResultSetHandler : NSObject
 
