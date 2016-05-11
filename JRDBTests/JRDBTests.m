@@ -7,10 +7,10 @@
 //
 
 #import <XCTest/XCTest.h>
-#import "Person.h"
-#import "JRReflectUtil.h"
-#import "NSObject+JRDB.h"
-#import "JRSqlGenerator.h"
+//#import "Person.h"
+//#import "JRReflectUtil.h"
+//#import "NSObject+JRDB.h"
+//#import "JRSqlGenerator.h"
 
 @interface JRDBTests : XCTestCase
 
@@ -34,12 +34,6 @@
 }
 
 - (void)testIvars {
-    NSArray *arr = [JRReflectUtil ivarAndEncode4Clazz:[Person class]];
-    Person *p = [[Person alloc] init];
-    [p setValue:@10 forKey:@"a_int"];
-    NSLog(@"%@", [Person jr_excludePropertyNames]);
-    NSLog(@"%d", p.a_int);
-    NSLog(@"%@", arr);
 }
 
 - (void)testGenerateSql {
