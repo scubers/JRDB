@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5AA5B3DE1CE2D46900360DC0 /* JRFMDBResultSetHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AA5B3DD1CE2D46900360DC0 /* JRFMDBResultSetHandler.m */; };
 		5AC8B3321CE1DA2500079BC8 /* NSObject+JRDB.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AC8B3311CE1DA2500079BC8 /* NSObject+JRDB.m */; };
 		5AC8B3381CE1EDA700079BC8 /* FMDatabase+JRDB.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AC8B3371CE1EDA700079BC8 /* FMDatabase+JRDB.m */; };
 		5ACBEEB21CE1B3A500371E01 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 5ACBEEB11CE1B3A500371E01 /* main.m */; };
@@ -45,6 +46,9 @@
 /* Begin PBXFileReference section */
 		16D9BC35A452ABED0FB7879A /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
 		2C94FB217DD9C61722850B3C /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
+		5AA5B3DB1CE2CEE100360DC0 /* JRDB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRDB.h; sourceTree = "<group>"; };
+		5AA5B3DC1CE2D46900360DC0 /* JRFMDBResultSetHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRFMDBResultSetHandler.h; sourceTree = "<group>"; };
+		5AA5B3DD1CE2D46900360DC0 /* JRFMDBResultSetHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRFMDBResultSetHandler.m; sourceTree = "<group>"; };
 		5AC8B3301CE1DA2500079BC8 /* NSObject+JRDB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+JRDB.h"; sourceTree = "<group>"; };
 		5AC8B3311CE1DA2500079BC8 /* NSObject+JRDB.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+JRDB.m"; sourceTree = "<group>"; };
 		5AC8B3361CE1EDA700079BC8 /* FMDatabase+JRDB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "FMDatabase+JRDB.h"; sourceTree = "<group>"; };
@@ -188,6 +192,9 @@
 				5AC8B3311CE1DA2500079BC8 /* NSObject+JRDB.m */,
 				5AC8B3361CE1EDA700079BC8 /* FMDatabase+JRDB.h */,
 				5AC8B3371CE1EDA700079BC8 /* FMDatabase+JRDB.m */,
+				5AA5B3DB1CE2CEE100360DC0 /* JRDB.h */,
+				5AA5B3DC1CE2D46900360DC0 /* JRFMDBResultSetHandler.h */,
+				5AA5B3DD1CE2D46900360DC0 /* JRFMDBResultSetHandler.m */,
 			);
 			path = JRDB;
 			sourceTree = "<group>";
@@ -399,6 +406,7 @@
 				5AC8B3381CE1EDA700079BC8 /* FMDatabase+JRDB.m in Sources */,
 				5AD63F241CE1C2480044ACE6 /* Person.m in Sources */,
 				5ACBEEB51CE1B3A500371E01 /* AppDelegate.m in Sources */,
+				5AA5B3DE1CE2D46900360DC0 /* JRFMDBResultSetHandler.m in Sources */,
 				5ACBEEB21CE1B3A500371E01 /* main.m in Sources */,
 				5ACBEEEB1CE1B91F00371E01 /* JRSqlGenerator.m in Sources */,
 				5AC8B3321CE1DA2500079BC8 /* NSObject+JRDB.m in Sources */,

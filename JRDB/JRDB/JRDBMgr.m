@@ -46,36 +46,9 @@ static JRDBMgr *__shareInstance;
 }
 
 - (FMDatabase *)DBWithPath:(NSString *)path {
-    return [FMDatabase databaseWithPath:path];
-}
-
-- (void)createTable4Clazz:(Class<JRPersistent>)clazz inDB:(FMDatabase *)db {
-    NSString *tableName = [JRReflectUtil shortClazzName:clazz];
-    if (![db tableExists:tableName]) {
-        [db executeUpdate:[JRSqlGenerator createTableSql4Clazz:clazz]];
-    }
-}
-
-- (void)updateTable4Clazz:(Class<JRPersistent>)clazz inDB:(FMDatabase *)db {
-    NSString *sql = [JRSqlGenerator updateTableSql4Clazz:clazz inDB:db];
-    if (sql.length) {
-        [db executeUpdate:sql];
-    }
-}
-
-- (void)deleteTable4Clazz:(Class<JRPersistent>)clazz inDB:(FMDatabase *)db {
-    NSString *tableName = [JRReflectUtil shortClazzName:clazz];
-    if ([db tableExists:tableName]) {
-        [db executeUpdate:[JRSqlGenerator deleteTableSql4Clazz:clazz]];
-    }
-    
-}
-
-- (void)registerClazz:(Class<JRPersistent>)clazz {
-    NSAssert(clazz != nil, @"class should not be nil");
-    if (![self.registeredClazz containsObject:clazz]) {
-        [self.registeredClazz addObject:clazz];
-    }
+    FMDatabase *db = [FMDatabase databaseWithPath:path];
+    [db open];
+    return db;
 }
 
 #pragma mark - lazy load

@@ -19,10 +19,6 @@
 - (void)deleteDBWithPath:(NSString *)path;
 - (FMDatabase *)DBWithPath:(NSString *)path;
 
-- (void)createTable4Clazz:(Class<JRPersistent>)clazz inDB:(FMDatabase *)db;
-- (void)updateTable4Clazz:(Class<JRPersistent>)clazz inDB:(FMDatabase *)db;
-- (void)deleteTable4Clazz:(Class<JRPersistent>)clazz inDB:(FMDatabase *)db;
-
 //- (void)registerClazz:(Class<JRPersistent>)clazz;
 
 @end

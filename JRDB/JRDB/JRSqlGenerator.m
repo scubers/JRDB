@@ -11,28 +11,27 @@
 #import "NSObject+JRDB.h"
 #import <FMDB.h>
 
-#define isID(name) ([name isEqualToString:@"ID"] || [name isEqualToString:@"_ID"])
-
 @implementation JRSqlGenerator
 
 + (NSString *)createTableSql4Clazz:(Class<JRPersistent>)clazz {
     NSMutableString *sql = [NSMutableString string];
     // create table 'tableName' (ID text primary key, 'p1' 'type1')
     NSString *tableName = [JRReflectUtil shortClazzName:clazz];
-    [sql appendFormat:@"create table %@ (ID text primary key", tableName];
+    [sql appendFormat:@"create table %@ (_ID text primary key ", tableName];
     
     NSArray *array = [JRReflectUtil ivarAndEncode4Clazz:clazz];
     NSArray *excludes = [clazz jr_excludePropertyNames];
     
     for (NSDictionary *dict in array) {
         NSString *name = dict.allKeys.firstObject;
-        if (excludes.count && [excludes containsObject:name]) {
+        if ((excludes.count && [excludes containsObject:name]) || isID(name)) {
             continue;
         }
         NSString *type = [self typeWithEncodeName:dict.allValues.firstObject];
         [sql appendFormat:@", %@ %@", name, type];
     }
     [sql appendString:@");"];
+    NSLog(@"sql: %@", sql);
     return sql;
 }
 
@@ -59,12 +58,15 @@
             [sql appendString:@","];
         }
     }
-    [sql appendString:@" where ID = ? ;"];
+    [sql appendString:@" where _ID = ? ;"];
+    NSLog(@"sql: %@", sql);
     return flag ? sql : nil;
 }
 
 + (NSString *)deleteTableSql4Clazz:(Class<JRPersistent>)clazz{
-    return [NSString stringWithFormat:@"drop table %@", [JRReflectUtil shortClazzName:clazz]];
+    NSString *sql = [NSString stringWithFormat:@"drop table %@", [JRReflectUtil shortClazzName:clazz]];
+    NSLog(@"sql: %@", sql);
+    return sql;
 }
 
 
@@ -73,7 +75,11 @@
     
     NSMutableString *sql = [NSMutableString string];
     NSString *tableName = [JRReflectUtil shortClazzName:[obj class]];
-    [sql appendFormat:@" insert into %@ values (ID = ?, ", tableName];
+    [sql appendFormat:@" insert into %@ ('_ID', ", tableName];
+    // insert into tablename (_ID) values (?)
+    
+    NSMutableString *sql2 = [NSMutableString string];
+    [sql2 appendFormat:@"values ( ? ,"];
     
     NSArray *array = [JRReflectUtil ivarAndEncode4Clazz:[obj class]];
     NSArray *excludes = [[obj class] jr_excludePropertyNames];
@@ -83,25 +89,37 @@
         if ((excludes.count && [excludes containsObject:name]) || isID(name)) {
             continue;
         }
-        [sql appendFormat:@" %@ = ? ", name];
-        NSLog(@"----%@", name);
+        [sql appendFormat:@" %@ ", name];
+        [sql2 appendFormat:@" ? "];
         id value = [(NSObject *)obj valueForKey:name];
         if (!value) {
             value = [NSNull null];
         }
         [argsList addObject:value];
         
-        if ([array indexOfObject:dict] != array.count - 1) {
-            [sql appendString:@","];
-        }
+        [sql appendString:@","];
+        [sql2 appendString:@","];
     }
-    [sql appendString:@");"];
+    
+    if ([sql hasSuffix:@","]) {
+        sql = [[sql substringToIndex:sql.length - 1] mutableCopy];
+    }
+    if ([sql2 hasSuffix:@","]) {
+        sql2 = [[sql2 substringToIndex:sql2.length - 1] mutableCopy];
+    }
+    
+    [sql appendString:@")"];
+    [sql2 appendString:@");"];
+    [sql appendString:sql2];
     *args = argsList;
+    NSLog(@"sql: %@", sql);
     return sql;
 }
 
 + (NSString *)sql4Delete:(id<JRPersistent>)obj {
-    return [NSString stringWithFormat:@"delete from %@ where ID = ? ;", [JRReflectUtil shortClazzName:[obj class]]];
+    NSString *sql = [NSString stringWithFormat:@"delete from %@ where _ID = ? ;", [JRReflectUtil shortClazzName:[obj class]]];
+    NSLog(@"sql: %@", sql);
+    return sql;
 }
 
 + (NSString *)sql4Update:(id<JRPersistent>)obj columns:(NSArray<NSString *> *)columns args:(NSArray *__autoreleasing *)args {
@@ -125,15 +143,28 @@
         }
         [argsList addObject:value];
         
-        if ([array indexOfObject:dict] != array.count - 1) {
-            [sql appendString:@","];
-        }
+        [sql appendString:@","];
     }
-    [sql appendString:@" where ID = ? ;"];
+    if ([sql hasSuffix:@","]) {
+        sql = [[sql substringToIndex:sql.length - 1] mutableCopy];
+    }
+    [sql appendString:@" where _ID = ? ;"];
     *args = argsList;
+    NSLog(@"sql: %@", sql);
     return sql;
 }
 
++ (NSString *)sql4GetByIdWithClazz:(Class<JRPersistent>)clazz {
+    NSString *sql = [NSString stringWithFormat:@"select * from %@ where _ID = ?;", [JRReflectUtil shortClazzName:clazz]];
+    NSLog(@"sql: %@", sql);
+    return sql;
+}
+
++ (NSString *)sql4FindAll:(Class<JRPersistent>)clazz {
+    NSString *sql = [NSString stringWithFormat:@"select * from %@ ;", [JRReflectUtil shortClazzName:clazz]];
+    NSLog(@"sql: %@", sql);
+    return sql;
+}
 
 + (NSString *)typeWithEncodeName:(NSString *)encode {
     if ([encode isEqualToString:[NSString stringWithUTF8String:@encode(int)]]

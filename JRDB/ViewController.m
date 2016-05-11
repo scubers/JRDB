@@ -22,14 +22,28 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+//    [self test];
+    [self test2];
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+//    AViewController *av = [[AViewController alloc] init];
+//    [self presentViewController:av animated:YES completion:nil];
+}
+
+- (void)test2 {
+    FMDatabase *db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/jmacmini/Desktop/aaa.sqlite"];
+    Person *p = [db findAll:[Person class]].firstObject;
+    p.a_int = 11111;
     
-    [self test];
+    if ([db updateObj:p columns:nil]) {
+        NSLog(@"success");
+    } else {
+        NSLog(@"failure");
+    }
     
-    AViewController *v = [[AViewController alloc] init];
-    [self presentViewController:v animated:false completion:nil];
-    
-    NSString *sql = [JRSqlGenerator createTableSql4Clazz:[Person class]];
-    NSLog(@"%@", sql);
+//    NSLog(@"%@", arr);
 }
 
 - (void)test {
@@ -48,7 +62,11 @@
     p.k_data = [NSData data];
     p.l_date = [NSDate date];
     
-    [db saveObj:p];
+    if ([db saveObj:p]) {
+        NSLog(@"success");
+    } else {
+        NSLog(@"failure");
+    }
     
 }
 

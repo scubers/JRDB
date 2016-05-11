@@ -45,7 +45,9 @@
         NSString *name = [NSString stringWithUTF8String:attributes[c-1].value];
         NSString *encode = [NSString stringWithUTF8String:attributes[0].value];
         
-        [list addObject:@{name : encode}];
+        if (name.length) {
+            [list addObject:@{name : encode}];
+        }
     }
     
 //        Ivar ivar = class_getInstanceVariable([Person class], attributes[c-1].value);

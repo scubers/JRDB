@@ -11,11 +11,17 @@
 
 @interface FMDatabase (JRDB)
 
+- (void)createTable4Clazz:(Class<JRPersistent>)clazz;
+- (void)updateTable4Clazz:(Class<JRPersistent>)clazz;
+- (void)deleteTable4Clazz:(Class<JRPersistent>)clazz;
+
 
 - (BOOL)saveObj:(id<JRPersistent>)obj;
 - (BOOL)saveObj:(id<JRPersistent>)obj synchronized:(BOOL)synchronized;
 - (BOOL)deleteObj:(id<JRPersistent>)obj;
-- (BOOL)deleteObj:(id<JRPersistent>)obj synchronized:(BOOL)synchronized;;
+- (BOOL)deleteObj:(id<JRPersistent>)obj synchronized:(BOOL)synchronized;
+
+- (BOOL)updateObj:(id<JRPersistent>)obj;
 - (BOOL)updateObj:(id<JRPersistent>)obj columns:(NSArray *)columns;
 - (BOOL)updateObj:(id<JRPersistent>)obj columns:(NSArray *)columns synchronized:(BOOL)synchronized;;
 

@@ -44,5 +44,22 @@ typedef enum {
  */
 + (NSString *)sql4Delete:(id<JRPersistent>)obj;
 
+/**
+ *  根据id获取对象
+ *
+ *  @param clazz 对象类
+ *
+ *  @return sql
+ */
++ (NSString *)sql4GetByIdWithClazz:(Class<JRPersistent>)clazz;
+
+/**
+ *  查找某个类的所有对象
+ *
+ *  @param clazz 类
+ *
+ *  @return sql
+ */
++ (NSString *)sql4FindAll:(Class<JRPersistent>)clazz;
 
 @end

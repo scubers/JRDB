@@ -9,6 +9,8 @@
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 
+#define isID(name) ([name isEqualToString:@"ID"] || [name isEqualToString:@"_ID"])
+
 @interface JRReflectUtil : NSObject
 
 /**
