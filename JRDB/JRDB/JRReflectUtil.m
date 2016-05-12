@@ -40,7 +40,9 @@
         objc_property_attribute_t *attributes = property_copyAttributeList(p, &c);
         NSString *name = [NSString stringWithUTF8String:attributes[c-1].value];
         NSString *encode = [NSString stringWithUTF8String:attributes[0].value];
-        dict[name] = encode;
+        if (name.length) {
+            dict[name] = encode;
+        }
     }
     return dict;
 }

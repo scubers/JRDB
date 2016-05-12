@@ -29,6 +29,7 @@ typedef enum {
 + (NSString *)createTableSql4Clazz:(Class<JRPersistent>)clazz;
 + (NSString *)updateTableSql4Clazz:(Class<JRPersistent>)clazz inDB:(FMDatabase *)db;
 + (NSString *)deleteTableSql4Clazz:(Class<JRPersistent>)clazz;
++ (NSString *)dropTableSql4Clazz:(Class<JRPersistent>)clazz;
 
 /**
  *  返回占位符的sql insert into tablename values (name= ? , name2 = ?,)
@@ -72,6 +73,6 @@ typedef enum {
  *
  *  @return sql
  */
-+ (NSString *)sql4FindByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz isDesc:(BOOL)isDesc;
++ (NSString *)sql4FindByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc;
 
 @end

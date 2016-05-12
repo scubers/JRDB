@@ -70,6 +70,11 @@
     return sql;
 }
 
++ (NSString *)dropTableSql4Clazz:(Class<JRPersistent>)clazz {
+    NSString *sql = [NSString stringWithFormat:@"drop table %@ ;",[JRReflectUtil shortClazzName:clazz]];
+    NSLog(@"sql: %@", sql);
+    return sql;
+}
 
 + (NSString *)sql4Insert:(id<JRPersistent>)obj args:(NSArray *__autoreleasing *)args{
     NSMutableArray *argsList = [NSMutableArray array];
@@ -133,11 +138,10 @@
     
     for (NSString *name in dict.allKeys) {
         if ([excludes containsObject:name] || isID(name)) {
-            if (!columns.count) {
-                continue;
-            } else if (columns ) {
-                
-            }
+            continue;
+        }
+        if (columns.count && ![columns containsObject:name]) {
+            continue;
         }
         [sql appendFormat:@" %@ = ? ", name];
         id value = [(NSObject *)obj valueForKey:name];
@@ -166,45 +170,31 @@
 + (NSString *)sql4FindAll:(Class<JRPersistent>)clazz orderby:(NSString *)orderby isDesc:(BOOL)isDesc {
     NSString *sql = [NSString stringWithFormat:@"select * from %@ ", [JRReflectUtil shortClazzName:clazz]];
     if (orderby.length) {
-        sql = [sql stringByAppendingFormat:@" order by %@ ", orderby];
+        sql = [sql stringByAppendingFormat:@" order by %@ ", orderby.length ? orderby : @"_ID"];
     }
     sql = [sql stringByAppendingFormat:@" %@ ;", isDesc ? @"desc" : @""];
     NSLog(@"sql: %@", sql);
     return sql;
 }
 
-+ (NSString *)sql4FindByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz isDesc:(BOOL)isDesc {
-    
++ (NSString *)sql4FindByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc {
     NSMutableString *sql = [NSMutableString string];
     [sql appendFormat:@" select * from %@ where 1=1 ", [JRReflectUtil shortClazzName:clazz]];
     
-    JRQueryCondition *orderby = nil;
-    JRQueryCondition *groupby = nil;
-    JRQueryCondition *limit = nil;
     for (JRQueryCondition *condition in conditions) {
-        if (condition.type == JRQueryConditionTypeOrderBy) {
-            orderby = condition;continue;
-        }
-        if (condition.type == JRQueryConditionTypeGroupBy) {
-            groupby = condition;continue;
-        }
-        if (condition.type == JRQueryConditionTypeLimit) {
-            limit = condition;continue;
-        }
         [sql appendFormat:@" %@ %@ ", condition.type == JRQueryConditionTypeAnd ? @"and" : @"or", condition.condition];
     }
     
-    if (groupby) {
-        [sql appendFormat:@" group by %@ ", groupby.condition];
+    if (groupBy.length) {
+        [sql appendFormat:@" group by %@ ", groupBy];
     }
-    if (orderby) {
-        [sql appendFormat:@" order by %@ ", orderby.condition];
-    }
+    
+    [sql appendFormat:@" order by %@ ", orderBy.length ? orderBy : @"_ID"];
     
     [sql appendFormat:@" %@ ", isDesc? @"desc" : @""];
     
-    if (limit) {
-        [sql appendFormat:@" %@ ", limit.condition];
+    if (limit.length) {
+        [sql appendFormat:@" %@ ", limit];
     }
     
     [sql appendString:@" ; "];

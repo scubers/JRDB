@@ -23,7 +23,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    [self test];
+//    [self test];
 //    [self test2];
 //    [self test3];
 }
@@ -33,39 +33,13 @@
 //    AViewController *av = [[AViewController alloc] init];
 //    [self presentViewController:av animated:YES completion:nil];
 }
-- (void)test4 {
-    NSString *path = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).firstObject;
-    path = [path stringByAppendingPathComponent:@"jrdb/jrdb.sqlite"];
-    NSLog(@"path : %@", path);
-    FMDatabase *db = [FMDatabase databaseWithPath:path];
-    if ([db open]) {
-        NSLog(@"success");
-    } else {
-        NSLog(@"failure");
-    }
-}
-- (void)test3 {
-    FMDatabase *db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/jmacmini/Desktop/aaa.sqlite"];
-    
-    NSArray *arr =[db findByConditions:@[
-//                                         [JRQueryCondition condition:@"_a_int = 2222" type:JRQueryConditionTypeAnd],
-                                         [JRQueryCondition condition:@" limit 0,5 " type:JRQueryConditionTypeLimit],
-                                         ] clazz:[Person class] isDesc:NO];
-    NSLog(@"%@", arr);
-}
 
 - (void)test2 {
-    FMDatabase *db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/jmacmini/Desktop/aaa.sqlite"];
-    Person *p = [db findAll:[Person class]].firstObject;
-    p.a_int = 2222;
+    FMDatabase *db = [JRDBMgr defaultDB];
+    NSArray *array = [db findAll:[Person class]];
     
-    if ([db updateObj:p columns:nil]) {
-        NSLog(@"success");
-    } else {
-        NSLog(@"failure");
-    }
     
-//    NSLog(@"%@", arr);
+    NSLog(@"%@", array);
 }
 
 - (void)test {
@@ -91,11 +65,6 @@
     }
     
     
-}
-
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
 }
 
 @end

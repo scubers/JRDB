@@ -11,6 +11,8 @@
 
 @import FMDB;
 
+typedef void(^JRDBComplete)(BOOL success);
+
 @class JRQueryCondition;
 
 @interface FMDatabase (JRDB)
@@ -36,6 +38,15 @@
 - (BOOL)createTable4Clazz:(Class<JRPersistent>)clazz;
 
 /**
+ *  把表删了，重新创建
+ *
+ *  @param clazz 类
+ *
+ *  @return 是否成功
+ */
+- (BOOL)truncateTable4Clazz:(Class<JRPersistent>)clazz;
+
+/**
  *  更新表操作
  *  (只会添加字段，不会删除和更改字段类型)
  *  @param clazz 对应表的类
@@ -51,7 +62,10 @@
 
 #pragma mark - 增删改查操作
 - (BOOL)saveObj:(id<JRPersistent>)obj;
+- (void)saveObj:(id<JRPersistent>)obj complete:(JRDBComplete)complete;
+
 - (BOOL)deleteObj:(id<JRPersistent>)obj;
+- (void)deleteObj:(id<JRPersistent>)obj complete:(JRDBComplete)complete;
 
 /**
  *  更新操作（全量更新）
@@ -61,6 +75,7 @@
  *  @return 是否成功
  */
 - (BOOL)updateObj:(id<JRPersistent>)obj;
+- (void)updateObj:(id<JRPersistent>)obj complete:(JRDBComplete)complete;
 
 /**
  *  更新操作
@@ -71,6 +86,7 @@
  *  @return 是否成功
  */
 - (BOOL)updateObj:(id<JRPersistent>)obj columns:(NSArray *)columns;
+- (void)updateObj:(id<JRPersistent>)obj columns:(NSArray *)columns complete:(JRDBComplete)complete;
 
 - (id<JRPersistent>)getByID:(NSString *)ID clazz:(Class<JRPersistent>)clazz;
 
@@ -84,7 +100,37 @@
  *
  *  @return 查询结果
  */
+- (NSArray *)findByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc;
+
+/**
+ *  单纯根据条件查询
+ */
 - (NSArray *)findByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz isDesc:(BOOL)isDesc;
+
+/**
+ *  单纯根据groupby以及条件
+ */
+- (NSArray *)findByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz groupBy:(NSString *)groupBy isDesc:(BOOL)isDesc;
+
+/**
+ *  单纯根据orderby以及条件
+ */
+- (NSArray *)findByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz orderBy:(NSString *)orderBy isDesc:(BOOL)isDesc;
+
+/**
+ *  单纯根据limit以及条件
+ */
+- (NSArray *)findByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz limit:(NSString *)limit isDesc:(BOOL)isDesc;
+
+/**
+ *  检查对应类的表是否存在
+ *
+ *  @param clazz 类
+ *
+ *  @return 是否存在
+ */
+- (BOOL)checkExistsTable4Clazz:(Class<JRPersistent>)clazz;
+
 
 
 @end

@@ -47,11 +47,6 @@ class AViewController: UIViewController {
         let db = JRDBMgr.shareInstance().DBWithPath("/Users/jmacmini/Desktop/aaa.sqlite");
         
         
-        
-        db.findByConditions([
-            
-            ], clazz: PPP.self, isDesc: false)
-        
     }
     func test2() {
         let db = JRDBMgr.shareInstance().DBWithPath("/Users/jmacmini/Desktop/aaa.sqlite");
