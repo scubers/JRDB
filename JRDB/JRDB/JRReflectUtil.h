@@ -42,9 +42,9 @@
  *
  *  @param clazz 类
  *
- *  @return ({ivar:@encode(int)},{ivar:@encode(int)})
+ *  @return {ivar:@encode(int),ivar:@encode(int)}
  */
-+ (NSArray *)ivarAndEncode4Clazz:(Class)clazz;
++ (NSDictionary<NSString *, NSString *> *)ivarAndEncode4Clazz:(Class)clazz;
 
 
 

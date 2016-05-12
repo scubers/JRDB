@@ -34,7 +34,7 @@ typedef enum {
 + (NSArray<id<JRPersistent>> *)handleResultSet:(FMResultSet *)resultSet forClazz:(Class<JRPersistent>)clazz {
     NSMutableArray *list = [NSMutableArray array];
     
-    NSArray *array = [JRReflectUtil ivarAndEncode4Clazz:clazz];
+    NSDictionary *dict = [JRReflectUtil ivarAndEncode4Clazz:clazz];
     
     while ([resultSet next]) {
         Class c = objc_getClass(class_getName(clazz));
@@ -43,12 +43,11 @@ typedef enum {
         NSString *ID = [resultSet stringForColumn:@"_ID"];
         [obj setID:ID];
         
-        for (NSDictionary *dict in array) {
-            NSString *name = dict.allKeys.firstObject;
+        for (NSString *name in dict.allKeys) {
             if (isID(name) || [[clazz jr_excludePropertyNames] containsObject:name]) {
                 continue;
             }
-            NSString *encode = dict.allValues.firstObject;
+            NSString *encode = dict[name];
             RetDataType type = [self typeWithEncode:encode];
             switch (type) {
                 case RetDataTypeNSData: {

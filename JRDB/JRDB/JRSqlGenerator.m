@@ -22,15 +22,14 @@
     NSString *tableName = [JRReflectUtil shortClazzName:clazz];
     [sql appendFormat:@"create table %@ (_ID text primary key ", tableName];
     
-    NSArray *array = [JRReflectUtil ivarAndEncode4Clazz:clazz];
+    NSDictionary *dict = [JRReflectUtil ivarAndEncode4Clazz:clazz];
     NSArray *excludes = [clazz jr_excludePropertyNames];
     
-    for (NSDictionary *dict in array) {
-        NSString *name = dict.allKeys.firstObject;
+    for (NSString *name in dict.allKeys) {
         if ([excludes containsObject:name] || isID(name)) {
             continue;
         }
-        NSString *type = [self typeWithEncodeName:dict.allValues.firstObject];
+        NSString *type = [self typeWithEncodeName:dict[name]];
         [sql appendFormat:@", %@ %@", name, type];
     }
     [sql appendString:@");"];
@@ -44,22 +43,21 @@
         return [self createTableSql4Clazz:clazz];
     }
     
-    NSArray *array = [JRReflectUtil ivarAndEncode4Clazz:clazz];
+    NSDictionary *dict = [JRReflectUtil ivarAndEncode4Clazz:clazz];
     NSArray *excludes = [clazz jr_excludePropertyNames];
     // alter 'tableName' add 'name' 'type', 'name2' 'type'
     BOOL flag = NO;
     NSMutableString *sql = [NSMutableString string];
     [sql appendFormat:@"alter %@ add ", tableName];
-    for (NSDictionary *dict in array) {
-        NSString *name = dict.allKeys.firstObject;
+    for (NSString *name in dict.allKeys) {
         if (![db columnExists:name inTableWithName:tableName] && ![excludes containsObject:name]
             ) {
             [sql appendFormat:@"%@ %@,", name , [self typeWithEncodeName:dict.allValues.firstObject]];
             flag = YES;
         }
-        if ([array indexOfObject:dict] != array.count-1) {
-            [sql appendString:@","];
-        }
+    }
+    if ([sql hasSuffix:@","]) {
+        sql = [[sql substringToIndex:sql.length - 1] mutableCopy];
     }
     [sql appendString:@" where _ID = ? ;"];
     NSLog(@"sql: %@", sql);
@@ -84,11 +82,10 @@
     NSMutableString *sql2 = [NSMutableString string];
     [sql2 appendFormat:@"values ( ? ,"];
     
-    NSArray *array = [JRReflectUtil ivarAndEncode4Clazz:[obj class]];
+    NSDictionary *dict = [JRReflectUtil ivarAndEncode4Clazz:[obj class]];
     NSArray *excludes = [[obj class] jr_excludePropertyNames];
     
-    for (NSDictionary *dict in array) {
-        NSString *name = dict.allKeys.firstObject;
+    for (NSString *name in dict.allKeys) {
         if ([excludes containsObject:name] || isID(name)) {
             continue;
         }
@@ -131,11 +128,10 @@
     NSString *tableName = [JRReflectUtil shortClazzName:[obj class]];
     [sql appendFormat:@" update %@ set ", tableName];
     
-    NSArray *array = [JRReflectUtil ivarAndEncode4Clazz:[obj class]];
+    NSDictionary *dict = [JRReflectUtil ivarAndEncode4Clazz:[obj class]];
     NSArray *excludes = [[obj class] jr_excludePropertyNames];
     
-    for (NSDictionary *dict in array) {
-        NSString *name = dict.allKeys.firstObject;
+    for (NSString *name in dict.allKeys) {
         if ([excludes containsObject:name] || isID(name)) {
             if (!columns.count) {
                 continue;
