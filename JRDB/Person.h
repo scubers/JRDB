@@ -10,9 +10,7 @@
 #import "JRPersistent.h"
 
 
-@interface Person : NSObject <JRPersistent>
-
-@property (nonatomic, copy) NSString *ID;
+@interface Person : NSObject
 
 @property (nonatomic, assign) int a_int;
 @property (nonatomic, assign) unsigned int b_unsigned_int;
@@ -28,6 +26,7 @@
 @property (nonatomic, strong) NSNumber *j_number;
 @property (nonatomic, strong) NSData *k_data;
 @property (nonatomic, strong) NSDate *l_date;
+@property (nonatomic, strong) NSDate *m_date;
 
 
 @end

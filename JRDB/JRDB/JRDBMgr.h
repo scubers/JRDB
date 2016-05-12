@@ -26,6 +26,7 @@
  *  @param clazz 类名
  */
 - (void)registerClazzForUpdateTable:(Class<JRPersistent>)clazz;
+- (NSArray<Class> *)registedClazz;
 
 /**
  * 更新默认数据库的表（或者新建没有的表）

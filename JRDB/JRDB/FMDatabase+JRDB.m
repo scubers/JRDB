@@ -64,12 +64,21 @@ NSString * uuid() {
     return [self createTable4Clazz:clazz];
 }
 
-- (BOOL)updateTable4Clazz:(Class<JRPersistent>)clazz {
-    NSString *sql = [JRSqlGenerator updateTableSql4Clazz:clazz inDB:self];
-    if (sql.length) {
-        return [self executeUpdate:sql];
+- (void)updateTable4Clazz:(Class<JRPersistent>)clazz complete:(JRDBComplete)complete {
+    NSArray *sqls = [JRSqlGenerator updateTableSql4Clazz:clazz inDB:self];
+    if (sqls.count) {
+        [self inTransaction:^(FMDatabase *db, BOOL *rollBack) {
+            BOOL flag = YES;
+            for (NSString *sql in sqls) {
+                flag = [db executeUpdate:sql];
+                if (!flag) {
+                    *rollBack = YES;
+                    break;
+                }
+            }
+            EXE_BLOCK(complete, flag);
+        }];
     }
-    return YES;
 }
 
 - (BOOL)deleteTable4Clazz:(Class<JRPersistent>)clazz {

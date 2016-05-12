@@ -26,7 +26,9 @@ typedef enum {
     
     RetDataTypeNSNumber,
     RetDataTypeNSData,
-    RetDataTypeNSDate
+    RetDataTypeNSDate,
+    
+    RetDataTypeUnsupport
 } RetDataType;
 
 @implementation JRFMDBResultSetHandler
@@ -110,6 +112,7 @@ typedef enum {
                     [obj setValue:date forKey:name];
                     break;
                 }
+                case RetDataTypeUnsupport:
                 default:
                     break;
             }
@@ -153,7 +156,7 @@ typedef enum {
         return RetDataTypeNSDate;
     }
     
-    return 0;
+    return RetDataTypeUnsupport;
 }
 
 

@@ -27,9 +27,17 @@ typedef enum {
 @interface JRSqlGenerator : NSObject
 
 + (NSString *)createTableSql4Clazz:(Class<JRPersistent>)clazz;
-+ (NSString *)updateTableSql4Clazz:(Class<JRPersistent>)clazz inDB:(FMDatabase *)db;
 + (NSString *)deleteTableSql4Clazz:(Class<JRPersistent>)clazz;
 + (NSString *)dropTableSql4Clazz:(Class<JRPersistent>)clazz;
+/**
+ *  因为sqlite不支持批量添加字段，只能返回多条语句，多次更新表
+ *
+ *  @param clazz 类
+ *  @param db    数据库
+ *
+ *  @return sql数组
+ */
++ (NSArray<NSString *> *)updateTableSql4Clazz:(Class<JRPersistent>)clazz inDB:(FMDatabase *)db;
 
 /**
  *  返回占位符的sql insert into tablename values (name= ? , name2 = ?,)

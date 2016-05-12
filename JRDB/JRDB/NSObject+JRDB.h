@@ -7,9 +7,11 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "JRPersistent.h"
 
-@interface NSObject (JRDB)
+@interface NSObject (JRDB) <JRPersistent>
 
 + (NSArray *)jr_excludePropertyNames;
+
 
 @end

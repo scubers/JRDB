@@ -51,7 +51,7 @@ typedef void(^JRDBComplete)(BOOL success);
  *  (只会添加字段，不会删除和更改字段类型)
  *  @param clazz 对应表的类
  */
-- (BOOL)updateTable4Clazz:(Class<JRPersistent>)clazz;
+- (void)updateTable4Clazz:(Class<JRPersistent>)clazz complete:(JRDBComplete)complete;
 
 /**
  *  删除表

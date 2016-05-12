@@ -30,6 +30,9 @@
             continue;
         }
         NSString *type = [self typeWithEncodeName:dict[name]];
+        if (!type) {
+            continue;
+        }
         [sql appendFormat:@", %@ %@", name, type];
     }
     [sql appendString:@");"];
@@ -37,31 +40,32 @@
     return sql;
 }
 
-+ (NSString *)updateTableSql4Clazz:(Class<JRPersistent>)clazz inDB:(FMDatabase *)db {
++ (NSArray<NSString *> *)updateTableSql4Clazz:(Class<JRPersistent>)clazz inDB:(FMDatabase *)db {
     NSString *tableName = [JRReflectUtil shortClazzName:clazz];
     if (![db tableExists:tableName]) {
-        return [self createTableSql4Clazz:clazz];
+        return @[[self createTableSql4Clazz:clazz]];
     }
+    
+    NSMutableArray *sqls = [NSMutableArray array];
     
     NSDictionary *dict = [JRReflectUtil ivarAndEncode4Clazz:clazz];
     NSArray *excludes = [clazz jr_excludePropertyNames];
-    // alter 'tableName' add 'name' 'type', 'name2' 'type'
+    // alter 'tableName' add 'name' 'type';
     BOOL flag = NO;
-    NSMutableString *sql = [NSMutableString string];
-    [sql appendFormat:@"alter %@ add ", tableName];
     for (NSString *name in dict.allKeys) {
         if (![db columnExists:name inTableWithName:tableName] && ![excludes containsObject:name]
             ) {
-            [sql appendFormat:@"%@ %@,", name , [self typeWithEncodeName:dict.allValues.firstObject]];
+            NSString *type = [self typeWithEncodeName:dict[name]];
+            if (!type) {
+                continue;
+            }
+            [sqls addObject:[NSString stringWithFormat:@"alter table %@ add column %@ %@ ;", tableName, name, type]];
+            
             flag = YES;
         }
     }
-    if ([sql hasSuffix:@","]) {
-        sql = [[sql substringToIndex:sql.length - 1] mutableCopy];
-    }
-    [sql appendString:@" where _ID = ? ;"];
-    NSLog(@"sql: %@", sql);
-    return flag ? sql : nil;
+    NSLog(@"sqls: %@", sqls);
+    return sqls;
 }
 
 + (NSString *)deleteTableSql4Clazz:(Class<JRPersistent>)clazz{
@@ -225,7 +229,10 @@
     if ([encode rangeOfString:@"NSData"].length) {
         return @"BLOB";
     }
-    return @"";
+    if ([encode rangeOfString:@"NSDate"].length) {
+        return @"TIMESTAMP";
+    }
+    return nil;
 }
 
 

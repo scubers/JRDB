@@ -50,7 +50,7 @@
     
     Person *p = all.firstObject;
     
-    p.l_date = [NSDate date];
+//    p.l_date = [NSDate date];
 //    p.l_date = nil;
 
     [_db updateObj:p columns:nil];
@@ -88,13 +88,13 @@
         p.c_long = 3;
         p.d_long_long = 4;
         p.e_unsigned_long = 5;
-        p.f_unsigned_long_long = 6;
-        p.g_float = 7.0;
-        p.h_double = 8.0;
-        p.i_string = @"9";
-        p.j_number = @10;
-        p.k_data = [NSData data];
-        p.l_date = [NSDate date];
+//        p.f_unsigned_long_long = 6;
+//        p.g_float = 7.0;
+//        p.h_double = 8.0;
+//        p.i_string = @"9";
+//        p.j_number = @10;
+//        p.k_data = [NSData data];
+//        p.l_date = [NSDate date];
         
         if ([_db saveObj:p]) {
             NSLog(@"success");
@@ -105,6 +105,11 @@
 
 - (void)testTruncateTable {
     [_db truncateTable4Clazz:[Person class]];
+}
+
+- (void)testUpdateTable {
+    [[JRDBMgr shareInstance] registerClazzForUpdateTable:[Person class]];
+    [[JRDBMgr shareInstance] updateDefaultDB];
 }
 
 - (void)testPerformanceExample {
