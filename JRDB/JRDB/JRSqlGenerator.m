@@ -9,8 +9,10 @@
 #import "JRSqlGenerator.h"
 #import "JRReflectUtil.h"
 #import "NSObject+JRDB.h"
-#import "FMDB.h"
+//#import "FMDB.h"
 #import "JRQueryCondition.h"
+
+@import FMDB;
 
 @implementation JRSqlGenerator
 

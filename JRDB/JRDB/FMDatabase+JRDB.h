@@ -6,8 +6,10 @@
 //  Copyright © 2016年 Jrwong. All rights reserved.
 //
 
-#import <FMDB/FMDB.h>
+//#import <FMDB/FMDB.h>
 #import "JRPersistent.h"
+
+@import FMDB;
 
 @class JRQueryCondition;
 

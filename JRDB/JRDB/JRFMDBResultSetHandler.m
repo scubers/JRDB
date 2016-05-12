@@ -11,6 +11,8 @@
 #import <objc/runtime.h>
 #import "NSObject+JRDB.h"
 
+@import FMDB;
+
 typedef enum {
     RetDataTypeInt = 1,
     RetDataTypeUnsignedInt,
