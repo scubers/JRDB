@@ -160,7 +160,6 @@ NSString * uuid() {
 }
 
 - (NSArray *)findByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc {
-    
     NSAssert([self checkExistsTable4Clazz:clazz], @"table %@ doesn't exists", clazz);
     NSString *sql = [JRSqlGenerator sql4FindByConditions:conditions clazz:clazz groupBy:groupBy orderBy:orderBy limit:limit isDesc:isDesc];
     FMResultSet *ret = [self executeQuery:sql];
