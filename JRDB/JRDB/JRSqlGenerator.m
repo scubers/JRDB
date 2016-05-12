@@ -85,7 +85,7 @@
     
     NSMutableString *sql = [NSMutableString string];
     NSString *tableName = [JRReflectUtil shortClazzName:[obj class]];
-    [sql appendFormat:@" insert into %@ ('_ID', ", tableName];
+    [sql appendFormat:@" insert into %@ ('_ID' ", tableName];
     // insert into tablename (_ID) values (?)
     
     NSMutableString *sql2 = [NSMutableString string];
@@ -98,7 +98,7 @@
         if ([excludes containsObject:name] || isID(name)) {
             continue;
         }
-        [sql appendFormat:@" %@ ", name];
+        [sql appendFormat:@", %@ ", name];
         [sql2 appendFormat:@" ? "];
         id value = [(NSObject *)obj valueForKey:name];
         if (!value) {
@@ -106,7 +106,6 @@
         }
         [argsList addObject:value];
         
-        [sql appendString:@","];
         [sql2 appendString:@","];
     }
     
