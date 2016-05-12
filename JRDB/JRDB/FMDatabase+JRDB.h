@@ -18,7 +18,7 @@ typedef void(^JRDBComplete)(BOOL success);
 @interface FMDatabase (JRDB)
 
 /**
- *  使用block来进行队列操作，线程安全
+ *  使用block来进行队列操作，后台操作，线程安全
  *
  *  @param block 执行block
  */
@@ -36,6 +36,7 @@ typedef void(^JRDBComplete)(BOOL success);
  *  @param clazz 对应表的类
  */
 - (BOOL)createTable4Clazz:(Class<JRPersistent>)clazz;
+- (void)createTable4Clazz:(Class<JRPersistent>)clazz complete:(JRDBComplete)complete;
 
 /**
  *  把表删了，重新创建
@@ -45,12 +46,14 @@ typedef void(^JRDBComplete)(BOOL success);
  *  @return 是否成功
  */
 - (BOOL)truncateTable4Clazz:(Class<JRPersistent>)clazz;
+- (void)truncateTable4Clazz:(Class<JRPersistent>)clazz complete:(JRDBComplete)complete;
 
 /**
  *  更新表操作
  *  (只会添加字段，不会删除和更改字段类型)
  *  @param clazz 对应表的类
  */
+- (BOOL)updateTable4Clazz:(Class<JRPersistent>)clazz;
 - (void)updateTable4Clazz:(Class<JRPersistent>)clazz complete:(JRDBComplete)complete;
 
 /**
@@ -58,7 +61,8 @@ typedef void(^JRDBComplete)(BOOL success);
  *
  *  @param clazz 对应表的类
  */
-- (BOOL)deleteTable4Clazz:(Class<JRPersistent>)clazz;
+- (BOOL)dropTable4Clazz:(Class<JRPersistent>)clazz;
+- (void)dropTable4Clazz:(Class<JRPersistent>)clazz complete:(JRDBComplete)complete;
 
 #pragma mark - 增删改查操作
 - (BOOL)saveObj:(id<JRPersistent>)obj;

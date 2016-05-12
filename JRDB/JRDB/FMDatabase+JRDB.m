@@ -57,6 +57,14 @@ NSString * uuid() {
     return YES;
 }
 
+- (void)createTable4Clazz:(Class<JRPersistent>)clazz complete:(JRDBComplete)complete {
+    [self inTransaction:^(FMDatabase *db, BOOL *rollBack) {
+        BOOL flag = [db createTable4Clazz:clazz];
+        *rollBack = !flag;
+        EXE_BLOCK(complete, flag);
+    }];
+}
+
 - (BOOL)truncateTable4Clazz:(Class<JRPersistent>)clazz {
     if ([self checkExistsTable4Clazz:clazz]) {
         [self executeUpdate:[JRSqlGenerator dropTableSql4Clazz:clazz]];
@@ -64,29 +72,48 @@ NSString * uuid() {
     return [self createTable4Clazz:clazz];
 }
 
-- (void)updateTable4Clazz:(Class<JRPersistent>)clazz complete:(JRDBComplete)complete {
-    NSArray *sqls = [JRSqlGenerator updateTableSql4Clazz:clazz inDB:self];
-    if (sqls.count) {
-        [self inTransaction:^(FMDatabase *db, BOOL *rollBack) {
-            BOOL flag = YES;
-            for (NSString *sql in sqls) {
-                flag = [db executeUpdate:sql];
-                if (!flag) {
-                    *rollBack = YES;
-                    break;
-                }
-            }
-            EXE_BLOCK(complete, flag);
-        }];
-    }
+- (void)truncateTable4Clazz:(Class<JRPersistent>)clazz complete:(JRDBComplete)complete {
+    [self inTransaction:^(FMDatabase *db, BOOL *rollBack) {
+        BOOL flag = [db truncateTable4Clazz:clazz];
+        *rollBack = !flag;
+        EXE_BLOCK(complete, flag);
+    }];
 }
 
-- (BOOL)deleteTable4Clazz:(Class<JRPersistent>)clazz {
+- (BOOL)updateTable4Clazz:(Class<JRPersistent>)clazz {
+    NSArray *sqls = [JRSqlGenerator updateTableSql4Clazz:clazz inDB:self];
+    BOOL flag = YES;
+    for (NSString *sql in sqls) {
+        flag = [self executeUpdate:sql];
+        if (!flag) {
+            break;
+        }
+    }
+    return flag;
+}
+
+- (void)updateTable4Clazz:(Class<JRPersistent>)clazz complete:(JRDBComplete)complete {
+    [self inTransaction:^(FMDatabase *db, BOOL *rollBack) {
+        BOOL flag = [db updateTable4Clazz:clazz];
+        *rollBack = !flag;
+        EXE_BLOCK(complete, flag);
+    }];
+}
+
+- (BOOL)dropTable4Clazz:(Class<JRPersistent>)clazz {
     NSString *tableName = [JRReflectUtil shortClazzName:clazz];
     if ([self tableExists:tableName]) {
         return [self executeUpdate:[JRSqlGenerator deleteTableSql4Clazz:clazz]];
     }
     return YES;
+}
+
+- (void)dropTable4Clazz:(Class<JRPersistent>)clazz complete:(JRDBComplete)complete {
+    [self inTransaction:^(FMDatabase *db, BOOL *rollBack) {
+        BOOL flag = [db dropTable4Clazz:clazz];
+        *rollBack = !flag;
+        EXE_BLOCK(complete, flag);
+    }];
 }
 
 
