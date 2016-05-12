@@ -16,6 +16,7 @@
 @property (nonatomic, readonly, strong) FMDatabase *defaultDB;
 
 + (instancetype)shareInstance;
++ (FMDatabase *)defaultDB;
 - (FMDatabase *)createDBWithPath:(NSString *)path;
 - (void)deleteDBWithPath:(NSString *)path;
 - (FMDatabase *)DBWithPath:(NSString *)path;

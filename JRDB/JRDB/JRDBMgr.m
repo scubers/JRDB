@@ -35,6 +35,10 @@ static JRDBMgr *__shareInstance;
     return [[self alloc] init];
 }
 
++ (FMDatabase *)defaultDB {
+    return [[self shareInstance] defaultDB];
+}
+
 - (FMDatabase *)createDBWithPath:(NSString *)path {
     FMDatabase *db = [FMDatabase databaseWithPath:path];
     [db open];
@@ -68,12 +72,22 @@ static JRDBMgr *__shareInstance;
 
 - (FMDatabase *)defaultDB {
     if (!_defaultDB) {
-        NSString *path = NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES).lastObject;
-        path = [path stringByAppendingPathComponent:@"jrdb/jrdb.sqlite"];
-        _defaultDB = [FMDatabase databaseWithPath:path];
+        _defaultDB = [FMDatabase databaseWithPath:[self defaultPath]];
         [_defaultDB open];
     }
     return _defaultDB;
+}
+
+- (NSString *)defaultPath {
+    NSFileManager *mgr = [NSFileManager defaultManager];
+    NSString *path = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).lastObject;
+    path = [path stringByAppendingPathComponent:@"jrdb"];
+    BOOL isDirectory;
+    if (![mgr fileExistsAtPath:path isDirectory:&isDirectory] || !isDirectory) {
+        [mgr createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:nil];
+    }
+    path = [path stringByAppendingPathComponent:@"jrdb.sqlite"];
+    return path;
 }
 
 @end

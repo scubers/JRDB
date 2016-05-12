@@ -23,17 +23,27 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-//    [self test];
+    [self test];
 //    [self test2];
 //    [self test3];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
-    AViewController *av = [[AViewController alloc] init];
-    [self presentViewController:av animated:YES completion:nil];
+//    AViewController *av = [[AViewController alloc] init];
+//    [self presentViewController:av animated:YES completion:nil];
 }
-
+- (void)test4 {
+    NSString *path = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).firstObject;
+    path = [path stringByAppendingPathComponent:@"jrdb/jrdb.sqlite"];
+    NSLog(@"path : %@", path);
+    FMDatabase *db = [FMDatabase databaseWithPath:path];
+    if ([db open]) {
+        NSLog(@"success");
+    } else {
+        NSLog(@"failure");
+    }
+}
 - (void)test3 {
     FMDatabase *db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/jmacmini/Desktop/aaa.sqlite"];
     
@@ -59,7 +69,7 @@
 }
 
 - (void)test {
-    FMDatabase *db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/jmacmini/Desktop/aaa.sqlite"];
+    FMDatabase *db = [JRDBMgr defaultDB];
     Person *p = [[Person alloc] init];
     p.a_int = 1;
     p.b_unsigned_int = 2;
@@ -79,6 +89,7 @@
     } else {
         NSLog(@"failure");
     }
+    
     
 }
 

@@ -52,32 +52,36 @@ NSString * uuid() {
 }
 
 
-- (void)createTable4Clazz:(Class<JRPersistent>)clazz {
+- (BOOL)createTable4Clazz:(Class<JRPersistent>)clazz {
     NSString *tableName = [JRReflectUtil shortClazzName:clazz];
     if (![self tableExists:tableName]) {
-        [self executeUpdate:[JRSqlGenerator createTableSql4Clazz:clazz]];
+        return [self executeUpdate:[JRSqlGenerator createTableSql4Clazz:clazz]];
     }
+    return YES;
 }
 
-- (void)updateTable4Clazz:(Class<JRPersistent>)clazz {
+- (BOOL)updateTable4Clazz:(Class<JRPersistent>)clazz {
     NSString *sql = [JRSqlGenerator updateTableSql4Clazz:clazz inDB:self];
     if (sql.length) {
-        [self executeUpdate:sql];
+        return [self executeUpdate:sql];
     }
+    return YES;
 }
 
-- (void)deleteTable4Clazz:(Class<JRPersistent>)clazz {
+- (BOOL)deleteTable4Clazz:(Class<JRPersistent>)clazz {
     NSString *tableName = [JRReflectUtil shortClazzName:clazz];
     if ([self tableExists:tableName]) {
-        [self executeUpdate:[JRSqlGenerator deleteTableSql4Clazz:clazz]];
+        return [self executeUpdate:[JRSqlGenerator deleteTableSql4Clazz:clazz]];
     }
-    
+    return YES;
 }
 
 
 - (BOOL)saveObj:(id<JRPersistent>)obj {
     if (![self tableExists:[JRReflectUtil shortClazzName:[obj class]]]) {
-        [self createTable4Clazz:[obj class]];
+        if (![self createTable4Clazz:[obj class]]) {
+            NSAssert(NO, @"create table: %@ error", [JRReflectUtil shortClazzName:[obj class]]);
+        }
     }
     NSArray *args;
     NSString *sql = [JRSqlGenerator sql4Insert:obj args:&args];

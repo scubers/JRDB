@@ -33,21 +33,21 @@
  *
  *  @param clazz 对应表的类
  */
-- (void)createTable4Clazz:(Class<JRPersistent>)clazz;
+- (BOOL)createTable4Clazz:(Class<JRPersistent>)clazz;
 
 /**
  *  更新表操作
  *  (只会添加字段，不会删除和更改字段类型)
  *  @param clazz 对应表的类
  */
-- (void)updateTable4Clazz:(Class<JRPersistent>)clazz;
+- (BOOL)updateTable4Clazz:(Class<JRPersistent>)clazz;
 
 /**
  *  删除表
  *
  *  @param clazz 对应表的类
  */
-- (void)deleteTable4Clazz:(Class<JRPersistent>)clazz;
+- (BOOL)deleteTable4Clazz:(Class<JRPersistent>)clazz;
 
 #pragma mark - 增删改查操作
 - (BOOL)saveObj:(id<JRPersistent>)obj;
