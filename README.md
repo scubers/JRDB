@@ -19,6 +19,15 @@ Feedback: [jr-wong@qq.com](mailto:jrwong@qq.com)
 
 --
 
+#Installation 【安装】
+```ruby
+use_frameworks!
+pod 'JRDB'
+```
+
+
+--
+
 #Usage
 
 
@@ -194,4 +203,3 @@ JRDBMgr持有一个默认数据库（~/Documents/jrdb/jrdb.sqlite），任何不
 - 查看FMDatabase+JRDB.h
 
 --
-
