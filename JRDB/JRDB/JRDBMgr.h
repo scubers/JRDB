@@ -19,7 +19,6 @@
 + (FMDatabase *)defaultDB;
 - (FMDatabase *)createDBWithPath:(NSString *)path;
 - (void)deleteDBWithPath:(NSString *)path;
-- (FMDatabase *)DBWithPath:(NSString *)path;
 
 /**
  *  在这里注册的类，使用本框架的数据库将全部建有这些表
@@ -30,7 +29,9 @@
 
 /**
  * 更新默认数据库的表（或者新建没有的表）
+ * 更新的表需要在本类先注册
  */
 - (void)updateDefaultDB;
+- (void)updateDB:(FMDatabase *)db;
 
 @end

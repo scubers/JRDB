@@ -11,16 +11,23 @@
 typedef NS_ENUM(NSInteger, JRQueryConditionType) {
     JRQueryConditionTypeAnd = 1,
     JRQueryConditionTypeOr,
-//    JRQueryConditionTypeGroupBy, // 只需要字段名即可
-//    JRQueryConditionTypeOrderBy, // 只需要字段名即可
-//    JRQueryConditionTypeLimit    // limit 0,3
 };
 
 @interface JRQueryCondition : NSObject
 
-@property (nonatomic, copy, readonly) NSString *condition;
+@property (nonatomic, copy, readonly  ) NSString             *condition;
+@property (nonatomic, copy, readonly  ) NSArray              *args;
 @property (nonatomic, assign, readonly) JRQueryConditionType type;
 
-+ (instancetype)condition:(NSString *)condition type:(JRQueryConditionType)type;
+/**
+ *  条件查询需要的condition
+ *
+ *  @param condition @"name = ?"
+ *  @param args      @[@"11"]
+ *  @param type      'and' or 'or'
+ *
+ *  @return instancetype
+ */
++ (instancetype)condition:(NSString *)condition args:(NSArray *)args type:(JRQueryConditionType)type;
 
 @end

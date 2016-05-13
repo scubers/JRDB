@@ -14,8 +14,6 @@
 
 @interface NSObject (JRDB) <JRPersistent>
 
-+ (NSArray *)jr_excludePropertyNames;
-
 #pragma mark - save
 /**
  *  保存到指定数据库
@@ -83,10 +81,45 @@
 + (NSArray<id<JRPersistent>> *)jr_findAllFromDB:(FMDatabase *)db orderBy:(NSString *)orderBy isDesc:(BOOL)isDesc;
 
 
-+ (NSArray *)jr_findByConditions:(NSArray<JRQueryCondition *> *)conditions groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc fromDB:(FMDatabase *)db;
++ (NSArray<id<JRPersistent>> *)jr_findByConditions:(NSArray<JRQueryCondition *> *)conditions groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc fromDB:(FMDatabase *)db;
 
-+ (NSArray *)jr_findByConditions:(NSArray<JRQueryCondition *> *)conditions groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc;
++ (NSArray<id<JRPersistent>> *)jr_findByConditions:(NSArray<JRQueryCondition *> *)conditions groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc;
 
+#pragma mark - sql语句
 
+/**
+ *  因为直接返回对象，所以sql 请以 select * 开头
+ *
+ *  @param sql  sql: select * from Person where _ID = ?
+ *  @param args 参数 @[@"111"]
+ *
+ *  @return 返回数组
+ */
++ (NSArray<id<JRPersistent>> *)jr_executeSql:(NSString *)sql args:(NSArray *)args;
++ (NSArray<id<JRPersistent>> *)jr_executeSql:(NSString *)sql args:(NSArray *)args fromDB:(FMDatabase *)db;
+
+/**
+ *  返回条数
+ *
+ *  @param sql  select count(1) where age > ?
+ *  @param args @[@10]
+ *
+ *  @return 数据条数
+ */
++ (NSUInteger)jr_countForSql:(NSString *)sql args:(NSArray *)args;
++ (NSUInteger)jr_countForSql:(NSString *)sql args:(NSArray *)args fromDB:(FMDatabase *)db;
+
+#pragma mark - table operation
++ (BOOL)jr_createTable;
++ (BOOL)jr_createTableInDB:(FMDatabase *)db;
+
++ (BOOL)jr_updateTable;
++ (BOOL)jr_updateTableInDB:(FMDatabase *)db;
+
++ (BOOL)jr_dropTable;
++ (BOOL)jr_dropTableInDB:(FMDatabase *)db;
+
++ (BOOL)jr_truncateTable;
++ (BOOL)jr_truncateTableInDB:(FMDatabase *)db;;
 
 @end

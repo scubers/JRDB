@@ -25,6 +25,11 @@ NSString * uuid() {
 
 @implementation FMDatabase (JRDB)
 
+- (void)closeQueue {
+    [[self transactionQueue] close];
+    objc_setAssociatedObject(self, &queuekey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
 - (FMDatabaseQueue *)transactionQueue {
     FMDatabaseQueue *q = objc_getAssociatedObject(self, &queuekey);
     if (!q) {
@@ -201,8 +206,9 @@ NSString * uuid() {
         NSLog(@"table %@ doesn't exists", clazz);
         return @[];
     }
-    NSString *sql = [JRSqlGenerator sql4FindByConditions:conditions clazz:clazz groupBy:groupBy orderBy:orderBy limit:limit isDesc:isDesc];
-    FMResultSet *ret = [self executeQuery:sql];
+    NSArray *args = nil;
+    NSString *sql = [JRSqlGenerator sql4FindByConditions:conditions clazz:clazz groupBy:groupBy orderBy:orderBy limit:limit isDesc:isDesc args:&args];
+    FMResultSet *ret = [self executeQuery:sql withArgumentsInArray:args];
     return [JRFMDBResultSetHandler handleResultSet:ret forClazz:clazz];
 }
 

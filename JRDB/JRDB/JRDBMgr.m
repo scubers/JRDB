@@ -52,12 +52,6 @@ static JRDBMgr *__shareInstance;
     [mgr removeItemAtPath:path error:nil];
 }
 
-- (FMDatabase *)DBWithPath:(NSString *)path {
-    FMDatabase *db = [FMDatabase databaseWithPath:path];
-    [db open];
-    return db;
-}
-
 - (void)registerClazzForUpdateTable:(Class<JRPersistent>)clazz {
     [_clazzArray addObject:clazz];
 }
@@ -67,8 +61,12 @@ static JRDBMgr *__shareInstance;
 }
 
 - (void)updateDefaultDB {
+    [self updateDB:[self defaultDB]];
+}
+
+- (void)updateDB:(FMDatabase *)db {
     for (Class clazz in _clazzArray) {
-        BOOL flag = [[self defaultDB] updateTable4Clazz:clazz];
+        BOOL flag = [db updateTable4Clazz:clazz];
         NSLog(@"update table: %@ %@", [clazz description], flag ? @"success" : @"failure");
     }
 }
@@ -81,6 +79,15 @@ static JRDBMgr *__shareInstance;
         [_defaultDB open];
     }
     return _defaultDB;
+}
+
+- (void)setDefaultDB:(FMDatabase *)defaultDB {
+    if (_defaultDB == defaultDB) {
+        return;
+    }
+    [_defaultDB closeQueue];
+    [_defaultDB close];
+    _defaultDB = defaultDB;
 }
 
 - (NSString *)defaultPath {

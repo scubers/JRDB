@@ -10,6 +10,7 @@
 #import <objc/runtime.h>
 #import "FMDatabase+JRDB.h"
 #import "JRDBMgr.h"
+#import "JRFMDBResultSetHandler.h"
 
 #define JR_DEFAULTDB [JRDBMgr defaultDB]
 
@@ -24,7 +25,11 @@ const NSString *JRDB_IDKEY = @"JRDB_IDKEY";
     return objc_getAssociatedObject(self, &JRDB_IDKEY);
 }
 + (NSArray *)jr_excludePropertyNames {
-    return nil;
+    return @[];
+}
+
++ (NSDictionary *)jr_mapPropNames {
+    return @{};
 }
 
 #pragma mark - save
@@ -108,12 +113,66 @@ const NSString *JRDB_IDKEY = @"JRDB_IDKEY";
     return [self jr_findAllFromDB:JR_DEFAULTDB orderBy:orderBy isDesc:isDesc];
 }
 
-+ (NSArray *)jr_findByConditions:(NSArray<JRQueryCondition *> *)conditions groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc fromDB:(FMDatabase *)db {
++ (NSArray<id<JRPersistent>> *)jr_findByConditions:(NSArray<JRQueryCondition *> *)conditions groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc fromDB:(FMDatabase *)db {
     return [db findByConditions:conditions clazz:[self class] groupBy:groupBy orderBy:orderBy limit:limit isDesc:isDesc];
 }
 
-+ (NSArray *)jr_findByConditions:(NSArray<JRQueryCondition *> *)conditions groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc {
++ (NSArray<id<JRPersistent>> *)jr_findByConditions:(NSArray<JRQueryCondition *> *)conditions groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc {
     return [self jr_findByConditions:conditions groupBy:groupBy orderBy:orderBy limit:limit isDesc:isDesc fromDB:JR_DEFAULTDB];
 }
+
+#pragma mark - sql
++ (NSArray<id<JRPersistent>> *)jr_executeSql:(NSString *)sql args:(NSArray *)args fromDB:(FMDatabase *)db {
+    FMResultSet *ret = [db executeQuery:sql withArgumentsInArray:args];
+    return [JRFMDBResultSetHandler handleResultSet:ret forClazz:[self class]];
+}
+
++ (NSArray<id<JRPersistent>> *)jr_executeSql:(NSString *)sql args:(NSArray *)args {
+    return [self jr_executeSql:sql args:args fromDB:JR_DEFAULTDB];
+}
+
++ (NSUInteger)jr_countForSql:(NSString *)sql args:(NSArray *)args fromDB:(FMDatabase *)db {
+    FMResultSet *ret = [db executeQuery:sql withArgumentsInArray:args];
+    return (NSUInteger)[ret unsignedLongLongIntForColumnIndex:0];
+}
+
++ (NSUInteger)jr_countForSql:(NSString *)sql args:(NSArray *)args {
+    return [self jr_countForSql:sql args:args fromDB:JR_DEFAULTDB];
+}
+
+#pragma mark - table operation
+
++ (BOOL)jr_createTableInDB:(FMDatabase *)db {
+    return [db createTable4Clazz:[self class]];
+}
+
++ (BOOL)jr_createTable {
+    return [self jr_createTableInDB:JR_DEFAULTDB];
+}
+
++ (BOOL)jr_updateTableInDB:(FMDatabase *)db {
+    return [db updateTable4Clazz:[self class]];
+}
+
++ (BOOL)jr_updateTable {
+    return [self jr_updateTableInDB:JR_DEFAULTDB];
+}
+
++ (BOOL)jr_dropTableInDB:(FMDatabase *)db {
+    return [db dropTable4Clazz:[self class]];
+}
+
++ (BOOL)jr_dropTable {
+    return [self jr_dropTableInDB:JR_DEFAULTDB];
+}
+
++ (BOOL)jr_truncateTableInDB:(FMDatabase *)db {
+    return [db truncateTable4Clazz:[self class]];
+}
+
++ (BOOL)jr_truncateTable {
+    return [self jr_truncateTableInDB:JR_DEFAULTDB];
+}
+
 
 @end

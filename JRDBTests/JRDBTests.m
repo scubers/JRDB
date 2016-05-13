@@ -29,6 +29,7 @@
     [super setUp];
 //    _db = [JRDBMgr defaultDB];
     _db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/jmacmini/Desktop/test.sqlite"];
+    [JRDBMgr shareInstance].defaultDB = _db;
     // Put setup code here. This method is called before the invocation of each test method in the class.
 }
 
@@ -45,42 +46,54 @@
 }
 
 - (void)testUpdate1 {
-    NSArray *all = [_db findAll:[Person class]];
+    NSArray *all = [Person jr_findAll];
     
     Person *p = all.firstObject;
-    
-//    p.l_date = [NSDate date];
-//    p.l_date = nil;
 
-    [_db updateObj:p columns:nil];
+    p.a_int = 100;
+
+    [p jr_updateWithColumn:nil];
     
+}
+
+- (void)testSql {
+    NSString *sql = @"select * from Person where age = ?";
+    NSArray *list = [Person jr_executeSql:sql args:@[@10]];
 }
 
 - (void)testFind2 {
-    NSArray *array = [_db findByConditions:@[
-                                             [JRQueryCondition condition:@"_l_date < '2016-5-12 15:10'" type:JRQueryConditionTypeAnd],
-                                             [JRQueryCondition condition:@"_a_int > 9" type:JRQueryConditionTypeAnd],
-                                             ] clazz:[Person class] groupBy:@"_i_string" isDesc:YES];
     
-    NSLog(@"%@", array);
+    NSArray *condis = @[
+                        [JRQueryCondition condition:@"_l_date < ?" args:@[[NSDate date]] type:JRQueryConditionTypeAnd],
+                        [JRQueryCondition condition:@"_a_int > ?" args:@[@9] type:JRQueryConditionTypeAnd],
+                        ];
+    
+    NSArray *arr = [Person jr_findByConditions:condis
+                                       groupBy:nil
+                                       orderBy:nil
+                                         limit:nil
+                                        isDesc:YES];
+    
+    NSLog(@"%@", arr);
 }
 
 - (void)testFind1 {
-    NSArray *arr = [_db findAll:[Person class] orderBy:@"_a_int" isDesc:YES];
     
-    Person *p = [_db getByID:[arr.firstObject ID] clazz:[Person class]];
+    NSArray *arr = [Person jr_findAllOrderBy:@"_a_int" isDesc:YES];
+    
+    Person *p = [Person jr_findByID:[arr.firstObject ID]];
     
     NSLog(@"%@, %@", arr, p);
 }
 
 - (void)testFindAll {
-    NSArray *array = [_db findAll:[Person class]];
-    Person *p = array.firstObject;
+    NSArray<Person *> *array = [Person jr_findAll];
+    NSLog(@"%@", array);
 }
 
 - (void)testAdd {
     
-    for (int i = 0; i<1; i++) {
+    for (int i = 0; i<10; i++) {
         Person *p = [[Person alloc] init];
         p.a_int = i+2;
         p.b_unsigned_int = 2;
@@ -94,23 +107,21 @@
         p.j_number = @10;
         p.k_data = [NSData data];
         p.l_date = [NSDate date];
-        
-        if ([_db saveObj:p]) {
-            NSLog(@"success");
-        }
-        
+        [p jr_save];
     }
 }
 
 - (void)testTruncateTable {
-    [_db truncateTable4Clazz:[Person class]];
-    [[JRDBMgr defaultDB] truncateTable4Clazz:[Person class]];
+    [Person jr_truncateTable];
+//    [_db truncateTable4Clazz:[Person class]];
+//    [[JRDBMgr defaultDB] truncateTable4Clazz:[Person class]];
+    
+    
 }
 
 - (void)testUpdateTable {
     [[JRDBMgr shareInstance] registerClazzForUpdateTable:[Person class]];
     [[JRDBMgr shareInstance] updateDefaultDB];
-    
 }
 
 - (void)testPerformanceExample {

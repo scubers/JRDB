@@ -15,6 +15,9 @@
 
 @interface FMDatabase (JRDB)
 
+
+- (void)closeQueue;
+
 /**
  *  使用block来进行队列操作，后台操作，线程安全
  *
@@ -92,8 +95,8 @@
 
 - (id<JRPersistent>)findByID:(NSString *)ID clazz:(Class<JRPersistent>)clazz;
 
-- (NSArray *)findAll:(Class<JRPersistent>)clazz;
-- (NSArray *)findAll:(Class<JRPersistent>)clazz orderBy:(NSString *)orderby isDesc:(BOOL)isDesc;
+- (NSArray<id<JRPersistent>> *)findAll:(Class<JRPersistent>)clazz;
+- (NSArray<id<JRPersistent>> *)findAll:(Class<JRPersistent>)clazz orderBy:(NSString *)orderby isDesc:(BOOL)isDesc;
 
 /**
  *  根据条件查询(条件名称需要是属性全称)
@@ -102,27 +105,27 @@
  *
  *  @return 查询结果
  */
-- (NSArray *)findByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc;
+- (NSArray<id<JRPersistent>> *)findByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc;
 
 /**
  *  单纯根据条件查询
  */
-- (NSArray *)findByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz isDesc:(BOOL)isDesc;
+- (NSArray<id<JRPersistent>> *)findByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz isDesc:(BOOL)isDesc;
 
 /**
  *  单纯根据groupby以及条件
  */
-- (NSArray *)findByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz groupBy:(NSString *)groupBy isDesc:(BOOL)isDesc;
+- (NSArray<id<JRPersistent>> *)findByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz groupBy:(NSString *)groupBy isDesc:(BOOL)isDesc;
 
 /**
  *  单纯根据orderby以及条件
  */
-- (NSArray *)findByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz orderBy:(NSString *)orderBy isDesc:(BOOL)isDesc;
+- (NSArray<id<JRPersistent>> *)findByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz orderBy:(NSString *)orderBy isDesc:(BOOL)isDesc;
 
 /**
  *  单纯根据limit以及条件
  */
-- (NSArray *)findByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz limit:(NSString *)limit isDesc:(BOOL)isDesc;
+- (NSArray<id<JRPersistent>> *)findByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz limit:(NSString *)limit isDesc:(BOOL)isDesc;
 
 /**
  *  检查对应类的表是否存在

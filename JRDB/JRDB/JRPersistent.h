@@ -19,6 +19,11 @@ typedef void(^JRDBComplete)(BOOL success);
 - (NSString *)ID;
 
 @optional
+/**
+ *  返回不用入库的对象字段数组
+ *  The full property names that you want to ignore for persistent
+ *
+ *  @return array
+ */
 + (NSArray *)jr_excludePropertyNames;
-
 @end
