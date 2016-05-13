@@ -153,6 +153,10 @@ NSString * uuid() {
 
 - (BOOL)updateObj:(id<JRPersistent>)obj columns:(NSArray *)columns {
     NSAssert(obj.ID != nil, @"The obj to be updated could be held a primary key");
+    if (![self checkExistsTable4Clazz:[obj class]]) {
+        NSLog(@"table : %@ doesn't exists", [obj class]);
+        return NO;
+    }
     NSArray *args;
     NSString *sql = [JRSqlGenerator sql4Update:obj columns:columns args:&args];
     args = [args arrayByAddingObject:obj.ID];
@@ -167,6 +171,10 @@ NSString * uuid() {
 
 - (BOOL)deleteObj:(id<JRPersistent>)obj {
     NSAssert(obj.ID != nil, @"obj ID should not be nil");
+    if (![self checkExistsTable4Clazz:[obj class]]) {
+        NSLog(@"table : %@ doesn't exists", [obj class]);
+        return NO;
+    }
     NSString *sql = [JRSqlGenerator sql4Delete:obj];
     return [self executeUpdate:sql withArgumentsInArray:@[obj.ID]];
 }

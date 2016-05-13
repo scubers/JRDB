@@ -57,8 +57,21 @@
 }
 
 - (void)testSql {
-    NSString *sql = @"select * from Person where age = ?";
-    NSArray *list = [Person jr_executeSql:sql args:@[@10]];
+    Person *person;
+    [[JRDBMgr defaultDB] createTable4Clazz:[Person class]];
+    [Person jr_createTable];
+    
+    [[JRDBMgr defaultDB] truncateTable4Clazz:[Person class]];
+    [Person jr_truncateTable];
+    
+    [person jr_save];
+    
+    [[JRDBMgr defaultDB] updateTable4Clazz:[Person class]];
+    [Person jr_updateTable];
+    
+    [[JRDBMgr defaultDB] dropTable4Clazz:[Person class]];
+    [Person jr_dropTable];
+    
 }
 
 - (void)testFind2 {
