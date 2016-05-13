@@ -59,7 +59,7 @@ p.jr_save()
 ###Update 【更新】
 
 ```objc
-Person *p = [Person jr_findAll];
+Person *p = [Person jr_findAll].firstObject;
 p.name = @"abc";
 [p jr_update columns:nil];
 ```
@@ -70,7 +70,7 @@ p.name = @"abc";
 ###Delete 【删除】
 
 ```objc
-Person *p = [Person jr_findAll];
+Person *p = [Person jr_findAll].firstObject;
 [p jr_delete];
 ```
 --
@@ -93,10 +93,10 @@ NSArray *condis = @[
                     ];
     
 NSArray *arr = [Person jr_findByConditions:condis
-                                       groupBy:@"_room"
-                                       orderBy:@"_age"
-                                         limit:@" limit 0,13 "
-                                        isDesc:YES];
+                                   groupBy:@"_room"
+                                   orderBy:@"_age"
+                                     limit:@" limit 0,13 "
+                                    isDesc:YES];
 ```
 
 - SQL
@@ -171,7 +171,27 @@ JRDBMgr持有一个默认数据库（~/Documents/jrdb/jrdb.sqlite），任何不
 	-(void)updateDB:(FMDatabase *)db
 进行统一更新或者创建表。	
 
+--
+
+#Thread Operation 【线程操作】
+- 多线程操作使用FMDB自带的 FMDatabaseQueue
+
+```objc
+[person jr_saveWithComplete:^(BOOL success) {
+    NSLog(@"%d", success);
+}];
+
+```
+任何带complete block的操作，都将放入到FMDatabaseQueue进行顺序执行
+
+- 注：所有需要立刻返回结果，或者影响其他操作的数据库操作，都建议放在主线程进行更新，大批量更新以及多线程操作数据库时，请使用带complete block的操作。
+
+
+
+--
+
 #MoreUsage
 - 查看FMDatabase+JRDB.h
 
 --
+
