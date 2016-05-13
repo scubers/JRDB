@@ -6,8 +6,6 @@
 //  Copyright © 2016年 Jrwong. All rights reserved.
 //
 
-#define EXE_BLOCK(block, ...) if (block){block(__VA_ARGS__);}
-
 
 #import "FMDatabase+JRDB.h"
 #import <objc/runtime.h>
@@ -174,7 +172,7 @@ NSString * uuid() {
     }];
 }
 
-- (id<JRPersistent>)getByID:(NSString *)ID clazz:(Class<JRPersistent>)clazz {
+- (id<JRPersistent>)findByID:(NSString *)ID clazz:(Class<JRPersistent>)clazz {
     NSAssert(ID != nil, @"id should be nil");
     NSAssert([self checkExistsTable4Clazz:clazz], @"table %@ doesn't exists", clazz);
     
@@ -188,7 +186,10 @@ NSString * uuid() {
 }
 
 - (NSArray *)findAll:(Class<JRPersistent>)clazz orderBy:(NSString *)orderby isDesc:(BOOL)isDesc {
-    NSAssert([self checkExistsTable4Clazz:clazz], @"table %@ doesn't exists", clazz);
+    if (![self checkExistsTable4Clazz:clazz]) {
+        NSLog(@"table %@ doesn't exists", clazz);
+        return @[];
+    }
     
     NSString *sql = [JRSqlGenerator sql4FindAll:clazz orderby:orderby isDesc:isDesc];
     FMResultSet *ret = [self executeQuery:sql];
@@ -196,7 +197,10 @@ NSString * uuid() {
 }
 
 - (NSArray *)findByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc {
-    NSAssert([self checkExistsTable4Clazz:clazz], @"table %@ doesn't exists", clazz);
+    if (![self checkExistsTable4Clazz:clazz]) {
+        NSLog(@"table %@ doesn't exists", clazz);
+        return @[];
+    }
     NSString *sql = [JRSqlGenerator sql4FindByConditions:conditions clazz:clazz groupBy:groupBy orderBy:orderBy limit:limit isDesc:isDesc];
     FMResultSet *ret = [self executeQuery:sql];
     return [JRFMDBResultSetHandler handleResultSet:ret forClazz:clazz];

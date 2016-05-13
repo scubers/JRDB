@@ -8,7 +8,6 @@
 
 #import <Foundation/Foundation.h>
 #import "JRPersistent.h"
-//#import "FMDB.h"
 
 @class FMResultSet;
 

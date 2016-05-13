@@ -13,7 +13,7 @@
 
 @interface JRDBMgr : NSObject
 
-@property (nonatomic, readonly, strong) FMDatabase *defaultDB;
+@property (nonatomic, strong) FMDatabase *defaultDB;
 
 + (instancetype)shareInstance;
 + (FMDatabase *)defaultDB;

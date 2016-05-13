@@ -11,8 +11,6 @@
 
 @import FMDB;
 
-typedef void(^JRDBComplete)(BOOL success);
-
 @class JRQueryCondition;
 
 @interface FMDatabase (JRDB)
@@ -92,7 +90,7 @@ typedef void(^JRDBComplete)(BOOL success);
 - (BOOL)updateObj:(id<JRPersistent>)obj columns:(NSArray *)columns;
 - (void)updateObj:(id<JRPersistent>)obj columns:(NSArray *)columns complete:(JRDBComplete)complete;
 
-- (id<JRPersistent>)getByID:(NSString *)ID clazz:(Class<JRPersistent>)clazz;
+- (id<JRPersistent>)findByID:(NSString *)ID clazz:(Class<JRPersistent>)clazz;
 
 - (NSArray *)findAll:(Class<JRPersistent>)clazz;
 - (NSArray *)findAll:(Class<JRPersistent>)clazz orderBy:(NSString *)orderby isDesc:(BOOL)isDesc;

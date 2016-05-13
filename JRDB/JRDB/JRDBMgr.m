@@ -68,7 +68,7 @@ static JRDBMgr *__shareInstance;
 
 - (void)updateDefaultDB {
     for (Class clazz in _clazzArray) {
-        BOOL flag = [_defaultDB updateTable4Clazz:clazz];
+        BOOL flag = [[self defaultDB] updateTable4Clazz:clazz];
         NSLog(@"update table: %@ %@", [clazz description], flag ? @"success" : @"failure");
     }
 }

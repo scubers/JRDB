@@ -8,6 +8,10 @@
 
 #import <Foundation/Foundation.h>
 
+#define EXE_BLOCK(block, ...) if (block){block(__VA_ARGS__);}
+
+typedef void(^JRDBComplete)(BOOL success);
+
 @protocol JRPersistent <NSObject>
 
 @required

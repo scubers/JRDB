@@ -12,7 +12,11 @@
 @implementation Person
 
 + (NSArray *)jr_excludePropertyNames {
-    return @[@"abc"];
+    return @[
+//             @"_k_data",
+//             @"_l_date",
+             @"_m_date",
+             ];
 }
 
 @end
