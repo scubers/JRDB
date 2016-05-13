@@ -88,6 +88,8 @@
                                         isDesc:YES];
     
     NSLog(@"%@", arr);
+    
+    [[JRDBMgr defaultDB] close];
 }
 
 - (void)testFind1 {

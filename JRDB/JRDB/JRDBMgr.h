@@ -15,7 +15,7 @@
 
 @property (nonatomic, strong) FMDatabase * _Nullable defaultDB;
 
-+ (instancetype _Nullable)shareInstance;
++ (instancetype _Nonnull)shareInstance;
 + (FMDatabase * _Nonnull)defaultDB;
 - (FMDatabase * _Nullable)createDBWithPath:(NSString * _Nullable)path;
 - (void)deleteDBWithPath:(NSString * _Nullable)path;
