@@ -6,3 +6,21 @@
 - 支持swift 和 Objective-c
 - 支持数据类型：基本数据类型（int，double，等），String，NSData，NSNumber，NSDate
   - 注：swift的基本数据类型，不支持Option类型，既不支持Int？Int！等，对象类型支持Option类型
+
+------
+```objc
+        Person *p = [[Person alloc] init];
+        p.a_int = i+2;
+        p.b_unsigned_int = 2;
+        p.c_long = 3;
+        p.d_long_long = 4;
+        p.e_unsigned_long = 5;
+        p.f_unsigned_long_long = 6;
+        p.g_float = 7.0;
+        p.h_double = 8.0;
+        p.i_string = @"9";
+        p.j_number = @10;
+        p.k_data = [NSData data];
+        p.l_date = [NSDate date];
+        [p jr_save];
+```
