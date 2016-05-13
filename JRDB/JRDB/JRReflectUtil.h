@@ -20,14 +20,14 @@
  *  @param clazz 输入类
  *  @return 返回类全名（Swift.UIView）兼顾swift
  */
-+ (NSString *)fullClazzName:(Class)clazz;
++ (NSString * _Nonnull)fullClazzName:(Class _Nonnull)clazz;
 /**
  *  类简称
  *
  *  @param clazz 输入类
  *  @return 返回类简称 UIView
  */
-+ (NSString *)shortClazzName:(Class)clazz;
++ (NSString * _Nonnull)shortClazzName:(Class _Nonnull)clazz;
 
 /**
  *  统一将下划线去掉
@@ -35,7 +35,7 @@
  *  @param ivarName _name or name
  *  @return name
  */
-+ (NSString *)simpleIvarName:(NSString *)ivarName;
++ (NSString * _Nonnull)simpleIvarName:(NSString * _Nonnull)ivarName;
 
 /**
  *  返回类里所有成员变量以及对应的编码
@@ -44,7 +44,7 @@
  *
  *  @return {ivar:@encode(int),ivar:@encode(int)}
  */
-+ (NSDictionary<NSString *, NSString *> *)ivarAndEncode4Clazz:(Class)clazz;
++ (NSDictionary<NSString *, NSString *> * _Nonnull)ivarAndEncode4Clazz:(Class _Nonnull)clazz;
 
 
 

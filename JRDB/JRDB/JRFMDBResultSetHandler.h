@@ -8,12 +8,11 @@
 
 #import <Foundation/Foundation.h>
 #import "JRPersistent.h"
-//#import "FMDB.h"
 
 @class FMResultSet;
 
 @interface JRFMDBResultSetHandler : NSObject
 
-+ (NSArray<id<JRPersistent>> *)handleResultSet:(FMResultSet *)resultSet forClazz:(Class<JRPersistent>)clazz;
++ (NSArray<id<JRPersistent>> * _Nonnull)handleResultSet:(FMResultSet * _Nonnull)resultSet forClazz:(Class<JRPersistent> _Nonnull)clazz;
 
 @end

@@ -11,32 +11,33 @@
 
 @import FMDB;
 
-typedef void(^JRDBComplete)(BOOL success);
-
 @class JRQueryCondition;
 
 @interface FMDatabase (JRDB)
+
+
+- (void)closeQueue;
 
 /**
  *  使用block来进行队列操作，后台操作，线程安全
  *
  *  @param block 执行block
  */
-- (void)inQueue:(void (^)(FMDatabase *db))block;
+- (void)inQueue:(void (^ _Nonnull)(FMDatabase * _Nonnull db))block;
 /**
  *  事物回滚操作
  *
  *  @param block 执行block
  */
-- (void)inTransaction:(void (^)(FMDatabase *db, BOOL *rollBack))block;
+- (void)inTransaction:(void (^ _Nonnull)(FMDatabase * _Nonnull db, BOOL * _Nonnull rollBack))block;
 
 /**
  *  建表操作
  *
  *  @param clazz 对应表的类
  */
-- (BOOL)createTable4Clazz:(Class<JRPersistent>)clazz;
-- (void)createTable4Clazz:(Class<JRPersistent>)clazz complete:(JRDBComplete)complete;
+- (BOOL)createTable4Clazz:(Class<JRPersistent> _Nonnull)clazz;
+- (void)createTable4Clazz:(Class<JRPersistent> _Nonnull)clazz complete:(JRDBComplete _Nullable)complete;
 
 /**
  *  把表删了，重新创建
@@ -45,31 +46,31 @@ typedef void(^JRDBComplete)(BOOL success);
  *
  *  @return 是否成功
  */
-- (BOOL)truncateTable4Clazz:(Class<JRPersistent>)clazz;
-- (void)truncateTable4Clazz:(Class<JRPersistent>)clazz complete:(JRDBComplete)complete;
+- (BOOL)truncateTable4Clazz:(Class<JRPersistent> _Nonnull)clazz;
+- (void)truncateTable4Clazz:(Class<JRPersistent> _Nonnull)clazz complete:(JRDBComplete _Nullable)complete;
 
 /**
  *  更新表操作
  *  (只会添加字段，不会删除和更改字段类型)
  *  @param clazz 对应表的类
  */
-- (BOOL)updateTable4Clazz:(Class<JRPersistent>)clazz;
-- (void)updateTable4Clazz:(Class<JRPersistent>)clazz complete:(JRDBComplete)complete;
+- (BOOL)updateTable4Clazz:(Class<JRPersistent> _Nonnull)clazz;
+- (void)updateTable4Clazz:(Class<JRPersistent> _Nonnull)clazz complete:(JRDBComplete _Nullable)complete;
 
 /**
  *  删除表
  *
  *  @param clazz 对应表的类
  */
-- (BOOL)dropTable4Clazz:(Class<JRPersistent>)clazz;
-- (void)dropTable4Clazz:(Class<JRPersistent>)clazz complete:(JRDBComplete)complete;
+- (BOOL)dropTable4Clazz:(Class<JRPersistent> _Nonnull)clazz;
+- (void)dropTable4Clazz:(Class<JRPersistent> _Nonnull)clazz complete:(JRDBComplete _Nullable)complete;
 
 #pragma mark - 增删改查操作
-- (BOOL)saveObj:(id<JRPersistent>)obj;
-- (void)saveObj:(id<JRPersistent>)obj complete:(JRDBComplete)complete;
+- (BOOL)saveObj:(id<JRPersistent> _Nonnull)obj;
+- (void)saveObj:(id<JRPersistent> _Nonnull)obj complete:(JRDBComplete _Nullable)complete;
 
-- (BOOL)deleteObj:(id<JRPersistent>)obj;
-- (void)deleteObj:(id<JRPersistent>)obj complete:(JRDBComplete)complete;
+- (BOOL)deleteObj:(id<JRPersistent> _Nonnull)obj;
+- (void)deleteObj:(id<JRPersistent> _Nonnull)obj complete:(JRDBComplete _Nullable)complete;
 
 /**
  *  更新操作（全量更新）
@@ -78,8 +79,8 @@ typedef void(^JRDBComplete)(BOOL success);
  *
  *  @return 是否成功
  */
-- (BOOL)updateObj:(id<JRPersistent>)obj;
-- (void)updateObj:(id<JRPersistent>)obj complete:(JRDBComplete)complete;
+- (BOOL)updateObj:(id<JRPersistent> _Nonnull)obj;
+- (void)updateObj:(id<JRPersistent> _Nonnull)obj complete:(JRDBComplete _Nullable)complete;
 
 /**
  *  更新操作
@@ -89,13 +90,13 @@ typedef void(^JRDBComplete)(BOOL success);
  *
  *  @return 是否成功
  */
-- (BOOL)updateObj:(id<JRPersistent>)obj columns:(NSArray *)columns;
-- (void)updateObj:(id<JRPersistent>)obj columns:(NSArray *)columns complete:(JRDBComplete)complete;
+- (BOOL)updateObj:(id<JRPersistent> _Nonnull)obj columns:(NSArray * _Nullable)columns;
+- (void)updateObj:(id<JRPersistent> _Nonnull)obj columns:(NSArray * _Nullable)columns complete:(JRDBComplete _Nullable)complete;
 
-- (id<JRPersistent>)getByID:(NSString *)ID clazz:(Class<JRPersistent>)clazz;
+- (id<JRPersistent> _Nullable)findByID:(NSString * _Nonnull)ID clazz:(Class<JRPersistent> _Nonnull)clazz;
 
-- (NSArray *)findAll:(Class<JRPersistent>)clazz;
-- (NSArray *)findAll:(Class<JRPersistent>)clazz orderBy:(NSString *)orderby isDesc:(BOOL)isDesc;
+- (NSArray<id<JRPersistent>> * _Nonnull)findAll:(Class<JRPersistent> _Nonnull)clazz;
+- (NSArray<id<JRPersistent>> * _Nonnull)findAll:(Class<JRPersistent> _Nonnull)clazz orderBy:(NSString * _Nullable)orderby isDesc:(BOOL)isDesc;
 
 /**
  *  根据条件查询(条件名称需要是属性全称)
@@ -104,27 +105,27 @@ typedef void(^JRDBComplete)(BOOL success);
  *
  *  @return 查询结果
  */
-- (NSArray *)findByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc;
+- (NSArray<id<JRPersistent>> * _Nonnull)findByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions clazz:(Class<JRPersistent> _Nonnull)clazz groupBy:(NSString * _Nullable)groupBy orderBy:(NSString * _Nullable)orderBy limit:(NSString * _Nullable)limit isDesc:(BOOL)isDesc;
 
 /**
  *  单纯根据条件查询
  */
-- (NSArray *)findByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz isDesc:(BOOL)isDesc;
+- (NSArray<id<JRPersistent>> * _Nonnull)findByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions clazz:(Class<JRPersistent> _Nonnull)clazz isDesc:(BOOL)isDesc;
 
 /**
  *  单纯根据groupby以及条件
  */
-- (NSArray *)findByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz groupBy:(NSString *)groupBy isDesc:(BOOL)isDesc;
+- (NSArray<id<JRPersistent>> * _Nonnull)findByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions clazz:(Class<JRPersistent> _Nonnull)clazz groupBy:(NSString * _Nullable)groupBy isDesc:(BOOL)isDesc;
 
 /**
  *  单纯根据orderby以及条件
  */
-- (NSArray *)findByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz orderBy:(NSString *)orderBy isDesc:(BOOL)isDesc;
+- (NSArray<id<JRPersistent>> * _Nonnull)findByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions clazz:(Class<JRPersistent> _Nonnull)clazz orderBy:(NSString * _Nullable)orderBy isDesc:(BOOL)isDesc;
 
 /**
  *  单纯根据limit以及条件
  */
-- (NSArray *)findByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz limit:(NSString *)limit isDesc:(BOOL)isDesc;
+- (NSArray<id<JRPersistent>> * _Nonnull)findByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions clazz:(Class<JRPersistent> _Nonnull)clazz limit:(NSString * _Nullable)limit isDesc:(BOOL)isDesc;
 
 /**
  *  检查对应类的表是否存在
@@ -133,7 +134,7 @@ typedef void(^JRDBComplete)(BOOL success);
  *
  *  @return 是否存在
  */
-- (BOOL)checkExistsTable4Clazz:(Class<JRPersistent>)clazz;
+- (BOOL)checkExistsTable4Clazz:(Class<JRPersistent> _Nonnull)clazz;
 
 
 

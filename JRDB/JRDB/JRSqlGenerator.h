@@ -26,9 +26,9 @@ typedef enum {
 
 @interface JRSqlGenerator : NSObject
 
-+ (NSString *)createTableSql4Clazz:(Class<JRPersistent>)clazz;
-+ (NSString *)deleteTableSql4Clazz:(Class<JRPersistent>)clazz;
-+ (NSString *)dropTableSql4Clazz:(Class<JRPersistent>)clazz;
++ (NSString * _Nonnull)createTableSql4Clazz:(Class<JRPersistent> _Nonnull)clazz;
++ (NSString * _Nonnull)deleteTableSql4Clazz:(Class<JRPersistent> _Nonnull)clazz;
++ (NSString * _Nonnull)dropTableSql4Clazz:(Class<JRPersistent> _Nonnull)clazz;
 /**
  *  因为sqlite不支持批量添加字段，只能返回多条语句，多次更新表
  *
@@ -37,21 +37,21 @@ typedef enum {
  *
  *  @return sql数组
  */
-+ (NSArray<NSString *> *)updateTableSql4Clazz:(Class<JRPersistent>)clazz inDB:(FMDatabase *)db;
++ (NSArray<NSString *> * _Nonnull)updateTableSql4Clazz:(Class<JRPersistent> _Nonnull)clazz inDB:(FMDatabase * _Nonnull)db;
 
 /**
  *  返回占位符的sql insert into tablename values (name= ? , name2 = ?,)
  */
-+ (NSString *)sql4Insert:(id<JRPersistent>)obj args:(NSArray **)args;
++ (NSString * _Nonnull)sql4Insert:(id<JRPersistent> _Nonnull)obj args:(NSArray * _Nullable * _Nullable)args;
 /**
  *  返回占位符的sql update tablename set name = ?, name2 = ? where ID = ?
  *  columns 需要更新的列，传nil则全部更新
  */
-+ (NSString *)sql4Update:(id<JRPersistent>)obj columns:(NSArray<NSString *> *)columns args:(NSArray **)args;;
++ (NSString * _Nonnull)sql4Update:(id<JRPersistent> _Nonnull)obj columns:(NSArray<NSString *> * _Nullable)columns args:(NSArray * _Nonnull * _Nonnull)args;;
 /**
  *  返回占位符的sql delete from tablename where ID = ?
  */
-+ (NSString *)sql4Delete:(id<JRPersistent>)obj;
++ (NSString * _Nonnull)sql4Delete:(id<JRPersistent> _Nonnull)obj;
 
 /**
  *  根据id获取对象
@@ -60,7 +60,7 @@ typedef enum {
  *
  *  @return sql
  */
-+ (NSString *)sql4GetByIdWithClazz:(Class<JRPersistent>)clazz;
++ (NSString * _Nonnull)sql4GetByIdWithClazz:(Class<JRPersistent> _Nonnull)clazz;
 
 /**
  *  查找某个类的所有对象
@@ -70,7 +70,7 @@ typedef enum {
  *
  *  @return sql
  */
-+ (NSString *)sql4FindAll:(Class<JRPersistent>)clazz orderby:(NSString *)orderby isDesc:(BOOL)isDesc;
++ (NSString * _Nonnull)sql4FindAll:(Class<JRPersistent> _Nonnull)clazz orderby:(NSString * _Nullable)orderby isDesc:(BOOL)isDesc;
 
 /**
  *  根据条件查询
@@ -81,6 +81,6 @@ typedef enum {
  *
  *  @return sql
  */
-+ (NSString *)sql4FindByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc;
++ (NSString * _Nonnull)sql4FindByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions clazz:(Class<JRPersistent> _Nonnull)clazz groupBy:(NSString * _Nullable)groupBy orderBy:(NSString * _Nullable)orderBy limit:(NSString * _Nullable)limit isDesc:(BOOL)isDesc args:(NSArray * _Nullable * _Nullable)args;
 
 @end

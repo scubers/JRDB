@@ -9,7 +9,6 @@
 #import "JRSqlGenerator.h"
 #import "JRReflectUtil.h"
 #import "NSObject+JRDB.h"
-//#import "FMDB.h"
 #import "JRQueryCondition.h"
 
 @import FMDB;
@@ -180,12 +179,20 @@
     return sql;
 }
 
-+ (NSString *)sql4FindByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc {
++ (NSString *)sql4FindByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc args:(NSArray *__autoreleasing *)args {
+    
+    NSMutableArray *argList = [NSMutableArray array];
+    
     NSMutableString *sql = [NSMutableString string];
     [sql appendFormat:@" select * from %@ where 1=1 ", [JRReflectUtil shortClazzName:clazz]];
     
     for (JRQueryCondition *condition in conditions) {
-        [sql appendFormat:@" %@ %@ ", condition.type == JRQueryConditionTypeAnd ? @"and" : @"or", condition.condition];
+        
+        [sql appendFormat:@" %@ (%@)", condition.type == JRQueryConditionTypeAnd ? @"and" : @"or", condition.condition];
+        
+        if (condition.args.count) {
+            [argList addObjectsFromArray:condition.args];
+        }
     }
     
     if (groupBy.length) {
@@ -202,6 +209,7 @@
     
     [sql appendString:@" ; "];
     
+    *args = argList;
     NSLog(@"sql: %@", sql);
     return sql;
 }

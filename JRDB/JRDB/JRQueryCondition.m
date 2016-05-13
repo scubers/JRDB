@@ -11,6 +11,7 @@
 @interface JRQueryCondition()
 {
     NSString *_condition;
+    NSArray *_args;
     JRQueryConditionType _type;
 }
 
@@ -18,10 +19,11 @@
 
 @implementation JRQueryCondition
 
-+ (instancetype)condition:(NSString *)condition type:(JRQueryConditionType)type {
++ (instancetype)condition:(NSString *)condition args:(NSArray *)args type:(JRQueryConditionType)type {
     JRQueryCondition *condi = [[JRQueryCondition alloc] init];
     condi->_condition = condition;
     condi->_type = type;
+    condi->_args = args;
     return condi;
 }
 
