@@ -22,15 +22,15 @@
  *
  *  @return 是否成功
  */
-- (BOOL)jr_saveToDB:(FMDatabase *)db;
-- (void)jr_saveToDB:(FMDatabase *)db complete:(JRDBComplete)complete;
+- (BOOL)jr_saveToDB:(FMDatabase * _Nonnull)db;
+- (void)jr_saveToDB:(FMDatabase * _Nonnull)db complete:(JRDBComplete _Nullable)complete;
 /**
  *  保存到JRDBMgr的默认数据库
  *
  *  @return 是否成功
  */
 - (BOOL)jr_save;
-- (void)jr_saveWithComplete:(JRDBComplete)complete;
+- (void)jr_saveWithComplete:(JRDBComplete _Nullable)complete;
 
 #pragma mark - update
 /**
@@ -38,8 +38,8 @@
  *  @param columns 指定更新列，nil为全量更新
  *  @return 是否成功
  */
-- (BOOL)jr_updateWithColumn:(NSArray *)columns;
-- (void)jr_updateWithColumn:(NSArray *)columns Complete:(JRDBComplete)complete;
+- (BOOL)jr_updateWithColumn:(NSArray * _Nullable)columns;
+- (void)jr_updateWithColumn:(NSArray * _Nullable)columns Complete:(JRDBComplete _Nullable)complete;
 
 /**
  *  更新到指定数据库
@@ -48,8 +48,8 @@
  *  @param columns 指定更新列，nil为全量更新
  *  @return 是否成功
  */
-- (BOOL)jr_updateToDB:(FMDatabase *)db column:(NSArray *)columns;
-- (void)jr_updateToDB:(FMDatabase *)db column:(NSArray *)columns complete:(JRDBComplete)complete;
+- (BOOL)jr_updateToDB:(FMDatabase * _Nonnull)db column:(NSArray * _Nullable)columns;
+- (void)jr_updateToDB:(FMDatabase * _Nonnull)db column:(NSArray * _Nullable)columns complete:(JRDBComplete _Nullable)complete;
 
 #pragma mark - delete
 /**
@@ -59,31 +59,31 @@
  *
  *  @return 是否成功
  */
-- (BOOL)jr_deleteFromDB:(FMDatabase *)db;
-- (void)jr_deleteFromDB:(FMDatabase *)db complete:(JRDBComplete)complete;
+- (BOOL)jr_deleteFromDB:(FMDatabase * _Nonnull)db;
+- (void)jr_deleteFromDB:(FMDatabase * _Nonnull)db complete:(JRDBComplete _Nullable)complete;
 /**
  *  从JRDBMgr的默认数据库删除
  *
  *  @return 是否成功
  */
 - (BOOL)jr_delete;
-- (void)jr_deleteWithComplete:(JRDBComplete)complete;
+- (void)jr_deleteWithComplete:(JRDBComplete _Nullable)complete;
 
 #pragma mark - select
 
-+ (instancetype)jr_findByID:(NSString *)ID;
-+ (instancetype)jr_findByID:(NSString *)ID fromDB:(FMDatabase *)db;
++ (instancetype _Nullable)jr_findByID:(NSString * _Nonnull)ID;
++ (instancetype _Nullable)jr_findByID:(NSString * _Nonnull)ID fromDB:(FMDatabase * _Nonnull)db;
 
 
-+ (NSArray<id<JRPersistent>> *)jr_findAll;
-+ (NSArray<id<JRPersistent>> *)jr_findAllFromDB:(FMDatabase *)db;
-+ (NSArray<id<JRPersistent>> *)jr_findAllOrderBy:(NSString *)orderBy isDesc:(BOOL)isDesc;
-+ (NSArray<id<JRPersistent>> *)jr_findAllFromDB:(FMDatabase *)db orderBy:(NSString *)orderBy isDesc:(BOOL)isDesc;
++ (NSArray<id<JRPersistent>> * _Nonnull)jr_findAll;
++ (NSArray<id<JRPersistent>> * _Nonnull)jr_findAllFromDB:(FMDatabase * _Nonnull)db;
++ (NSArray<id<JRPersistent>> * _Nonnull)jr_findAllOrderBy:(NSString * _Nullable)orderBy isDesc:(BOOL)isDesc;
++ (NSArray<id<JRPersistent>> * _Nonnull)jr_findAllFromDB:(FMDatabase * _Nonnull)db orderBy:(NSString * _Nullable)orderBy isDesc:(BOOL)isDesc;
 
 
-+ (NSArray<id<JRPersistent>> *)jr_findByConditions:(NSArray<JRQueryCondition *> *)conditions groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc fromDB:(FMDatabase *)db;
++ (NSArray<id<JRPersistent>> * _Nonnull)jr_findByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions groupBy:(NSString * _Nullable)groupBy orderBy:(NSString * _Nullable)orderBy limit:(NSString * _Nullable)limit isDesc:(BOOL)isDesc fromDB:(FMDatabase * _Nullable)db;
 
-+ (NSArray<id<JRPersistent>> *)jr_findByConditions:(NSArray<JRQueryCondition *> *)conditions groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc;
++ (NSArray<id<JRPersistent>> * _Nonnull)jr_findByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions groupBy:(NSString * _Nullable)groupBy orderBy:(NSString * _Nullable)orderBy limit:(NSString * _Nullable)limit isDesc:(BOOL)isDesc;
 
 #pragma mark - sql语句
 
@@ -95,8 +95,8 @@
  *
  *  @return 返回数组
  */
-+ (NSArray<id<JRPersistent>> *)jr_executeSql:(NSString *)sql args:(NSArray *)args;
-+ (NSArray<id<JRPersistent>> *)jr_executeSql:(NSString *)sql args:(NSArray *)args fromDB:(FMDatabase *)db;
++ (NSArray<id<JRPersistent>> * _Nonnull)jr_executeSql:(NSString * _Nonnull)sql args:(NSArray * _Nullable)args;
++ (NSArray<id<JRPersistent>> * _Nonnull)jr_executeSql:(NSString * _Nonnull)sql args:(NSArray * _Nullable)args fromDB:(FMDatabase * _Nonnull)db;
 
 /**
  *  返回条数
@@ -106,20 +106,20 @@
  *
  *  @return 数据条数
  */
-+ (NSUInteger)jr_countForSql:(NSString *)sql args:(NSArray *)args;
-+ (NSUInteger)jr_countForSql:(NSString *)sql args:(NSArray *)args fromDB:(FMDatabase *)db;
++ (NSUInteger)jr_countForSql:(NSString * _Nonnull)sql args:(NSArray * _Nullable)args;
++ (NSUInteger)jr_countForSql:(NSString * _Nonnull)sql args:(NSArray * _Nullable)args fromDB:(FMDatabase * _Nonnull)db;
 
 #pragma mark - table operation
 + (BOOL)jr_createTable;
-+ (BOOL)jr_createTableInDB:(FMDatabase *)db;
++ (BOOL)jr_createTableInDB:(FMDatabase * _Nonnull)db;
 
 + (BOOL)jr_updateTable;
-+ (BOOL)jr_updateTableInDB:(FMDatabase *)db;
++ (BOOL)jr_updateTableInDB:(FMDatabase * _Nonnull)db;
 
 + (BOOL)jr_dropTable;
-+ (BOOL)jr_dropTableInDB:(FMDatabase *)db;
++ (BOOL)jr_dropTableInDB:(FMDatabase * _Nonnull)db;
 
 + (BOOL)jr_truncateTable;
-+ (BOOL)jr_truncateTableInDB:(FMDatabase *)db;;
++ (BOOL)jr_truncateTableInDB:(FMDatabase * _Nonnull)db;;
 
 @end

@@ -15,8 +15,8 @@ typedef void(^JRDBComplete)(BOOL success);
 @protocol JRPersistent <NSObject>
 
 @required
-- (void)setID:(NSString *)ID;
-- (NSString *)ID;
+- (void)setID:(NSString * _Nullable)ID;
+- (NSString * _Nullable)ID;
 
 @optional
 /**
@@ -25,5 +25,5 @@ typedef void(^JRDBComplete)(BOOL success);
  *
  *  @return array
  */
-+ (NSArray *)jr_excludePropertyNames;
++ (NSArray * _Nullable)jr_excludePropertyNames;
 @end

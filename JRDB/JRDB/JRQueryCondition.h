@@ -15,8 +15,8 @@ typedef NS_ENUM(NSInteger, JRQueryConditionType) {
 
 @interface JRQueryCondition : NSObject
 
-@property (nonatomic, copy, readonly  ) NSString             *condition;
-@property (nonatomic, copy, readonly  ) NSArray              *args;
+@property (nonatomic, copy, readonly  ) NSString             * _Nonnull condition;
+@property (nonatomic, copy, readonly  ) NSArray              * _Nullable args;
 @property (nonatomic, assign, readonly) JRQueryConditionType type;
 
 /**
@@ -28,6 +28,6 @@ typedef NS_ENUM(NSInteger, JRQueryConditionType) {
  *
  *  @return instancetype
  */
-+ (instancetype)condition:(NSString *)condition args:(NSArray *)args type:(JRQueryConditionType)type;
++ (instancetype _Nonnull)condition:(NSString * _Nonnull)condition args:(NSArray * _Nullable)args type:(JRQueryConditionType)type;
 
 @end

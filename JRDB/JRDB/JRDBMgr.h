@@ -13,25 +13,25 @@
 
 @interface JRDBMgr : NSObject
 
-@property (nonatomic, strong) FMDatabase *defaultDB;
+@property (nonatomic, strong) FMDatabase * _Nullable defaultDB;
 
-+ (instancetype)shareInstance;
-+ (FMDatabase *)defaultDB;
-- (FMDatabase *)createDBWithPath:(NSString *)path;
-- (void)deleteDBWithPath:(NSString *)path;
++ (instancetype _Nullable)shareInstance;
++ (FMDatabase * _Nonnull)defaultDB;
+- (FMDatabase * _Nullable)createDBWithPath:(NSString * _Nullable)path;
+- (void)deleteDBWithPath:(NSString * _Nullable)path;
 
 /**
  *  在这里注册的类，使用本框架的数据库将全部建有这些表
  *  @param clazz 类名
  */
-- (void)registerClazzForUpdateTable:(Class<JRPersistent>)clazz;
-- (NSArray<Class> *)registedClazz;
+- (void)registerClazzForUpdateTable:(Class<JRPersistent> _Nonnull)clazz;
+- (NSArray<Class> * _Nonnull)registedClazz;
 
 /**
  * 更新默认数据库的表（或者新建没有的表）
  * 更新的表需要在本类先注册
  */
 - (void)updateDefaultDB;
-- (void)updateDB:(FMDatabase *)db;
+- (void)updateDB:(FMDatabase * _Nonnull)db;
 
 @end
