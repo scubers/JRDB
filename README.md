@@ -182,6 +182,35 @@ JRDBMgr持有一个默认数据库（~/Documents/jrdb/jrdb.sqlite），任何不
 
 --
 
+#Table Operation 【表操作】
+
+###Create 【建表】
+```objc
+// FMDatabase+JRDB 方法
+[[JRDBMgr defaultDB] createTable4Clazz:[Person class]];
+[Person jr_createTable];
+
+// 删除原有的表，重新创建
+[[JRDBMgr defaultDB] truncateTable4Clazz:[Person class]];
+[Person jr_truncateTable];
+
+//保存时，若发现没有表，将自动创建
+[person jr_save];
+```
+###Update 【更新表】
+
+```objc
+[[JRDBMgr defaultDB] updateTable4Clazz:[Person class]];
+[Person jr_updateTable];
+```
+更新表时，只会添加不存在的字段，不会修改字段属性，不会删除字段，若有需要，需要自行写sql语句进行修改
+###Drop 【删表】
+```objc
+[[JRDBMgr defaultDB] dropTable4Clazz:[Person class]];
+[Person jr_dropTable];
+```
+--
+
 #Thread Operation 【线程操作】
 - 多线程操作使用FMDB自带的 FMDatabaseQueue
 
