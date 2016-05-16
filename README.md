@@ -24,7 +24,9 @@ Feedback: [jr-wong@qq.com](mailto:jrwong@qq.com)
 use_frameworks!
 pod 'JRDB'
 ```
-
+```objc
+@import JRDB;
+```
 
 --
 
