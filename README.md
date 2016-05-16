@@ -181,6 +181,28 @@ JRDBMgr持有一个默认数据库（~/Documents/jrdb/jrdb.sqlite），任何不
 进行统一更新或者创建表。	
 
 --
+###Swift枚举操作
+```swift
+enum Sex : Int { // 定义一个枚举
+    case Male = 1
+    case Female = 2
+}
+
+// 通过第三个变量使用rawValue进行操作
+class Person: NSObject {
+    var sexEnum: Sex { // 数据库不生成此字段
+        set {
+            sex = newValue.rawValue
+        }
+        get {
+            return Sex(rawValue: sex)!
+        }
+    }
+    var sex : Int = Sex.Male.rawValue // 数据库管理此字段
+}
+```
+
+--
 
 #Table Operation 【表操作】
 
