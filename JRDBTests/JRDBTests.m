@@ -79,8 +79,8 @@
     NSArray *condis = @[
 //                        [JRQueryCondition condition:@"_l_date < ?" args:@[[NSDate date]] type:JRQueryConditionTypeAnd],
 //                        [JRQueryCondition condition:@"_a_int > ?" args:@[@9] type:JRQueryConditionTypeAnd],
-                        [JRQueryCondition type:JRQueryConditionTypeAnd condition:@"_a_int > ?", @9],
-                        [JRQueryCondition type:JRQueryConditionTypeAnd condition:@"_l_date < ?", [NSDate date]],
+                        [JRQueryCondition type:JRQueryConditionTypeAnd condition:@"_a_int > ? and _l_date < ?", @9, [NSDate date], nil],
+//                        [JRQueryCondition type:JRQueryConditionTypeAnd condition:@"_l_date < ?", [NSDate date]],
                         ];
     
     NSArray *arr = [Person jr_findByConditions:condis

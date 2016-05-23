@@ -34,7 +34,7 @@ typedef NS_ENUM(NSInteger, JRQueryConditionType) {
  *  条件查询需要的condition
  *
  *  @param type      'and' or 'or'
- *  @param condition 【_name = ?】 , name ；可变参数需要为id类型
+ *  @param condition 【_name = ?】 , name ；可变参数需要为id类型，参数结尾添加nil
  *
  *  @return instancetype
  */
