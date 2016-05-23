@@ -8,7 +8,15 @@
 
 import UIKit
 
+enum Sex : Int {
+    case Man
+    case Woman
+}
+
 class PPP: NSObject {
+    
+    var sss : Sex = .Man
+    
     var a_int: Int = 0
     var a_int1: Int? = nil
     var b_string: String = "1"
@@ -29,8 +37,11 @@ class AViewController: UIViewController {
 //        test()
 //        test2()
         test3()
+        
     }
     
     func test3() {
+        PPP().jr_save()
+        PPP.jr_findAll()
     }
 }

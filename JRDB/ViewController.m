@@ -31,8 +31,8 @@
 
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
-//    AViewController *av = [[AViewController alloc] init];
-//    [self presentViewController:av animated:YES completion:nil];
+    AViewController *av = [[AViewController alloc] init];
+    [self presentViewController:av animated:YES completion:nil];
 }
 
 - (void)test2 {

@@ -27,4 +27,17 @@
     return condi;
 }
 
++ (instancetype)type:(JRQueryConditionType)type condition:(NSString *)condition, ... {
+    JRQueryCondition *condi = [[JRQueryCondition alloc] init];
+    NSMutableArray *args = [NSMutableArray array];
+    va_list ap;
+    va_start(ap, condition);
+    [args addObject:va_arg(ap, id)];
+    va_end(ap);
+    condi->_args = args;
+    condi->_condition = condition;
+    condi->_type = type;
+    return condi;
+}
+
 @end
