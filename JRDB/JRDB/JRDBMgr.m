@@ -118,7 +118,7 @@ static JRDBMgr *__shareInstance;
             NSString *newMethodName = [NSString stringWithFormat:@"jr_%@", methodName];
             
             SEL sel = sel_registerName([newMethodName UTF8String]);
-            IMP imp = [self swizzleImp4Selector:sel inClazz:clazz];
+            IMP imp = [self swizzleImp4Selector:sel inClazz:clazz paramType:@"i"];
             BOOL ret = class_addMethod(clazz, sel, imp, typeEncoding);
             
             if (ret) {
@@ -129,23 +129,45 @@ static JRDBMgr *__shareInstance;
     }
 }
 
-- (IMP)swizzleImp4Selector:(SEL)selector inClazz:(Class)clazz {
-    Method method = class_getInstanceMethod(clazz, selector);
-    const char *typeEncoding = method_getTypeEncoding(method);
+#define IMPSomething(jr_sel, jr_clazz, jr_type) \
+if ([paramType isEqualToString:[NSString stringWithUTF8String:@encode(jr_type)]]) { \
+Method method = class_getInstanceMethod(clazz, selector); \
+const char *typeEncoding = method_getTypeEncoding(method); \
+imp = imp_implementationWithBlock(^(id target, int value){ \
+    NSLog(@"new method "); \
+    NSLog(@"target: %@, value: %d ", target, value); \
+    NSInvocation *inv = [NSInvocation invocationWithMethodSignature:[NSMethodSignature signatureWithObjCTypes:typeEncoding]]; \
+    inv.selector = selector; \
+    inv.target = target; \
+    [inv setArgument:&value atIndex:2]; \
+    [inv invoke]; \
+}); \
+}
+
+- (IMP)swizzleImp4Selector:(SEL)selector inClazz:(Class)clazz paramType:(NSString *)paramType {
     
     IMP imp;
     
-    imp = imp_implementationWithBlock(^(id target, int value){
-        NSLog(@"new method ");
-        NSLog(@"target: %@, value: %d ", target, value);
-        NSInvocation *inv = [NSInvocation invocationWithMethodSignature:[NSMethodSignature signatureWithObjCTypes:typeEncoding]];
-        inv.selector = selector;
-        inv.target = target;
-        [inv setArgument:&value atIndex:2];
-        [inv invoke];
-    });
+    IMPSomething(selector, clazz, int)
+    else
+    IMPSomething(selector, clazz, double)
+    
+    
+//    Method method = class_getInstanceMethod(clazz, selector);
+//    const char *typeEncoding = method_getTypeEncoding(method);
+//    imp = imp_implementationWithBlock(^(id target, int value){
+//        NSLog(@"new method ");
+//        NSLog(@"target: %@, value: %d ", target, value);
+//        NSInvocation *inv = [NSInvocation invocationWithMethodSignature:[NSMethodSignature signatureWithObjCTypes:typeEncoding]];
+//        inv.selector = selector;
+//        inv.target = target;
+//        [inv setArgument:&value atIndex:2];
+//        [inv invoke];
+//    });
     
     return imp;
 }
+
+
 
 @end
