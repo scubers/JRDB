@@ -47,5 +47,9 @@
     return dict;
 }
 
++ (const char *)typeEncoding4InstanceMethod:(SEL)selector inClazz:(Class)clazz {
+    Method method = class_getInstanceMethod(clazz, selector);
+    return method_getTypeEncoding(method);
+}
 
 @end

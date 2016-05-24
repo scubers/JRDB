@@ -120,6 +120,8 @@
 + (BOOL)jr_dropTableInDB:(FMDatabase * _Nonnull)db;
 
 + (BOOL)jr_truncateTable;
-+ (BOOL)jr_truncateTableInDB:(FMDatabase * _Nonnull)db;;
++ (BOOL)jr_truncateTableInDB:(FMDatabase * _Nonnull)db;
+
++ (void)jr_swizzleSetters4Clazz;
 
 @end

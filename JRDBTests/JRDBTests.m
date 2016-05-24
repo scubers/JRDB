@@ -139,7 +139,17 @@
     [[JRDBMgr shareInstance] registerClazzForUpdateTable:[Person class]];
     Person *p = [Person new];
     p.a_int = 1;
-    NSLog(@"%d", p.a_int);
+    p.b_unsigned_int = 2;
+    p.c_long = 3;
+    p.d_long_long = 4;
+    p.e_unsigned_long = 5;
+    p.f_unsigned_long_long = 6;
+    p.g_float = 7.0;
+    p.h_double = 8.0;
+    p.i_string = @"9";
+    p.j_number = @10;
+    p.k_data = [NSData data];
+    p.l_date = [NSDate date];
 }
 
 - (void)testPerformanceExample {
