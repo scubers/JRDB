@@ -133,12 +133,13 @@
 //    [_db truncateTable4Clazz:[Person class]];
 //    [[JRDBMgr defaultDB] truncateTable4Clazz:[Person class]];
     
-    
 }
 
 - (void)testUpdateTable {
     [[JRDBMgr shareInstance] registerClazzForUpdateTable:[Person class]];
-    [[JRDBMgr shareInstance] updateDefaultDB];
+    Person *p = [Person new];
+    p.a_int = 1;
+    NSLog(@"%d", p.a_int);
 }
 
 - (void)testPerformanceExample {

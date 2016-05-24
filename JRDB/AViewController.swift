@@ -38,6 +38,8 @@ class AViewController: UIViewController {
 //        test2()
         test3()
         
+        JRDBMgr.shareInstance().registerClazzForUpdateTable(PPP)
+        
     }
     
     func test3() {

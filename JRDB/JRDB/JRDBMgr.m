@@ -7,10 +7,11 @@
 //
 
 #import "JRDBMgr.h"
-//#import "FMDB.h"
 #import "JRReflectUtil.h"
 #import "JRSqlGenerator.h"
 #import "FMDatabase+JRDB.h"
+#import "NSObject+JRDB.h"
+#import <objc/message.h>
 
 @interface JRDBMgr()
 {
@@ -54,6 +55,7 @@ static JRDBMgr *__shareInstance;
 
 - (void)registerClazzForUpdateTable:(Class<JRPersistent>)clazz {
     [_clazzArray addObject:clazz];
+    [self swizzleSetters4Clazz:clazz];
 }
 
 - (NSArray<Class> *)registedClazz {
@@ -100,6 +102,50 @@ static JRDBMgr *__shareInstance;
     }
     path = [path stringByAppendingPathComponent:@"jrdb.sqlite"];
     return path;
+}
+
+- (void)swizzleSetters4Clazz:(Class<JRPersistent>)clazz {
+    unsigned int outCount;
+    
+    
+    Method *list = class_copyMethodList(clazz, &outCount);
+    for (int i = 0; i < outCount; i++) {
+        Method method = list[i];
+        SEL setter = method_getName(method);
+        NSString *methodName = [NSString stringWithUTF8String:sel_getName(setter)];
+        if ([methodName hasPrefix:@"set"] && [methodName hasSuffix:@":"]) {
+            const char *typeEncoding = method_getTypeEncoding(method);
+            NSString *newMethodName = [NSString stringWithFormat:@"jr_%@", methodName];
+            
+            SEL sel = sel_registerName([newMethodName UTF8String]);
+            IMP imp = [self swizzleImp4Selector:sel inClazz:clazz];
+            BOOL ret = class_addMethod(clazz, sel, imp, typeEncoding);
+            
+            if (ret) {
+                Method newMethod = class_getInstanceMethod(clazz, sel);
+                method_exchangeImplementations(method, newMethod);
+            }
+        }
+    }
+}
+
+- (IMP)swizzleImp4Selector:(SEL)selector inClazz:(Class)clazz {
+    Method method = class_getInstanceMethod(clazz, selector);
+    const char *typeEncoding = method_getTypeEncoding(method);
+    
+    IMP imp;
+    
+    imp = imp_implementationWithBlock(^(id target, int value){
+        NSLog(@"new method ");
+        NSLog(@"target: %@, value: %d ", target, value);
+        NSInvocation *inv = [NSInvocation invocationWithMethodSignature:[NSMethodSignature signatureWithObjCTypes:typeEncoding]];
+        inv.selector = selector;
+        inv.target = target;
+        [inv setArgument:&value atIndex:2];
+        [inv invoke];
+    });
+    
+    return imp;
 }
 
 @end
