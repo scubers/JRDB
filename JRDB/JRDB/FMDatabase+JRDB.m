@@ -14,6 +14,7 @@
 #import "JRDBMgr.h"
 #import "JRFMDBResultSetHandler.h"
 #import "JRQueryCondition.h"
+#import "NSObject+JRDB.h"
 static NSString *queuekey = @"queuekey";
 
 NSString * uuid() {
@@ -132,7 +133,12 @@ NSString * uuid() {
     [obj setID:uuid()];
     args = [@[obj.ID] arrayByAddingObjectsFromArray:args];
     
-    return [self executeUpdate:sql withArgumentsInArray:args];
+    BOOL ret = [self executeUpdate:sql withArgumentsInArray:args];
+    if (ret) {
+        [((NSObject *)obj).jr_changedArray removeAllObjects];
+    }
+
+    return ret;
 }
 
 - (void)saveObj:(id<JRPersistent>)obj complete:(JRDBComplete)complete {
@@ -160,7 +166,11 @@ NSString * uuid() {
     NSArray *args;
     NSString *sql = [JRSqlGenerator sql4Update:obj columns:columns args:&args];
     args = [args arrayByAddingObject:obj.ID];
-    return [self executeUpdate:sql withArgumentsInArray:args];
+    BOOL ret = [self executeUpdate:sql withArgumentsInArray:args];
+    if (ret) {
+        [((NSObject *)obj).jr_changedArray removeAllObjects];
+    }
+    return ret;
 }
 
 - (void)updateObj:(id<JRPersistent>)obj columns:(NSArray *)columns complete:(JRDBComplete)complete {

@@ -122,6 +122,8 @@
 + (BOOL)jr_truncateTable;
 + (BOOL)jr_truncateTableInDB:(FMDatabase * _Nonnull)db;
 
+#pragma mark - hooking
 + (void)jr_swizzleSetters4Clazz;
+- (NSMutableArray * _Nullable)jr_changedArray;
 
 @end

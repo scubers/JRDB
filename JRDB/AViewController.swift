@@ -43,7 +43,9 @@ class AViewController: UIViewController {
     }
     
     func test3() {
-        PPP().jr_save()
+        let p = PPP()
+        p.a_int = 1
+        print(p.jr_changedArray())
         PPP.jr_findAll()
     }
 }

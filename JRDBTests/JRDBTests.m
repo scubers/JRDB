@@ -28,8 +28,9 @@
 - (void)setUp {
     [super setUp];
 //    _db = [JRDBMgr defaultDB];
-    _db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/jmacmini/Desktop/test.sqlite"];
+    _db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/Jrwong/Desktop/test.sqlite"];
     [JRDBMgr shareInstance].defaultDB = _db;
+    [[JRDBMgr shareInstance] registerClazzForUpdateTable:[Person class]];
     // Put setup code here. This method is called before the invocation of each test method in the class.
 }
 
@@ -106,6 +107,12 @@
 - (void)testFindAll {
     NSArray<Person *> *array = [Person jr_findAll];
     NSLog(@"%@", array);
+    [array enumerateObjectsUsingBlock:^(Person * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        NSLog(@"%@", obj.jr_changedArray);
+        obj.a_int = 11;
+        NSLog(@"%@", obj.jr_changedArray);
+
+    }];
 }
 
 - (void)testAdd {
@@ -124,7 +131,9 @@
         p.j_number = @10;
         p.k_data = [NSData data];
         p.l_date = [NSDate date];
+        NSLog(@"%@", p.jr_changedArray);
         [p jr_save];
+        NSLog(@"%@", p.jr_changedArray);
     }
 }
 
@@ -150,6 +159,8 @@
     p.j_number = @10;
     p.k_data = [NSData data];
     p.l_date = [NSDate date];
+
+    NSLog(@"%@", p.jr_changedArray);
 }
 
 - (void)testPerformanceExample {

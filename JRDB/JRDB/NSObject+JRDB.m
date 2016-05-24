@@ -177,9 +177,14 @@ const NSString *JRDB_IDKEY = @"JRDB_IDKEY";
 
 
 #pragma mark - method hook
-
-- (NSArray *)jr_changedArray {
-    return nil;
+const static NSString *jr_changedArrayKey = @"jr_changedArrayKey";
+- (NSMutableArray *)jr_changedArray {
+    NSMutableArray *array = objc_getAssociatedObject(self, &jr_changedArrayKey);
+    if (!array) {
+        array = [NSMutableArray array];
+        objc_setAssociatedObject(self, &jr_changedArrayKey, array, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    }
+    return array;
 }
 
 + (void)jr_swizzleSetters4Clazz {
@@ -189,13 +194,13 @@ const NSString *JRDB_IDKEY = @"JRDB_IDKEY";
 
         Method originMethod = list[i];
         SEL originSelector = method_getName(originMethod);
+        NSString *methodName = [NSString stringWithUTF8String:sel_getName(originSelector)];
 
         NSString *paramterType = [self jr_type4SetterParameter:originSelector];
-        if (paramterType) {
+        if (paramterType && [methodName hasPrefix:@"set"]) {
 
             const char *typeEncoding = method_getTypeEncoding(originMethod);
 
-            NSString *methodName = [NSString stringWithUTF8String:sel_getName(originSelector)];
             NSString *newMethodName = [NSString stringWithFormat:@"jr_%@", methodName];
 
             SEL newSelector = sel_registerName([newMethodName UTF8String]);
@@ -211,7 +216,30 @@ const NSString *JRDB_IDKEY = @"JRDB_IDKEY";
     }
 }
 
-#define IMPSomething(typeEncoding, jr_sel, jr_clazz, jr_type) \
+- (NSString *)jr_propertyNameWithSetter:(SEL)setter {
+
+    NSString *setterName = [NSString stringWithUTF8String:sel_getName(setter)];
+    if (![setterName hasPrefix:@"set"]) {
+        return nil;
+    }
+
+    NSArray *ivarNames = [JRReflectUtil ivarAndEncode4Clazz:[self class]].allKeys;
+
+    NSString *name = [setterName substringWithRange:NSMakeRange(3, setterName.length - 4)];
+    NSString *first = [setterName substringWithRange:NSMakeRange(3, 1)].lowercaseString;
+    name = [@"_" stringByAppendingString:[first stringByAppendingString:[name substringFromIndex:1]]];
+
+    if ([ivarNames containsObject:name]) {
+        return name;
+    }
+    name = [name substringFromIndex:1];
+    if ([ivarNames containsObject:name]) {
+        return name;
+    }
+    return nil;
+}
+
+#define IMPSomething(typeEncoding, jr_sel, jr_templateSel, jr_clazz, jr_type) \
 if ([paramType isEqualToString:[NSString stringWithUTF8String:@encode(jr_type)]]) { \
 imp = imp_implementationWithBlock(^(id target, jr_type value){ \
     NSLog(@"new method "); \
@@ -221,11 +249,15 @@ imp = imp_implementationWithBlock(^(id target, jr_type value){ \
     inv.selector = jr_sel; \
     [inv setArgument:&value atIndex:2]; \
     [inv invoke]; \
+    NSString *propertyName = [((NSObject *)target) jr_propertyNameWithSetter:jr_templateSel]; \
+    if (![((NSObject *)target).jr_changedArray containsObject:propertyName]) { \
+        [((NSObject *)target).jr_changedArray addObject:propertyName]; \
+    } \
 }); \
 }
 
-#define ElseIMPSomething(typeEncoding, jr_sel, jr_clazz, jr_type) \
-else IMPSomething(typeEncoding, jr_sel, jr_clazz, jr_type)
+#define ElseIMPSomething(typeEncoding, jr_sel, jr_templateSel, jr_clazz, jr_type) \
+else IMPSomething(typeEncoding, jr_sel, jr_templateSel, jr_clazz, jr_type)
 
 #define setMethod(name,type) \
 - (void)jr__set##name:(type)a{}
@@ -240,15 +272,15 @@ else IMPSomething(typeEncoding, jr_sel, jr_clazz, jr_type)
     const char *typeEncoding = method_getTypeEncoding(class_getInstanceMethod(self, templeteSelector));
     NSString *paramType = [self jr_type4SetterParameter:templeteSelector];
 
-    IMPSomething(typeEncoding, newSelector, self, int)
-    ElseIMPSomething(typeEncoding, newSelector, self, unsigned int)
-    ElseIMPSomething(typeEncoding, newSelector, self, long)
-    ElseIMPSomething(typeEncoding, newSelector, self, unsigned long)
-    ElseIMPSomething(typeEncoding, newSelector, self, double)
-    ElseIMPSomething(typeEncoding, newSelector, self, float)
+    IMPSomething(typeEncoding, newSelector, templeteSelector, self, int)
+    ElseIMPSomething(typeEncoding, newSelector, templeteSelector, self, unsigned int)
+    ElseIMPSomething(typeEncoding, newSelector, templeteSelector, self, long)
+    ElseIMPSomething(typeEncoding, newSelector, templeteSelector, self, unsigned long)
+    ElseIMPSomething(typeEncoding, newSelector, templeteSelector, self, double)
+    ElseIMPSomething(typeEncoding, newSelector, templeteSelector, self, float)
     else
     {
-        imp = imp_implementationWithBlock(^(id target, id value){
+        imp = imp_implementationWithBlock(^(id<NSObject> target, id value){
 
             NSLog(@"new method ");
             NSLog(@"target: %@, value: %@ ", target, value);
@@ -258,6 +290,11 @@ else IMPSomething(typeEncoding, jr_sel, jr_clazz, jr_type)
             inv.target = target;
             [inv setArgument:&value atIndex:2];
             [inv invoke];
+
+            NSString *propertyName = [((NSObject *)target) jr_propertyNameWithSetter:templeteSelector];
+            if (![((NSObject *)target).jr_changedArray containsObject:propertyName]) {
+                [((NSObject *)target).jr_changedArray addObject:propertyName];
+            }
 
         });
     }
