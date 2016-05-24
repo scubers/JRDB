@@ -174,5 +174,8 @@ const NSString *JRDB_IDKEY = @"JRDB_IDKEY";
     return [self jr_truncateTableInDB:JR_DEFAULTDB];
 }
 
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *,id> *)change context:(void *)context {
+    NSLog(@"%@----", keyPath);
+}
 
 @end

@@ -30,4 +30,16 @@ typedef NS_ENUM(NSInteger, JRQueryConditionType) {
  */
 + (instancetype _Nonnull)condition:(NSString * _Nonnull)condition args:(NSArray * _Nullable)args type:(JRQueryConditionType)type;
 
+/**
+ *  条件查询需要的condition
+ *
+ *  @param type      'and' or 'or'
+ *  @param condition 【_name = ?】 , name ；可变参数需要为id类型，参数结尾添加nil
+ *
+ *  @return instancetype
+ */
++ (instancetype _Nonnull)type:(JRQueryConditionType)type condition:(NSString * _Nonnull)condition, ...;
+
+//+ (instancetype _Nonnull)condition:(NSString * _Nonnull)condition args:(NSArray * _Nullable)args type:(JRQueryConditionType)type;
+
 @end

@@ -77,8 +77,10 @@
 - (void)testFind2 {
     
     NSArray *condis = @[
-                        [JRQueryCondition condition:@"_l_date < ?" args:@[[NSDate date]] type:JRQueryConditionTypeAnd],
-                        [JRQueryCondition condition:@"_a_int > ?" args:@[@9] type:JRQueryConditionTypeAnd],
+//                        [JRQueryCondition condition:@"_l_date < ?" args:@[[NSDate date]] type:JRQueryConditionTypeAnd],
+//                        [JRQueryCondition condition:@"_a_int > ?" args:@[@9] type:JRQueryConditionTypeAnd],
+                        [JRQueryCondition type:JRQueryConditionTypeAnd condition:@"_a_int > ? and _l_date < ?", @9, [NSDate date], nil],
+//                        [JRQueryCondition type:JRQueryConditionTypeAnd condition:@"_l_date < ?", [NSDate date]],
                         ];
     
     NSArray *arr = [Person jr_findByConditions:condis
@@ -131,12 +133,13 @@
 //    [_db truncateTable4Clazz:[Person class]];
 //    [[JRDBMgr defaultDB] truncateTable4Clazz:[Person class]];
     
-    
 }
 
 - (void)testUpdateTable {
     [[JRDBMgr shareInstance] registerClazzForUpdateTable:[Person class]];
-    [[JRDBMgr shareInstance] updateDefaultDB];
+    Person *p = [Person new];
+    p.a_int = 1;
+    NSLog(@"%d", p.a_int);
 }
 
 - (void)testPerformanceExample {
