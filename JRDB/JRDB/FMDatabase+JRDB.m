@@ -160,7 +160,9 @@ NSString * uuid() {
 
 - (BOOL)updateObj:(id<JRPersistent>)obj columns:(NSArray *)columns {
     if (![[obj class] jr_customPrimarykey]) {
-        NSAssert(obj.ID != nil, @"The obj to be updated could be held a primary key");
+        NSAssert(obj.ID != nil, @"The obj to be updated should hold a primary key");
+    } else {
+        NSAssert([obj jr_customPrimarykeyValue] != nil, @"The obj to be updated should be hold a primary key");
     }
     if (![self checkExistsTable4Clazz:[obj class]]) {
         NSLog(@"table : %@ doesn't exists", [obj class]);
@@ -191,6 +193,8 @@ NSString * uuid() {
 - (BOOL)deleteObj:(id<JRPersistent>)obj {
     if (![[obj class] jr_customPrimarykey]) {
         NSAssert(obj.ID != nil, @"obj ID should not be nil");
+    } else {
+        NSAssert([obj jr_customPrimarykeyValue] != nil, @"obj ID should not be nil");
     }
     if (![self checkExistsTable4Clazz:[obj class]]) {
         NSLog(@"table : %@ doesn't exists", [obj class]);
@@ -207,7 +211,7 @@ NSString * uuid() {
     }];
 }
 
-- (id<JRPersistent>)findByPrimaryKey:(NSString *)ID clazz:(Class<JRPersistent>)clazz {
+- (id<JRPersistent>)findByPrimaryKey:(id)ID clazz:(Class<JRPersistent>)clazz {
     NSAssert(ID != nil, @"id should be nil");
     NSAssert([self checkExistsTable4Clazz:clazz], @"table %@ doesn't exists", clazz);
     
