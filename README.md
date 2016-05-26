@@ -1,14 +1,14 @@
-#JRDB
+# iOS用对FMDB的超好用封装
 
-**一个对FMDB进行类Hibernate封装的ios库，支持Objective-c 和 Swift。**
+**一个对FMDB进行类Hibernate封装的ios库，支持Objective-C 和 Swift。**
 
 GitHub: [sucbers](https://github.com/scubers)
 
 Feedback: [jr-wong@qq.com](mailto:jrwong@qq.com)
 
---
+---
 
-#Description
+# Description
 
 - 使用分类的模式，模仿Hibernate，对FMDB进行简易封装
 - 支持pod 安装 『pod 'JRDB'』，Podfile需要添加  use_framework! 
@@ -17,23 +17,24 @@ Feedback: [jr-wong@qq.com](mailto:jrwong@qq.com)
 - 支持数据类型：基本数据类型（int，double，等），String，NSData，NSNumber，NSDate
   - 注：swift的基本数据类型，不支持**Option**类型，既不支持Int？Int！等，对象类型支持**Option**类型
 
---
+---
 
-#Installation 【安装】
+# Installation 【安装】
 ```ruby
 use_frameworks!
 pod 'JRDB'
 ```
+
 ```objc
 @import JRDB;
 ```
 
---
+---
 
-#Usage
+# Usage
 
 
-###Save 【保存】
+### Save 【保存】
 - OC
 
 ```Objc
@@ -65,9 +66,9 @@ p.birthday = NSDate()
 p.jr_save()
 ```
 
---
+---
 
-###Update 【更新】
+### Update 【更新】
 
 ```objc
 Person *p = [Person jr_findAll].firstObject;
@@ -76,21 +77,21 @@ p.name = @"abc";
 ```
 	column: 需要更新的字段名，传入空为全量更新
 
---
+---
 
-###Delete 【删除】
+### Delete 【删除】
 
 ```objc
 Person *p = [Person jr_findAll].firstObject;
 [p jr_delete];
 ```
---
+---
 ###Select 【查找】
 
 - 常规查找
 
 ```objc
-Person *P = [Person jr_findByID:@"111"];
+Person *p = [Person jr_findByPrimaryKey:@"111"];
 NSArray *list = [Person jr_findAll];
 NSArray *list1 = [Person jr_findAllOrderBy:@"_age" isDesc:YES];
 ```
@@ -116,29 +117,43 @@ NSArray *arr = [Person jr_findByConditions:condis
 NSString *sql = @"select * from Person where age = ?";
 NSArray *list = [Person jr_executeSql:sql args:@[@10]];
 ```
---
+---
 
-#Other 【其他】
+# Other 【其他】
 
-###协议：JRPersistent
+### 协议：JRPersistent
 
 ```objc
 @protocol JRPersistent <NSObject>
 @required
-- (void)setID:(NSString *)ID;
-- (NSString *)ID;
+- (void)setID:(NSString * _Nullable)ID;
+- (NSString * _Nullable)ID;
 @optional
 /**
  *  返回不用入库的对象字段数组
  *  The full property names that you want to ignore for persistent
- *  
  *  @return array
  */
-+ (NSArray *)jr_excludePropertyNames;
++ (NSArray * _Nullable)jr_excludePropertyNames;
+/**
+ *  返回自定义主键字段
+ *  @return 字段全名
+ */
++ (NSString * _Nullable)jr_customPrimarykey;
+/**
+ *  返回自定义主键值
+ *  @return 主键值
+ */
+- (id _Nullable)jr_customPrimarykeyValue;
 @end
 ```
 
-###默认NSObject分类实现
+### 主键
+默认每个Object的主键为ID， UUID字符串。
+
+可以实现 `jr_customPrimarykey` 以及 `jr_customPrimarykeyValue ` 方法，自定义主键。
+
+### 默认NSObject分类实现
 
 ```objc
 @interface NSObject (JRDB) <JRPersistent>
@@ -147,7 +162,7 @@ NSArray *list = [Person jr_executeSql:sql args:@[@10]];
 ```
 
 --
-###JRDBMgr
+### JRDBMgr
 
 ```objc
 @interface JRDBMgr : NSObject
@@ -173,7 +188,7 @@ NSArray *list = [Person jr_executeSql:sql args:@[@10]];
 
 JRDBMgr持有一个默认数据库（~/Documents/jrdb/jrdb.sqlite），任何不指定数据库的操作，都在此数据库进行操作。默认数据库可以自行设置。
 
-######Method
+###### Method
 
 	- (void)registerClazzForUpdateTable:(Class<JRPersistent>)clazz;
 
@@ -182,33 +197,11 @@ JRDBMgr持有一个默认数据库（~/Documents/jrdb/jrdb.sqlite），任何不
 	-(void)updateDB:(FMDatabase *)db
 进行统一更新或者创建表。	
 
---
-###Swift枚举操作
-```swift
-enum Sex : Int { // 定义一个枚举
-    case Male = 1
-    case Female = 2
-}
+---
 
-// 通过第三个变量使用rawValue进行操作
-class Person: NSObject {
-    var sexEnum: Sex { // 数据库不生成此字段
-        set {
-            sex = newValue.rawValue
-        }
-        get {
-            return Sex(rawValue: sex)!
-        }
-    }
-    var sex : Int = Sex.Male.rawValue // 数据库管理此字段
-}
-```
+# Table Operation 【表操作】
 
---
-
-#Table Operation 【表操作】
-
-###Create 【建表】
+### Create 【建表】
 ```objc
 // FMDatabase+JRDB 方法
 [[JRDBMgr defaultDB] createTable4Clazz:[Person class]];
@@ -221,21 +214,21 @@ class Person: NSObject {
 //保存时，若发现没有表，将自动创建
 [person jr_save];
 ```
-###Update 【更新表】
+### Update 【更新表】
 
 ```objc
 [[JRDBMgr defaultDB] updateTable4Clazz:[Person class]];
 [Person jr_updateTable];
 ```
 更新表时，只会添加不存在的字段，不会修改字段属性，不会删除字段，若有需要，需要自行写sql语句进行修改
-###Drop 【删表】
+### Drop 【删表】
 ```objc
 [[JRDBMgr defaultDB] dropTable4Clazz:[Person class]];
 [Person jr_dropTable];
 ```
---
+---
 
-#Thread Operation 【线程操作】
+# Thread Operation 【线程操作】
 - 多线程操作使用FMDB自带的 FMDatabaseQueue
 
 ```objc
@@ -249,10 +242,7 @@ class Person: NSObject {
 - 注：所有需要立刻返回结果，或者影响其他操作的数据库操作，都建议放在主线程进行更新，大批量更新以及多线程操作数据库时，请使用带complete block的操作。
 
 
+---
 
---
-
-#MoreUsage
+# MoreUsage
 - 查看FMDatabase+JRDB.h
-
---
