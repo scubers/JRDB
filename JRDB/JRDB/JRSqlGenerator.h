@@ -60,7 +60,7 @@ typedef enum {
  *
  *  @return sql
  */
-+ (NSString * _Nonnull)sql4GetByIdWithClazz:(Class<JRPersistent> _Nonnull)clazz;
++ (NSString * _Nonnull)sql4GetByPrimaryKeyWithClazz:(Class<JRPersistent> _Nonnull)clazz;
 
 /**
  *  查找某个类的所有对象

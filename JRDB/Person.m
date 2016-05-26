@@ -19,4 +19,12 @@
              ];
 }
 
++ (NSString *)jr_customPrimarykey {
+    return @"_a_int";
+}
+
+- (id)jr_customPrimarykeyValue {
+    return @(self.a_int);
+}
+
 @end

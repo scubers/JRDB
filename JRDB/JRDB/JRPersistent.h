@@ -26,4 +26,20 @@ typedef void(^JRDBComplete)(BOOL success);
  *  @return array
  */
 + (NSArray * _Nullable)jr_excludePropertyNames;
+
+/**
+ *  返回自定义主键字段
+ *
+ *  @return 字段全名
+ */
++ (NSString * _Nullable)jr_customPrimarykey;
+
+/**
+ *  返回自定义主键值
+ *
+ *  @return 主键值
+ */
+- (id _Nullable)jr_customPrimarykeyValue;
+
+
 @end

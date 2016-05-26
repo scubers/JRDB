@@ -55,7 +55,7 @@ static JRDBMgr *__shareInstance;
 
 - (void)registerClazzForUpdateTable:(Class<JRPersistent>)clazz {
     [_clazzArray addObject:clazz];
-    [clazz.self jr_swizzleSetters4Clazz];
+    //[clazz.self jr_swizzleSetters4Clazz];
 }
 
 - (NSArray<Class> *)registedClazz {

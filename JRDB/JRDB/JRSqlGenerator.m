@@ -124,7 +124,8 @@
 }
 
 + (NSString *)sql4Delete:(id<JRPersistent>)obj {
-    NSString *sql = [NSString stringWithFormat:@"delete from %@ where _ID = ? ;", [JRReflectUtil shortClazzName:[obj class]]];
+    NSString *customPK = [[obj class] jr_customPrimarykey];
+    NSString *sql = [NSString stringWithFormat:@"delete from %@ where %@ = ? ;", [JRReflectUtil shortClazzName:[obj class]], customPK ? customPK : @"_ID"];
     NSLog(@"sql: %@", sql);
     return sql;
 }
@@ -157,14 +158,17 @@
     if ([sql hasSuffix:@","]) {
         sql = [[sql substringToIndex:sql.length - 1] mutableCopy];
     }
-    [sql appendString:@" where _ID = ? ;"];
+    
+    NSString *customPK = [[obj class] jr_customPrimarykey];
+    [sql appendFormat:@" where %@ = ? ;", customPK ? customPK : @"_ID"];
     *args = argsList;
     NSLog(@"sql: %@", sql);
     return sql;
 }
 
-+ (NSString *)sql4GetByIdWithClazz:(Class<JRPersistent>)clazz {
-    NSString *sql = [NSString stringWithFormat:@"select * from %@ where _ID = ?;", [JRReflectUtil shortClazzName:clazz]];
++ (NSString *)sql4GetByPrimaryKeyWithClazz:(Class<JRPersistent>)clazz {
+    NSString *customPK = [clazz jr_customPrimarykey];
+    NSString *sql = [NSString stringWithFormat:@"select * from %@ where %@ = ?;", [JRReflectUtil shortClazzName:clazz], customPK ? customPK : @"_ID"];
     NSLog(@"sql: %@", sql);
     return sql;
 }

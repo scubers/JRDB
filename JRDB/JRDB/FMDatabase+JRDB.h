@@ -93,7 +93,7 @@
 - (BOOL)updateObj:(id<JRPersistent> _Nonnull)obj columns:(NSArray * _Nullable)columns;
 - (void)updateObj:(id<JRPersistent> _Nonnull)obj columns:(NSArray * _Nullable)columns complete:(JRDBComplete _Nullable)complete;
 
-- (id<JRPersistent> _Nullable)findByID:(NSString * _Nonnull)ID clazz:(Class<JRPersistent> _Nonnull)clazz;
+- (id<JRPersistent> _Nullable)findByPrimaryKey:(id _Nonnull)ID clazz:(Class<JRPersistent> _Nonnull)clazz;
 
 - (NSArray<id<JRPersistent>> * _Nonnull)findAll:(Class<JRPersistent> _Nonnull)clazz;
 - (NSArray<id<JRPersistent>> * _Nonnull)findAll:(Class<JRPersistent> _Nonnull)clazz orderBy:(NSString * _Nullable)orderby isDesc:(BOOL)isDesc;

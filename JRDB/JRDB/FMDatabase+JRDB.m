@@ -128,6 +128,7 @@ NSString * uuid() {
             NSAssert(NO, @"create table: %@ error", [JRReflectUtil shortClazzName:[obj class]]);
         }
     }
+    
     NSArray *args;
     NSString *sql = [JRSqlGenerator sql4Insert:obj args:&args];
     [obj setID:uuid()];
@@ -158,14 +159,22 @@ NSString * uuid() {
 }
 
 - (BOOL)updateObj:(id<JRPersistent>)obj columns:(NSArray *)columns {
-    NSAssert(obj.ID != nil, @"The obj to be updated could be held a primary key");
+    if (![[obj class] jr_customPrimarykey]) {
+        NSAssert(obj.ID != nil, @"The obj to be updated could be held a primary key");
+    }
     if (![self checkExistsTable4Clazz:[obj class]]) {
         NSLog(@"table : %@ doesn't exists", [obj class]);
         return NO;
     }
     NSArray *args;
     NSString *sql = [JRSqlGenerator sql4Update:obj columns:columns args:&args];
-    args = [args arrayByAddingObject:obj.ID];
+    
+    if ([[obj class] jr_customPrimarykey]) {
+        args = [args arrayByAddingObject:[obj jr_customPrimarykeyValue]];
+    } else {
+        args = [args arrayByAddingObject:obj.ID];
+    }
+    
     BOOL ret = [self executeUpdate:sql withArgumentsInArray:args];
     if (ret) {
         [((NSObject *)obj).jr_changedArray removeAllObjects];
@@ -180,13 +189,16 @@ NSString * uuid() {
 }
 
 - (BOOL)deleteObj:(id<JRPersistent>)obj {
-    NSAssert(obj.ID != nil, @"obj ID should not be nil");
+    if (![[obj class] jr_customPrimarykey]) {
+        NSAssert(obj.ID != nil, @"obj ID should not be nil");
+    }
     if (![self checkExistsTable4Clazz:[obj class]]) {
         NSLog(@"table : %@ doesn't exists", [obj class]);
         return NO;
     }
     NSString *sql = [JRSqlGenerator sql4Delete:obj];
-    return [self executeUpdate:sql withArgumentsInArray:@[obj.ID]];
+    id PK = [[obj class] jr_customPrimarykey] ? [obj jr_customPrimarykeyValue] : [obj ID];
+    return [self executeUpdate:sql withArgumentsInArray:@[PK]];
 }
 
 - (void)deleteObj:(id<JRPersistent>)obj complete:(JRDBComplete)complete {
@@ -195,11 +207,11 @@ NSString * uuid() {
     }];
 }
 
-- (id<JRPersistent>)findByID:(NSString *)ID clazz:(Class<JRPersistent>)clazz {
+- (id<JRPersistent>)findByPrimaryKey:(NSString *)ID clazz:(Class<JRPersistent>)clazz {
     NSAssert(ID != nil, @"id should be nil");
     NSAssert([self checkExistsTable4Clazz:clazz], @"table %@ doesn't exists", clazz);
     
-    NSString *sql = [JRSqlGenerator sql4GetByIdWithClazz:clazz];
+    NSString *sql = [JRSqlGenerator sql4GetByPrimaryKeyWithClazz:clazz];
     FMResultSet *ret = [self executeQuery:sql withArgumentsInArray:@[ID]];
     return [JRFMDBResultSetHandler handleResultSet:ret forClazz:clazz].firstObject;
 }

@@ -33,6 +33,10 @@ const NSString *JRDB_IDKEY = @"JRDB_IDKEY";
     return @{};
 }
 
++ (NSString *)jr_customPrimarykey {
+    return nil;
+}
+
 #pragma mark - save
 - (BOOL)jr_saveToDB:(FMDatabase *)db {
     return [db saveObj:self];
@@ -92,12 +96,11 @@ const NSString *JRDB_IDKEY = @"JRDB_IDKEY";
 
 #pragma mark - select
 
-+ (instancetype)jr_findByID:(NSString *)ID fromDB:(FMDatabase *)db {
-    return [db findByID:ID clazz:[self class]];
++ (instancetype)jr_findByPrimaryKey:(id)ID fromDB:(FMDatabase * _Nonnull)db {
+    return [db findByPrimaryKey:ID clazz:[self class]];
 }
-
-+ (instancetype)jr_findByID:(NSString *)ID {
-    return [self jr_findByID:ID fromDB:JR_DEFAULTDB];
++ (instancetype)jr_findByPrimaryKey:(id)ID {
+    return [self jr_findByPrimaryKey:ID fromDB:JR_DEFAULTDB];
 }
 
 + (NSArray<id<JRPersistent>> *)jr_findAllFromDB:(FMDatabase *)db {

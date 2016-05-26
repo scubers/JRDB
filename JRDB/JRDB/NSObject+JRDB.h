@@ -71,8 +71,8 @@
 
 #pragma mark - select
 
-+ (instancetype _Nullable)jr_findByID:(NSString * _Nonnull)ID;
-+ (instancetype _Nullable)jr_findByID:(NSString * _Nonnull)ID fromDB:(FMDatabase * _Nonnull)db;
++ (instancetype _Nullable)jr_findByPrimaryKey:(id _Nonnull)ID;
++ (instancetype _Nullable)jr_findByPrimaryKey:(id _Nonnull)ID fromDB:(FMDatabase * _Nonnull)db;
 
 
 + (NSArray<id<JRPersistent>> * _Nonnull)jr_findAll;

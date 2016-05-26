@@ -16,7 +16,6 @@
 //#import "JRSqlGenerator.h"
 
 @interface JRDBTests : XCTestCase
-
 {
     FMDatabase *_db;
 }
@@ -27,9 +26,9 @@
 
 - (void)setUp {
     [super setUp];
-//    _db = [JRDBMgr defaultDB];
-    _db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/Jrwong/Desktop/test.sqlite"];
-    [JRDBMgr shareInstance].defaultDB = _db;
+    _db = [JRDBMgr defaultDB];
+//    _db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/Jrwong/Desktop/test.sqlite"];
+//    [JRDBMgr shareInstance].defaultDB = _db;
     [[JRDBMgr shareInstance] registerClazzForUpdateTable:[Person class]];
     // Put setup code here. This method is called before the invocation of each test method in the class.
 }
@@ -46,14 +45,17 @@
     // Use XCTAssert and related functions to verify your tests produce the correct results.
 }
 
-- (void)testUpdate1 {
-    NSArray *all = [Person jr_findAll];
-    
-    Person *p = all.firstObject;
-
-    p.a_int = 100;
-
+- (void)testUpdate {
+    Person *p = [Person new];
+    p.a_int = 11;
     [p jr_updateWithColumn:nil];
+//    NSArray *all = [Person jr_findAll];
+//    
+//    Person *p = all.firstObject;
+//
+//    p.a_int = 100;
+//
+//    [p jr_updateWithColumn:nil];
     
 }
 
@@ -73,6 +75,12 @@
     [[JRDBMgr defaultDB] dropTable4Clazz:[Person class]];
     [Person jr_dropTable];
     
+}
+
+- (void)testDelete {
+    Person *p = [Person new];
+    p.a_int = 11;
+    [p jr_delete];
 }
 
 - (void)testFind2 {
@@ -99,9 +107,10 @@
     
     NSArray *arr = [Person jr_findAllOrderBy:@"_a_int" isDesc:YES];
     
-    Person *p = [Person jr_findByID:[arr.firstObject ID]];
+//    Person *p = [Person jr_findByPrimaryKey:[arr.firstObject ID]];
+    Person *p = [Person jr_findByPrimaryKey:@([arr.firstObject a_int])];
     
-    NSLog(@"%@, %@", arr, p);
+    NSLog(@"%@, %@, %@", arr, p, p.j_number);
 }
 
 - (void)testFindAll {
@@ -131,6 +140,7 @@
         p.j_number = @10;
         p.k_data = [NSData data];
         p.l_date = [NSDate date];
+        p.m_date = [NSDate date];
         NSLog(@"%@", p.jr_changedArray);
         [p jr_save];
         NSLog(@"%@", p.jr_changedArray);
