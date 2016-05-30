@@ -37,6 +37,10 @@ const NSString *JRDB_IDKEY = @"JRDB_IDKEY";
     return nil;
 }
 
+- (id)jr_customPrimarykeyValue {
+    return nil;
+}
+
 #pragma mark - save
 - (BOOL)jr_saveToDB:(FMDatabase *)db {
     return [db saveObj:self];
