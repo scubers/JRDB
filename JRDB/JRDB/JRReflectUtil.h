@@ -42,7 +42,7 @@
  *
  *  @param clazz 类
  *
- *  @return {ivar:@encode(int),ivar:@encode(int)}
+ *  @return {ivar:@encode(int),ivar:@encode(int)} example : {@"_age" : @"i"}
  */
 + (NSDictionary<NSString *, NSString *> * _Nonnull)ivarAndEncode4Clazz:(Class _Nonnull)clazz;
 

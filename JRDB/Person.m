@@ -9,6 +9,9 @@
 #import "Person.h"
 #import "NSObject+JRDB.h"
 
+@implementation Animal
+@end
+
 @implementation Person
 
 + (NSArray *)jr_excludePropertyNames {
@@ -20,11 +23,11 @@
 }
 
 + (NSString *)jr_customPrimarykey {
-    return @"_a_int";
+    return @"_i_string";
 }
 
 - (id)jr_customPrimarykeyValue {
-    return @(self.a_int);
+    return self.i_string;
 }
 
 @end

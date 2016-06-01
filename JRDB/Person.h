@@ -9,8 +9,16 @@
 #import <Foundation/Foundation.h>
 #import "JRPersistent.h"
 
+@interface Animal : NSObject
 
-@interface Person : NSObject
+@property (nonatomic, strong) NSString *type;
+
+@end
+
+
+@interface Person : Animal
+
+@property (nonatomic, strong) Animal *animal;
 
 @property (nonatomic, assign) int a_int;
 @property (nonatomic, assign) unsigned int b_unsigned_int;

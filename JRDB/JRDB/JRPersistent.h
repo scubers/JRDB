@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-#define EXE_BLOCK(block, ...) if (block){block(__VA_ARGS__);}
+#define EXE_BLOCK(block, ...) if(block){block(__VA_ARGS__);}
 
 typedef void(^JRDBComplete)(BOOL success);
 
@@ -40,6 +40,23 @@ typedef void(^JRDBComplete)(BOOL success);
  *  @return 主键值
  */
 - (id _Nullable)jr_customPrimarykeyValue;
+
+
+#pragma mark - convenience
+/**
+ *  如果有自定义主键，则返回自定义主键key，例如 name，若没有实现，则返回默认主键key ： @"_ID"
+ *
+ *  @return 主键的字段名
+ */
++ (NSString * _Nonnull)jr_primaryKey;
+
+/**
+ * 如果有自定义主键，则返回自定义主键的值，如果没有，则返回 [self ID]
+ *
+ *  @return 主键值
+ */
+- (id _Nullable)jr_primaryKeyValue;
+
 
 
 @end
