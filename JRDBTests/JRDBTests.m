@@ -182,7 +182,24 @@
 }
 
 - (void)testIvars {
-    NSDictionary *dict = [JRReflectUtil ivarAndEncode4Clazz:[Person class]];
+    NSDictionary<NSString *, NSString *> *dict = [JRReflectUtil ivarAndEncode4Clazz:[Person class]];
+
+    [dict enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, NSString * _Nonnull obj, BOOL * _Nonnull stop) {
+        obj = [obj stringByReplacingOccurrencesOfString:@"\"" withString:@""];
+        obj = [obj stringByReplacingOccurrencesOfString:@"@" withString:@""];
+        NSLog(@"%@", obj);
+        Class clazz = NSClassFromString(obj);
+        if (clazz) {
+            if (class_conformsToProtocol(clazz, @protocol(JRPersistent))) {
+                NSLog(@"%@ comforms to protocol JRPersistent", clazz);
+            }
+        }
+    }];
+
+    if (class_conformsToProtocol([Animal class], @protocol(JRPersistent))) {
+        NSLog(@"");
+    }
+
     NSLog(@"%@", dict);
 }
 

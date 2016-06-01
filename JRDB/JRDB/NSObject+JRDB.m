@@ -197,7 +197,7 @@ const NSString *JRDB_IDKEY = @"JRDB_IDKEY";
     return [self jr_truncateTableInDB:JR_DEFAULTDB];
 }
 
-#pragma mark - method hook
+#pragma mark - method hook   now unavaliable
 const static NSString *jr_changedArrayKey = @"jr_changedArrayKey";
 - (NSMutableArray *)jr_changedArray {
     NSMutableArray *array = objc_getAssociatedObject(self, &jr_changedArrayKey);
