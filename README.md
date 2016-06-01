@@ -246,3 +246,6 @@ JRDBMgr持有一个默认数据库（~/Documents/jrdb/jrdb.sqlite），任何不
 
 # MoreUsage
 - 查看FMDatabase+JRDB.h
+
+### Other
+库还在更新中，如果有使用不好或者bug，请邮件联系

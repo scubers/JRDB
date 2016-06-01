@@ -46,9 +46,9 @@ typedef enum {
         [obj setID:ID];
         
         for (NSString *name in dict.allKeys) {
-            if (isID(name) || [[clazz jr_excludePropertyNames] containsObject:name]) {
-                continue;
-            }
+            // 检查忽略
+            if (isID(name) || [[clazz jr_excludePropertyNames] containsObject:name]) { continue; }
+            
             NSString *encode = dict[name];
             RetDataType type = [self typeWithEncode:encode];
             switch (type) {

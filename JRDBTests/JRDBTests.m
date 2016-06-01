@@ -16,9 +16,6 @@
 //#import "JRSqlGenerator.h"
 
 @interface JRDBTests : XCTestCase
-{
-    FMDatabase *_db;
-}
 
 @end
 
@@ -26,16 +23,12 @@
 
 - (void)setUp {
     [super setUp];
-    _db = [JRDBMgr defaultDB];
-//    _db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/Jrwong/Desktop/test.sqlite"];
-//    [JRDBMgr shareInstance].defaultDB = _db;
     [[JRDBMgr shareInstance] registerClazzForUpdateTable:[Person class]];
-    // Put setup code here. This method is called before the invocation of each test method in the class.
 }
 
 - (void)tearDown {
     // Put teardown code here. This method is called after the invocation of each test method in the class.
-    [_db close];
+    [[JRDBMgr defaultDB] close];
     [super tearDown];
     
 }
@@ -86,10 +79,7 @@
 - (void)testFind2 {
     
     NSArray *condis = @[
-//                        [JRQueryCondition condition:@"_l_date < ?" args:@[[NSDate date]] type:JRQueryConditionTypeAnd],
-//                        [JRQueryCondition condition:@"_a_int > ?" args:@[@9] type:JRQueryConditionTypeAnd],
                         [JRQueryCondition type:JRQueryConditionTypeAnd condition:@"_a_int > ? and _l_date < ?", @9, [NSDate date], nil],
-//                        [JRQueryCondition type:JRQueryConditionTypeAnd condition:@"_l_date < ?", [NSDate date]],
                         ];
     
     NSArray *arr = [Person jr_findByConditions:condis
@@ -124,11 +114,16 @@
     }];
 }
 
-- (void)testAdd {
+- (void)testCustomPK {
     
-    for (int i = 0; i<10; i++) {
+}
+
+- (void)testAdd {
+//    Person *p = [Person new];
+//    [p setValue:@"abc" forKey:@"_type"];
+    for (int i = 0; i<1; i++) {
         Person *p = [[Person alloc] init];
-        p.a_int = i+2;
+        p.a_int = i;
         p.b_unsigned_int = 2;
         p.c_long = 3;
         p.d_long_long = 4;
@@ -141,6 +136,8 @@
         p.k_data = [NSData data];
         p.l_date = [NSDate date];
         p.m_date = [NSDate date];
+        p.type = @"Person";
+        p.animal = [Animal new];
         NSLog(@"%@", p.jr_changedArray);
         [p jr_save];
         NSLog(@"%@", p.jr_changedArray);
@@ -148,7 +145,8 @@
 }
 
 - (void)testTruncateTable {
-    [Person jr_truncateTable];
+    [Person jr_dropTable];
+//    [Person jr_truncateTable];
 //    [_db truncateTable4Clazz:[Person class]];
 //    [[JRDBMgr defaultDB] truncateTable4Clazz:[Person class]];
     
@@ -169,6 +167,7 @@
     p.j_number = @10;
     p.k_data = [NSData data];
     p.l_date = [NSDate date];
+    p.type = @"Person";
 
     NSLog(@"%@", p.jr_changedArray);
 }
@@ -177,7 +176,14 @@
     // This is an example of a performance test case.
     [self measureBlock:^{
         // Put the code you want to measure the time of here.
+        Person *p = [Person new];
+        [p jr_save];
     }];
+}
+
+- (void)testIvars {
+    NSDictionary *dict = [JRReflectUtil ivarAndEncode4Clazz:[Person class]];
+    NSLog(@"%@", dict);
 }
 
 @end

@@ -41,6 +41,21 @@ const NSString *JRDB_IDKEY = @"JRDB_IDKEY";
     return nil;
 }
 
++ (NSString *)jr_primaryKey {
+    if ([self jr_customPrimarykey]) {
+        return [self jr_customPrimarykey];
+    }
+    return @"_ID";
+}
+
+- (id)jr_primaryKeyValue {
+    if ([[self class] jr_customPrimarykey]) {
+        return [self jr_customPrimarykeyValue];
+    }
+    return [self ID];
+}
+
+
 #pragma mark - save
 - (BOOL)jr_saveToDB:(FMDatabase *)db {
     return [db saveObj:self];
@@ -181,7 +196,6 @@ const NSString *JRDB_IDKEY = @"JRDB_IDKEY";
 + (BOOL)jr_truncateTable {
     return [self jr_truncateTableInDB:JR_DEFAULTDB];
 }
-
 
 #pragma mark - method hook
 const static NSString *jr_changedArrayKey = @"jr_changedArrayKey";

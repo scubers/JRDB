@@ -31,20 +31,27 @@
 }
 
 + (NSDictionary<NSString *, NSString *> *)ivarAndEncode4Clazz:(Class)clazz {
-    NSMutableDictionary *dict = [NSMutableDictionary dictionary];
-    unsigned int outCount;
-    objc_property_t *prop = class_copyPropertyList(clazz, &outCount);
-    for (int i = 0; i < outCount; i++) {
-        objc_property_t p = prop[i];
-        unsigned int c;
-        objc_property_attribute_t *attributes = property_copyAttributeList(p, &c);
-        NSString *name = [NSString stringWithUTF8String:attributes[c-1].value];
-        NSString *encode = [NSString stringWithUTF8String:attributes[0].value];
-        if (name.length) {
-            dict[name] = encode;
+    NSString *className = [NSString stringWithUTF8String:class_getName(clazz)];
+    if ([className isEqualToString:@"NSObject"]) {
+        return nil;
+    } else {
+        NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+        unsigned int outCount;
+        objc_property_t *prop = class_copyPropertyList(clazz, &outCount);
+        for (int i = 0; i < outCount; i++) {
+            objc_property_t p = prop[i];
+            unsigned int c;
+            objc_property_attribute_t *attributes = property_copyAttributeList(p, &c);
+            NSString *name = [NSString stringWithUTF8String:attributes[c-1].value];
+            NSString *encode = [NSString stringWithUTF8String:attributes[0].value];
+            if (name.length) {
+                dict[name] = encode;
+            }
         }
+        [dict addEntriesFromDictionary:[self ivarAndEncode4Clazz:class_getSuperclass(clazz)]];
+        return dict;
     }
-    return dict;
+    
 }
 
 + (const char *)typeEncoding4InstanceMethod:(SEL)selector inClazz:(Class)clazz {
