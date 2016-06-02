@@ -9,6 +9,8 @@
 #import <XCTest/XCTest.h>
 #import "JRDB.h"
 #import "Person.h"
+#import "JRColumnSchema.h"
+
 
 //#import "Person.h"
 //#import "JRReflectUtil.h"
@@ -150,31 +152,12 @@
 
 - (void)testTruncateTable {
     [[JRDBMgr shareInstance] deleteDBWithPath:[JRDBMgr defaultDB].databasePath];
-//    [Person jr_dropTable];
-//    [Person jr_truncateTable];
-//    [_db truncateTable4Clazz:[Person class]];
-//    [[JRDBMgr defaultDB] truncateTable4Clazz:[Person class]];
     
 }
 
 - (void)testUpdateTable {
     [[JRDBMgr shareInstance] registerClazzForUpdateTable:[Person class]];
-    Person *p = [Person new];
-    p.a_int = 1;
-    p.b_unsigned_int = 2;
-    p.c_long = 3;
-    p.d_long_long = 4;
-    p.e_unsigned_long = 5;
-    p.f_unsigned_long_long = 6;
-    p.g_float = 7.0;
-    p.h_double = 8.0;
-    p.i_string = @"9";
-    p.j_number = @10;
-    p.k_data = [NSData data];
-    p.l_date = [NSDate date];
-    p.type = @"Person";
-
-    NSLog(@"%@", p.jr_changedArray);
+    [Person jr_updateTable];
 }
 
 - (void)testPerformanceExample {
@@ -213,9 +196,29 @@
     NSLog(@"%@", dict);
 }
 
-- (void)testSql1 {
-    BOOL flag = [[JRDBMgr defaultDB] executeUpdate:@"update Person set _b_unsigned_int = _a_int;"];
-    NSLog(@"%d", flag);
+- (void)testCurrentColumns {
+    NSLog(@"%@", [Person currentColumns]);
+}
+
+
+- (void)testSql11 {
+    Person *p = [Person new];
+    p.a_int = 10;
+    p.i_string = @"abc";
+    Card *c = [Card new];
+    c.serialNumber = @"111";
+    p.card = c;
+    [p jr_save];
+}
+
+- (void)testSomething {
+    NSArray *array = [Person jr_findAll];
+    [array isEqual:nil];
+    
 }
 
 @end
+
+
+
+

@@ -33,6 +33,12 @@
         
         [sql appendFormat:@", %@ %@", name, type];
     }
+    
+    // 是否具有一对一关联对象 默认保存其_ID字段
+    [[clazz jr_singleLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull obj, BOOL * _Nonnull stop) {
+        [sql appendFormat:@", %@ TEXT ", SingleLinkColumn(key)];
+    }];
+    
     [sql appendString:@");"];
     NSLog(@"sql: %@", sql);
     return sql;
@@ -56,9 +62,17 @@
             NSString *type = [self typeWithEncodeName:dict[name]];
             if (!type) { continue; }
             
-            [sqls addObject:[NSString stringWithFormat:@"alter table %@ add column %@ %@ ;", tableName, name, type]];
+            [sqls addObject:[NSString stringWithFormat:@"alter table %@ add column %@ %@;", tableName, name, type]];
         }
     }
+    
+    // 检测一对一关系
+    [[clazz jr_singleLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull obj, BOOL * _Nonnull stop) {
+        if (![db columnExists:SingleLinkColumn(key) inTableWithName:tableName]) {
+            [sqls addObject:[NSString stringWithFormat:@"alter table %@ add column %@ TEXT;", tableName, SingleLinkColumn(key)]];
+        }
+    }];
+    
     NSLog(@"sqls: %@", sqls);
     return sqls;
 }
@@ -104,6 +118,14 @@
         // 添加参数
         [argsList addObject:value];
     }
+    
+    // 检测一对一字段
+    [[[obj class] jr_singleLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull clazz, BOOL * _Nonnull stop) {
+        NSObject<JRPersistent> *value = [((NSObject *)obj) valueForKey:key];
+        [sql appendFormat:@", %@ ", SingleLinkColumn(key)];
+        [sql2 appendFormat:@", ? "];
+        [argsList addObject:[value ID]];
+    }];
     
     [sql appendString:@")"];
     [sql2 appendString:@");"];
@@ -158,6 +180,12 @@
     
     [sql appendFormat:@" where %@ = ? ;", [[obj class] jr_primaryKey]];
     *args = argsList;
+    NSLog(@"sql: %@", sql);
+    return sql;
+}
+
++ (NSString * _Nonnull)sql4GetByIDWithClazz:(Class<JRPersistent> _Nonnull)clazz {
+    NSString *sql = [NSString stringWithFormat:@"select * from %@ where _ID = ?;", [JRReflectUtil shortClazzName:clazz]];
     NSLog(@"sql: %@", sql);
     return sql;
 }

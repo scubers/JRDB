@@ -9,6 +9,10 @@
 #import "Person.h"
 #import "NSObject+JRDB.h"
 
+@implementation Card
+@end
+
+
 @implementation Animal
 @end
 
@@ -21,13 +25,17 @@
              @"_m_date",
              ];
 }
-//
-//+ (NSString *)jr_customPrimarykey {
-//    return @"_i_string";
-//}
-//
-//- (id)jr_customPrimarykeyValue {
-//    return self.i_string;
-//}
+
++ (NSString *)jr_customPrimarykey {
+    return @"_i_string";
+}
+
+- (id)jr_customPrimarykeyValue {
+    return self.i_string;
+}
+
++ (NSDictionary<NSString *,Class<JRPersistent>> *)jr_singleLinkedPropertyNames {
+    return @{@"_card" : [Card class]};
+}
 
 @end

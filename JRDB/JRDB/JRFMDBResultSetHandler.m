@@ -118,6 +118,15 @@ typedef enum {
             }
         }
         
+        // 检查一对一关联的字段
+        [[clazz jr_singleLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull clazz, BOOL * _Nonnull stop) {
+            int idx = [resultSet columnIndexForName:SingleLinkColumn(key)];
+            if (idx >= 0) {
+                NSString *ID = [resultSet stringForColumnIndex:idx];
+                [obj setSingleLinkID:ID forKey:key];
+            }
+        }];
+        
         [list addObject:obj];
     }
     

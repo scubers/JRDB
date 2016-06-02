@@ -29,11 +29,11 @@ NSString * uuid() {
 
 #pragma mark - queue action
 - (void)closeQueue {
-    [[self transactionQueue] close];
+    [[self databaseQueue] close];
     objc_setAssociatedObject(self, &queuekey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-- (FMDatabaseQueue *)transactionQueue {
+- (FMDatabaseQueue *)databaseQueue {
     FMDatabaseQueue *q = objc_getAssociatedObject(self, &queuekey);
     if (!q) {
         q = [FMDatabaseQueue databaseQueueWithPath:self.databasePath];
@@ -43,15 +43,28 @@ NSString * uuid() {
 }
 
 - (void)inQueue:(void (^)(FMDatabase *))block {
-    [[self transactionQueue] inDatabase:^(FMDatabase *db) {
+    [[self databaseQueue] inDatabase:^(FMDatabase *db) {
         EXE_BLOCK(block, db);
     }];
 }
 
-- (void)inTransaction:(void (^)(FMDatabase *, BOOL *))block {
-    [[self transactionQueue] inTransaction:^(FMDatabase *db, BOOL *rollback) {
-        EXE_BLOCK(block, db, rollback);
-    }];
+- (BOOL)inTransaction:(void (^)(FMDatabase *, BOOL *))block {
+    BOOL flag = [self beginTransaction];
+    if (!flag) {
+        NSLog(@"begin transaction fail");
+        return NO;
+    }
+    BOOL rollback = NO;
+    EXE_BLOCK(block, self, &rollback);
+    if (rollback) {
+        [self rollback];
+        return NO;
+    } else {
+        return [self commit];
+    }
+//    [[self databaseQueue] inTransaction:^(FMDatabase *db, BOOL *rollback) {
+//        EXE_BLOCK(block, db, rollback);
+//    }];
 }
 
 #pragma mark - table operation
@@ -121,32 +134,78 @@ NSString * uuid() {
     }];
 }
 
+#pragma mark - table message
+
+- (NSArray<JRColumnSchema *> *)schemasInClazz:(Class<JRPersistent>)clazz {
+    FMResultSet *ret = [[JRDBMgr defaultDB] getTableSchema:[JRReflectUtil shortClazzName:clazz]];
+//    get table schema: result colums: cid[INTEGER], name,type [STRING], notnull[INTEGER], dflt_value[],pk[INTEGER]
+    NSMutableArray *schemas = [NSMutableArray array];
+    while ([ret next]) {
+        JRColumnSchema *schema = [JRColumnSchema new];
+        schema.cid = [ret intForColumn:@"cid"];
+        schema.name = [ret stringForColumn:@"name"];
+        schema.type = [ret stringForColumn:@"type"];
+        schema.notnull = [ret intForColumn:@"notnull"];
+        schema.pk = [ret intForColumn:@"pk"];
+        [schemas addObject:schema];
+    }
+    return schemas;
+}
+
 #pragma mark - data operation
 
-- (BOOL)saveObj:(id<JRPersistent>)obj {
+/**
+ *  保存单条，不关联保存
+ */
+- (BOOL)saveSingle:(id<JRPersistent>)obj {
+    if ([[obj class] jr_customPrimarykey]) { // 自定义主键
+        NSAssert([obj jr_customPrimarykeyValue] != nil, @"custom Primary key should not be nil");
+        NSObject *old = (NSObject *)[self getByPrimaryKey:[obj jr_customPrimarykeyValue] clazz:[obj class]];
+        NSAssert(!old, @"primary key is exists");
+    } else { // 默认主键
+        NSAssert(obj.ID == nil, @"The obj:%@ to be saved should not hold a primary key", obj);
+    }
+    
+    NSArray *args;
+    NSString *sql = [JRSqlGenerator sql4Insert:obj args:&args toDB:self];
+    [obj setID:uuid()];
+    args = [@[obj.ID] arrayByAddingObjectsFromArray:args];
+    BOOL ret = [self executeUpdate:sql withArgumentsInArray:args];
+    return ret;
+}
+
+- (BOOL)handleSave:(id<JRPersistent>)obj startObj:(id<JRPersistent>)startObj hierarchy:(int)hierarchy {
+    
+    [[[obj class] jr_singleLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull clazz, BOOL * _Nonnull stop) {
+        id value = [((NSObject *)obj) valueForKey:key];
+        if (value && value != startObj) {
+            [self handleSave:value startObj:startObj hierarchy:hierarchy + 1];
+        }
+    }];
     
     NSString *tableName = [JRReflectUtil shortClazzName:[obj class]];
     if (![self tableExists:tableName]) {
         NSAssert([self createTable4Clazz:[obj class]], @"create table: %@ error", tableName);
     }
     
-    if ([[obj class] jr_customPrimarykey]) { // 自定义主键
-        NSAssert([obj jr_customPrimarykeyValue] != nil, @"custom Primary key should not be nil");
-        NSObject *old = [[obj class] jr_findByPrimaryKey:[obj jr_customPrimarykeyValue]];
-        NSAssert(!old, @"primary key is exists");
-    } else { // 默认主键
-        NSAssert(obj.ID == nil, @"The to be saved should not hold a primary key");
+    if (!hierarchy || ![obj jr_primaryKeyValue]) {
+        return [self saveSingle:obj];
+    } else {
+        if (![obj ID]) {
+            [obj setID:[[self getByPrimaryKey:[obj jr_primaryKeyValue] clazz:[obj class]] ID]];
+        }
+        // 子对象已经存在不用保存，直接返回，若需要更新，需要自行手动更新
+        return YES;
     }
     
-    
-    NSArray *args;
-    NSString *sql = [JRSqlGenerator sql4Insert:obj args:&args toDB:self];
-    [obj setID:uuid()];
-    args = [@[obj.ID] arrayByAddingObjectsFromArray:args];
-    
-    BOOL ret = [self executeUpdate:sql withArgumentsInArray:args];
-    
-    return ret;
+}
+
+- (BOOL)saveObj:(id<JRPersistent>)obj {
+    __block BOOL flag = NO;
+    [self inTransaction:^(FMDatabase * _Nonnull db, BOOL * _Nonnull rollBack) {
+        flag = [db handleSave:obj startObj:obj hierarchy:0];
+    }];
+    return flag;
 }
 
 - (void)saveObj:(id<JRPersistent>)obj complete:(JRDBComplete)complete {
@@ -176,7 +235,7 @@ NSString * uuid() {
     
     id<JRPersistent> updateObj;
     if (columns.count) {
-        id<JRPersistent> old = [self findByPrimaryKey:[obj jr_primaryKeyValue] clazz:[obj class]];
+        id<JRPersistent> old = [self getByPrimaryKey:[obj jr_customPrimarykeyValue] clazz:[obj class]];;
         if (!old) {
             NSLog(@"The object doesn't exists in database");
             return NO;
@@ -222,34 +281,33 @@ NSString * uuid() {
     }];
 }
 
-#pragma mark - query operation
+#pragma mark - single level query operation
 
-- (id<JRPersistent>)findByPrimaryKey:(id)ID clazz:(Class<JRPersistent>)clazz {
-    
+- (id<JRPersistent>)getByID:(NSString *)ID clazz:(Class<JRPersistent>)clazz {
     NSAssert(ID, @"id should be nil");
-    NSAssert([self checkExistsTable4Clazz:clazz], @"table %@ doesn't exists", clazz);
-    
-    NSString *sql = [JRSqlGenerator sql4GetByPrimaryKeyWithClazz:clazz];
+    NSString *sql = [JRSqlGenerator sql4GetByIDWithClazz:clazz];
     FMResultSet *ret = [self executeQuery:sql withArgumentsInArray:@[ID]];
     return [JRFMDBResultSetHandler handleResultSet:ret forClazz:clazz].firstObject;
 }
 
-- (NSArray *)findAll:(Class<JRPersistent>)clazz {
-    return [self findAll:clazz orderBy:nil isDesc:NO];
+- (id<JRPersistent>)getByPrimaryKey:(id)primaryKey clazz:(Class<JRPersistent>)clazz {
+    NSAssert(primaryKey, @"id should be nil");
+    NSString *sql = [JRSqlGenerator sql4GetByPrimaryKeyWithClazz:clazz];
+    FMResultSet *ret = [self executeQuery:sql withArgumentsInArray:@[primaryKey]];
+    return [JRFMDBResultSetHandler handleResultSet:ret forClazz:clazz].firstObject;
 }
 
-- (NSArray *)findAll:(Class<JRPersistent>)clazz orderBy:(NSString *)orderby isDesc:(BOOL)isDesc {
+- (NSArray *)getAll:(Class<JRPersistent>)clazz orderBy:(NSString *)orderby isDesc:(BOOL)isDesc {
     if (![self checkExistsTable4Clazz:clazz]) {
         NSLog(@"table %@ doesn't exists", clazz);
         return @[];
     }
-    
     NSString *sql = [JRSqlGenerator sql4FindAll:clazz orderby:orderby isDesc:isDesc];
     FMResultSet *ret = [self executeQuery:sql];
     return [JRFMDBResultSetHandler handleResultSet:ret forClazz:clazz];
 }
 
-- (NSArray *)findByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc {
+- (NSArray *)getByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc {
     if (![self checkExistsTable4Clazz:clazz]) {
         NSLog(@"table %@ doesn't exists", clazz);
         return @[];
@@ -258,6 +316,53 @@ NSString * uuid() {
     NSString *sql = [JRSqlGenerator sql4FindByConditions:conditions clazz:clazz groupBy:groupBy orderBy:orderBy limit:limit isDesc:isDesc args:&args];
     FMResultSet *ret = [self executeQuery:sql withArgumentsInArray:args];
     return [JRFMDBResultSetHandler handleResultSet:ret forClazz:clazz];
+}
+
+#pragma mark - multi level query operation
+
+- (id<JRPersistent>)handleSingleLinkFindByID:(NSString *)ID clazz:(Class<JRPersistent>)clazz {
+    id obj = [self getByID:ID clazz:clazz];
+    [[clazz jr_singleLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull subClazz, BOOL * _Nonnull stop) {
+        NSString *subID = [((NSObject *)obj) singleLinkIDforKey:key];
+        if (subID) {
+            id<JRPersistent> subObj = [self handleSingleLinkFindByID:subID clazz:subClazz];
+            [obj setValue:subObj forKey:key];
+        }
+    }];
+    return obj;
+}
+
+- (id<JRPersistent>)findByID:(NSString *)ID clazz:(Class<JRPersistent>)clazz {
+    return [self handleSingleLinkFindByID:ID clazz:clazz];
+}
+
+- (id<JRPersistent>)findByPrimaryKey:(id)primaryKey clazz:(Class<JRPersistent>)clazz {
+    NSAssert([self checkExistsTable4Clazz:clazz], @"table %@ doesn't exists", clazz);
+    id<JRPersistent> obj = [self getByPrimaryKey:primaryKey clazz:clazz];
+    return [self handleSingleLinkFindByID:[obj ID] clazz:clazz];
+}
+
+
+- (NSArray *)findAll:(Class<JRPersistent>)clazz {
+    return [self findAll:clazz orderBy:nil isDesc:NO];
+}
+
+- (NSArray *)findAll:(Class<JRPersistent>)clazz orderBy:(NSString *)orderby isDesc:(BOOL)isDesc {
+    NSArray *list = [self getAll:clazz orderBy:orderby isDesc:isDesc];
+    NSMutableArray *result = [NSMutableArray array];
+    [list enumerateObjectsUsingBlock:^(id<JRPersistent>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [result addObject:[self handleSingleLinkFindByID:[obj ID] clazz:[obj class]]];
+    }];
+    return result;
+}
+
+- (NSArray *)findByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc {
+    NSArray<id<JRPersistent>> *list = [self getByConditions:conditions clazz:clazz groupBy:groupBy orderBy:orderBy limit:limit isDesc:isDesc];
+    NSMutableArray *result = [NSMutableArray array];
+    [list enumerateObjectsUsingBlock:^(id<JRPersistent>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [result addObject:[self handleSingleLinkFindByID:[obj ID] clazz:[obj class]]];
+    }];
+    return result;
 }
 
 - (NSArray *)findByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz isDesc:(BOOL)isDesc {

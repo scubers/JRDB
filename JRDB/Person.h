@@ -9,7 +9,8 @@
 #import <Foundation/Foundation.h>
 #import "JRPersistent.h"
 
-@protocol Ignore <NSObject>
+@interface Card : NSObject
+@property (nonatomic, strong) NSString *serialNumber;
 @end
 
 
@@ -40,5 +41,6 @@
 @property (nonatomic, strong) NSDate *l_date;
 @property (nonatomic, strong) NSDate *m_date;
 
+@property (nonatomic, strong) Card *card;
 
 @end

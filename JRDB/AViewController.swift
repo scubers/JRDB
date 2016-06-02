@@ -39,7 +39,7 @@ class AViewController: UIViewController {
         super.viewDidLoad()
 //        test()
 //        test2()
-//        test3()
+        test3()
         
 //        JRDBMgr.shareInstance().registerClazzForUpdateTable(PPP)
         let dict = JRReflectUtil.ivarAndEncode4Clazz(PPP)
@@ -53,5 +53,6 @@ class AViewController: UIViewController {
         p.a_int = 1
         print(p.jr_changedArray())
         PPP.jr_findAll()
+        
     }
 }
