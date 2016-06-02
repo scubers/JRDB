@@ -36,98 +36,9 @@
     
 }
 
-- (void)testExample {
-    // This is an example of a functional test case.
-    // Use XCTAssert and related functions to verify your tests produce the correct results.
-}
-
-- (void)testUpdate {
-    Person *p = [Person new];
-    p.a_int = 11;
-    [p jr_updateWithColumn:nil];
-//    NSArray *all = [Person jr_findAll];
-//    
-//    Person *p = all.firstObject;
-//
-//    p.a_int = 100;
-//
-//    [p jr_updateWithColumn:nil];
-    
-}
-
-- (void)testSql {
-    Person *person;
-    [[JRDBMgr defaultDB] createTable4Clazz:[Person class]];
-    [Person jr_createTable];
-    
-    [[JRDBMgr defaultDB] truncateTable4Clazz:[Person class]];
-    [Person jr_truncateTable];
-    
-    [person jr_save];
-    
-    [[JRDBMgr defaultDB] updateTable4Clazz:[Person class]];
-    [Person jr_updateTable];
-    
-    [[JRDBMgr defaultDB] dropTable4Clazz:[Person class]];
-    [Person jr_dropTable];
-    
-}
-
-- (void)testDelete {
-    Person *p = [Person new];
-    p.a_int = 11;
-    [p jr_delete];
-}
-
-- (void)testFind2 {
-    
-    NSArray *condis = @[
-                        [JRQueryCondition type:JRQueryConditionTypeAnd condition:@"_a_int > ? and _l_date < ?", @9, [NSDate date], nil],
-                        ];
-    
-    NSArray *arr = [Person jr_findByConditions:condis
-                                       groupBy:nil
-                                       orderBy:nil
-                                         limit:nil
-                                        isDesc:YES];
-    
-    NSLog(@"%@", arr);
-    
-    [[JRDBMgr defaultDB] close];
-}
-
-- (void)testFind1 {
-    
-    NSArray *arr = [Person jr_findAllOrderBy:@"_a_int" isDesc:YES];
-    
-//    Person *p = [Person jr_findByPrimaryKey:[arr.firstObject ID]];
-    Person *p = [Person jr_findByPrimaryKey:@([arr.firstObject a_int])];
-    
-    NSLog(@"%@, %@, %@", arr, p, p.j_number);
-}
-
-- (void)testFindAll {
-    NSArray *array = [Person jr_findAll];
-    NSLog(@"%@", array);
-    [array enumerateObjectsUsingBlock:^(Person * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        NSLog(@"%@", obj.jr_changedArray);
-        obj.a_int = 11;
-        NSLog(@"%@", obj.jr_changedArray);
-
-    }];
-}
-//alter table tablename rename column oldColumnName to newColumnName;
-
-- (void)testCustomPK {
-    Person *p = [Person new];
-    p.i_string = @"9";
-    p.a_int = 1000;
-    [p jr_updateWithColumn:@[@"_a_int"]];
-}
-
 - (void)testAdd {
-//    Person *p = [Person new];
-//    [p setValue:@"abc" forKey:@"_type"];
+    //    Person *p = [Person new];
+    //    [p setValue:@"abc" forKey:@"_type"];
     for (int i = 0; i<10; i++) {
         Person *p = [[Person alloc] init];
         p.a_int = i;
@@ -145,11 +56,32 @@
         p.m_date = [NSDate date];
         p.type = @"Person";
         p.animal = [Animal new];
-        NSLog(@"%@", p.jr_changedArray);
         [p jr_save];
-        NSLog(@"%@", p.jr_changedArray);
     }
 }
+
+- (void)testUpdate {
+}
+
+
+- (void)testDelete {
+    Person *p = [Person new];
+    p.a_int = 11;
+    [p jr_delete];
+}
+
+
+- (void)testFindAll {
+    NSArray *array = [Person jr_findAll];
+    NSLog(@"%@", array);
+    [array enumerateObjectsUsingBlock:^(Person * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        NSLog(@"%@", obj.jr_changedArray);
+        obj.a_int = 11;
+        NSLog(@"%@", obj.jr_changedArray);
+
+    }];
+}
+//alter table tablename rename column oldColumnName to newColumnName;
 
 - (void)testTruncateTable {
     [[JRDBMgr shareInstance] deleteDBWithPath:[JRDBMgr defaultDB].databasePath];
@@ -170,52 +102,50 @@
     }];
 }
 
-- (void)testConforms {
-    BOOL flag = class_conformsToProtocol([Person class], @protocol(JRPersistent));
-    NSLog(@"%d", flag);
-}
-
-- (void)testIvars {
-    NSDictionary<NSString *, NSString *> *dict = [JRReflectUtil ivarAndEncode4Clazz:[Person class]];
-
-    [dict enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, NSString * _Nonnull obj, BOOL * _Nonnull stop) {
-        obj = [obj stringByReplacingOccurrencesOfString:@"\"" withString:@""];
-        obj = [obj stringByReplacingOccurrencesOfString:@"@" withString:@""];
-        NSLog(@"%@", obj);
-        Class clazz = NSClassFromString(obj);
-        if (clazz) {
-            if (class_conformsToProtocol(clazz, @protocol(JRPersistent))) {
-                NSLog(@"%@ comforms to protocol JRPersistent", clazz);
-            }
-        }
-    }];
-
-    if (class_conformsToProtocol([Animal class], @protocol(JRPersistent))) {
-        NSLog(@"");
-    }
-
-    NSLog(@"%@", dict);
-}
-
-- (void)testCurrentColumns {
-    NSLog(@"%@", [Person currentColumns]);
-}
-
 
 - (void)testSql11 {
-    Person *p = [Person new];
-    p.a_int = 10;
-    p.i_string = @"abc";
-    Card *c = [Card new];
-    c.serialNumber = @"111";
+    Person *p = [self createPerson:1];
+    Card *c = [self createCard:@"001"];
     p.card = c;
+    c.person = p;
     [p jr_save];
 }
 
+
+
 - (void)testSomething {
     NSArray *array = [Person jr_findAll];
+    NSArray *arr = [Card jr_findAll];
     [array isEqual:nil];
+    [arr isEqual:nil];
     
+}
+
+- (Person *)createPerson:(int)base {
+    Person *p = [[Person alloc] init];
+    p.a_int = base + 1;
+    p.b_unsigned_int = base + 2;
+    p.c_long = base + 3;
+    p.d_long_long = base + 4;
+    p.e_unsigned_long = base + 5;
+    p.f_unsigned_long_long = base + 6;
+    p.g_float = base + 7.0;
+    p.h_double = base + 8.0;
+    p.i_string = [NSString stringWithFormat:@"%d", base + 9];
+    p.j_number = @(10 + base);
+    p.k_data = [NSData data];
+    p.l_date = [NSDate date];
+    p.m_date = [NSDate date];
+    p.type = [NSString stringWithFormat:@"Person+%d", base];
+    p.animal = [Animal new];
+
+    return p;
+}
+
+- (Card *)createCard:(NSString *)serialNumber {
+    Card *c = [Card new];
+    c.serialNumber = serialNumber;
+    return c;
 }
 
 @end

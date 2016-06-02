@@ -9,8 +9,11 @@
 #import <Foundation/Foundation.h>
 #import "JRPersistent.h"
 
+@class Person;
+
 @interface Card : NSObject
 @property (nonatomic, strong) NSString *serialNumber;
+@property (nonatomic, weak) Person *person;
 @end
 
 
