@@ -12,7 +12,13 @@
 
 @class FMDatabase;
 
-@interface NSObject (JRDB) <JRPersistent>
+@interface NSObject (JRDB) <JRPersistent, JRIgnore>
+
+#pragma mark - convinence method
+
+- (void)setSingleLinkID:(NSString * _Nullable)ID forKey:(NSString * _Nonnull)key;
+- (NSString * _Nullable)singleLinkIDforKey:(NSString * _Nonnull)key;
+
 
 #pragma mark - save
 /**
@@ -71,8 +77,12 @@
 
 #pragma mark - select
 
-+ (instancetype _Nullable)jr_findByPrimaryKey:(id _Nonnull)ID;
-+ (instancetype _Nullable)jr_findByPrimaryKey:(id _Nonnull)ID fromDB:(FMDatabase * _Nonnull)db;
++ (instancetype _Nullable)jr_findByID:(id _Nonnull)ID;
++ (instancetype _Nullable)jr_findByID:(id _Nonnull)ID fromDB:(FMDatabase * _Nonnull)db;
+
+
++ (instancetype _Nullable)jr_findByPrimaryKey:(id _Nonnull)primaryKey;
++ (instancetype _Nullable)jr_findByPrimaryKey:(id _Nonnull)primaryKey fromDB:(FMDatabase * _Nonnull)db;
 
 
 + (NSArray<id<JRPersistent>> * _Nonnull)jr_findAll;
@@ -84,6 +94,11 @@
 + (NSArray<id<JRPersistent>> * _Nonnull)jr_findByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions groupBy:(NSString * _Nullable)groupBy orderBy:(NSString * _Nullable)orderBy limit:(NSString * _Nullable)limit isDesc:(BOOL)isDesc fromDB:(FMDatabase * _Nullable)db;
 
 + (NSArray<id<JRPersistent>> * _Nonnull)jr_findByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions groupBy:(NSString * _Nullable)groupBy orderBy:(NSString * _Nullable)orderBy limit:(NSString * _Nullable)limit isDesc:(BOOL)isDesc;
+
+#pragma mark - table message 
+
++ (NSArray<NSString *> * _Nonnull)currentColumnsInDB:(FMDatabase * _Nonnull)db;
++ (NSArray<NSString *> * _Nonnull)currentColumns;
 
 #pragma mark - sql语句
 
@@ -108,6 +123,10 @@
  */
 + (NSUInteger)jr_countForSql:(NSString * _Nonnull)sql args:(NSArray * _Nullable)args;
 + (NSUInteger)jr_countForSql:(NSString * _Nonnull)sql args:(NSArray * _Nullable)args fromDB:(FMDatabase * _Nonnull)db;
+
+
++ (BOOL)jr_executeUpdate:(NSString * _Nonnull)sql args:(NSArray * _Nullable)args;
++ (BOOL)jr_executeUpdate:(NSString * _Nonnull)sql args:(NSArray * _Nullable)args fromDB:(FMDatabase * _Nonnull)db;
 
 #pragma mark - table operation
 + (BOOL)jr_createTable;

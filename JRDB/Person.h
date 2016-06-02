@@ -9,6 +9,11 @@
 #import <Foundation/Foundation.h>
 #import "JRPersistent.h"
 
+@interface Card : NSObject
+@property (nonatomic, strong) NSString *serialNumber;
+@end
+
+
 @interface Animal : NSObject
 
 @property (nonatomic, strong) NSString *type;
@@ -36,5 +41,6 @@
 @property (nonatomic, strong) NSDate *l_date;
 @property (nonatomic, strong) NSDate *m_date;
 
+@property (nonatomic, strong) Card *card;
 
 @end

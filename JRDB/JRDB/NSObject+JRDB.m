@@ -12,6 +12,7 @@
 #import "JRDBMgr.h"
 #import "JRFMDBResultSetHandler.h"
 #import "JRReflectUtil.h"
+#import "JRColumnSchema.h"
 
 #define JR_DEFAULTDB [JRDBMgr defaultDB]
 
@@ -19,6 +20,7 @@ const NSString *JRDB_IDKEY = @"JRDB_IDKEY";
 
 @implementation NSObject (JRDB)
 
+#pragma mark - protocol method
 - (void)setID:(NSString *)ID {
     objc_setAssociatedObject(self, &JRDB_IDKEY, ID, OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
@@ -29,8 +31,12 @@ const NSString *JRDB_IDKEY = @"JRDB_IDKEY";
     return @[];
 }
 
-+ (NSDictionary *)jr_mapPropNames {
-    return @{};
++ (NSDictionary<NSString *,Class<JRPersistent>> *)jr_singleLinkedPropertyNames {
+    return nil;
+}
+
++ (NSDictionary<NSString *,Class<JRPersistent>> *)jr_oneToManyLinkedPropertyNames {
+    return nil;
 }
 
 + (NSString *)jr_customPrimarykey {
@@ -55,6 +61,15 @@ const NSString *JRDB_IDKEY = @"JRDB_IDKEY";
     return [self ID];
 }
 
+#pragma mark - convinence method
+
+- (void)setSingleLinkID:(NSString *)ID forKey:(NSString *)key {
+    objc_setAssociatedObject(self, NSSelectorFromString(SingleLinkColumn(key)), ID, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+- (NSString *)singleLinkIDforKey:(NSString *)key {
+    return objc_getAssociatedObject(self, NSSelectorFromString(SingleLinkColumn(key)));
+}
 
 #pragma mark - save
 - (BOOL)jr_saveToDB:(FMDatabase *)db {
@@ -115,11 +130,19 @@ const NSString *JRDB_IDKEY = @"JRDB_IDKEY";
 
 #pragma mark - select
 
-+ (instancetype)jr_findByPrimaryKey:(id)ID fromDB:(FMDatabase * _Nonnull)db {
-    return [db findByPrimaryKey:ID clazz:[self class]];
++ (instancetype _Nullable)jr_findByID:(id _Nonnull)ID fromDB:(FMDatabase * _Nonnull)db {
+    return (NSObject *)[db findByID:ID clazz:self];
 }
-+ (instancetype)jr_findByPrimaryKey:(id)ID {
-    return [self jr_findByPrimaryKey:ID fromDB:JR_DEFAULTDB];
+
++ (instancetype _Nullable)jr_findByID:(id _Nonnull)ID {
+    return [self jr_findByID:ID fromDB:JR_DEFAULTDB];
+}
+
++ (instancetype)jr_findByPrimaryKey:(id)primaryKey fromDB:(FMDatabase * _Nonnull)db {
+    return (NSObject *)[db findByPrimaryKey:primaryKey clazz:[self class]];
+}
++ (instancetype)jr_findByPrimaryKey:(id)primaryKey {
+    return [self jr_findByPrimaryKey:primaryKey fromDB:JR_DEFAULTDB];
 }
 
 + (NSArray<id<JRPersistent>> *)jr_findAllFromDB:(FMDatabase *)db {
@@ -144,6 +167,20 @@ const NSString *JRDB_IDKEY = @"JRDB_IDKEY";
     return [self jr_findByConditions:conditions groupBy:groupBy orderBy:orderBy limit:limit isDesc:isDesc fromDB:JR_DEFAULTDB];
 }
 
+#pragma mark - table message
+
++ (NSArray<NSString *> * _Nonnull)currentColumnsInDB:(FMDatabase * _Nonnull)db {
+    NSArray<JRColumnSchema *> * arr = [db schemasInClazz:self];
+    NSMutableArray *array = [NSMutableArray array];
+    [arr enumerateObjectsUsingBlock:^(JRColumnSchema * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [array addObject:obj.name];
+    }];
+    return array;
+}
++ (NSArray<NSString *> * _Nonnull)currentColumns {
+    return [self currentColumnsInDB:JR_DEFAULTDB];
+}
+
 #pragma mark - sql
 + (NSArray<id<JRPersistent>> *)jr_executeSql:(NSString *)sql args:(NSArray *)args fromDB:(FMDatabase *)db {
     FMResultSet *ret = [db executeQuery:sql withArgumentsInArray:args];
@@ -161,6 +198,14 @@ const NSString *JRDB_IDKEY = @"JRDB_IDKEY";
 
 + (NSUInteger)jr_countForSql:(NSString *)sql args:(NSArray *)args {
     return [self jr_countForSql:sql args:args fromDB:JR_DEFAULTDB];
+}
+
++ (BOOL)jr_executeUpdate:(NSString *)sql args:(NSArray *)args {
+    return [self jr_executeUpdate:sql args:args fromDB:JR_DEFAULTDB];
+}
+
++ (BOOL)jr_executeUpdate:(NSString *)sql args:(NSArray *)args fromDB:(FMDatabase *)db {
+    return [db executeQuery:sql withArgumentsInArray:args];
 }
 
 #pragma mark - table operation
