@@ -145,7 +145,8 @@
 }
 
 - (void)testTruncateTable {
-    [Person jr_dropTable];
+    [[JRDBMgr shareInstance] deleteDBWithPath:[JRDBMgr defaultDB].databasePath];
+//    [Person jr_dropTable];
 //    [Person jr_truncateTable];
 //    [_db truncateTable4Clazz:[Person class]];
 //    [[JRDBMgr defaultDB] truncateTable4Clazz:[Person class]];
@@ -179,6 +180,11 @@
         Person *p = [Person new];
         [p jr_save];
     }];
+}
+
+- (void)testConforms {
+    BOOL flag = class_conformsToProtocol([Person class], @protocol(JRPersistent));
+    NSLog(@"%d", flag);
 }
 
 - (void)testIvars {

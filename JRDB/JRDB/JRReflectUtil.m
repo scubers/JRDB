@@ -59,4 +59,8 @@
     return method_getTypeEncoding(method);
 }
 
++ (BOOL)checkClazz:(Class)clazz isConformsTo:(Protocol *)aProtocol {
+    return class_conformsToProtocol(clazz, aProtocol);
+}
+
 @end

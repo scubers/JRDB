@@ -49,4 +49,14 @@
 
 + (const char * _Nonnull)typeEncoding4InstanceMethod:(SEL _Nonnull)selector inClazz:(Class _Nonnull)clazz;
 
+/**
+ *  检查该类是否遵循了某协议，其父类遵循依然返回NO，一定是本类遵循
+ *
+ *  @param clazz     检查的类
+ *  @param aProtocol 某个协议
+ *
+ *  @return 是否遵循
+ */
++ (BOOL)checkClazz:(Class _Nonnull)clazz isConformsTo:(Protocol * _Nonnull)aProtocol;
+
 @end

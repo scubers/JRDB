@@ -12,7 +12,7 @@
 
 @class FMDatabase;
 
-@interface NSObject (JRDB) <JRPersistent>
+@interface NSObject (JRDB) <JRPersistent, JRIgnore>
 
 #pragma mark - save
 /**

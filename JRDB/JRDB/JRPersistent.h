@@ -60,3 +60,9 @@ typedef void(^JRDBComplete)(BOOL success);
 
 
 @end
+
+/**
+ *  空协议，用于标记忽略字段
+ */
+@protocol JRIgnore <NSObject>
+@end

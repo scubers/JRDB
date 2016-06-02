@@ -15,6 +15,7 @@
 #import "JRFMDBResultSetHandler.h"
 #import "JRQueryCondition.h"
 #import "NSObject+JRDB.h"
+
 static NSString * const queuekey = @"queuekey";
 
 NSString * uuid() {
@@ -26,6 +27,7 @@ NSString * uuid() {
 
 @implementation FMDatabase (JRDB)
 
+#pragma mark - queue action
 - (void)closeQueue {
     [[self transactionQueue] close];
     objc_setAssociatedObject(self, &queuekey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
@@ -52,6 +54,7 @@ NSString * uuid() {
     }];
 }
 
+#pragma mark - table operation
 
 - (BOOL)createTable4Clazz:(Class<JRPersistent>)clazz {
     if (![self checkExistsTable4Clazz:clazz]) {
@@ -118,6 +121,7 @@ NSString * uuid() {
     }];
 }
 
+#pragma mark - data operation
 
 - (BOOL)saveObj:(id<JRPersistent>)obj {
     
@@ -170,16 +174,16 @@ NSString * uuid() {
         return NO;
     }
     
-    NSObject<JRPersistent> *updateObj;
+    id<JRPersistent> updateObj;
     if (columns.count) {
-        NSObject<JRPersistent> *old = [self findByPrimaryKey:[obj jr_primaryKeyValue] clazz:[obj class]];
+        id<JRPersistent> old = [self findByPrimaryKey:[obj jr_primaryKeyValue] clazz:[obj class]];
         if (!old) {
             NSLog(@"The object doesn't exists in database");
             return NO;
         }
         for (NSString *name in columns) {
             id value = [((NSObject *)obj) valueForKey:name];
-            [old setValue:value forKey:name];
+            [((NSObject *)old) setValue:value forKey:name];
         }
         updateObj = old;
     } else {
@@ -217,6 +221,8 @@ NSString * uuid() {
         EXE_BLOCK(complete, [db deleteObj:obj]);
     }];
 }
+
+#pragma mark - query operation
 
 - (id<JRPersistent>)findByPrimaryKey:(id)ID clazz:(Class<JRPersistent>)clazz {
     

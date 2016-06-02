@@ -29,6 +29,9 @@ class PPP: NSObject {
     var d_double: Double = 7
     var e_float: Float = 8
     var f_cgfloat: CGFloat = 9
+    
+    var g_nsData: NSData = NSData()
+    var h_nsDate: NSDate = NSDate()
 }
 
 class AViewController: UIViewController {
@@ -36,9 +39,12 @@ class AViewController: UIViewController {
         super.viewDidLoad()
 //        test()
 //        test2()
-        test3()
+//        test3()
         
-        JRDBMgr.shareInstance().registerClazzForUpdateTable(PPP)
+//        JRDBMgr.shareInstance().registerClazzForUpdateTable(PPP)
+        let dict = JRReflectUtil.ivarAndEncode4Clazz(PPP)
+        
+        NSLog("%@", dict)
         
     }
     
