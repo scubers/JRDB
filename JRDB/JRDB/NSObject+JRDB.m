@@ -163,6 +163,14 @@ const NSString *JRDB_IDKEY = @"JRDB_IDKEY";
     return [self jr_countForSql:sql args:args fromDB:JR_DEFAULTDB];
 }
 
++ (BOOL)jr_executeUpdate:(NSString *)sql args:(NSArray *)args {
+    return [self jr_executeUpdate:sql args:args fromDB:JR_DEFAULTDB];
+}
+
++ (BOOL)jr_executeUpdate:(NSString *)sql args:(NSArray *)args fromDB:(FMDatabase *)db {
+    return [db executeQuery:sql withArgumentsInArray:args];
+}
+
 #pragma mark - table operation
 
 + (BOOL)jr_createTableInDB:(FMDatabase *)db {

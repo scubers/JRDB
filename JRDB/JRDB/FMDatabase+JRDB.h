@@ -15,6 +15,7 @@
 
 @interface FMDatabase (JRDB)
 
+#pragma mark - queue operation
 
 - (void)closeQueue;
 
@@ -31,6 +32,8 @@
  */
 - (void)inTransaction:(void (^ _Nonnull)(FMDatabase * _Nonnull db, BOOL * _Nonnull rollBack))block;
 
+#pragma mark - table operation
+
 /**
  *  建表操作
  *
@@ -38,6 +41,7 @@
  */
 - (BOOL)createTable4Clazz:(Class<JRPersistent> _Nonnull)clazz;
 - (void)createTable4Clazz:(Class<JRPersistent> _Nonnull)clazz complete:(JRDBComplete _Nullable)complete;
+
 
 /**
  *  把表删了，重新创建
@@ -48,6 +52,7 @@
  */
 - (BOOL)truncateTable4Clazz:(Class<JRPersistent> _Nonnull)clazz;
 - (void)truncateTable4Clazz:(Class<JRPersistent> _Nonnull)clazz complete:(JRDBComplete _Nullable)complete;
+
 
 /**
  *  更新表操作
@@ -98,6 +103,8 @@
  */
 - (BOOL)updateObj:(id<JRPersistent> _Nonnull)obj columns:(NSArray * _Nullable)columns;
 - (void)updateObj:(id<JRPersistent> _Nonnull)obj columns:(NSArray * _Nullable)columns complete:(JRDBComplete _Nullable)complete;
+
+#pragma mark - query operation
 
 - (id<JRPersistent> _Nullable)findByPrimaryKey:(id _Nonnull)ID clazz:(Class<JRPersistent> _Nonnull)clazz;
 

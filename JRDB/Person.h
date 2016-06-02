@@ -13,16 +13,16 @@
 @end
 
 
-@interface Animal : NSObject <JRPersistent>
+@interface Animal : NSObject
 
 @property (nonatomic, strong) NSString *type;
 
 @end
 
 
-@interface Person : Animal <JRPersistent>
+@interface Person : Animal
 
-@property (nonatomic, strong) Animal<Ignore> *animal;
+@property (nonatomic, strong) Animal *animal;
 
 @property (nonatomic, assign) int a_int;
 @property (nonatomic, assign) unsigned int b_unsigned_int;

@@ -104,7 +104,7 @@
 }
 
 - (void)testFindAll {
-    NSArray<Person *> *array = [Person jr_findAll];
+    NSArray *array = [Person jr_findAll];
     NSLog(@"%@", array);
     [array enumerateObjectsUsingBlock:^(Person * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         NSLog(@"%@", obj.jr_changedArray);
@@ -113,15 +113,19 @@
 
     }];
 }
+//alter table tablename rename column oldColumnName to newColumnName;
 
 - (void)testCustomPK {
-    
+    Person *p = [Person new];
+    p.i_string = @"9";
+    p.a_int = 1000;
+    [p jr_updateWithColumn:@[@"_a_int"]];
 }
 
 - (void)testAdd {
 //    Person *p = [Person new];
 //    [p setValue:@"abc" forKey:@"_type"];
-    for (int i = 0; i<1; i++) {
+    for (int i = 0; i<10; i++) {
         Person *p = [[Person alloc] init];
         p.a_int = i;
         p.b_unsigned_int = 2;
@@ -207,6 +211,11 @@
     }
 
     NSLog(@"%@", dict);
+}
+
+- (void)testSql1 {
+    BOOL flag = [[JRDBMgr defaultDB] executeUpdate:@"update Person set _b_unsigned_int = _a_int;"];
+    NSLog(@"%d", flag);
 }
 
 @end

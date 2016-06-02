@@ -109,6 +109,10 @@
 + (NSUInteger)jr_countForSql:(NSString * _Nonnull)sql args:(NSArray * _Nullable)args;
 + (NSUInteger)jr_countForSql:(NSString * _Nonnull)sql args:(NSArray * _Nullable)args fromDB:(FMDatabase * _Nonnull)db;
 
+
++ (BOOL)jr_executeUpdate:(NSString * _Nonnull)sql args:(NSArray * _Nullable)args;
++ (BOOL)jr_executeUpdate:(NSString * _Nonnull)sql args:(NSArray * _Nullable)args fromDB:(FMDatabase * _Nonnull)db;
+
 #pragma mark - table operation
 + (BOOL)jr_createTable;
 + (BOOL)jr_createTableInDB:(FMDatabase * _Nonnull)db;

@@ -21,13 +21,13 @@
              @"_m_date",
              ];
 }
-
-+ (NSString *)jr_customPrimarykey {
-    return @"_i_string";
-}
-
-- (id)jr_customPrimarykeyValue {
-    return self.i_string;
-}
+//
+//+ (NSString *)jr_customPrimarykey {
+//    return @"_i_string";
+//}
+//
+//- (id)jr_customPrimarykeyValue {
+//    return self.i_string;
+//}
 
 @end
