@@ -22,21 +22,44 @@
 
 #pragma mark - save
 /**
- *  保存到指定数据库
+ *  保存到指定数据库 自带事务操作，外层不能嵌套事务操作 @see - jr_saveToDB:useTransaction:
  *
  *  @param db 数据库
- *
  *  @return 是否成功
  */
 - (BOOL)jr_saveToDB:(FMDatabase * _Nonnull)db;
-- (void)jr_saveToDB:(FMDatabase * _Nonnull)db complete:(JRDBComplete _Nullable)complete;
+
+
 /**
- *  保存到JRDBMgr的默认数据库
+ *  保存到指定数据库 自带事务操作，外层不能嵌套事务操作 @see - jr_saveToDB:useTransaction:complete:
+ *
+ *  @param db 数据库
+ *  @return 是否成功
+ */
+- (void)jr_saveToDB:(FMDatabase * _Nonnull)db complete:(JRDBComplete _Nullable)complete;
+
+/**
+ *  保存到JRDBMgr的默认数据库 自带事务操作，外层不能嵌套事务操作，如需自行包裹事务，@see - jr_save:useTransaction:
  *
  *  @return 是否成功
  */
 - (BOOL)jr_save;
+
+/**
+ *  保存到JRDBMgr的默认数据库 自带事务操作，外层不能嵌套事务操作，如需自行包裹事务，@see - jr_saveUseTransaction:complete:
+ *
+ *  @return 是否成功
+ */
 - (void)jr_saveWithComplete:(JRDBComplete _Nullable)complete;
+
+
+- (BOOL)jr_saveToDB:(FMDatabase * _Nonnull)db useTransaction:(BOOL)useTransaction;
+- (void)jr_saveToDB:(FMDatabase * _Nonnull)db useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete;
+
+
+- (BOOL)jr_saveUseTransaction:(BOOL)useTransaction;
+- (void)jr_saveUseTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete;
+
 
 #pragma mark - update
 /**
@@ -67,6 +90,8 @@
  */
 - (BOOL)jr_deleteFromDB:(FMDatabase * _Nonnull)db;
 - (void)jr_deleteFromDB:(FMDatabase * _Nonnull)db complete:(JRDBComplete _Nullable)complete;
+
+
 /**
  *  从JRDBMgr的默认数据库删除
  *

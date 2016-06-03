@@ -26,7 +26,7 @@
 
 - (void)setUp {
     [super setUp];
-    FMDatabase *db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/jmacmini/Desktop/test.sqlite"];
+    FMDatabase *db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/Jrwong/Desktop/test.sqlite"];
     [[JRDBMgr shareInstance] registerClazzForUpdateTable:[Person class]];
     [JRDBMgr shareInstance].defaultDB = db;
 }
@@ -137,12 +137,11 @@
     Card *c = [self createCard:@"001"];
     son.card = c;
     c.person = son;
-    
-    [[JRDBMgr defaultDB] inTransaction:^(FMDatabase * _Nonnull db, BOOL * _Nonnull rollBack) {
-        [father jr_saveToDB:db];
-    }];
+
 //    [father jr_save];
-    
+    [father jr_saveUseTransaction:NO];
+
+
 }
 
 - (void)test3Node {
@@ -171,8 +170,10 @@
     [[JRDBMgr defaultDB] inTransaction:^(FMDatabase * _Nonnull db, BOOL * _Nonnull rollBack) {
         Person *p = [self createPerson:1 name:@"A"];
         Person *p2 = [self createPerson:2 name:@"B"];
-        [p jr_saveToDB:db];
-        [p2 jr_saveToDB:db];
+
+        [db saveObj:p useTransaction:NO];
+        [db saveObj:p2 useTransaction:NO];
+
         *rollBack = YES;
     }];
 }

@@ -21,6 +21,8 @@
  *  @return 返回类全名（Swift.UIView）兼顾swift
  */
 + (NSString * _Nonnull)fullClazzName:(Class _Nonnull)clazz;
+
+
 /**
  *  类简称
  *
@@ -29,6 +31,7 @@
  */
 + (NSString * _Nonnull)shortClazzName:(Class _Nonnull)clazz;
 
+
 /**
  *  统一将下划线去掉
  *
@@ -36,6 +39,7 @@
  *  @return name
  */
 + (NSString * _Nonnull)simpleIvarName:(NSString * _Nonnull)ivarName;
+
 
 /**
  *  返回类里所有成员变量以及对应的编码

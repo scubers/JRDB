@@ -15,15 +15,9 @@
 #import "JRFMDBResultSetHandler.h"
 #import "JRQueryCondition.h"
 #import "NSObject+JRDB.h"
+#import "JRUtils.h"
 
 static NSString * const queuekey = @"queuekey";
-
-NSString * uuid() {
-    CFUUIDRef uuidObject = CFUUIDCreate(kCFAllocatorDefault);
-    NSString *uuidStr = (NSString *)CFBridgingRelease(CFUUIDCreateString(kCFAllocatorDefault, uuidObject));
-    CFRelease(uuidObject);
-    return uuidStr;
-}
 
 @implementation FMDatabase (JRDB)
 
@@ -168,7 +162,7 @@ NSString * uuid() {
     
     NSArray *args;
     NSString *sql = [JRSqlGenerator sql4Insert:obj args:&args toDB:self];
-    [obj setID:uuid()];
+    [obj setID:[JRUtils uuid]];
     args = [@[obj.ID] arrayByAddingObjectsFromArray:args];
     BOOL ret = [self executeUpdate:sql withArgumentsInArray:args];
     
@@ -188,7 +182,7 @@ NSString * uuid() {
     [[[obj class] jr_singleLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull clazz, BOOL * _Nonnull stop) {
         id value = [((NSObject *)obj) valueForKey:key];
         if (value) {
-            NSString *identifier = uuid();
+            NSString *identifier = [JRUtils uuid];
             if ([*stack containsObject:value]) {
                 [value jr_addDidFinishBlock:^(id<JRPersistent>  _Nonnull object) {
                     [((NSObject *)obj) jr_updateWithColumn:nil];
@@ -212,10 +206,12 @@ NSString * uuid() {
         NSAssert([self createTable4Clazz:[obj class]], @"create table: %@ error", tableName);
     }
     
-//    if (!hierarchy || ![obj jr_primaryKeyValue]) {
     if (![obj jr_primaryKeyValue]) {
         BOOL ret = [self save:obj];
         *needRollBack = !ret;
+        if (!ret) {
+            NSLog(@"save obj: %@ error, transaction will be rollback", obj);
+        }
         return ret;
     } else {
         if (![obj ID]) {
@@ -228,17 +224,39 @@ NSString * uuid() {
 }
 
 - (BOOL)saveObj:(id<JRPersistent>)obj {
-    NSAssert([self inTransaction], @"save operation can occur an error, you should use 'inTransaction:' method to save");
-    NSMutableArray *stack = [NSMutableArray array];
-    BOOL needRollBack = NO;
-    [self handleSave:obj stack:&stack needRollBack:&needRollBack];
-    if (needRollBack) { [self rollback]; }
-    return !needRollBack;
+    return [self saveObj:obj useTransaction:YES];
 }
 
 - (void)saveObj:(id<JRPersistent>)obj complete:(JRDBComplete)complete {
     [self inQueue:^(FMDatabase *db) {
         EXE_BLOCK(complete, [db saveObj:obj]);
+    }];
+}
+
+
+- (BOOL)saveObj:(id<JRPersistent>)obj useTransaction:(BOOL)useTransaction {
+    if (useTransaction) {
+        NSAssert(![self inTransaction], @"save error: database has been open an transaction");
+        [self beginTransaction];
+    }
+
+    NSMutableArray *stack = [NSMutableArray array];
+    BOOL needRollBack = NO;
+    [self handleSave:obj stack:&stack needRollBack:&needRollBack];
+
+    if (useTransaction) {
+        if (needRollBack) {
+            [self rollback];
+        } else {
+            [self commit];
+        }
+    }
+    return !needRollBack;
+}
+
+- (void)saveObj:(id<JRPersistent>)obj useTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete {
+    [self inQueue:^(FMDatabase * _Nonnull db) {
+        EXE_BLOCK(complete, [db saveObj:obj useTransaction:useTransaction]);
     }];
 }
 

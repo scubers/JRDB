@@ -80,7 +80,7 @@
 #pragma mark - 增删改查操作
 /**
  *  save 操作，若使用默认主键，则自动生成主键，若自定义主键，需要自行赋值主键
- *  因为带有关联保存操作，使用 事务操作
+ *  因为带有关联保存操作，自带事务操作
  *
  *  @param obj 保存对象
  *  @return return value description
@@ -88,6 +88,25 @@
 - (BOOL)saveObj:(id<JRPersistent> _Nonnull)obj;
 - (void)saveObj:(id<JRPersistent> _Nonnull)obj complete:(JRDBComplete _Nullable)complete;
 
+/**
+ *  save 操作，若使用默认主键，则自动生成主键，若自定义主键，需要自行赋值主键
+ *  因为带有关联保存操作，自带事务操作
+ *
+ *  @param obj 保存对象
+ *  @param useTransaction 是否使用事务，可以选择使用，也可以选择自行包裹事务
+ *  @return return value description
+ */
+
+- (BOOL)saveObj:(id<JRPersistent> _Nonnull)obj useTransaction:(BOOL)useTransaction;
+- (void)saveObj:(id<JRPersistent> _Nonnull)obj useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete;
+
+/**
+ *  删除操作
+ *
+ *  @param obj 删除的对象
+ *
+ *  @return 结果
+ */
 - (BOOL)deleteObj:(id<JRPersistent> _Nonnull)obj;
 - (void)deleteObj:(id<JRPersistent> _Nonnull)obj complete:(JRDBComplete _Nullable)complete;
 

@@ -114,6 +114,22 @@ const NSString *JRDB_IDKEY = @"JRDB_IDKEY";
     [self jr_saveToDB:JR_DEFAULTDB complete:complete];
 }
 
+- (BOOL)jr_saveToDB:(FMDatabase *)db useTransaction:(BOOL)useTransaction {
+    return [db saveObj:self useTransaction:useTransaction];
+}
+
+- (void)jr_saveToDB:(FMDatabase *)db useTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete {
+    [db saveObj:self useTransaction:useTransaction complete:complete];
+}
+
+- (BOOL)jr_saveUseTransaction:(BOOL)useTransaction {
+    return [self jr_saveToDB:JR_DEFAULTDB useTransaction:useTransaction];
+}
+
+- (void)jr_saveUseTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete {
+    [self jr_saveToDB:JR_DEFAULTDB useTransaction:useTransaction complete:complete];
+}
+
 #pragma mark - update
 - (BOOL)jr_updateToDB:(FMDatabase *)db column:(NSArray *)columns {
     return [db updateObj:self columns:columns];
