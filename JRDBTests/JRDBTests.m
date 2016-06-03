@@ -26,7 +26,9 @@
 
 - (void)setUp {
     [super setUp];
+    FMDatabase *db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/jmacmini/Desktop/test.sqlite"];
     [[JRDBMgr shareInstance] registerClazzForUpdateTable:[Person class]];
+    [JRDBMgr shareInstance].defaultDB = db;
 }
 
 - (void)tearDown {
@@ -61,6 +63,12 @@
 }
 
 - (void)testUpdate {
+    Person *p = (Person *)[Person jr_findAll].firstObject;
+    p.card.person = p;
+    [p.card jr_updateWithColumn:nil];
+//    [p jr_updateWithColumn:nil];
+//    [p isEqual:nil];
+    
 }
 
 
@@ -104,13 +112,80 @@
 
 
 - (void)testSql11 {
-    Person *p = [self createPerson:1];
+    Person *p = [self createPerson:1 name:@"A"];
     Card *c = [self createCard:@"001"];
+    Card *c1 = [self createCard:@"002"];
     p.card = c;
+    p.card1 = c1;
     c.person = p;
+    c1.person = p;
+
+    [p jr_addDidFinishBlock:^(id<JRPersistent>  _Nonnull obj) {
+        NSLog(@"finish save %@", obj);
+    } forIdentifier:@"abc"];
+
     [p jr_save];
+    
+    NSLog(@"------");
 }
 
+- (void)test2Cycle {
+    Person *father = [self createPerson:1 name:@"A"];
+    Person *son = [self createPerson:2  name:@"B"];
+    father.son = son;
+    
+    Card *c = [self createCard:@"001"];
+    son.card = c;
+    c.person = son;
+    
+    [[JRDBMgr defaultDB] inTransaction:^(FMDatabase * _Nonnull db, BOOL * _Nonnull rollBack) {
+        [father jr_saveToDB:db];
+    }];
+//    [father jr_save];
+    
+}
+
+- (void)test3Node {
+    Person *father = [self createPerson:1 name:@"A"];
+    Person *son = [self createPerson:2 name:@"B"];
+    Person *subSon = [self createPerson:3 name:@"C"];
+    
+    father.son = son;
+    son.son = subSon;
+    subSon.son = father;
+    
+    [father jr_addDidFinishBlock:^(id<JRPersistent>  _Nonnull obj) {
+        NSLog(@"father saved");
+    } forIdentifier:@"1"];
+    [son jr_addDidFinishBlock:^(id<JRPersistent>  _Nonnull obj) {
+        NSLog(@"son saved");
+    } forIdentifier:@"1"];
+    [subSon jr_addDidFinishBlock:^(id<JRPersistent>  _Nonnull obj) {
+        NSLog(@"subson saved");
+    } forIdentifier:@"1"];
+    
+    [father jr_save];
+}
+
+- (void)testTransaction {
+    [[JRDBMgr defaultDB] inTransaction:^(FMDatabase * _Nonnull db, BOOL * _Nonnull rollBack) {
+        Person *p = [self createPerson:1 name:@"A"];
+        Person *p2 = [self createPerson:2 name:@"B"];
+        [p jr_saveToDB:db];
+        [p2 jr_saveToDB:db];
+        *rollBack = YES;
+    }];
+}
+
+- (void)testFindByID {
+    Person *p = [Person jr_findByID:@"CD71B668-3608-4EAE-997A-201DBAE40BA3"];
+    [p isEqual:nil];
+}
+
+- (void)testDeleteAll {
+    [Person jr_truncateTable];
+    [Card jr_truncateTable];
+}
 
 
 - (void)testSomething {
@@ -121,8 +196,9 @@
     
 }
 
-- (Person *)createPerson:(int)base {
+- (Person *)createPerson:(int)base name:(NSString *)name {
     Person *p = [[Person alloc] init];
+    p.name = name;
     p.a_int = base + 1;
     p.b_unsigned_int = base + 2;
     p.c_long = base + 3;

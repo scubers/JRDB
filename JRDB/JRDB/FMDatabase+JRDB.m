@@ -157,7 +157,7 @@ NSString * uuid() {
 /**
  *  保存单条，不关联保存
  */
-- (BOOL)saveSingle:(id<JRPersistent>)obj {
+- (BOOL)save:(id<JRPersistent>)obj {
     if ([[obj class] jr_customPrimarykey]) { // 自定义主键
         NSAssert([obj jr_customPrimarykeyValue] != nil, @"custom Primary key should not be nil");
         NSObject *old = (NSObject *)[self getByPrimaryKey:[obj jr_customPrimarykeyValue] clazz:[obj class]];
@@ -171,15 +171,39 @@ NSString * uuid() {
     [obj setID:uuid()];
     args = [@[obj.ID] arrayByAddingObjectsFromArray:args];
     BOOL ret = [self executeUpdate:sql withArgumentsInArray:args];
+    
+    // 保存完，执行block
+    [obj jr_executeFinishBlocks];
+    
     return ret;
 }
 
-- (BOOL)handleSave:(id<JRPersistent>)obj startObj:(id<JRPersistent>)startObj hierarchy:(int)hierarchy {
+
+- (BOOL)handleSave:(id<JRPersistent>)obj stack:(NSMutableArray<id<JRPersistent>> **)stack needRollBack:(BOOL *)needRollBack {
+    
+    if (*needRollBack) {
+        return NO;
+    }
     
     [[[obj class] jr_singleLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull clazz, BOOL * _Nonnull stop) {
         id value = [((NSObject *)obj) valueForKey:key];
-        if (value && value != startObj) {
-            [self handleSave:value startObj:startObj hierarchy:hierarchy + 1];
+        if (value) {
+            NSString *identifier = uuid();
+            if ([*stack containsObject:value]) {
+                [value jr_addDidFinishBlock:^(id<JRPersistent>  _Nonnull object) {
+                    [((NSObject *)obj) jr_updateWithColumn:nil];
+                    [object jr_removeDidFinishBlockForIdentifier:identifier];
+                } forIdentifier:identifier];
+            } else {
+                if (![*stack containsObject:obj]) {
+                    [*stack addObject:obj];
+                }
+                [obj jr_addDidFinishBlock:^(id<JRPersistent>  _Nonnull object) {
+                    [*stack removeObject:object];
+                    [object jr_removeDidFinishBlockForIdentifier:identifier];
+                } forIdentifier:identifier];
+                [self handleSave:value stack:stack needRollBack:needRollBack];
+            }
         }
     }];
     
@@ -188,8 +212,11 @@ NSString * uuid() {
         NSAssert([self createTable4Clazz:[obj class]], @"create table: %@ error", tableName);
     }
     
-    if (!hierarchy || ![obj jr_primaryKeyValue]) {
-        return [self saveSingle:obj];
+//    if (!hierarchy || ![obj jr_primaryKeyValue]) {
+    if (![obj jr_primaryKeyValue]) {
+        BOOL ret = [self save:obj];
+        *needRollBack = !ret;
+        return ret;
     } else {
         if (![obj ID]) {
             [obj setID:[[self getByPrimaryKey:[obj jr_primaryKeyValue] clazz:[obj class]] ID]];
@@ -201,11 +228,12 @@ NSString * uuid() {
 }
 
 - (BOOL)saveObj:(id<JRPersistent>)obj {
-    __block BOOL flag = NO;
-    [self inTransaction:^(FMDatabase * _Nonnull db, BOOL * _Nonnull rollBack) {
-        flag = [db handleSave:obj startObj:obj hierarchy:0];
-    }];
-    return flag;
+    NSAssert([self inTransaction], @"save operation can occur an error, you should use 'inTransaction:' method to save");
+    NSMutableArray *stack = [NSMutableArray array];
+    BOOL needRollBack = NO;
+    [self handleSave:obj stack:&stack needRollBack:&needRollBack];
+    if (needRollBack) { [self rollback]; }
+    return !needRollBack;
 }
 
 - (void)saveObj:(id<JRPersistent>)obj complete:(JRDBComplete)complete {
@@ -254,6 +282,8 @@ NSString * uuid() {
     args = [args arrayByAddingObject:[updateObj jr_primaryKeyValue]];
 
     BOOL ret = [self executeUpdate:sql withArgumentsInArray:args];
+    // 保存完，执行block
+    [obj jr_executeFinishBlocks];
     return ret;
 }
 
@@ -272,7 +302,10 @@ NSString * uuid() {
     }
     
     NSString *sql = [JRSqlGenerator sql4Delete:obj];
-    return [self executeUpdate:sql withArgumentsInArray:@[[obj jr_primaryKeyValue]]];
+    BOOL ret = [self executeUpdate:sql withArgumentsInArray:@[[obj jr_primaryKeyValue]]];
+    // 保存完，执行block
+    [obj jr_executeFinishBlocks];
+    return ret;
 }
 
 - (void)deleteObj:(id<JRPersistent>)obj complete:(JRDBComplete)complete {
@@ -280,6 +313,23 @@ NSString * uuid() {
         EXE_BLOCK(complete, [db deleteObj:obj]);
     }];
 }
+
+- (BOOL)deleteAll:(Class<JRPersistent> _Nonnull)clazz {
+    if (![self checkExistsTable4Clazz:clazz]) {
+        NSLog(@"table : %@ doesn't exists", clazz);
+        return NO;
+    }
+    NSString *sql = [JRSqlGenerator sql4DeleteAll:clazz];
+    BOOL ret = [self executeUpdate:sql withArgumentsInArray:nil];
+    return ret;
+}
+
+- (void)deleteAll:(Class<JRPersistent> _Nonnull)clazz complete:(JRDBComplete _Nullable)complete {
+    [self inQueue:^(FMDatabase * _Nonnull db) {
+        EXE_BLOCK(complete, [db deleteAll:clazz]);
+    }];
+}
+
 
 #pragma mark - single level query operation
 
@@ -320,26 +370,43 @@ NSString * uuid() {
 
 #pragma mark - multi level query operation
 
-- (id<JRPersistent>)handleSingleLinkFindByID:(NSString *)ID clazz:(Class<JRPersistent>)clazz {
+- (id<JRPersistent>)objInStack:(NSArray *)array withID:(NSString *)ID {
+    __block id<JRPersistent> obj = nil;
+    [array enumerateObjectsUsingBlock:^(id<JRPersistent>  _Nonnull stackObj, NSUInteger idx, BOOL * _Nonnull stop) {
+        if ([ID isEqualToString:[stackObj ID]]) {
+            obj = stackObj;
+            *stop = YES;
+        }
+    }];
+    return obj;
+}
+
+- (id<JRPersistent>)handleSingleLinkFindByID:(NSString *)ID clazz:(Class<JRPersistent>)clazz stack:(NSMutableArray<id<JRPersistent>> **)stack{
     id obj = [self getByID:ID clazz:clazz];
     [[clazz jr_singleLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull subClazz, BOOL * _Nonnull stop) {
         NSString *subID = [((NSObject *)obj) singleLinkIDforKey:key];
         if (subID) {
-            id<JRPersistent> subObj = [self handleSingleLinkFindByID:subID clazz:subClazz];
-            [obj setValue:subObj forKey:key];
+            [(*stack) addObject:obj];
+            id<JRPersistent> exists = [self objInStack:(*stack) withID:subID];
+            if (!exists) {
+                exists = [self handleSingleLinkFindByID:subID clazz:subClazz stack:stack];
+            }
+            [obj setValue:exists forKey:key];
         }
     }];
     return obj;
 }
 
 - (id<JRPersistent>)findByID:(NSString *)ID clazz:(Class<JRPersistent>)clazz {
-    return [self handleSingleLinkFindByID:ID clazz:clazz];
+    NSMutableArray *array = [NSMutableArray array];
+    return [self handleSingleLinkFindByID:ID clazz:clazz stack:&array];
 }
 
 - (id<JRPersistent>)findByPrimaryKey:(id)primaryKey clazz:(Class<JRPersistent>)clazz {
     NSAssert([self checkExistsTable4Clazz:clazz], @"table %@ doesn't exists", clazz);
     id<JRPersistent> obj = [self getByPrimaryKey:primaryKey clazz:clazz];
-    return [self handleSingleLinkFindByID:[obj ID] clazz:clazz];
+    NSMutableArray *array = [NSMutableArray array];
+    return [self handleSingleLinkFindByID:[obj ID] clazz:clazz stack:&array];
 }
 
 
@@ -351,7 +418,8 @@ NSString * uuid() {
     NSArray *list = [self getAll:clazz orderBy:orderby isDesc:isDesc];
     NSMutableArray *result = [NSMutableArray array];
     [list enumerateObjectsUsingBlock:^(id<JRPersistent>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        [result addObject:[self handleSingleLinkFindByID:[obj ID] clazz:[obj class]]];
+        NSMutableArray *array = [NSMutableArray array];
+        [result addObject:[self handleSingleLinkFindByID:[obj ID] clazz:[obj class] stack:&array]];
     }];
     return result;
 }
@@ -360,7 +428,8 @@ NSString * uuid() {
     NSArray<id<JRPersistent>> *list = [self getByConditions:conditions clazz:clazz groupBy:groupBy orderBy:orderBy limit:limit isDesc:isDesc];
     NSMutableArray *result = [NSMutableArray array];
     [list enumerateObjectsUsingBlock:^(id<JRPersistent>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        [result addObject:[self handleSingleLinkFindByID:[obj ID] clazz:[obj class]]];
+        NSMutableArray *array = [NSMutableArray array];
+        [result addObject:[self handleSingleLinkFindByID:[obj ID] clazz:[obj class] stack:&array]];
     }];
     return result;
 }

@@ -59,7 +59,6 @@ typedef enum {
                              args:(NSArray * _Nullable * _Nullable)args
                              toDB:(FMDatabase * _Nonnull)db;
 
-
 /**
  *  返回占位符的sql update tablename set name = ?, name2 = ? where ID = ?
  *  columns 需要更新的列，传nil则全部更新
@@ -75,6 +74,10 @@ typedef enum {
  */
 + (NSString * _Nonnull)sql4Delete:(id<JRPersistent> _Nonnull)obj;
 
+/**
+ *  返回占位符的sql delete from tablename
+ */
++ (NSString * _Nonnull)sql4DeleteAll:(Class<JRPersistent> _Nonnull)clazz;
 
 
 /**

@@ -124,7 +124,7 @@
         NSObject<JRPersistent> *value = [((NSObject *)obj) valueForKey:key];
         [sql appendFormat:@", %@ ", SingleLinkColumn(key)];
         [sql2 appendFormat:@", ? "];
-        [argsList addObject:[value ID]];
+        [argsList addObject:[value ID] ? [value ID] : [NSNull null]];
     }];
     
     [sql appendString:@")"];
@@ -138,6 +138,12 @@
 
 + (NSString *)sql4Delete:(id<JRPersistent>)obj {
     NSString *sql = [NSString stringWithFormat:@"delete from %@ where %@ = ? ;", [JRReflectUtil shortClazzName:[obj class]], [[obj class] jr_primaryKey]];
+    NSLog(@"sql: %@", sql);
+    return sql;
+}
+
++ (NSString *)sql4DeleteAll:(Class<JRPersistent>)clazz {
+    NSString *sql = [NSString stringWithFormat:@"delete from %@", [JRReflectUtil shortClazzName:clazz]];
     NSLog(@"sql: %@", sql);
     return sql;
 }
@@ -173,6 +179,17 @@
         
         [argsList addObject:value];
     }
+    
+    // 检测一对一字段
+    [[[obj class] jr_singleLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull clazz, BOOL * _Nonnull stop) {
+        
+        id<JRPersistent> value = [((NSObject *)obj) valueForKey:key];
+        [((NSObject *)obj) setSingleLinkID:[value ID] forKey:key];
+        
+        [sql appendFormat:@" %@ = ?,", SingleLinkColumn(key)];
+        [argsList addObject: [value ID] ? [value ID] : [NSNull null]];
+    }];
+    
     
     if ([sql hasSuffix:@","]) {
         sql = [[sql substringToIndex:sql.length - 1] mutableCopy];

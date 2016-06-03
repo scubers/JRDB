@@ -13,10 +13,19 @@
 + (NSDictionary<NSString *,Class<JRPersistent>> *)jr_singleLinkedPropertyNames {
     return @{@"_person" : [Person class]};
 }
+- (void)dealloc {
+    NSLog(@"%@, dealloc", self);
+}
+- (NSString *)description {
+    return [NSString stringWithFormat:@"Serial number: %@\nID: %@", self.serialNumber, self.ID];
+}
 @end
 
 
 @implementation Animal
+- (void)dealloc {
+    NSLog(@"%@, dealloc", self);
+}
 @end
 
 @implementation Person
@@ -38,7 +47,15 @@
 //}
 
 + (NSDictionary<NSString *,Class<JRPersistent>> *)jr_singleLinkedPropertyNames {
-    return @{@"_card" : [Card class]};
+    return @{
+             @"_card" : [Card class],
+             @"_card1" : [Card class],
+             @"_son" : [Person class],
+             };
+}
+
+- (NSString *)description {
+    return [NSString stringWithFormat:@"name: %@, \nID: %@", self.name, self.ID];
 }
 
 @end

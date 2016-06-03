@@ -61,6 +61,30 @@ const NSString *JRDB_IDKEY = @"JRDB_IDKEY";
     return [self ID];
 }
 
+- (void)jr_addDidFinishBlock:(JRDBDidFinishBlock _Nullable)block forIdentifier:(NSString * _Nonnull)identifier; {
+    [self jr_finishBlocks][identifier] = block;
+}
+
+- (void)jr_removeDidFinishBlockForIdentifier:(NSString *)identifier {
+    [[self jr_finishBlocks] removeObjectForKey:identifier];
+}
+
+- (void)jr_executeFinishBlocks {
+    __weak typeof(self) ws = self;
+    [[self jr_finishBlocks] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, JRDBDidFinishBlock  _Nonnull block, BOOL * _Nonnull stop) {
+        block(ws);
+    }];
+}
+
+- (NSMutableDictionary<NSString *,JRDBDidFinishBlock> *)jr_finishBlocks {
+    NSMutableDictionary<NSString *,JRDBDidFinishBlock> *blocks = objc_getAssociatedObject(self, _cmd);
+    if (!blocks) {
+        blocks = [NSMutableDictionary dictionary];
+        objc_setAssociatedObject(self, _cmd, blocks, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    }
+    return blocks;
+}
+
 #pragma mark - convinence method
 
 - (void)setSingleLinkID:(NSString *)ID forKey:(NSString *)key {
@@ -128,13 +152,29 @@ const NSString *JRDB_IDKEY = @"JRDB_IDKEY";
     [self jr_deleteFromDB:JR_DEFAULTDB complete:complete];
 }
 
++ (BOOL)jr_deleteAll {
+    return [self jr_deleteAllFromDB:JR_DEFAULTDB];
+}
+
++ (void)jr_deleteAllWithComplete:(JRDBComplete)complete {
+    [self jr_deleteAllFromDB:JR_DEFAULTDB WithComplete:complete];
+}
+
++ (BOOL)jr_deleteAllFromDB:(FMDatabase *)db {
+    return [db deleteAll:self];
+}
+
++ (void)jr_deleteAllFromDB:(FMDatabase *)db WithComplete:(JRDBComplete)complete {
+    [db deleteAll:self complete:complete];
+}
+
 #pragma mark - select
 
-+ (instancetype _Nullable)jr_findByID:(id _Nonnull)ID fromDB:(FMDatabase * _Nonnull)db {
++ (instancetype _Nullable)jr_findByID:(NSString * _Nonnull)ID fromDB:(FMDatabase * _Nonnull)db {
     return (NSObject *)[db findByID:ID clazz:self];
 }
 
-+ (instancetype _Nullable)jr_findByID:(id _Nonnull)ID {
++ (instancetype _Nullable)jr_findByID:(NSString * _Nonnull)ID {
     return [self jr_findByID:ID fromDB:JR_DEFAULTDB];
 }
 

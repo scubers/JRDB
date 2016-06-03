@@ -13,7 +13,14 @@ enum Sex : Int {
     case Woman
 }
 
-class PPP: NSObject {
+class AAA: NSObject {
+    var type: String?
+    deinit {
+        print("\(self) deinit")
+    }
+}
+
+class PPP: AAA {
     
     var sss : Sex = .Man
     
@@ -32,27 +39,91 @@ class PPP: NSObject {
     
     var g_nsData: NSData = NSData()
     var h_nsDate: NSDate = NSDate()
+    
+    var ccc: CCC?
+    var ccc1: CCC?
+    
+    var ppp: PPP?
+    
+    override static func jr_singleLinkedPropertyNames() -> [String : AnyObject.Type]? {
+        return [
+            "ccc" : CCC.self,
+            "ccc1" : CCC.self,
+            "ppp" : PPP.self,
+        ]
+    }
+}
+
+class CCC: NSObject {
+    var serialNumber: String = ""
+    weak var ppp: PPP?
+    
+    override static func jr_singleLinkedPropertyNames() -> [String : AnyObject.Type]? {
+        return [
+            "ppp" : PPP.self,
+        ]
+    }
+    
+    deinit {
+        print("\(self) deinit")
+    }
 }
 
 class AViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
-//        test()
-//        test2()
-        test3()
+//        let db = JRDBMgr.shareInstance().createDBWithPath("/Users/jmacmini/Desktop/test.sqlite")
+//        JRDBMgr.shareInstance().defaultDB = db
+//        test1Cycle()
+//        testFindByID()
+//        testThreeNodeCycle()
+//        test2Node1Cycle()
+//        truncateTable()
+    }
+    
+    func test2Node1Cycle() {
+        let p = PPP()
+        let p1 = PPP()
+        let c = CCC()
         
-//        JRDBMgr.shareInstance().registerClazzForUpdateTable(PPP)
-        let dict = JRReflectUtil.ivarAndEncode4Clazz(PPP)
+        p.ppp = p1
+        p1.ccc = c
+        c.ppp = p1
         
-        NSLog("%@", dict)
+        p.jr_save()
+    }
+    
+    func testThreeNodeCycle() {
+        let p1 = PPP()
+        let p2 = PPP()
+        let p3 = PPP()
+        
+        p1.ppp = p2
+        p2.ppp = p3
+        p3.ppp = p1
+        
+        p1.jr_save()
+    }
+  
+    func test1Cycle() {
+        let p = PPP()
+        let c = CCC()
+        p.ccc = c
+        c.ppp = p
+
+        p.jr_save()
         
     }
     
-    func test3() {
-        let p = PPP()
-        p.a_int = 1
-        print(p.jr_changedArray())
-        PPP.jr_findAll()
-        
+    func testFindByID() {
+        let p = PPP.jr_findByID("FBE5701E-ECBB-494A-BE62-7C7114C780A1")
+        p?.isEqual(nil);
     }
+
+    
+    func truncateTable() {
+        PPP.jr_truncateTable()
+        CCC.jr_truncateTable()
+    }
+    
 }

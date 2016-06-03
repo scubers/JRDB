@@ -28,6 +28,8 @@
 
 @property (nonatomic, strong) Animal *animal;
 
+
+@property (nonatomic, strong) NSString *name;
 @property (nonatomic, assign) int a_int;
 @property (nonatomic, assign) unsigned int b_unsigned_int;
 @property (nonatomic, assign) long c_long;
@@ -44,6 +46,11 @@
 @property (nonatomic, strong) NSDate *l_date;
 @property (nonatomic, strong) NSDate *m_date;
 
+
+@property (nonatomic, strong) Person *son;
+
 @property (nonatomic, strong) Card *card;
+@property (nonatomic, strong) Card *card1;
+
 
 @end

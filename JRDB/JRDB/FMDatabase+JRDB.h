@@ -80,6 +80,7 @@
 #pragma mark - 增删改查操作
 /**
  *  save 操作，若使用默认主键，则自动生成主键，若自定义主键，需要自行赋值主键
+ *  因为带有关联保存操作，使用 事务操作
  *
  *  @param obj 保存对象
  *  @return return value description
@@ -89,6 +90,9 @@
 
 - (BOOL)deleteObj:(id<JRPersistent> _Nonnull)obj;
 - (void)deleteObj:(id<JRPersistent> _Nonnull)obj complete:(JRDBComplete _Nullable)complete;
+
+- (BOOL)deleteAll:(Class<JRPersistent> _Nonnull)clazz;
+- (void)deleteAll:(Class<JRPersistent> _Nonnull)clazz complete:(JRDBComplete _Nullable)complete;
 
 /**
  *  更新操作（全量更新）

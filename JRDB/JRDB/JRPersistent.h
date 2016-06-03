@@ -12,9 +12,11 @@
 
 #define SingleLinkColumn(property) [NSString stringWithFormat:@"_single_link_%@", property]
 
-typedef void(^JRDBComplete)(BOOL success);
 
 @protocol JRPersistent <NSObject>
+
+typedef void(^JRDBComplete)(BOOL success);
+typedef void(^JRDBDidFinishBlock)(id<JRPersistent> _Nonnull obj);
 
 @required
 - (void)setID:(NSString * _Nullable)ID;
@@ -62,6 +64,22 @@ typedef void(^JRDBComplete)(BOOL success);
 - (id _Nullable)jr_customPrimarykeyValue;
 
 
+#pragma mark - operation
+
+/**
+ *  完成save 或者 update 会调用
+ *
+ *  @param block 代码块
+ */
+- (void)jr_addDidFinishBlock:(JRDBDidFinishBlock _Nullable)block forIdentifier:(NSString * _Nonnull)identifier;
+- (void)jr_removeDidFinishBlockForIdentifier:(NSString * _Nonnull)identifier;
+
+
+/**
+ *  此方法不用自己调用，库会每次操作完调用一次
+ */
+- (void)jr_executeFinishBlocks;
+
 #pragma mark - convenience
 /**
  *  如果有自定义主键，则返回自定义主键key，例如 name，若没有实现，则返回默认主键key ： @"_ID"
@@ -82,8 +100,3 @@ typedef void(^JRDBComplete)(BOOL success);
 
 @end
 
-/**
- *  空协议，用于标记忽略字段， 由于swift 不支持，暂时停用
- */
-@protocol JRIgnore <NSObject>
-@end

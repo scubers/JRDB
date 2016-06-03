@@ -12,13 +12,13 @@
 
 @class FMDatabase;
 
-@interface NSObject (JRDB) <JRPersistent, JRIgnore>
+@interface NSObject (JRDB) <JRPersistent>
 
 #pragma mark - convinence method
 
 - (void)setSingleLinkID:(NSString * _Nullable)ID forKey:(NSString * _Nonnull)key;
 - (NSString * _Nullable)singleLinkIDforKey:(NSString * _Nonnull)key;
-
+- (NSMutableDictionary<NSString *,JRDBDidFinishBlock> * _Nonnull)jr_finishBlocks;
 
 #pragma mark - save
 /**
@@ -74,6 +74,13 @@
  */
 - (BOOL)jr_delete;
 - (void)jr_deleteWithComplete:(JRDBComplete _Nullable)complete;
+
+
++ (BOOL)jr_deleteAllFromDB:(FMDatabase * _Nonnull)db;
++ (void)jr_deleteAllFromDB:(FMDatabase * _Nonnull)db WithComplete:(JRDBComplete _Nullable)complete;
+
++ (BOOL)jr_deleteAll;
++ (void)jr_deleteAllWithComplete:(JRDBComplete _Nullable)complete;
 
 #pragma mark - select
 
