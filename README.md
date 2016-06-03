@@ -23,6 +23,8 @@ Feedback: [jr-wong@qq.com](mailto:jrwong@qq.com)
 ```ruby
 use_frameworks!
 pod 'JRDB'
+
+// 请使用Cocoapods安装，切勿直接拖文件夹，囧，忘记打分支了，全在master上改了
 ```
 
 ```objc
