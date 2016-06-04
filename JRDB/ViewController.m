@@ -15,6 +15,8 @@
 #import "FMDatabase+JRDB.h"
 #import "JRQueryCondition.h"
 #import "NSObject+JRDB.h"
+#import <objc/runtime.h>
+
 
 @interface ViewController ()
 
@@ -27,6 +29,7 @@
 //    [self test];
 //    [self test2];
 //    [self test3];
+
 }
 
 - (void)viewDidAppear:(BOOL)animated {

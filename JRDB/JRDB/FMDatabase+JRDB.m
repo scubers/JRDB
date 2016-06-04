@@ -56,9 +56,6 @@ static NSString * const queuekey = @"queuekey";
     } else {
         return [self commit];
     }
-//    [[self databaseQueue] inTransaction:^(FMDatabase *db, BOOL *rollback) {
-//        EXE_BLOCK(block, db, rollback);
-//    }];
 }
 
 #pragma mark - table operation
@@ -241,8 +238,40 @@ static NSString * const queuekey = @"queuekey";
     }
 
     NSMutableArray *stack = [NSMutableArray array];
-    BOOL needRollBack = NO;
+    __block BOOL needRollBack = NO;
     [self handleSave:obj stack:&stack needRollBack:&needRollBack];
+
+    if (!needRollBack) {
+        // 监测一对多的保存
+        [[[obj class] jr_oneToManyLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull clazz, BOOL * _Nonnull stop) {
+            NSArray *array = [((NSObject *)obj) valueForKey:key];
+
+            // 检查子表
+            if (![self checkExistsTable4Clazz:clazz]) {
+                needRollBack = ![self createTable4Clazz:clazz];
+                if (needRollBack) {
+                    *stop = YES;
+                    return;
+                }
+            }
+            // 检查关联的父对象的字段是否存在
+            if (![self columnExists:OneToManyLinkColumn([obj class], key) inTableWithName:[JRReflectUtil shortClazzName:clazz]]) {
+                NSString *sql = [NSString stringWithFormat:@"alter table %@ add column %@ TEXT;", [JRReflectUtil shortClazzName:clazz], OneToManyLinkColumn([obj class], key)];
+
+                needRollBack = ![self executeUpdate:sql];
+                if (needRollBack) {
+                    *stop = YES;
+                    return;
+                }
+            }
+
+            // 逐个保存
+            [array enumerateObjectsUsingBlock:^(NSObject<JRPersistent> * _Nonnull subObj, NSUInteger idx, BOOL * _Nonnull stop) {
+                [subObj setOneToManyLinkID:[obj ID] forClazz:[obj class] key:key];
+                [self saveObj:subObj useTransaction:NO];
+            }];
+        }];
+    }
 
     if (useTransaction) {
         if (needRollBack) {

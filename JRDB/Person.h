@@ -11,6 +11,10 @@
 
 @class Person;
 
+@interface Money : NSObject
+@property (nonatomic, strong) NSString *value;
+@end
+
 @interface Card : NSObject
 @property (nonatomic, strong) NSString *serialNumber;
 @property (nonatomic, weak) Person *person;
@@ -51,6 +55,9 @@
 
 @property (nonatomic, strong) Card *card;
 @property (nonatomic, strong) Card *card1;
+
+
+@property (nonatomic, strong) NSMutableArray<Money *> *money;
 
 
 @end

@@ -18,6 +18,9 @@
 
 - (void)setSingleLinkID:(NSString * _Nullable)ID forKey:(NSString * _Nonnull)key;
 - (NSString * _Nullable)singleLinkIDforKey:(NSString * _Nonnull)key;
+- (void)setOneToManyLinkID:(NSString * _Nullable)ID forClazz:(Class<JRPersistent> _Nonnull)clazz key:(NSString * _Nonnull)key;
+- (NSString * _Nullable)oneToManyLinkIDforClazz:(Class<JRPersistent> _Nonnull) clazz key:(NSString * _Nonnull)key;
+
 - (NSMutableDictionary<NSString *,JRDBDidFinishBlock> * _Nonnull)jr_finishBlocks;
 
 #pragma mark - save
@@ -62,6 +65,7 @@
 
 
 #pragma mark - update
+
 /**
  *  更新到JRDBMgr默认数据库
  *  @param columns 指定更新列，nil为全量更新
@@ -69,6 +73,7 @@
  */
 - (BOOL)jr_updateWithColumn:(NSArray * _Nullable)columns;
 - (void)jr_updateWithColumn:(NSArray * _Nullable)columns Complete:(JRDBComplete _Nullable)complete;
+
 
 /**
  *  更新到指定数据库
@@ -109,8 +114,8 @@
 
 #pragma mark - select
 
-+ (instancetype _Nullable)jr_findByID:(id _Nonnull)ID;
-+ (instancetype _Nullable)jr_findByID:(id _Nonnull)ID fromDB:(FMDatabase * _Nonnull)db;
++ (instancetype _Nullable)jr_findByID:(NSString * _Nonnull)ID;
++ (instancetype _Nullable)jr_findByID:(NSString * _Nonnull)ID fromDB:(FMDatabase * _Nonnull)db;
 
 
 + (instancetype _Nullable)jr_findByPrimaryKey:(id _Nonnull)primaryKey;

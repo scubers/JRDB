@@ -16,6 +16,7 @@
 
 #define JR_DEFAULTDB [JRDBMgr defaultDB]
 
+
 const NSString *JRDB_IDKEY = @"JRDB_IDKEY";
 
 @implementation NSObject (JRDB)
@@ -93,6 +94,14 @@ const NSString *JRDB_IDKEY = @"JRDB_IDKEY";
 
 - (NSString *)singleLinkIDforKey:(NSString *)key {
     return objc_getAssociatedObject(self, NSSelectorFromString(SingleLinkColumn(key)));
+}
+
+- (void)setOneToManyLinkID:(NSString *)ID forClazz:(Class<JRPersistent>)clazz key:(NSString *)key {
+    objc_setAssociatedObject(self, NSSelectorFromString(OneToManyLinkColumn(clazz, key)), ID, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+- (NSString *)oneToManyLinkIDforClazz:(Class<JRPersistent>)clazz key:(NSString *)key {
+    return objc_getAssociatedObject(self, NSSelectorFromString(OneToManyLinkColumn(clazz, key)));
 }
 
 #pragma mark - save

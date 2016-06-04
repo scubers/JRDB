@@ -9,6 +9,10 @@
 #import "Person.h"
 #import "NSObject+JRDB.h"
 
+@implementation Money
+@end
+
+
 @implementation Card
 + (NSDictionary<NSString *,Class<JRPersistent>> *)jr_singleLinkedPropertyNames {
     return @{@"_person" : [Person class]};
@@ -54,8 +58,21 @@
              };
 }
 
++ (NSDictionary<NSString *,Class<JRPersistent>> *)jr_oneToManyLinkedPropertyNames {
+    return @{
+             @"_money" : [Money class],
+             };
+}
+
 - (NSString *)description {
     return [NSString stringWithFormat:@"name: %@, \nID: %@", self.name, self.ID];
+}
+
+- (NSMutableArray<Money *> *)money {
+    if (!_money) {
+        _money = [NSMutableArray array];
+    }
+    return _money;
 }
 
 @end
