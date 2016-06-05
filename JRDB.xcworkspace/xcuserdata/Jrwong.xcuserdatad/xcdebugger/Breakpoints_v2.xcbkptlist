@@ -90,12 +90,12 @@
                   moduleName = "JRDB"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/Jrwong/Desktop/code/JRDB/JRDB/JRDB/FMDatabase+JRDB.m"
-                  timestampString = "486789371.384954"
+                  timestampString = "486823648.294356"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "269"
                   endingLineNumber = "269"
-                  offsetFromSymbolStart = "962">
+                  offsetFromSymbolStart = "942">
                </Location>
                <Location
                   shouldBeEnabled = "Yes"
@@ -105,7 +105,7 @@
                   moduleName = "JRDB"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/Jrwong/Desktop/code/JRDB/JRDB/JRDB/FMDatabase+JRDB.m"
-                  timestampString = "486789371.385051"
+                  timestampString = "486823648.294571"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "269"
@@ -122,12 +122,124 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "JRDBTests/JRDBTests.m"
-            timestampString = "486789364.409356"
+            timestampString = "486799529.128816"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "216"
-            endingLineNumber = "216"
+            startingLineNumber = "220"
+            endingLineNumber = "220"
             landmarkName = "-testRuntimeProperty"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "JRDB/JRDB/NSObject+JRDB.m"
+            timestampString = "486823647.2585"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "29"
+            endingLineNumber = "29"
+            landmarkName = "-jr_init"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "JRDBTests/JRDBTests.m"
+            timestampString = "486823494.723428"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "206"
+            endingLineNumber = "206"
+            landmarkName = "-testSomething"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "JRDB/JRDB/NSObject+JRDB.m"
+            timestampString = "486823647.2585"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "33"
+            endingLineNumber = "33"
+            landmarkName = "-jr_init"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "JRDB/JRDB/NSObject+JRDB.m"
+            timestampString = "486823657.812728"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "114"
+            endingLineNumber = "114"
+            landmarkName = "+_configureExtraProperty"
+            landmarkType = "5">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "+[NSObject(JRDB) _configureExtraProperty]"
+                  moduleName = "JRDB"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/Jrwong/Desktop/code/JRDB/JRDB/JRDB/NSObject+JRDB.m"
+                  timestampString = "486823657.814244"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "114"
+                  endingLineNumber = "114"
+                  offsetFromSymbolStart = "16">
+               </Location>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "__41+[NSObject(JRDB) _configureExtraProperty]_block_invoke"
+                  moduleName = "JRDB"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/Jrwong/Desktop/code/JRDB/JRDB/JRDB/NSObject+JRDB.m"
+                  timestampString = "486823657.814372"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "115"
+                  endingLineNumber = "115"
+                  offsetFromSymbolStart = "68">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "JRDB/JRDB/NSObject+JRDB.m"
+            timestampString = "486823658.622553"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "115"
+            endingLineNumber = "115"
+            landmarkName = "+_configureExtraProperty"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>

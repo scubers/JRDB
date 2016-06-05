@@ -13,13 +13,28 @@
 #import "JRFMDBResultSetHandler.h"
 #import "JRReflectUtil.h"
 #import "JRColumnSchema.h"
+#import "JRExtraProperty.h"
+
 
 #define JR_DEFAULTDB [JRDBMgr defaultDB]
-
-
 const NSString *JRDB_IDKEY = @"JRDB_IDKEY";
 
 @implementation NSObject (JRDB)
+
++ (void)load {
+    [self objc_exchangeMethod:@selector(init) withMethod:@selector(jr_init)];
+}
+
+- (instancetype)jr_init {
+    [self jr_init];
+
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        [[self class] _configureExtraProperty];
+    });
+
+    return self;
+}
 
 #pragma mark - protocol method
 - (void)setID:(NSString *)ID {
@@ -84,6 +99,22 @@ const NSString *JRDB_IDKEY = @"JRDB_IDKEY";
         objc_setAssociatedObject(self, _cmd, blocks, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
     return blocks;
+}
+
++ (NSArray<JRExtraProperty *> *)jr_extraProperties {
+    NSMutableArray *array = objc_getAssociatedObject(self, _cmd);
+    if (!array) {
+        array = [NSMutableArray array];
+        objc_setAssociatedObject(self, _cmd, array, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    }
+    return array;
+}
+
++ (void)_configureExtraProperty {
+    [[self jr_oneToManyLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull clazz, BOOL * _Nonnull stop) {
+        JRExtraProperty *p = [JRExtraProperty extraPropertyWithClazz:clazz linkKey:key];
+        [((NSMutableArray *)[clazz jr_extraProperties]) addObject:p];
+    }];
 }
 
 #pragma mark - convinence method
@@ -307,7 +338,7 @@ const NSString *JRDB_IDKEY = @"JRDB_IDKEY";
     return [self jr_truncateTableInDB:JR_DEFAULTDB];
 }
 
-#pragma mark - method hook   now unavaliable
+#pragma mark - method hook   now unavaliable  监听setter 由于swift 不适用，暂停使用
 const static NSString *jr_changedArrayKey = @"jr_changedArrayKey";
 - (NSMutableArray *)jr_changedArray {
     NSMutableArray *array = objc_getAssociatedObject(self, &jr_changedArrayKey);
@@ -369,6 +400,7 @@ const static NSString *jr_changedArrayKey = @"jr_changedArrayKey";
     }
     return nil;
 }
+
 
 #define IMPSomething(typeEncoding, jr_sel, jr_templateSel, jr_clazz, jr_type) \
 if ([paramType isEqualToString:[NSString stringWithUTF8String:@encode(jr_type)]]) { \

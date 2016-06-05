@@ -212,14 +212,13 @@
 
 - (void)testRuntimeProperty {
 
-    NSDictionary *dict = [JRReflectUtil ivarAndEncode4Clazz:[Person class]];
+    NSDictionary *dict = [JRReflectUtil propNameAndEncode4Clazz:[Person class]];
     NSLog(@"%@", dict);
 
-//    [[Person objc_properties] enumerateObjectsUsingBlock:^(OBJCProperty * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-//        NSLog(@"%@", obj);
-//    }];
+    NSArray *arr = [Person jr_extraProperties];
 
-
+    NSLog(@"%@", arr);
+    
 }
 
 - (Person *)createPerson:(int)base name:(NSString *)name {

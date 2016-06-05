@@ -10,6 +10,7 @@
 #import "JRPersistent.h"
 #import "JRQueryCondition.h"
 
+
 @class FMDatabase;
 
 @interface NSObject (JRDB) <JRPersistent>

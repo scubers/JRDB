@@ -14,6 +14,7 @@
 #define SingleLinkColumn(property) [NSString stringWithFormat:@"_single_link_%@", property]
 #define OneToManyLinkColumn(clazz, property) [NSString stringWithFormat:@"_one_to_many_link_%@_%@", NSStringFromClass(clazz), property]
 
+@class JRExtraProperty;
 
 @protocol JRPersistent <JRReflectable>
 
@@ -99,6 +100,12 @@ typedef void(^JRDBDidFinishBlock)(id<JRPersistent> _Nonnull obj);
 - (id _Nullable)jr_primaryKeyValue;
 
 
+/**
+ *  返回需要除property之外，额外需要入库的property
+ *
+ *  @return 数组
+ */
++ (NSArray<JRExtraProperty *> * _Nullable)jr_extraProperties;
 
 @end
 
