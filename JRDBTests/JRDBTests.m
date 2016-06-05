@@ -10,6 +10,7 @@
 #import "JRDB.h"
 #import "Person.h"
 #import "JRColumnSchema.h"
+#import "NSObject+Reflect.h"
 
 
 //#import "Person.h"
@@ -210,54 +211,14 @@
 }
 
 - (void)testRuntimeProperty {
-//    NSDictionary *dict = [JRReflectUtil ivarAndEncode4Clazz:[Person class]];
-//    NSLog(@"%@", dict);
-
-//    NSString 的objc_property_attributes
-//    name: T  value: @"NSString"
-//    name: &  value:
-//    name: N  value:
-//    name: V  value: _name
-
-    unsigned int outCount;
-    objc_property_t *prop = class_copyPropertyList([Person class], &outCount);
-
-    for (int i = 0; i < outCount; i++) {
-        NSLog(@"------");
-        unsigned int oc;
-        objc_property_attribute_t *attrs = property_copyAttributeList(prop[i], &oc);
-        for (int j = 0; j < oc; j++) {
-            NSLog(@"name: %s  value: %s", attrs[j].name, attrs[j].value);
-        }
-    }
-
-    objc_property_attribute_t p1 = {"T", "@\"NSString\""};
-    objc_property_attribute_t p2 = {"&", ""};
-    objc_property_attribute_t p3 = {"N", ""};
-    objc_property_attribute_t p4 = {"V", "_aaa"};
-
-    objc_property_attribute_t attrs[4];
-    attrs[0] = p1;
-    attrs[1] = p2;
-    attrs[2] = p3;
-    attrs[3] = p4;
-    if (class_addProperty([Person class], @"_aaa".UTF8String, attrs, 4)) {
-        NSLog(@"add success");
-    }
 
     NSDictionary *dict = [JRReflectUtil ivarAndEncode4Clazz:[Person class]];
     NSLog(@"%@", dict);
 
-    Ivar ivar = class_getInstanceVariable([Person class], "_aaa");
+//    [[Person objc_properties] enumerateObjectsUsingBlock:^(OBJCProperty * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+//        NSLog(@"%@", obj);
+//    }];
 
-    NSLog(@"%@", ivar);
-    Person *p = [self createPerson:1 name:@"1"];
-    NSLog(@"%@", [p valueForKey:@"_aaa"]);
-    [p setValue:@"wowowowo" forKey:@"_aaa"];
-    NSLog(@"%@", [p valueForKey:@"_aaa"]);
-
-
-//    int *a = [1, 2];
 
 }
 

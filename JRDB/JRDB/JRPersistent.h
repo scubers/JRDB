@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "JRReflectable.h"
 
 #define EXE_BLOCK(block, ...) if(block){block(__VA_ARGS__);}
 
@@ -14,7 +15,7 @@
 #define OneToManyLinkColumn(clazz, property) [NSString stringWithFormat:@"_one_to_many_link_%@_%@", NSStringFromClass(clazz), property]
 
 
-@protocol JRPersistent <NSObject>
+@protocol JRPersistent <JRReflectable>
 
 typedef void(^JRDBComplete)(BOOL success);
 typedef void(^JRDBDidFinishBlock)(id<JRPersistent> _Nonnull obj);

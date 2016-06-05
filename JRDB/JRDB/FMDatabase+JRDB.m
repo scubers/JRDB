@@ -128,7 +128,7 @@ static NSString * const queuekey = @"queuekey";
 #pragma mark - table message
 
 - (NSArray<JRColumnSchema *> *)schemasInClazz:(Class<JRPersistent>)clazz {
-    FMResultSet *ret = [[JRDBMgr defaultDB] getTableSchema:[JRReflectUtil shortClazzName:clazz]];
+    FMResultSet *ret = [[JRDBMgr defaultDB] getTableSchema:[clazz shortClazzName]];
 //    get table schema: result colums: cid[INTEGER], name,type [STRING], notnull[INTEGER], dflt_value[],pk[INTEGER]
     NSMutableArray *schemas = [NSMutableArray array];
     while ([ret next]) {
@@ -198,7 +198,7 @@ static NSString * const queuekey = @"queuekey";
         }
     }];
     
-    NSString *tableName = [JRReflectUtil shortClazzName:[obj class]];
+    NSString *tableName = [[obj class] shortClazzName];
     if (![self tableExists:tableName]) {
         NSAssert([self createTable4Clazz:[obj class]], @"create table: %@ error", tableName);
     }
@@ -255,8 +255,8 @@ static NSString * const queuekey = @"queuekey";
                 }
             }
             // 检查关联的父对象的字段是否存在
-            if (![self columnExists:OneToManyLinkColumn([obj class], key) inTableWithName:[JRReflectUtil shortClazzName:clazz]]) {
-                NSString *sql = [NSString stringWithFormat:@"alter table %@ add column %@ TEXT;", [JRReflectUtil shortClazzName:clazz], OneToManyLinkColumn([obj class], key)];
+            if (![self columnExists:OneToManyLinkColumn([obj class], key) inTableWithName:[clazz shortClazzName]]) {
+                NSString *sql = [NSString stringWithFormat:@"alter table %@ add column %@ TEXT;", [clazz shortClazzName], OneToManyLinkColumn([obj class], key)];
 
                 needRollBack = ![self executeUpdate:sql];
                 if (needRollBack) {
@@ -497,7 +497,7 @@ static NSString * const queuekey = @"queuekey";
 
 #pragma mark - private
 - (BOOL)checkExistsTable4Clazz:(Class<JRPersistent>)clazz {
-    return [self tableExists:[JRReflectUtil shortClazzName:clazz]];
+    return [self tableExists:[clazz shortClazzName]];
 }
 
 @end
