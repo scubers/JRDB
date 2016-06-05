@@ -36,7 +36,7 @@ typedef enum {
 + (NSArray<id<JRPersistent>> *)handleResultSet:(FMResultSet *)resultSet forClazz:(Class<JRPersistent>)clazz {
     NSMutableArray *list = [NSMutableArray array];
     
-    NSDictionary *dict = [JRReflectUtil ivarAndEncode4Clazz:clazz];
+    NSDictionary *dict = [JRReflectUtil propNameAndEncode4Clazz:clazz];
     
     while ([resultSet next]) {
         Class c = objc_getClass(class_getName(clazz));

@@ -21,7 +21,7 @@
  *
  *  @return {ivar:@encode(int),ivar:@encode(int)} example : {@"_age" : @"i"}
  */
-+ (NSDictionary<NSString *, NSString *> * _Nonnull)ivarAndEncode4Clazz:(Class _Nonnull)clazz;
++ (NSDictionary<NSString *, NSString *> * _Nonnull)propNameAndEncode4Clazz:(Class _Nonnull)clazz;
 
 
 + (const char * _Nonnull)typeEncoding4InstanceMethod:(SEL _Nonnull)selector inClazz:(Class _Nonnull)clazz;

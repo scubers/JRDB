@@ -9,6 +9,7 @@
 #import "NSObject+Reflect.h"
 #import <objc/runtime.h>
 #import "OBJCProperty.h"
+#import "OBJCMethod.h"
 
 @implementation NSObject (Reflect)
 
@@ -32,6 +33,39 @@
         [array addObject:[OBJCProperty prop:props[i]]];
     }
     return array;
+}
+
++ (OBJCProperty *)objcPropertyWithName:(NSString *)name {
+    __block OBJCProperty *p = nil;
+    [[self objc_properties] enumerateObjectsUsingBlock:^(OBJCProperty * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        if ([obj.name isEqualToString:name] || [obj.ivarName isEqualToString:name]) {
+            p = obj;
+            *stop = YES;
+        }
+    }];
+    return p;
+}
+
++ (NSArray<OBJCMethod *> *)objc_methods {
+    unsigned int outCount;
+    Method *methods = class_copyMethodList(self, &outCount);
+
+    NSMutableArray *array = [NSMutableArray array];
+    for (int i = 0; i < outCount; i++) {
+        [array addObject:[OBJCMethod method:methods[i]]];
+    }
+    return array;
+}
+
++ (OBJCMethod *)objcMethodWithSel:(SEL)selector {
+    __block OBJCMethod *m = nil;
+    [[self objc_methods] enumerateObjectsUsingBlock:^(OBJCMethod * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        if (obj.selector == selector) {
+            m = obj;
+            *stop = YES;
+        }
+    }];
+    return m;
 }
 
 + (void)objc_exchangeMethod:(SEL)selector withMethod:(SEL)aSelector {

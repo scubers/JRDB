@@ -9,7 +9,7 @@
 #ifndef JRReflectable_h
 #define JRReflectable_h
 
-@class OBJCProperty;
+@class OBJCProperty, OBJCMethod;
 
 @protocol JRReflectable <NSObject>
 
@@ -23,6 +23,15 @@
  */
 + (NSArray<OBJCProperty *> * _Nonnull)objc_properties;
 
++ (OBJCProperty * _Nullable)objcPropertyWithName:(NSString * _Nonnull)name;
+
+/**
+ *  返回本类的所有methods
+ *  @return methods
+ */
++ (NSArray<OBJCMethod *> * _Nonnull)objc_methods;
+
++ (OBJCMethod * _Nullable)objcMethodWithSel:(SEL _Nonnull)selector;
 
 /**
  *  替换本类的方法

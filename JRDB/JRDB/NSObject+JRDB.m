@@ -354,7 +354,7 @@ const static NSString *jr_changedArrayKey = @"jr_changedArrayKey";
         return nil;
     }
 
-    NSArray *ivarNames = [JRReflectUtil ivarAndEncode4Clazz:[self class]].allKeys;
+    NSArray *ivarNames = [JRReflectUtil propNameAndEncode4Clazz:[self class]].allKeys;
 
     NSString *name = [setterName substringWithRange:NSMakeRange(3, setterName.length - 4)];
     NSString *first = [setterName substringWithRange:NSMakeRange(3, 1)].lowercaseString;

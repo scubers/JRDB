@@ -19,7 +19,7 @@
 // create table 'tableName' (ID text primary key, 'p1' 'type1')
 + (NSString *)createTableSql4Clazz:(Class<JRPersistent>)clazz {
     
-    NSDictionary *dict   = [JRReflectUtil ivarAndEncode4Clazz:clazz];
+    NSDictionary *dict   = [JRReflectUtil propNameAndEncode4Clazz:clazz];
     NSString *tableName  = [clazz shortClazzName];
     NSMutableString *sql = [NSMutableString string];
     
@@ -51,7 +51,7 @@
     // 检测表是否存在, 不存在则直接返回创建表语句
     if (![db tableExists:tableName]) { return @[[self createTableSql4Clazz:clazz]]; }
     
-    NSDictionary *dict   = [JRReflectUtil ivarAndEncode4Clazz:clazz];
+    NSDictionary *dict   = [JRReflectUtil propNameAndEncode4Clazz:clazz];
     NSArray *excludes    = [clazz jr_excludePropertyNames];
     NSMutableArray *sqls = [NSMutableArray array];
     
@@ -91,7 +91,7 @@
     NSString *tableName = [[obj class] shortClazzName];
     
     NSMutableArray *argsList = [NSMutableArray array];
-    NSDictionary *dict       = [JRReflectUtil ivarAndEncode4Clazz:[obj class]];
+    NSDictionary *dict       = [JRReflectUtil propNameAndEncode4Clazz:[obj class]];
     NSMutableString *sql     = [NSMutableString string];
     NSMutableString *sql2    = [NSMutableString string];
     
@@ -155,7 +155,7 @@
     NSString *tableName      = [[obj class] shortClazzName];
     NSMutableArray *argsList = [NSMutableArray array];
     NSMutableString *sql     = [NSMutableString string];
-    NSDictionary *dict       = [JRReflectUtil ivarAndEncode4Clazz:[obj class]];
+    NSDictionary *dict       = [JRReflectUtil propNameAndEncode4Clazz:[obj class]];
     
     [sql appendFormat:@" update %@ set ", tableName];
     

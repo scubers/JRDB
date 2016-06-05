@@ -12,7 +12,7 @@
 
 @implementation JRReflectUtil
 
-+ (NSDictionary<NSString *, NSString *> *)ivarAndEncode4Clazz:(Class)clazz {
++ (NSDictionary<NSString *, NSString *> *)propNameAndEncode4Clazz:(Class)clazz {
     NSString *className = [NSString stringWithUTF8String:class_getName(clazz)];
     if ([className isEqualToString:@"NSObject"]) {
         return nil;
@@ -21,7 +21,7 @@
         [[clazz objc_properties] enumerateObjectsUsingBlock:^(OBJCProperty * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             dict[obj.ivarName] = obj.typeEncoding;
         }];
-        [dict addEntriesFromDictionary:[self ivarAndEncode4Clazz:class_getSuperclass(clazz)]];
+        [dict addEntriesFromDictionary:[self propNameAndEncode4Clazz:class_getSuperclass(clazz)]];
         return dict;
     }
     
