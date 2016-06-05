@@ -34,4 +34,7 @@
 - (void)updateDefaultDB;
 - (void)updateDB:(FMDatabase * _Nonnull)db;
 
+
+- (BOOL)isValidateClazz:(Class<JRPersistent> _Nonnull)clazz;
+
 @end

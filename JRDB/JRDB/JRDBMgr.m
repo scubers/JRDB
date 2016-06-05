@@ -105,4 +105,8 @@ static JRDBMgr *__shareInstance;
 }
 
 
+- (BOOL)isValidateClazz:(Class<JRPersistent>)clazz {
+    return [_clazzArray containsObject:clazz];
+}
+
 @end

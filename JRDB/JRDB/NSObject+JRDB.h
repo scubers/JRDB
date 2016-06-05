@@ -15,6 +15,8 @@
 
 @interface NSObject (JRDB) <JRPersistent>
 
+- (instancetype _Nullable)jr_init;
+
 #pragma mark - convinence method
 
 - (void)setSingleLinkID:(NSString * _Nullable)ID forKey:(NSString * _Nonnull)key;

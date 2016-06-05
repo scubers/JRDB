@@ -21,18 +21,12 @@ const NSString *JRDB_IDKEY = @"JRDB_IDKEY";
 
 @implementation NSObject (JRDB)
 
-+ (void)load {
-    [self objc_exchangeMethod:@selector(init) withMethod:@selector(jr_init)];
-}
-
 - (instancetype)jr_init {
     [self jr_init];
-
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         [[self class] _configureExtraProperty];
     });
-
     return self;
 }
 
