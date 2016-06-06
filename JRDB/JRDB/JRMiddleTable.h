@@ -71,6 +71,9 @@
 
 - (BOOL)deleteID:(NSString * _Nonnull)ID forClazz:(Class<JRPersistent> _Nonnull)clazz;
 
+
+- (BOOL)cleanRubbishData;
+
 @end
 
 

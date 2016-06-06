@@ -20,9 +20,6 @@
 - (void)dealloc {
     NSLog(@"%@, dealloc", self);
 }
-- (NSString *)description {
-    return [NSString stringWithFormat:@"Serial number: %@\nID: %@", self.serialNumber, self.ID];
-}
 @end
 
 
@@ -64,9 +61,6 @@
              };
 }
 
-- (NSString *)description {
-    return [NSString stringWithFormat:@"name: %@, \nID: %@", self.name, self.ID];
-}
 
 - (NSMutableArray<Money *> *)money {
     if (!_money) {

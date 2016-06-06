@@ -44,4 +44,11 @@
  */
 - (BOOL)isValidateClazz:(Class<JRPersistent> _Nonnull)clazz;
 
+/**
+ *  清理中间表的缓存辣鸡
+ *
+ *  @param db
+ */
+- (void)clearMidTableRubbishDataForDB:(FMDatabase * _Nonnull)db;
+
 @end

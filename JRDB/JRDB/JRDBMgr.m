@@ -12,11 +12,12 @@
 #import "FMDatabase+JRDB.h"
 #import "NSObject+JRDB.h"
 #import <objc/message.h>
+#import "JRMiddleTable.h"
 
 @interface JRDBMgr()
 {
     FMDatabase *_defaultDB;
-    NSMutableArray *_clazzArray;
+    NSMutableArray<Class<JRPersistent>> *_clazzArray;
 }
 
 @end
@@ -83,6 +84,20 @@ static JRDBMgr *__shareInstance;
     return [_clazzArray containsObject:clazz];
 }
 
+- (void)clearMidTableRubbishDataForDB:(FMDatabase *)db {
+
+    [_clazzArray enumerateObjectsUsingBlock:^(Class<JRPersistent>  _Nonnull clazz, NSUInteger idx, BOOL * _Nonnull stop) {
+        
+        if (idx == _clazzArray.count - 1) { return ; }
+        
+        for (NSUInteger i = idx + 1; i < _clazzArray.count; i++) {
+            JRMiddleTable *mid = [JRMiddleTable table4Clazz:clazz andClazz:_clazzArray[i] db:db];
+            if ([db tableExists:[mid tableName]]) {
+                [mid cleanRubbishData];
+            }
+        }
+    }];
+}
 
 #pragma mark - lazy load
 

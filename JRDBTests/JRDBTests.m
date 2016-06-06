@@ -123,18 +123,13 @@
     NSLog(@"------");
 }
 
-- (void)test2Cycle {
-    Person *father = [self createPerson:1 name:@"A"];
-    Person *son = [self createPerson:2  name:@"B"];
-    father.son = son;
-    
+- (void)testCycle {
+    Person *p = [self createPerson:1 name:@"A"];
     Card *c = [self createCard:@"001"];
-    son.card = c;
-    c.person = son;
+    p.card = c;
+    c.person = p;
 
-//    [father jr_save];
-    [father jr_saveUseTransaction:NO];
-
+    [p jr_save];
 
 }
 
@@ -181,10 +176,14 @@
     }
 
     [p jr_save];
-
+    
+    Person *p2 = [self createPerson:0 name:@"b"];
+    p2.money = [p.money copy];
+    [p2 jr_save];
 }
 
 - (void)testFindByID {
+    [[JRDBMgr shareInstance] clearMidTableRubbishDataForDB:[JRDBMgr defaultDB]];
     Person *p = [Person jr_findByID:@"D9F8B771-13B0-496B-9004-97C86802F621"];
     [p.money removeObjectAtIndex:0];
     [p jr_updateColumns:nil];
@@ -205,11 +204,11 @@
 
 
 - (void)testSomething {
-    NSArray *array = [Person jr_findAll];
-    NSArray *arr = [Card jr_findAll];
-    [array isEqual:nil];
-    [arr isEqual:nil];
-    
+    NSArray<Money *> *array = [Money jr_findAll];
+    [array enumerateObjectsUsingBlock:^(Money * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        *stop = (idx == 5);
+        [obj jr_delete];
+    }];
 }
 
 - (void)testRuntimeProperty {

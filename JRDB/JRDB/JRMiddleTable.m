@@ -8,6 +8,7 @@
 
 #import "JRMiddleTable.h"
 #import "FMDatabase+JRDB.h"
+#import "NSObject+Reflect.h"
 
 #define MiddleTableName(clazz1,clazz2) [NSString stringWithFormat:@"%@_%@_Mid_Table", clazz1, clazz2]
 #define MiddleColumn4Clazz(clazz) [NSString stringWithFormat:@"%@_ids", clazz]
@@ -96,6 +97,19 @@
 - (BOOL)deleteID:(NSString *)ID forClazz:(Class<JRPersistent>)clazz {
     NSString *sql = [NSString stringWithFormat:@"delete from %@ where %@ = ?;", [self tableName], MiddleColumn4Clazz(clazz)];
     return [_db executeUpdate:sql withArgumentsInArray:@[ID]];
+}
+
+- (BOOL)cleanRubbishData {
+    if ([_db inTransaction]) {
+        NSLog(@"can not clean rubbish data due to the database is in transaction now");
+        return NO;
+    }
+    [_db beginTransaction];
+//delete from Person_money_mid_table where (person_ids not in (select _id from Person)) or (money_ids not in (select _id from Money))
+    NSString *sql = [NSString stringWithFormat:@"delete from %@ where (%@ not in (select _id from %@)) or (%@ not in (select _id from %@))", [self tableName], MiddleColumn4Clazz(_clazz1), [_clazz1 shortClazzName], MiddleColumn4Clazz(_clazz2), [_clazz2 shortClazzName]];
+    BOOL ret = [_db executeUpdate:sql];
+    ret ? [_db commit] : [_db rollback];
+    return ret;
 }
 
 #pragma mark - Private Method

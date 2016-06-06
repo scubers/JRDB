@@ -167,16 +167,16 @@ static NSString * const queuekey = @"queuekey";
             NSString *identifier = [JRUtils uuid];
             if ([*stack containsObject:value]) {
                 [value jr_addDidFinishBlock:^(id<JRPersistent>  _Nonnull object) {
-                    [self jr_updateColumns:nil useTransaction:NO];
                     [object jr_removeDidFinishBlockForIdentifier:identifier];
+                    [self jr_updateOne:obj columns:nil useTransaction:NO];
                 } forIdentifier:identifier];
             } else {
                 if (![*stack containsObject:obj]) {
                     [*stack addObject:obj];
                 }
                 [obj jr_addDidFinishBlock:^(id<JRPersistent>  _Nonnull object) {
-                    [*stack removeObject:object];
                     [object jr_removeDidFinishBlockForIdentifier:identifier];
+                    [*stack removeObject:object];
                 } forIdentifier:identifier];
                 [self handleSave:value stack:stack needRollBack:needRollBack];
             }
@@ -313,6 +313,7 @@ static NSString * const queuekey = @"queuekey";
 - (BOOL)jr_updateOneOnly:(id<JRPersistent>)one columns:(NSArray<NSString *> *)columns {
     
     AssertRegisteredClazz([one class]);
+    
     NSAssert([one jr_primaryKeyValue], @"The obj to be updated should hold a primary key");
     
     // 表不存在
