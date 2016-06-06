@@ -35,6 +35,15 @@
  */
 - (BOOL)inTransaction:(void (^ _Nonnull)(FMDatabase * _Nonnull db, BOOL * _Nonnull rollBack))block;
 
+
+/**
+ *  当前线程执行某个block
+ *
+ *  @param block
+ *  @param useTransaction 是否使用默认事务 NO:需要自己开启和提交事务
+ */
+- (BOOL)execute:(BOOL (^ _Nonnull)(FMDatabase * _Nonnull))block useTransaction:(BOOL)useTransaction;
+
 #pragma mark - table operation
 
 /**

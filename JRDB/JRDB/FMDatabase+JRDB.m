@@ -61,6 +61,21 @@ static NSString * const queuekey = @"queuekey";
     }
 }
 
+- (BOOL)execute:(BOOL (^)(FMDatabase * _Nonnull))block useTransaction:(BOOL)useTransaction {
+    if (useTransaction) {
+        NSAssert(![self inTransaction], @"database has been open a transaction");
+        if (![self beginTransaction]) {
+            NSLog(@"begin a transaction error!!!");
+            return NO;
+        }
+    }
+    BOOL flag = block(self);
+    if (useTransaction) {
+        return  flag ? [self commit] : [self rollback];
+    }
+    return flag;
+}
+
 #pragma mark - table operation
 
 - (BOOL)createTable4Clazz:(Class<JRPersistent>)clazz {

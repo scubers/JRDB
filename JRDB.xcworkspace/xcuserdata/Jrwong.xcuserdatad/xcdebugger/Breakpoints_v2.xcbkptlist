@@ -47,7 +47,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "250"
             endingLineNumber = "250"
-            landmarkName = "-saveObj:useTransaction:"
+            landmarkName = "-jr_saveOneOnly:"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
@@ -63,7 +63,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "258"
             endingLineNumber = "258"
-            landmarkName = "-saveObj:useTransaction:"
+            landmarkName = "-jr_saveOneOnly:"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
@@ -79,7 +79,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "269"
             endingLineNumber = "269"
-            landmarkName = "-saveObj:useTransaction:"
+            landmarkName = "-jr_saveOne:useTransaction:"
             landmarkType = "5">
             <Locations>
                <Location
@@ -159,7 +159,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "114"
             endingLineNumber = "114"
-            landmarkName = "+_configureExtraProperty"
+            landmarkName = "-setSingleLinkID:forKey:"
             landmarkType = "5">
             <Locations>
                <Location
@@ -207,7 +207,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "115"
             endingLineNumber = "115"
-            landmarkName = "+_configureExtraProperty"
+            landmarkName = "-singleLinkIDforKey:"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
