@@ -11,7 +11,6 @@
 #import "NSObject+JRDB.h"
 #import "JRQueryCondition.h"
 #import "NSObject+Reflect.h"
-#import "JRExtraProperty.h"
 
 @import FMDB;
 
@@ -41,10 +40,6 @@
         [sql appendFormat:@", %@ TEXT ", SingleLinkColumn(key)];
     }];
     
-    // 检查一对多的子表额外字段
-    [[clazz jr_extraProperties] enumerateObjectsUsingBlock:^(JRExtraProperty * _Nonnull property, NSUInteger idx, BOOL * _Nonnull stop) {
-        [sql appendFormat:@", %@ TEXT", property.dbLinkKey];
-    }];
     
     [sql appendString:@");"];
     NSLog(@"sql: %@", sql);
@@ -80,12 +75,6 @@
         }
     }];
     
-    // 检查一对多的子表额外字段
-    [[clazz jr_extraProperties] enumerateObjectsUsingBlock:^(JRExtraProperty * _Nonnull property, NSUInteger idx, BOOL * _Nonnull stop) {
-        if (![db columnExists:property.dbLinkKey inTableWithName:tableName]) {
-            [sqls addObject:[NSString stringWithFormat:@"alter table %@ add column %@ TEXT;", tableName, property.dbLinkKey]];
-        }
-    }];
     
     NSLog(@"sqls: %@", sqls);
     return sqls;
@@ -141,13 +130,6 @@
         [argsList addObject:[value ID] ? [value ID] : [NSNull null]];
     }];
     
-    // 检查一对多的子表额外字段
-    [[[obj class] jr_extraProperties] enumerateObjectsUsingBlock:^(JRExtraProperty * _Nonnull property, NSUInteger idx, BOOL * _Nonnull stop) {
-        [sql appendFormat:@" , %@", property.dbLinkKey];
-        [sql2 appendFormat:@" , ?"];
-        NSString *prop = [((NSObject *)obj) oneToManyLinkIDforClazz:property.linkClazz key:property.linkKey];
-        [argsList addObject:prop ? prop : [NSNull null]];
-    }];
     
     [sql appendString:@")"];
     [sql2 appendString:@");"];
@@ -212,12 +194,6 @@
         [argsList addObject: [value ID] ? [value ID] : [NSNull null]];
     }];
     
-    // 检查一对多的子表额外字段
-    [[[obj class] jr_extraProperties] enumerateObjectsUsingBlock:^(JRExtraProperty * _Nonnull property, NSUInteger idx, BOOL * _Nonnull stop) {
-        [sql appendFormat:@" %@ = ?,", property.dbLinkKey];
-        NSString *prop = [((NSObject *)obj) oneToManyLinkIDforClazz:property.linkClazz key:property.linkKey];
-        [argsList addObject:prop ? prop : [NSNull null]];
-    }];
     
     
     if ([sql hasSuffix:@","]) {

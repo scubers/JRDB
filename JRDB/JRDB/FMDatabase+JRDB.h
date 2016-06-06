@@ -77,62 +77,75 @@
 
 - (NSArray<JRColumnSchema *> * _Nonnull)schemasInClazz:(Class<JRPersistent> _Nonnull)clazz;
 
-#pragma mark - 增删改查操作
-/**
- *  save 操作，若使用默认主键，则自动生成主键，若自定义主键，需要自行赋值主键
- *  因为带有关联保存操作，自带事务操作
- *
- *  @param obj 保存对象
- *  @return return value description
- */
-- (BOOL)saveObj:(id<JRPersistent> _Nonnull)obj;
-- (void)saveObj:(id<JRPersistent> _Nonnull)obj complete:(JRDBComplete _Nullable)complete;
+#pragma mark - save
 
 /**
- *  save 操作，若使用默认主键，则自动生成主键，若自定义主键，需要自行赋值主键
- *  因为带有关联保存操作，自带事务操作
+ *  只保存one，不进行关联保存和删除更新（不建议使用）
  *
- *  @param obj 保存对象
- *  @param useTransaction 是否使用事务，可以选择使用，也可以选择自行包裹事务
- *  @return return value description
+ *  @param one
  */
-
-- (BOOL)saveObj:(id<JRPersistent> _Nonnull)obj useTransaction:(BOOL)useTransaction;
-- (void)saveObj:(id<JRPersistent> _Nonnull)obj useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete;
+- (BOOL)jr_saveOneOnly:(id<JRPersistent> _Nonnull)one;
 
 /**
- *  删除操作
+ *  保存one， 同时进行关联保存删除更新（建议使用），可选择自带事务或者自行在外层包裹事务
  *
- *  @param obj 删除的对象
- *
- *  @return 结果
+ *  @param one
+ *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
  */
-- (BOOL)deleteObj:(id<JRPersistent> _Nonnull)obj;
-- (void)deleteObj:(id<JRPersistent> _Nonnull)obj complete:(JRDBComplete _Nullable)complete;
-
-- (BOOL)deleteAll:(Class<JRPersistent> _Nonnull)clazz;
-- (void)deleteAll:(Class<JRPersistent> _Nonnull)clazz complete:(JRDBComplete _Nullable)complete;
+- (BOOL)jr_saveOne:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction;
+- (void)jr_saveOne:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete;
 
 /**
- *  更新操作（全量更新）
+ *  保存one， 同时进行关联保存删除更新（建议使用），自带事务操作，外层不能包裹事务
  *
- *  @param obj 更新的对象
- *
- *  @return 是否成功
+ *  @param one
  */
-- (BOOL)updateObj:(id<JRPersistent> _Nonnull)obj;
-- (void)updateObj:(id<JRPersistent> _Nonnull)obj complete:(JRDBComplete _Nullable)complete;
+- (BOOL)jr_saveOne:(id<JRPersistent> _Nonnull)one;
+- (void)jr_saveOne:(id<JRPersistent> _Nonnull)one complete:(JRDBComplete _Nullable)complete;
+
+#pragma mark - delete
 
 /**
- *  更新操作
+ *  只删除one，不进行关联保存和删除更新（不建议使用）
  *
- *  @param obj     部分更新
- *  @param columns 需要更新的字段数组（全称）
- *
- *  @return 是否成功
+ *  @param one
  */
-- (BOOL)updateObj:(id<JRPersistent> _Nonnull)obj columns:(NSArray * _Nullable)columns;
-- (void)updateObj:(id<JRPersistent> _Nonnull)obj columns:(NSArray * _Nullable)columns complete:(JRDBComplete _Nullable)complete;
+- (BOOL)jr_deleteOneOnly:(id<JRPersistent> _Nonnull)one;
+
+/**
+ *  删除one， 同时进行关联保存删除更新（建议使用），可选择自带事务或者自行在外层包裹事务
+ *
+ *  @param one
+ *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
+ */
+- (BOOL)jr_deleteOne:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction;
+- (void)jr_deleteOne:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete;
+
+- (BOOL)jr_deleteOne:(id<JRPersistent> _Nonnull)one;
+- (void)jr_deleteOne:(id<JRPersistent> _Nonnull)one complete:(JRDBComplete _Nullable)complete;
+
+#pragma mark - update
+
+/**
+ *  只更新one，不进行关联保存和删除更新（不建议使用）
+ *
+ *  @param one
+ *  @param columns 需要更新的字段
+ */
+- (BOOL)jr_updateOneOnly:(id<JRPersistent> _Nonnull)one columns:(NSArray<NSString *> * _Nullable)columns;
+
+/**
+ *  更新one， 同时进行关联保存删除更新（建议使用），可选择自带事务或者自行在外层包裹事务
+ *
+ *  @param one
+ *  @param columns 需要更新的字段
+ *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
+ */
+- (BOOL)jr_updateOne:(id<JRPersistent> _Nonnull)one columns:(NSArray<NSString *> * _Nullable)columns useTransaction:(BOOL)useTransaction;
+- (void)jr_updateOne:(id<JRPersistent> _Nonnull)one columns:(NSArray<NSString *> * _Nullable)columns useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete;
+
+- (BOOL)jr_updateOne:(id<JRPersistent> _Nonnull)one columns:(NSArray<NSString *> * _Nullable)columns;
+- (void)jr_updateOne:(id<JRPersistent> _Nonnull)one columns:(NSArray<NSString *> * _Nullable)columns complete:(JRDBComplete _Nullable)complete;
 
 #pragma mark - single level query operation
 

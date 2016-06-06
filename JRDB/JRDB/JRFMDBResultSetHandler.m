@@ -10,7 +10,6 @@
 #import "JRReflectUtil.h"
 #import <objc/runtime.h>
 #import "NSObject+JRDB.h"
-#import "JRExtraProperty.h"
 
 @import FMDB;
 
@@ -128,11 +127,6 @@ typedef enum {
             }
         }];
         
-        // 检查一对多的关联字段
-        [[clazz jr_extraProperties] enumerateObjectsUsingBlock:^(JRExtraProperty * _Nonnull property, NSUInteger idx, BOOL * _Nonnull stop) {
-            NSString *linkID = [resultSet stringForColumn:property.dbLinkKey];
-            [obj setOneToManyLinkID:linkID forClazz:property.linkClazz key:property.linkKey];
-        }];
         
         [list addObject:obj];
     }

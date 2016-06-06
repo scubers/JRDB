@@ -16,7 +16,7 @@
 #import "JRQueryCondition.h"
 #import "NSObject+JRDB.h"
 #import "JRUtils.h"
-#import "JRExtraProperty.h"
+#import "JRMiddleTable.h"
 
 #define AssertRegisteredClazz(clazz) NSAssert([[JRDBMgr shareInstance] isValidateClazz:clazz], @"class: %@ should be registered in JRDBMgr", clazz)
 
@@ -153,33 +153,7 @@ static NSString * const queuekey = @"queuekey";
     return schemas;
 }
 
-#pragma mark - data operation
-
-/**
- *  保存单条，不关联保存
- */
-- (BOOL)save:(id<JRPersistent>)obj {
-    AssertRegisteredClazz([obj class]);
-    if ([[obj class] jr_customPrimarykey]) { // 自定义主键
-        NSAssert([obj jr_customPrimarykeyValue] != nil, @"custom Primary key should not be nil");
-        NSObject *old = (NSObject *)[self getByPrimaryKey:[obj jr_customPrimarykeyValue] clazz:[obj class]];
-        NSAssert(!old, @"primary key is exists");
-    } else { // 默认主键
-        NSAssert(obj.ID == nil, @"The obj:%@ to be saved should not hold a primary key", obj);
-    }
-    
-    NSArray *args;
-    NSString *sql = [JRSqlGenerator sql4Insert:obj args:&args toDB:self];
-    [obj setID:[JRUtils uuid]];
-    args = [@[obj.ID] arrayByAddingObjectsFromArray:args];
-    BOOL ret = [self executeUpdate:sql withArgumentsInArray:args];
-    
-    // 保存完，执行block
-    [obj jr_executeFinishBlocks];
-    
-    return ret;
-}
-
+#pragma mark - link operation
 
 - (BOOL)handleSave:(id<JRPersistent>)obj stack:(NSMutableArray<id<JRPersistent>> **)stack needRollBack:(BOOL *)needRollBack {
     
@@ -193,7 +167,7 @@ static NSString * const queuekey = @"queuekey";
             NSString *identifier = [JRUtils uuid];
             if ([*stack containsObject:value]) {
                 [value jr_addDidFinishBlock:^(id<JRPersistent>  _Nonnull object) {
-                    [((NSObject *)obj) jr_updateWithColumn:nil];
+                    [self jr_updateColumns:nil useTransaction:NO];
                     [object jr_removeDidFinishBlockForIdentifier:identifier];
                 } forIdentifier:identifier];
             } else {
@@ -215,7 +189,7 @@ static NSString * const queuekey = @"queuekey";
     }
     
     if (![obj jr_primaryKeyValue]) {
-        BOOL ret = [self save:obj];
+        BOOL ret = [self jr_saveOneOnly:obj];
         *needRollBack = !ret;
         if (!ret) {
             NSLog(@"save obj: %@ error, transaction will be rollback", obj);
@@ -231,67 +205,77 @@ static NSString * const queuekey = @"queuekey";
     
 }
 
-- (BOOL)saveObj:(id<JRPersistent>)obj {
-    return [self saveObj:obj useTransaction:YES];
-}
-
-- (void)saveObj:(id<JRPersistent>)obj complete:(JRDBComplete)complete {
-    [self inQueue:^(FMDatabase *db) {
-        EXE_BLOCK(complete, [db saveObj:obj]);
+- (BOOL)handleOneToManySaveWithObj:(id<JRPersistent>)obj columns:(NSArray *)columns {
+    NSAssert([self inTransaction], @"should in transaction");
+    
+    __block BOOL needRollBack = NO;
+    // 监测一对多的保存
+    [[[obj class] jr_oneToManyLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull clazz, BOOL * _Nonnull stop) {
+        
+        if (!columns || [columns containsObject:key]) {
+            NSArray *array = [((NSObject *)obj) valueForKey:key];
+            // 逐个保存
+            [array enumerateObjectsUsingBlock:^(NSObject<JRPersistent> * _Nonnull subObj, NSUInteger idx, BOOL * _Nonnull stop) {
+                if (![subObj jr_primaryKeyValue]) {
+                    needRollBack = ![self jr_saveOne:subObj useTransaction:NO];
+                    *stop = needRollBack;
+                }
+            }];
+            // 保存中建表
+            JRMiddleTable *mid = [JRMiddleTable table4Clazz:clazz andClazz:[obj class] db:self];
+            needRollBack = ![mid saveObjs:array forObj:obj];
+            *stop = needRollBack;
+        }
+        
     }];
+    return !needRollBack;
 }
 
+#pragma mark - save
 
-- (BOOL)saveObj:(id<JRPersistent>)obj useTransaction:(BOOL)useTransaction {
-    AssertRegisteredClazz([obj class]);
+/**
+ *  保存单条，不关联保存
+ */
+- (BOOL)jr_saveOneOnly:(id<JRPersistent>)one {
+    AssertRegisteredClazz([one class]);
+    if ([[one class] jr_customPrimarykey]) { // 自定义主键
+        NSAssert([one jr_customPrimarykeyValue] != nil, @"custom Primary key should not be nil");
+        NSObject *old = (NSObject *)[self getByPrimaryKey:[one jr_customPrimarykeyValue] clazz:[one class]];
+        NSAssert(!old, @"primary key is exists");
+    } else { // 默认主键
+        NSAssert(one.ID == nil, @"The obj:%@ to be saved should not hold a primary key", one);
+    }
+    
+    NSArray *args;
+    NSString *sql = [JRSqlGenerator sql4Insert:one args:&args toDB:self];
+    [one setID:[JRUtils uuid]];
+    args = [@[one.ID] arrayByAddingObjectsFromArray:args];
+    BOOL ret = [self executeUpdate:sql withArgumentsInArray:args];
+    
+    if (ret) {
+        // 保存完，执行block
+        [one jr_executeFinishBlocks];
+    }
+    return ret;
+}
+
+- (BOOL)jr_saveOne:(id<JRPersistent>)one useTransaction:(BOOL)useTransaction {
+    AssertRegisteredClazz([one class]);
     
     if (useTransaction) {
         NSAssert(![self inTransaction], @"save error: database has been open an transaction");
         [self beginTransaction];
     }
-
+    
     NSMutableArray *stack = [NSMutableArray array];
     __block BOOL needRollBack = NO;
-    [self handleSave:obj stack:&stack needRollBack:&needRollBack];
-
+    [self handleSave:one stack:&stack needRollBack:&needRollBack];
+    
     if (!needRollBack) {
         // 监测一对多的保存
-        [[[obj class] jr_oneToManyLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull clazz, BOOL * _Nonnull stop) {
-            NSArray *array = [((NSObject *)obj) valueForKey:key];
-
-            // 检查子表
-            if (![self checkExistsTable4Clazz:clazz]) {
-                needRollBack = ![self createTable4Clazz:clazz];
-                if (needRollBack) {
-                    *stop = YES;
-                    return;
-                }
-            } else {
-                // 检查关联的父对象的字段是否存在
-                if (![self columnExists:OneToManyLinkColumn([obj class], key) inTableWithName:[clazz shortClazzName]]) {
-                    NSString *sql = [NSString stringWithFormat:@"alter table %@ add column %@ TEXT;", [clazz shortClazzName], OneToManyLinkColumn([obj class], key)];
-                    
-                    needRollBack = ![self executeUpdate:sql];
-                    if (needRollBack) {
-                        *stop = YES;
-                        return;
-                    }
-                }
-            }
-
-            // 逐个保存
-            [array enumerateObjectsUsingBlock:^(NSObject<JRPersistent> * _Nonnull subObj, NSUInteger idx, BOOL * _Nonnull stop) {
-                [subObj setOneToManyLinkID:[obj ID] forClazz:[obj class] key:key];
-                
-                if ([subObj jr_primaryKeyValue]) {
-                    [self updateObj:subObj];
-                } else {
-                    [self saveObj:subObj useTransaction:NO];
-                }
-            }];
-        }];
+        needRollBack = ![self handleOneToManySaveWithObj:one columns:nil];
     }
-
+    
     if (useTransaction) {
         if (needRollBack) {
             [self rollback];
@@ -302,33 +286,42 @@ static NSString * const queuekey = @"queuekey";
     return !needRollBack;
 }
 
-- (void)saveObj:(id<JRPersistent>)obj useTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete {
+- (void)jr_saveOne:(id<JRPersistent>)one useTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete {
     [self inQueue:^(FMDatabase * _Nonnull db) {
-        EXE_BLOCK(complete, [db saveObj:obj useTransaction:useTransaction]);
+        EXE_BLOCK(complete, [db jr_saveOne:one useTransaction:useTransaction]);
     }];
 }
 
-- (BOOL)updateObj:(id<JRPersistent>)obj {
-    return [self updateObj:obj columns:nil];
+- (BOOL)jr_saveOne:(id<JRPersistent>)one {
+    return [self jr_saveOne:one useTransaction:YES];
 }
 
-- (void)updateObj:(id<JRPersistent>)obj complete:(JRDBComplete)complete {
-    [self inQueue:^(FMDatabase *db) {
-        EXE_BLOCK(complete, [db updateObj:obj]);
+- (void)jr_saveOne:(id<JRPersistent>)one complete:(JRDBComplete)complete {
+    [self inQueue:^(FMDatabase * _Nonnull db) {
+        EXE_BLOCK(complete, [db jr_saveOne:one]);
     }];
 }
 
-- (BOOL)updateObj:(id<JRPersistent>)obj columns:(NSArray *)columns {
-    AssertRegisteredClazz([obj class]);
-    NSAssert([obj jr_primaryKeyValue], @"The obj to be updated should hold a primary key");
+#pragma mark - update
+
+/**
+ *  只更新数据，不进行关联操作
+ *
+ *  @param obj
+ *  @param columns
+ */
+- (BOOL)jr_updateOneOnly:(id<JRPersistent>)one columns:(NSArray<NSString *> *)columns {
+    
+    AssertRegisteredClazz([one class]);
+    NSAssert([one jr_primaryKeyValue], @"The obj to be updated should hold a primary key");
     
     // 表不存在
-    if (![self checkExistsTable4Clazz:[obj class]]) {
-        NSLog(@"table : %@ doesn't exists", [obj class]);
+    if (![self checkExistsTable4Clazz:[one class]]) {
+        NSLog(@"table : %@ doesn't exists", [one class]);
         return NO;
     }
     
-    NSObject<JRPersistent> *old = (NSObject *)[self getByPrimaryKey:[obj jr_customPrimarykeyValue] clazz:[obj class]];;
+    NSObject<JRPersistent> *old = (NSObject *)[self findByPrimaryKey:[one jr_primaryKeyValue] clazz:[one class]];
     NSObject<JRPersistent> *updateObj;
     if (columns.count) {
         if (!old) {
@@ -336,76 +329,127 @@ static NSString * const queuekey = @"queuekey";
             return NO;
         }
         for (NSString *name in columns) {
-            id value = [((NSObject *)obj) valueForKey:name];
+            id value = [((NSObject *)one) valueForKey:name];
             [((NSObject *)old) setValue:value forKey:name];
         }
         updateObj = old;
     } else {
-        // TODO: 把extra property copy 到新updateObj中
-        updateObj = obj;
-        
-        [[[old class] jr_extraProperties] enumerateObjectsUsingBlock:^(JRExtraProperty * _Nonnull property, NSUInteger idx, BOOL * _Nonnull stop) {
-            NSString *linkID = [old oneToManyLinkIDforClazz:property.linkClazz key:property.linkKey];
-            [updateObj setOneToManyLinkID:linkID forClazz:property.linkClazz key:property.linkKey];
-        }];
-        
+        updateObj = one;
     }
     
     NSArray *args;
     NSString *sql = [JRSqlGenerator sql4Update:updateObj columns:columns args:&args toDB:self];
     args = [args arrayByAddingObject:[updateObj jr_primaryKeyValue]];
-
+    
     BOOL ret = [self executeUpdate:sql withArgumentsInArray:args];
-    // 保存完，执行block
-    [obj jr_executeFinishBlocks];
+    if (ret) {
+        // 保存完，执行block
+        if (ret) [one jr_executeFinishBlocks];
+    }
     return ret;
 }
 
-- (void)updateObj:(id<JRPersistent>)obj columns:(NSArray *)columns complete:(JRDBComplete)complete {
-    [self inQueue:^(FMDatabase *db) {
-        EXE_BLOCK(complete, [db updateObj:obj columns:columns]);
-    }];
-}
+- (BOOL)jr_updateOne:(id<JRPersistent>)one columns:(NSArray<NSString *> *)columns useTransaction:(BOOL)useTransaction {
+    if (useTransaction) {
+        NSAssert(![self inTransaction], @"save error: database has been open an transaction");
+        [self beginTransaction];
+    }
 
-- (BOOL)deleteObj:(id<JRPersistent>)obj {
-    AssertRegisteredClazz([obj class]);
-    NSAssert([obj jr_primaryKeyValue], @"primary key should not be nil");
+    BOOL needRollBack = ![self jr_updateOneOnly:one columns:columns];
     
-    if (![self checkExistsTable4Clazz:[obj class]]) {
-        NSLog(@"table : %@ doesn't exists", [obj class]);
-        return NO;
+    if (!needRollBack) {
+        // 监测一对多的保存
+        needRollBack = ![self handleOneToManySaveWithObj:one columns:nil];
     }
     
-    NSString *sql = [JRSqlGenerator sql4Delete:obj];
-    BOOL ret = [self executeUpdate:sql withArgumentsInArray:@[[obj jr_primaryKeyValue]]];
-    // 保存完，执行block
-    [obj jr_executeFinishBlocks];
-    return ret;
-}
-
-- (void)deleteObj:(id<JRPersistent>)obj complete:(JRDBComplete)complete {
-    [self inQueue:^(FMDatabase *db) {
-        EXE_BLOCK(complete, [db deleteObj:obj]);
-    }];
-}
-
-- (BOOL)deleteAll:(Class<JRPersistent> _Nonnull)clazz {
-    AssertRegisteredClazz(clazz);
-    if (![self checkExistsTable4Clazz:clazz]) {
-        NSLog(@"table : %@ doesn't exists", clazz);
-        return NO;
+    if (useTransaction) {
+        if (needRollBack) {
+            [self rollback];
+        } else {
+            [self commit];
+        }
     }
-    NSString *sql = [JRSqlGenerator sql4DeleteAll:clazz];
-    BOOL ret = [self executeUpdate:sql withArgumentsInArray:nil];
-    return ret;
+    return !needRollBack;
 }
 
-- (void)deleteAll:(Class<JRPersistent> _Nonnull)clazz complete:(JRDBComplete _Nullable)complete {
+- (void)jr_updateOne:(id<JRPersistent>)one columns:(NSArray<NSString *> *)columns useTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete {
     [self inQueue:^(FMDatabase * _Nonnull db) {
-        EXE_BLOCK(complete, [db deleteAll:clazz]);
+        EXE_BLOCK(complete, [db jr_updateOne:one columns:columns useTransaction:useTransaction]);
     }];
 }
 
+- (BOOL)jr_updateOne:(id<JRPersistent>)one columns:(NSArray<NSString *> *)columns {
+    return [self jr_updateOne:one columns:columns useTransaction:YES];
+}
+- (void)jr_updateOne:(id<JRPersistent>)one columns:(NSArray<NSString *> *)columns complete:(JRDBComplete)complete {
+    [self inQueue:^(FMDatabase * _Nonnull db) {
+        EXE_BLOCK(complete, [db jr_updateOne:one columns:columns]);
+    }];
+}
+
+#pragma mark - delete
+
+- (BOOL)jr_deleteOneOnly:(id<JRPersistent>)one {
+    AssertRegisteredClazz([one class]);
+    NSAssert([one jr_primaryKeyValue], @"primary key should not be nil");
+    
+    if (![self checkExistsTable4Clazz:[one class]]) {
+        NSLog(@"table : %@ doesn't exists", [one class]);
+        return NO;
+    }
+    
+    NSString *sql = [JRSqlGenerator sql4Delete:one];
+    BOOL ret = [self executeUpdate:sql withArgumentsInArray:@[[one jr_primaryKeyValue]]];
+    if (ret) {
+        // 保存完，执行block
+        [one jr_executeFinishBlocks];
+    }
+    return ret;
+}
+
+- (BOOL)jr_deleteOne:(id<JRPersistent>)one useTransaction:(BOOL)useTransaction {
+    if (useTransaction) {
+        NSAssert(![self inTransaction], @"save error: database has been open an transaction");
+        [self beginTransaction];
+    }
+    
+    __block BOOL needRollBack = ![self jr_deleteOneOnly:one];
+    
+    if (!needRollBack) {
+        // 监测一对多的 删除
+        [[[one class] jr_oneToManyLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull clazz, BOOL * _Nonnull stop) {
+            JRMiddleTable *mid = [JRMiddleTable table4Clazz:clazz andClazz:[one class] db:self];
+            needRollBack = ![mid deleteID:[one ID] forClazz:[one class]];
+            *stop = needRollBack;
+        }];
+        
+    }
+    
+    if (useTransaction) {
+        if (needRollBack) {
+            [self rollback];
+        } else {
+            [self commit];
+        }
+    }
+    return !needRollBack;
+}
+
+- (void)jr_deleteOne:(id<JRPersistent>)one useTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete {
+    [self inQueue:^(FMDatabase * _Nonnull db) {
+        EXE_BLOCK(complete, [db jr_deleteOne:one useTransaction:useTransaction]);
+    }];
+}
+
+- (BOOL)jr_deleteOne:(id<JRPersistent>)one {
+    return [self jr_deleteOne:one useTransaction:YES];
+}
+
+- (void)jr_deleteOne:(id<JRPersistent>)one complete:(JRDBComplete)complete {
+    [self inQueue:^(FMDatabase * _Nonnull db) {
+        EXE_BLOCK(complete, [db jr_deleteOne:one]);
+    }];
+}
 
 #pragma mark - single level query operation
 
@@ -483,15 +527,17 @@ static NSString * const queuekey = @"queuekey";
     
     // 检查有无查询一对多
     [[[obj class] jr_oneToManyLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull clazz, BOOL * _Nonnull stop) {
-        NSArray<id<JRPersistent>> *subList =
-        [self findByConditions:@[
-                                 
-                                 [JRQueryCondition type:JRQueryConditionTypeAnd
-                                              condition:[NSString stringWithFormat:@" %@ = ?",
-                                                         OneToManyLinkColumn([obj class], key)], [obj ID], nil],
-                                 ]
-                         clazz:clazz
-                        isDesc:NO];
+        
+        JRMiddleTable *mid = [JRMiddleTable table4Clazz:clazz andClazz:[obj class] db:self];
+        NSArray *ids = [mid anotherClazzIDsWithID:[obj ID] clazz:[obj class]];
+        
+        NSMutableArray *subList = [NSMutableArray array];
+        [ids enumerateObjectsUsingBlock:^(id  _Nonnull aID, NSUInteger idx, BOOL * _Nonnull stop) {
+            id sub = [self findByID:aID clazz:clazz];
+            if (sub) {
+                [subList addObject:sub];
+            }
+        }];
         [obj setValue:subList forKey:key];
     }];
     
@@ -543,7 +589,7 @@ static NSString * const queuekey = @"queuekey";
     return [self findByConditions:conditions clazz:clazz groupBy:nil orderBy:nil limit:limit isDesc:isDesc];
 }
 
-#pragma mark - private
+#pragma mark - convenience method
 - (BOOL)checkExistsTable4Clazz:(Class<JRPersistent>)clazz {
     AssertRegisteredClazz(clazz);
     return [self tableExists:[clazz shortClazzName]];

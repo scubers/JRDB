@@ -70,18 +70,12 @@
 - (void)testUpdate {
     Person *p = (Person *)[Person jr_findAll].firstObject;
     p.card.person = p;
-    [p.card jr_updateWithColumn:nil];
+    [p.card jr_updateColumns:nil];
 //    [p jr_updateWithColumn:nil];
 //    [p isEqual:nil];
     
 }
 
-
-- (void)testDelete {
-    Person *p = [Person new];
-    p.a_int = 11;
-    [p jr_delete];
-}
 
 
 - (void)testFindAll {
@@ -171,8 +165,8 @@
         Person *p = [self createPerson:1 name:@"A"];
         Person *p2 = [self createPerson:2 name:@"B"];
 
-        [db saveObj:p useTransaction:NO];
-        [db saveObj:p2 useTransaction:NO];
+        [db jr_saveOne:p useTransaction:NO];
+        [db jr_saveOne:p2 useTransaction:NO];
 
         *rollBack = YES;
     }];
@@ -182,7 +176,7 @@
     Person *p = [self createPerson:0 name:@"a"];
     for (int i = 0; i<10; i++) {
         Money *m = [Money new];
-        m.value = [NSString stringWithFormat:@"%d", i];
+        m.value = [NSString stringWithFormat:@"%d", i + 100];
         [p.money addObject:m];
     }
 
@@ -191,7 +185,9 @@
 }
 
 - (void)testFindByID {
-    Person *p = [Person jr_findByID:@"35687747-4425-4E47-829B-CFCC2FC71D19"];
+    Person *p = [Person jr_findByID:@"D9F8B771-13B0-496B-9004-97C86802F621"];
+    [p.money removeObjectAtIndex:0];
+    [p jr_updateColumns:nil];
     [p isEqual:nil];
 }
 
@@ -199,6 +195,12 @@
     [Person jr_truncateTable];
     [Card jr_truncateTable];
     [Money jr_truncateTable];
+}
+
+- (void)testDelete {
+    Person *p = (Person *)[Person jr_findAll].firstObject;
+    
+    [p jr_delete];
 }
 
 

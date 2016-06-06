@@ -62,12 +62,6 @@
 //    p.k_data = [NSData data];
 //    p.l_date = [NSDate date];
     
-    if ([db saveObj:p]) {
-        NSLog(@"success");
-    } else {
-        NSLog(@"failure");
-    }
-    
     
 }
 
