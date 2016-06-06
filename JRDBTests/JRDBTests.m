@@ -27,8 +27,12 @@
 
 - (void)setUp {
     [super setUp];
-    FMDatabase *db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/Jrwong/Desktop/test.sqlite"];
-    [[JRDBMgr shareInstance] registerClazzForUpdateTable:[Person class]];
+    FMDatabase *db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/jmacmini/Desktop/test.sqlite"];
+    [[JRDBMgr shareInstance] registerClazzes:@[
+                                                [Person class],
+                                                [Card class],
+                                                [Money class],
+                                                ]];
     [JRDBMgr shareInstance].defaultDB = db;
 }
 
@@ -95,11 +99,6 @@
 - (void)testTruncateTable {
     [[JRDBMgr shareInstance] deleteDBWithPath:[JRDBMgr defaultDB].databasePath];
     
-}
-
-- (void)testUpdateTable {
-    [[JRDBMgr shareInstance] registerClazzForUpdateTable:[Person class]];
-    [Person jr_updateTable];
 }
 
 - (void)testPerformanceExample {
@@ -192,13 +191,14 @@
 }
 
 - (void)testFindByID {
-    Person *p = [Person jr_findByID:@"CD71B668-3608-4EAE-997A-201DBAE40BA3"];
+    Person *p = [Person jr_findByID:@"35687747-4425-4E47-829B-CFCC2FC71D19"];
     [p isEqual:nil];
 }
 
 - (void)testDeleteAll {
     [Person jr_truncateTable];
     [Card jr_truncateTable];
+    [Money jr_truncateTable];
 }
 
 

@@ -15,7 +15,10 @@
 
 @interface NSObject (JRDB) <JRPersistent>
 
-- (instancetype _Nullable)jr_init;
+/**
+ *  注册的时候自动调用, 每个注册类有且只执行一次;
+ */
++ (void)jr_configure;
 
 #pragma mark - convinence method
 

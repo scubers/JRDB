@@ -15,7 +15,8 @@
 + (instancetype)extraPropertyWithClazz:(Class)clazz linkKey:(NSString *)key {
     JRExtraProperty *p = [JRExtraProperty new];
     p->_linkClazz = clazz;
-    p->_linkKey = OneToManyLinkColumn(self, key);
+    p->_linkKey = key;
+    p->_dbLinkKey = OneToManyLinkColumn(clazz, key);
     return p;
 }
 @end

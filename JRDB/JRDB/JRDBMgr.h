@@ -21,11 +21,12 @@
 - (void)deleteDBWithPath:(NSString * _Nullable)path;
 
 /**
- *  在这里注册的类，使用本框架的数据库将全部建有这些表
+ *  在这里注册的类，使用本框架的只能操作已注册的类
  *  @param clazz 类名
  */
-- (void)registerClazzForUpdateTable:(Class<JRPersistent> _Nonnull)clazz;
-- (NSArray<Class> * _Nonnull)registedClazz;
+- (void)registerClazz:(Class<JRPersistent> _Nonnull)clazz;
+- (void)registerClazzes:(NSArray<Class<JRPersistent>> * _Nonnull)clazzArray;
+- (NSArray<Class> * _Nonnull)registeredClazz;
 
 /**
  * 更新默认数据库的表（或者新建没有的表）
@@ -35,6 +36,12 @@
 - (void)updateDB:(FMDatabase * _Nonnull)db;
 
 
+/**
+ *  检查是否注册
+ *
+ *  @param clazz 类
+ *  @return 结果
+ */
 - (BOOL)isValidateClazz:(Class<JRPersistent> _Nonnull)clazz;
 
 @end

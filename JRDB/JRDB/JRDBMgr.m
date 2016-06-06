@@ -53,12 +53,18 @@ static JRDBMgr *__shareInstance;
     [mgr removeItemAtPath:path error:nil];
 }
 
-- (void)registerClazzForUpdateTable:(Class<JRPersistent>)clazz {
+- (void)registerClazz:(Class<JRPersistent> _Nonnull)clazz {
     [_clazzArray addObject:clazz];
-    //[clazz.self jr_swizzleSetters4Clazz];
+    [self _configureRegisteredClazz:clazz];
 }
 
-- (NSArray<Class> *)registedClazz {
+- (void)registerClazzes:(NSArray<Class<JRPersistent>> *)clazzArray {
+    [clazzArray enumerateObjectsUsingBlock:^(Class<JRPersistent>  _Nonnull clazz, NSUInteger idx, BOOL * _Nonnull stop) {
+        [self registerClazz:clazz];
+    }];
+}
+
+- (NSArray<Class> *)registeredClazz {
     return _clazzArray;
 }
 
@@ -73,11 +79,16 @@ static JRDBMgr *__shareInstance;
     }
 }
 
+- (BOOL)isValidateClazz:(Class<JRPersistent>)clazz {
+    return [_clazzArray containsObject:clazz];
+}
+
+
 #pragma mark - lazy load
 
 - (FMDatabase *)defaultDB {
     if (!_defaultDB) {
-        _defaultDB = [FMDatabase databaseWithPath:[self defaultPath]];
+        _defaultDB = [FMDatabase databaseWithPath:[self _defaultPath]];
         [_defaultDB open];
     }
     return _defaultDB;
@@ -92,7 +103,9 @@ static JRDBMgr *__shareInstance;
     _defaultDB = defaultDB;
 }
 
-- (NSString *)defaultPath {
+#pragma mark - private method
+
+- (NSString *)_defaultPath {
     NSFileManager *mgr = [NSFileManager defaultManager];
     NSString *path = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).lastObject;
     path = [path stringByAppendingPathComponent:@"jrdb"];
@@ -104,9 +117,8 @@ static JRDBMgr *__shareInstance;
     return path;
 }
 
-
-- (BOOL)isValidateClazz:(Class<JRPersistent>)clazz {
-    return [_clazzArray containsObject:clazz];
+- (void)_configureRegisteredClazz:(Class)clazz {
+    [clazz jr_configure];
 }
 
 @end

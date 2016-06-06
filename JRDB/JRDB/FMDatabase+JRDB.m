@@ -16,6 +16,9 @@
 #import "JRQueryCondition.h"
 #import "NSObject+JRDB.h"
 #import "JRUtils.h"
+#import "JRExtraProperty.h"
+
+#define AssertRegisteredClazz(clazz) NSAssert([[JRDBMgr shareInstance] isValidateClazz:clazz], @"class: %@ should be registered in JRDBMgr", clazz)
 
 static NSString * const queuekey = @"queuekey";
 
@@ -61,6 +64,9 @@ static NSString * const queuekey = @"queuekey";
 #pragma mark - table operation
 
 - (BOOL)createTable4Clazz:(Class<JRPersistent>)clazz {
+    
+    AssertRegisteredClazz(clazz);
+    
     if (![self checkExistsTable4Clazz:clazz]) {
         return [self executeUpdate:[JRSqlGenerator createTableSql4Clazz:clazz]];
     }
@@ -76,6 +82,7 @@ static NSString * const queuekey = @"queuekey";
 }
 
 - (BOOL)truncateTable4Clazz:(Class<JRPersistent>)clazz {
+    AssertRegisteredClazz(clazz);
     if ([self checkExistsTable4Clazz:clazz]) {
         [self executeUpdate:[JRSqlGenerator dropTableSql4Clazz:clazz]];
     }
@@ -91,6 +98,7 @@ static NSString * const queuekey = @"queuekey";
 }
 
 - (BOOL)updateTable4Clazz:(Class<JRPersistent>)clazz {
+    AssertRegisteredClazz(clazz);
     NSArray *sqls = [JRSqlGenerator updateTableSql4Clazz:clazz inDB:self];
     BOOL flag = YES;
     for (NSString *sql in sqls) {
@@ -111,6 +119,7 @@ static NSString * const queuekey = @"queuekey";
 }
 
 - (BOOL)dropTable4Clazz:(Class<JRPersistent>)clazz {
+    AssertRegisteredClazz(clazz);
     if ([self checkExistsTable4Clazz:clazz]) {
         return [self executeUpdate:[JRSqlGenerator dropTableSql4Clazz:clazz]];
     }
@@ -128,6 +137,7 @@ static NSString * const queuekey = @"queuekey";
 #pragma mark - table message
 
 - (NSArray<JRColumnSchema *> *)schemasInClazz:(Class<JRPersistent>)clazz {
+    AssertRegisteredClazz(clazz);
     FMResultSet *ret = [[JRDBMgr defaultDB] getTableSchema:[clazz shortClazzName]];
 //    get table schema: result colums: cid[INTEGER], name,type [STRING], notnull[INTEGER], dflt_value[],pk[INTEGER]
     NSMutableArray *schemas = [NSMutableArray array];
@@ -149,6 +159,7 @@ static NSString * const queuekey = @"queuekey";
  *  保存单条，不关联保存
  */
 - (BOOL)save:(id<JRPersistent>)obj {
+    AssertRegisteredClazz([obj class]);
     if ([[obj class] jr_customPrimarykey]) { // 自定义主键
         NSAssert([obj jr_customPrimarykeyValue] != nil, @"custom Primary key should not be nil");
         NSObject *old = (NSObject *)[self getByPrimaryKey:[obj jr_customPrimarykeyValue] clazz:[obj class]];
@@ -232,6 +243,8 @@ static NSString * const queuekey = @"queuekey";
 
 
 - (BOOL)saveObj:(id<JRPersistent>)obj useTransaction:(BOOL)useTransaction {
+    AssertRegisteredClazz([obj class]);
+    
     if (useTransaction) {
         NSAssert(![self inTransaction], @"save error: database has been open an transaction");
         [self beginTransaction];
@@ -253,22 +266,28 @@ static NSString * const queuekey = @"queuekey";
                     *stop = YES;
                     return;
                 }
-            }
-            // 检查关联的父对象的字段是否存在
-            if (![self columnExists:OneToManyLinkColumn([obj class], key) inTableWithName:[clazz shortClazzName]]) {
-                NSString *sql = [NSString stringWithFormat:@"alter table %@ add column %@ TEXT;", [clazz shortClazzName], OneToManyLinkColumn([obj class], key)];
-
-                needRollBack = ![self executeUpdate:sql];
-                if (needRollBack) {
-                    *stop = YES;
-                    return;
+            } else {
+                // 检查关联的父对象的字段是否存在
+                if (![self columnExists:OneToManyLinkColumn([obj class], key) inTableWithName:[clazz shortClazzName]]) {
+                    NSString *sql = [NSString stringWithFormat:@"alter table %@ add column %@ TEXT;", [clazz shortClazzName], OneToManyLinkColumn([obj class], key)];
+                    
+                    needRollBack = ![self executeUpdate:sql];
+                    if (needRollBack) {
+                        *stop = YES;
+                        return;
+                    }
                 }
             }
 
             // 逐个保存
             [array enumerateObjectsUsingBlock:^(NSObject<JRPersistent> * _Nonnull subObj, NSUInteger idx, BOOL * _Nonnull stop) {
                 [subObj setOneToManyLinkID:[obj ID] forClazz:[obj class] key:key];
-                [self saveObj:subObj useTransaction:NO];
+                
+                if ([subObj jr_primaryKeyValue]) {
+                    [self updateObj:subObj];
+                } else {
+                    [self saveObj:subObj useTransaction:NO];
+                }
             }];
         }];
     }
@@ -300,6 +319,7 @@ static NSString * const queuekey = @"queuekey";
 }
 
 - (BOOL)updateObj:(id<JRPersistent>)obj columns:(NSArray *)columns {
+    AssertRegisteredClazz([obj class]);
     NSAssert([obj jr_primaryKeyValue], @"The obj to be updated should hold a primary key");
     
     // 表不存在
@@ -308,9 +328,9 @@ static NSString * const queuekey = @"queuekey";
         return NO;
     }
     
-    id<JRPersistent> updateObj;
+    NSObject<JRPersistent> *old = (NSObject *)[self getByPrimaryKey:[obj jr_customPrimarykeyValue] clazz:[obj class]];;
+    NSObject<JRPersistent> *updateObj;
     if (columns.count) {
-        id<JRPersistent> old = [self getByPrimaryKey:[obj jr_customPrimarykeyValue] clazz:[obj class]];;
         if (!old) {
             NSLog(@"The object doesn't exists in database");
             return NO;
@@ -321,7 +341,14 @@ static NSString * const queuekey = @"queuekey";
         }
         updateObj = old;
     } else {
+        // TODO: 把extra property copy 到新updateObj中
         updateObj = obj;
+        
+        [[[old class] jr_extraProperties] enumerateObjectsUsingBlock:^(JRExtraProperty * _Nonnull property, NSUInteger idx, BOOL * _Nonnull stop) {
+            NSString *linkID = [old oneToManyLinkIDforClazz:property.linkClazz key:property.linkKey];
+            [updateObj setOneToManyLinkID:linkID forClazz:property.linkClazz key:property.linkKey];
+        }];
+        
     }
     
     NSArray *args;
@@ -341,6 +368,7 @@ static NSString * const queuekey = @"queuekey";
 }
 
 - (BOOL)deleteObj:(id<JRPersistent>)obj {
+    AssertRegisteredClazz([obj class]);
     NSAssert([obj jr_primaryKeyValue], @"primary key should not be nil");
     
     if (![self checkExistsTable4Clazz:[obj class]]) {
@@ -362,6 +390,7 @@ static NSString * const queuekey = @"queuekey";
 }
 
 - (BOOL)deleteAll:(Class<JRPersistent> _Nonnull)clazz {
+    AssertRegisteredClazz(clazz);
     if (![self checkExistsTable4Clazz:clazz]) {
         NSLog(@"table : %@ doesn't exists", clazz);
         return NO;
@@ -381,6 +410,7 @@ static NSString * const queuekey = @"queuekey";
 #pragma mark - single level query operation
 
 - (id<JRPersistent>)getByID:(NSString *)ID clazz:(Class<JRPersistent>)clazz {
+    AssertRegisteredClazz(clazz);
     NSAssert(ID, @"id should be nil");
     NSString *sql = [JRSqlGenerator sql4GetByIDWithClazz:clazz];
     FMResultSet *ret = [self executeQuery:sql withArgumentsInArray:@[ID]];
@@ -388,6 +418,7 @@ static NSString * const queuekey = @"queuekey";
 }
 
 - (id<JRPersistent>)getByPrimaryKey:(id)primaryKey clazz:(Class<JRPersistent>)clazz {
+    AssertRegisteredClazz(clazz);
     NSAssert(primaryKey, @"id should be nil");
     NSString *sql = [JRSqlGenerator sql4GetByPrimaryKeyWithClazz:clazz];
     FMResultSet *ret = [self executeQuery:sql withArgumentsInArray:@[primaryKey]];
@@ -395,6 +426,7 @@ static NSString * const queuekey = @"queuekey";
 }
 
 - (NSArray *)getAll:(Class<JRPersistent>)clazz orderBy:(NSString *)orderby isDesc:(BOOL)isDesc {
+    AssertRegisteredClazz(clazz);
     if (![self checkExistsTable4Clazz:clazz]) {
         NSLog(@"table %@ doesn't exists", clazz);
         return @[];
@@ -405,6 +437,7 @@ static NSString * const queuekey = @"queuekey";
 }
 
 - (NSArray *)getByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc {
+    AssertRegisteredClazz(clazz);
     if (![self checkExistsTable4Clazz:clazz]) {
         NSLog(@"table %@ doesn't exists", clazz);
         return @[];
@@ -446,14 +479,29 @@ static NSString * const queuekey = @"queuekey";
 
 - (id<JRPersistent>)findByID:(NSString *)ID clazz:(Class<JRPersistent>)clazz {
     NSMutableArray *array = [NSMutableArray array];
-    return [self handleSingleLinkFindByID:ID clazz:clazz stack:&array];
+    NSObject<JRPersistent> *obj = [self handleSingleLinkFindByID:ID clazz:clazz stack:&array];
+    
+    // 检查有无查询一对多
+    [[[obj class] jr_oneToManyLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull clazz, BOOL * _Nonnull stop) {
+        NSArray<id<JRPersistent>> *subList =
+        [self findByConditions:@[
+                                 
+                                 [JRQueryCondition type:JRQueryConditionTypeAnd
+                                              condition:[NSString stringWithFormat:@" %@ = ?",
+                                                         OneToManyLinkColumn([obj class], key)], [obj ID], nil],
+                                 ]
+                         clazz:clazz
+                        isDesc:NO];
+        [obj setValue:subList forKey:key];
+    }];
+    
+    return obj;
 }
 
 - (id<JRPersistent>)findByPrimaryKey:(id)primaryKey clazz:(Class<JRPersistent>)clazz {
     NSAssert([self checkExistsTable4Clazz:clazz], @"table %@ doesn't exists", clazz);
-    id<JRPersistent> obj = [self getByPrimaryKey:primaryKey clazz:clazz];
-    NSMutableArray *array = [NSMutableArray array];
-    return [self handleSingleLinkFindByID:[obj ID] clazz:clazz stack:&array];
+    NSObject<JRPersistent> *obj = [self getByPrimaryKey:primaryKey clazz:clazz];
+    return [self findByID:[obj ID] clazz:[obj class]];
 }
 
 
@@ -464,10 +512,11 @@ static NSString * const queuekey = @"queuekey";
 - (NSArray *)findAll:(Class<JRPersistent>)clazz orderBy:(NSString *)orderby isDesc:(BOOL)isDesc {
     NSArray *list = [self getAll:clazz orderBy:orderby isDesc:isDesc];
     NSMutableArray *result = [NSMutableArray array];
+    
     [list enumerateObjectsUsingBlock:^(id<JRPersistent>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        NSMutableArray *array = [NSMutableArray array];
-        [result addObject:[self handleSingleLinkFindByID:[obj ID] clazz:[obj class] stack:&array]];
+        [result addObject:[self findByID:[obj ID] clazz:[obj class]]];
     }];
+    
     return result;
 }
 
@@ -475,8 +524,7 @@ static NSString * const queuekey = @"queuekey";
     NSArray<id<JRPersistent>> *list = [self getByConditions:conditions clazz:clazz groupBy:groupBy orderBy:orderBy limit:limit isDesc:isDesc];
     NSMutableArray *result = [NSMutableArray array];
     [list enumerateObjectsUsingBlock:^(id<JRPersistent>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        NSMutableArray *array = [NSMutableArray array];
-        [result addObject:[self handleSingleLinkFindByID:[obj ID] clazz:[obj class] stack:&array]];
+        [result addObject:[self findByID:[obj ID] clazz:[obj class]]];
     }];
     return result;
 }
@@ -497,6 +545,7 @@ static NSString * const queuekey = @"queuekey";
 
 #pragma mark - private
 - (BOOL)checkExistsTable4Clazz:(Class<JRPersistent>)clazz {
+    AssertRegisteredClazz(clazz);
     return [self tableExists:[clazz shortClazzName]];
 }
 

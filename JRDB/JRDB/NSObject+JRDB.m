@@ -17,17 +17,17 @@
 
 
 #define JR_DEFAULTDB [JRDBMgr defaultDB]
+
 const NSString *JRDB_IDKEY = @"JRDB_IDKEY";
+
+const NSString *jr_configureKey = @"jr_configureKey";
 
 @implementation NSObject (JRDB)
 
-- (instancetype)jr_init {
-    [self jr_init];
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        [[self class] _configureExtraProperty];
-    });
-    return self;
++ (void)jr_configure {
+    NSAssert(![objc_getAssociatedObject(self, _cmd) boolValue], @"This class's -[jr_configure] has been executed");
+    [self _configureExtraProperty];
+    objc_setAssociatedObject(self, _cmd, @(YES), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 #pragma mark - protocol method
@@ -95,6 +95,8 @@ const NSString *JRDB_IDKEY = @"JRDB_IDKEY";
     return blocks;
 }
 
+NSString * const jr_extraPropertyKey = @"jr_extraPropertyKey";
+
 + (NSArray<JRExtraProperty *> *)jr_extraProperties {
     NSMutableArray *array = objc_getAssociatedObject(self, _cmd);
     if (!array) {
@@ -106,7 +108,7 @@ const NSString *JRDB_IDKEY = @"JRDB_IDKEY";
 
 + (void)_configureExtraProperty {
     [[self jr_oneToManyLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull clazz, BOOL * _Nonnull stop) {
-        JRExtraProperty *p = [JRExtraProperty extraPropertyWithClazz:clazz linkKey:key];
+        JRExtraProperty *p = [JRExtraProperty extraPropertyWithClazz:self linkKey:key];
         [((NSMutableArray *)[clazz jr_extraProperties]) addObject:p];
     }];
 }
@@ -122,11 +124,13 @@ const NSString *JRDB_IDKEY = @"JRDB_IDKEY";
 }
 
 - (void)setOneToManyLinkID:(NSString *)ID forClazz:(Class<JRPersistent>)clazz key:(NSString *)key {
-    objc_setAssociatedObject(self, NSSelectorFromString(OneToManyLinkColumn(clazz, key)), ID, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    SEL cmd = NSSelectorFromString(OneToManyLinkColumn(clazz, key));
+    objc_setAssociatedObject(self, cmd, ID, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (NSString *)oneToManyLinkIDforClazz:(Class<JRPersistent>)clazz key:(NSString *)key {
-    return objc_getAssociatedObject(self, NSSelectorFromString(OneToManyLinkColumn(clazz, key)));
+    SEL cmd = NSSelectorFromString(OneToManyLinkColumn(clazz, key));
+    return objc_getAssociatedObject(self, cmd);
 }
 
 #pragma mark - save

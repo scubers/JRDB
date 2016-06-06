@@ -11,6 +11,7 @@
 #import "NSObject+JRDB.h"
 #import "JRQueryCondition.h"
 #import "NSObject+Reflect.h"
+#import "JRExtraProperty.h"
 
 @import FMDB;
 
@@ -38,6 +39,11 @@
     // 是否具有一对一关联对象 默认保存其_ID字段
     [[clazz jr_singleLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull obj, BOOL * _Nonnull stop) {
         [sql appendFormat:@", %@ TEXT ", SingleLinkColumn(key)];
+    }];
+    
+    // 检查一对多的子表额外字段
+    [[clazz jr_extraProperties] enumerateObjectsUsingBlock:^(JRExtraProperty * _Nonnull property, NSUInteger idx, BOOL * _Nonnull stop) {
+        [sql appendFormat:@", %@ TEXT", property.dbLinkKey];
     }];
     
     [sql appendString:@");"];
@@ -71,6 +77,13 @@
     [[clazz jr_singleLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull obj, BOOL * _Nonnull stop) {
         if (![db columnExists:SingleLinkColumn(key) inTableWithName:tableName]) {
             [sqls addObject:[NSString stringWithFormat:@"alter table %@ add column %@ TEXT;", tableName, SingleLinkColumn(key)]];
+        }
+    }];
+    
+    // 检查一对多的子表额外字段
+    [[clazz jr_extraProperties] enumerateObjectsUsingBlock:^(JRExtraProperty * _Nonnull property, NSUInteger idx, BOOL * _Nonnull stop) {
+        if (![db columnExists:property.dbLinkKey inTableWithName:tableName]) {
+            [sqls addObject:[NSString stringWithFormat:@"alter table %@ add column %@ TEXT;", tableName, property.dbLinkKey]];
         }
     }];
     
@@ -109,8 +122,8 @@
         if (![self typeWithEncodeName:dict[name]]) { continue;}
         
         // 拼接语句
-        [sql appendFormat:@", %@ ", name];
-        [sql2 appendFormat:@", ? "];
+        [sql appendFormat:@" , %@", name];
+        [sql2 appendFormat:@" , ?"];
 
         // 空值转换
         id value = [(NSObject *)obj valueForKey:name];
@@ -123,9 +136,17 @@
     // 检测一对一字段
     [[[obj class] jr_singleLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull clazz, BOOL * _Nonnull stop) {
         NSObject<JRPersistent> *value = [((NSObject *)obj) valueForKey:key];
-        [sql appendFormat:@", %@ ", SingleLinkColumn(key)];
-        [sql2 appendFormat:@", ? "];
+        [sql appendFormat:@" , %@", SingleLinkColumn(key)];
+        [sql2 appendFormat:@" , ?"];
         [argsList addObject:[value ID] ? [value ID] : [NSNull null]];
+    }];
+    
+    // 检查一对多的子表额外字段
+    [[[obj class] jr_extraProperties] enumerateObjectsUsingBlock:^(JRExtraProperty * _Nonnull property, NSUInteger idx, BOOL * _Nonnull stop) {
+        [sql appendFormat:@" , %@", property.dbLinkKey];
+        [sql2 appendFormat:@" , ?"];
+        NSString *prop = [((NSObject *)obj) oneToManyLinkIDforClazz:property.linkClazz key:property.linkKey];
+        [argsList addObject:prop ? prop : [NSNull null]];
     }];
     
     [sql appendString:@")"];
@@ -191,6 +212,13 @@
         [argsList addObject: [value ID] ? [value ID] : [NSNull null]];
     }];
     
+    // 检查一对多的子表额外字段
+    [[[obj class] jr_extraProperties] enumerateObjectsUsingBlock:^(JRExtraProperty * _Nonnull property, NSUInteger idx, BOOL * _Nonnull stop) {
+        [sql appendFormat:@" %@ = ?,", property.dbLinkKey];
+        NSString *prop = [((NSObject *)obj) oneToManyLinkIDforClazz:property.linkClazz key:property.linkKey];
+        [argsList addObject:prop ? prop : [NSNull null]];
+    }];
+    
     
     if ([sql hasSuffix:@","]) {
         sql = [[sql substringToIndex:sql.length - 1] mutableCopy];
@@ -243,7 +271,7 @@
     // group
     if (groupBy.length) { [sql appendFormat:@" group by %@ ", groupBy]; }
     // orderby
-    [sql appendFormat:@" order by %@ ", orderBy.length ? orderBy : [clazz jr_primaryKey]];
+    if (orderBy.length) { [sql appendFormat:@" order by %@ ", orderBy]; }
     // desc asc
     if (isDesc) {[sql appendString:@" desc "];}
     // limit

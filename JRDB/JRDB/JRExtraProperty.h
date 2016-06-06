@@ -11,8 +11,8 @@
 @interface JRExtraProperty : NSObject
 
 @property (nonatomic, strong, nonnull, readonly) Class    linkClazz;
-@property (nonatomic, copy, nonnull, readonly  ) NSString *linkKey;
-@property (nonatomic, copy, nullable, readonly ) NSString *linkValue;
+@property (nonatomic, copy, nonnull, readonly  ) NSString *dbLinkKey;
+@property (nonatomic, copy, nullable, readonly ) NSString *linkKey;
 
 + (instancetype _Nonnull)extraPropertyWithClazz:(Class _Nonnull)clazz linkKey:(NSString * _Nonnull)key;
 
