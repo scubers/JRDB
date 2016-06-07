@@ -4,30 +4,25 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
-		<key>JRDB.xcscheme_^#shared#^_</key>
+		<key>FMDB.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>0</integer>
+			<integer>1</integer>
 		</dict>
-		<key>JRDBTests.xcscheme_^#shared#^_</key>
+		<key>Pods.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>3</integer>
+			<integer>2</integer>
 		</dict>
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
-		<key>5ACBEEAC1CE1B3A500371E01</key>
+		<key>0819C6FE2207E0B4AD74736F87EF25BD</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>5ACBEEC51CE1B3A500371E01</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>5ACBEED01CE1B3A500371E01</key>
+		<key>23CF27B2BA6AC7125EFFEDA8C5AA819F</key>
 		<dict>
 			<key>primary</key>
 			<true/>

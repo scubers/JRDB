@@ -7,13 +7,13 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "JRReflectable.h"
 
 #define EXE_BLOCK(block, ...) if(block){block(__VA_ARGS__);}
 
 #define SingleLinkColumn(property) [NSString stringWithFormat:@"_single_link_%@", property]
 
-
-@protocol JRPersistent <NSObject>
+@protocol JRPersistent <JRReflectable>
 
 typedef void(^JRDBComplete)(BOOL success);
 typedef void(^JRDBDidFinishBlock)(id<JRPersistent> _Nonnull obj);
@@ -68,6 +68,7 @@ typedef void(^JRDBDidFinishBlock)(id<JRPersistent> _Nonnull obj);
 
 /**
  *  完成save 或者 update 会调用
+ * （注意：如果有事务操作，也会在执行当前sql语句之后执行，即使之后有可能会被回滚）
  *
  *  @param block 代码块
  */

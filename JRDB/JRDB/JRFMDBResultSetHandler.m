@@ -36,7 +36,7 @@ typedef enum {
 + (NSArray<id<JRPersistent>> *)handleResultSet:(FMResultSet *)resultSet forClazz:(Class<JRPersistent>)clazz {
     NSMutableArray *list = [NSMutableArray array];
     
-    NSDictionary *dict = [JRReflectUtil ivarAndEncode4Clazz:clazz];
+    NSDictionary *dict = [JRReflectUtil propNameAndEncode4Clazz:clazz];
     
     while ([resultSet next]) {
         Class c = objc_getClass(class_getName(clazz));
@@ -123,9 +123,10 @@ typedef enum {
             int idx = [resultSet columnIndexForName:SingleLinkColumn(key)];
             if (idx >= 0) {
                 NSString *ID = [resultSet stringForColumnIndex:idx];
-                [obj setSingleLinkID:ID forKey:key];
+                [obj jr_setSingleLinkID:ID forKey:key];
             }
         }];
+        
         
         [list addObject:obj];
     }

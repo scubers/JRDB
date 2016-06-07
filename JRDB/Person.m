@@ -9,22 +9,23 @@
 #import "Person.h"
 #import "NSObject+JRDB.h"
 
+@implementation Money
+@end
+
+
 @implementation Card
 + (NSDictionary<NSString *,Class<JRPersistent>> *)jr_singleLinkedPropertyNames {
     return @{@"_person" : [Person class]};
 }
 - (void)dealloc {
-    NSLog(@"%@, dealloc", self);
-}
-- (NSString *)description {
-    return [NSString stringWithFormat:@"Serial number: %@\nID: %@", self.serialNumber, self.ID];
+    JRLog(@"%@, dealloc", self);
 }
 @end
 
 
 @implementation Animal
 - (void)dealloc {
-    NSLog(@"%@, dealloc", self);
+    JRLog(@"%@, dealloc", self);
 }
 @end
 
@@ -54,8 +55,18 @@
              };
 }
 
-- (NSString *)description {
-    return [NSString stringWithFormat:@"name: %@, \nID: %@", self.name, self.ID];
++ (NSDictionary<NSString *,Class<JRPersistent>> *)jr_oneToManyLinkedPropertyNames {
+    return @{
+             @"_money" : [Money class],
+             };
+}
+
+
+- (NSMutableArray<Money *> *)money {
+    if (!_money) {
+        _money = [NSMutableArray array];
+    }
+    return _money;
 }
 
 @end

@@ -12,11 +12,12 @@
 #import "FMDatabase+JRDB.h"
 #import "NSObject+JRDB.h"
 #import <objc/message.h>
+#import "JRMiddleTable.h"
 
 @interface JRDBMgr()
 {
     FMDatabase *_defaultDB;
-    NSMutableArray *_clazzArray;
+    NSMutableArray<Class<JRPersistent>> *_clazzArray;
 }
 
 @end
@@ -53,12 +54,19 @@ static JRDBMgr *__shareInstance;
     [mgr removeItemAtPath:path error:nil];
 }
 
-- (void)registerClazzForUpdateTable:(Class<JRPersistent>)clazz {
+- (void)registerClazz:(Class<JRPersistent> _Nonnull)clazz {
+    if ([_clazzArray containsObject:clazz]) { return; }
     [_clazzArray addObject:clazz];
-    //[clazz.self jr_swizzleSetters4Clazz];
+    [self _configureRegisteredClazz:clazz];
 }
 
-- (NSArray<Class> *)registedClazz {
+- (void)registerClazzes:(NSArray<Class<JRPersistent>> *)clazzArray {
+    [clazzArray enumerateObjectsUsingBlock:^(Class<JRPersistent>  _Nonnull clazz, NSUInteger idx, BOOL * _Nonnull stop) {
+        [self registerClazz:clazz];
+    }];
+}
+
+- (NSArray<Class> *)registeredClazz {
     return _clazzArray;
 }
 
@@ -68,16 +76,35 @@ static JRDBMgr *__shareInstance;
 
 - (void)updateDB:(FMDatabase *)db {
     for (Class clazz in _clazzArray) {
-        BOOL flag = [db updateTable4Clazz:clazz];
-        NSLog(@"update table: %@ %@", [clazz description], flag ? @"success" : @"failure");
+        BOOL flag = [db jr_updateTable4Clazz:clazz];
+        JRLog(@"update table: %@ %@", [clazz description], flag ? @"success" : @"failure");
     }
+}
+
+- (BOOL)isValidateClazz:(Class<JRPersistent>)clazz {
+    return [_clazzArray containsObject:clazz];
+}
+
+- (void)clearMidTableRubbishDataForDB:(FMDatabase *)db {
+
+    [_clazzArray enumerateObjectsUsingBlock:^(Class<JRPersistent>  _Nonnull clazz, NSUInteger idx, BOOL * _Nonnull stop) {
+        
+        if (idx == _clazzArray.count - 1) { return ; }
+        
+        for (NSUInteger i = idx + 1; i < _clazzArray.count; i++) {
+            JRMiddleTable *mid = [JRMiddleTable table4Clazz:clazz andClazz:_clazzArray[i] db:db];
+            if ([db tableExists:[mid tableName]]) {
+                [mid cleanRubbishData];
+            }
+        }
+    }];
 }
 
 #pragma mark - lazy load
 
 - (FMDatabase *)defaultDB {
     if (!_defaultDB) {
-        _defaultDB = [FMDatabase databaseWithPath:[self defaultPath]];
+        _defaultDB = [FMDatabase databaseWithPath:[self _defaultPath]];
         [_defaultDB open];
     }
     return _defaultDB;
@@ -87,12 +114,16 @@ static JRDBMgr *__shareInstance;
     if (_defaultDB == defaultDB) {
         return;
     }
-    [_defaultDB closeQueue];
+    [_defaultDB jr_closeQueue];
     [_defaultDB close];
+    
     _defaultDB = defaultDB;
+    [_defaultDB open];
 }
 
-- (NSString *)defaultPath {
+#pragma mark - private method
+
+- (NSString *)_defaultPath {
     NSFileManager *mgr = [NSFileManager defaultManager];
     NSString *path = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).lastObject;
     path = [path stringByAppendingPathComponent:@"jrdb"];
@@ -104,5 +135,8 @@ static JRDBMgr *__shareInstance;
     return path;
 }
 
+- (void)_configureRegisteredClazz:(Class)clazz {
+    [clazz jr_configure];
+}
 
 @end
