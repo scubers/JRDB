@@ -37,12 +37,12 @@
 
 
 /**
- *  当前线程执行某个block
+ *  当前线程执行某个block, block 执行是必须有事务，useTransaction可以使用默认事务
  *
  *  @param block
  *  @param useTransaction 是否使用默认事务 NO:需要自己开启和提交事务
  */
-- (BOOL)execute:(BOOL (^ _Nonnull)(FMDatabase * _Nonnull))block useTransaction:(BOOL)useTransaction;
+- (BOOL)execute:(BOOL (^ _Nonnull)(FMDatabase * _Nonnull db))block useTransaction:(BOOL)useTransaction;
 
 #pragma mark - table operation
 
@@ -86,10 +86,10 @@
 
 - (NSArray<JRColumnSchema *> * _Nonnull)schemasInClazz:(Class<JRPersistent> _Nonnull)clazz;
 
-#pragma mark - save
+#pragma mark - save one
 
 /**
- *  只保存one，不进行关联保存和删除更新（不建议使用）
+ *  只保存one，没事务操作，不进行关联保存和删除更新（不建议使用）
  *
  *  @param one
  */
@@ -112,26 +112,25 @@
 - (BOOL)jr_saveOne:(id<JRPersistent> _Nonnull)one;
 - (void)jr_saveOne:(id<JRPersistent> _Nonnull)one complete:(JRDBComplete _Nullable)complete;
 
-#pragma mark - delete
+#pragma mark - save array
 
 /**
- *  只删除one，不进行关联保存和删除更新（不建议使用）
+ *  保存数组， 同时进行关联保存删除更新，可选择自带事务或者自行在外层包裹事务
  *
- *  @param one
- */
-- (BOOL)jr_deleteOneOnly:(id<JRPersistent> _Nonnull)one;
-
-/**
- *  删除one， 同时进行关联保存删除更新（建议使用），可选择自带事务或者自行在外层包裹事务
- *
- *  @param one
+ *  @param objects
  *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
  */
-- (BOOL)jr_deleteOne:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction;
-- (void)jr_deleteOne:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete;
+- (BOOL)jr_saveObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction;
+- (void)jr_saveObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete;
 
-- (BOOL)jr_deleteOne:(id<JRPersistent> _Nonnull)one;
-- (void)jr_deleteOne:(id<JRPersistent> _Nonnull)one complete:(JRDBComplete _Nullable)complete;
+/**
+ *  保存objects， 同时进行关联保存删除更新，自带事务操作，外层不能包裹事务
+ *
+ *  @param objects
+ */
+- (BOOL)jr_saveObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects;
+- (void)jr_saveObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects complete:(JRDBComplete _Nullable)complete;
+
 
 #pragma mark - update
 
@@ -155,6 +154,57 @@
 
 - (BOOL)jr_updateOne:(id<JRPersistent> _Nonnull)one columns:(NSArray<NSString *> * _Nullable)columns;
 - (void)jr_updateOne:(id<JRPersistent> _Nonnull)one columns:(NSArray<NSString *> * _Nullable)columns complete:(JRDBComplete _Nullable)complete;
+
+#pragma mark - update array
+
+
+/**
+ *  更新array， 同时进行关联保存删除更新，可选择自带事务或者自行在外层包裹事务
+ *
+ *  @param objects
+ *  @param columns 需要更新的字段
+ *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
+ */
+- (BOOL)jr_updateObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects columns:(NSArray<NSString *> * _Nullable)columns useTransaction:(BOOL)useTransaction;
+- (void)jr_updateObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects columns:(NSArray<NSString *> * _Nullable)columns useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete;
+
+- (BOOL)jr_updateObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects columns:(NSArray<NSString *> * _Nullable)columns;
+- (void)jr_updateObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects columns:(NSArray<NSString *> * _Nullable)columns complete:(JRDBComplete _Nullable)complete;
+
+#pragma mark - delete
+
+/**
+ *  只删除one，不进行关联保存和删除更新（不建议使用）
+ *
+ *  @param one
+ */
+- (BOOL)jr_deleteOneOnly:(id<JRPersistent> _Nonnull)one;
+
+/**
+ *  删除one， 同时进行关联保存删除更新（建议使用），可选择自带事务或者自行在外层包裹事务
+ *
+ *  @param one
+ *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
+ */
+- (BOOL)jr_deleteOne:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction;
+- (void)jr_deleteOne:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete;
+
+- (BOOL)jr_deleteOne:(id<JRPersistent> _Nonnull)one;
+- (void)jr_deleteOne:(id<JRPersistent> _Nonnull)one complete:(JRDBComplete _Nullable)complete;
+
+#pragma mark - delete array
+
+/**
+ *  删除array， 同时进行关联保存删除更新，可选择自带事务或者自行在外层包裹事务
+ *
+ *  @param objects
+ *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
+ */
+- (BOOL)jr_deleteObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction;
+- (void)jr_deleteObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete;
+
+- (BOOL)jr_deleteObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects;
+- (void)jr_deleteObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects complete:(JRDBComplete _Nullable)complete;
 
 #pragma mark - single level query operation
 

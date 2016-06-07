@@ -13,80 +13,111 @@
 
 @implementation NSArray (JRDB)
 
-- (BOOL)jr_arraySaveUseTransaction:(BOOL)useTransaction toDB:(FMDatabase *)db {
-    if (useTransaction) {
-        NSAssert(![db inTransaction], @"save error: database has been open an transaction");
-        [db beginTransaction];
-    }
-    __block BOOL needRollBack = NO;
-    [self enumerateObjectsUsingBlock:^(NSObject<JRPersistent> * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        [obj jr_saveUseTransaction:NO];
-    }];
-    if (useTransaction) {
-        if (needRollBack) {
-            [db rollback];
-        } else {
-            [db commit];
-        }
-    }
-    return !needRollBack;
+#pragma mark - save
+- (BOOL)jr_saveUseTransaction:(BOOL)useTransaction toDB:(FMDatabase *)db {
+    return [db jr_saveObjects:self useTransaction:useTransaction];
 }
 
-- (void)jr_arraySaveUseTransaction:(BOOL)useTransaction toDB:(FMDatabase *)db complete:(JRDBComplete)complete {
-    [db inQueue:^(FMDatabase * _Nonnull db) {
-        EXE_BLOCK(complete, [self jr_arraySaveUseTransaction:useTransaction toDB:db]);
-    }];
+- (void)jr_saveUseTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete toDB:(FMDatabase *)db {
+    return [db jr_saveObjects:self useTransaction:useTransaction complete:complete];
 }
 
-- (BOOL)jr_arrayUpdateColumns:(NSArray<NSString *> *)columns useTransaction:(BOOL)useTransaction toDB:(FMDatabase *)db {
-    if (useTransaction) {
-        NSAssert(![db inTransaction], @"save error: database has been open an transaction");
-        [db beginTransaction];
-    }
-    __block BOOL needRollBack = NO;
-    [self enumerateObjectsUsingBlock:^(NSObject<JRPersistent> * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        [obj jr_updateColumns:columns useTransaction:NO];
-    }];
-    if (useTransaction) {
-        if (needRollBack) {
-            [db rollback];
-        } else {
-            [db commit];
-        }
-    }
-    return !needRollBack;
+- (BOOL)jr_saveToDB:(FMDatabase *)db {
+    return [db jr_saveObjects:self];
 }
 
-- (void)jr_arrayUpdateColumns:(NSArray<NSString *> *)columns useTransaction:(BOOL)useTransaction toDB:(FMDatabase *)db complete:(JRDBComplete _Nullable)complete {
-    [db inQueue:^(FMDatabase * _Nonnull db) {
-        EXE_BLOCK(complete, [self jr_arrayUpdateColumns:columns useTransaction:useTransaction toDB:db]);
-    }];
+- (void)jr_saveWithComplete:(JRDBComplete)complete toDB:(FMDatabase *)db {
+    return [db jr_saveObjects:self complete:complete];
 }
 
+#pragma mark - save use DefaultDB
 
-- (BOOL)jr_arrayDeleteUseTransaction:(BOOL)useTransaction toDB:(FMDatabase *)db {
-    if (useTransaction) {
-        NSAssert(![db inTransaction], @"save error: database has been open an transaction");
-        [db beginTransaction];
-    }
-    __block BOOL needRollBack = NO;
-    [self enumerateObjectsUsingBlock:^(NSObject<JRPersistent> * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        [obj jr_deleteUseTransaction:NO];
-    }];
-    if (useTransaction) {
-        if (needRollBack) {
-            [db rollback];
-        } else {
-            [db commit];
-        }
-    }
-    return !needRollBack;
+- (BOOL)jr_saveUseTransaction:(BOOL)useTransaction {
+    return [self jr_saveUseTransaction:useTransaction toDB:JR_DEFAULTDB];
 }
 
-- (void)jr_arrayDeleteUseTransaction:(BOOL)useTransaction toDB:(FMDatabase *)db complete:(JRDBComplete)complete {
-    [db inQueue:^(FMDatabase * _Nonnull db) {
-        EXE_BLOCK(complete, [self jr_arrayDeleteUseTransaction:useTransaction toDB:db]);
-    }];
+- (void)jr_saveUseTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete {
+    [self jr_saveUseTransaction:useTransaction complete:complete toDB:JR_DEFAULTDB];
+}
+
+- (BOOL)jr_save {
+    return [self jr_saveToDB:JR_DEFAULTDB];
+}
+
+- (void)jr_saveWithComplete:(JRDBComplete)complete {
+    return [self jr_saveWithComplete:complete toDB:JR_DEFAULTDB];
+}
+
+#pragma mark - update
+
+- (BOOL)jr_updateColumns:(NSArray<NSString *> *)columns useTransaction:(BOOL)useTransaction toDB:(FMDatabase *)db {
+    return [db jr_updateObjects:self columns:columns useTransaction:useTransaction];
+}
+
+- (void)jr_updateColumns:(NSArray<NSString *> *)columns useTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete toDB:(FMDatabase *)db {
+    return [db jr_updateObjects:self columns:columns useTransaction:useTransaction complete:complete];
+}
+
+- (BOOL)jr_updateColumns:(NSArray<NSString *> *)columns toDB:(FMDatabase *)db {
+    return [db jr_updateObjects:self columns:columns useTransaction:YES];
+}
+
+- (void)jr_updateColumns:(NSArray<NSString *> *)columns complete:(JRDBComplete)complete toDB:(FMDatabase *)db {
+    [db jr_updateObjects:self columns:columns complete:complete];
+}
+
+#pragma mark - update use DefaultDB
+
+- (BOOL)jr_updateColumns:(NSArray<NSString *> *)columns useTransaction:(BOOL)useTransaction {
+    return [self jr_updateColumns:self useTransaction:useTransaction toDB:JR_DEFAULTDB];
+}
+
+- (void)jr_updateColumns:(NSArray<NSString *> *)columns useTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete {
+    return [self jr_updateColumns:columns useTransaction:useTransaction complete:complete toDB:JR_DEFAULTDB];
+}
+
+- (BOOL)jr_updateColumns:(NSArray<NSString *> *)columns {
+    return [self jr_updateColumns:columns toDB:JR_DEFAULTDB];
+}
+
+- (void)jr_updateColumns:(NSArray<NSString *> *)columns complete:(JRDBComplete)complete {
+    return [self jr_updateColumns:columns complete:complete toDB:JR_DEFAULTDB];
+}
+
+#pragma mark - delete
+
+- (BOOL)jr_deleteUseTransaction:(BOOL)useTransaction fromDB:(FMDatabase *)db {
+    return [db jr_deleteObjects:self useTransaction:useTransaction];
+}
+
+- (void)jr_deleteUseTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete fromDB:(FMDatabase *)db {
+    [db jr_deleteObjects:self useTransaction:useTransaction complete:complete];
+}
+
+- (BOOL)jr_deleteFromDB:(FMDatabase *)db {
+    return [db jr_deleteObjects:self];
+}
+
+- (void)jr_deleteWithComplete:(JRDBComplete)complete fromDB:(FMDatabase *)db {
+    [db jr_deleteObjects:self complete:complete];
+}
+
+#pragma mark - delete use DefaultDB
+
+- (BOOL)jr_deleteUseTransaction:(BOOL)useTransaction {
+    return [self jr_deleteUseTransaction:useTransaction fromDB:JR_DEFAULTDB];
+}
+
+- (void)jr_deleteUseTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete {
+    return [self jr_deleteUseTransaction:useTransaction complete:complete fromDB:JR_DEFAULTDB];
+}
+
+- (BOOL)jr_delete {
+    return [self jr_deleteFromDB:JR_DEFAULTDB];
+}
+
+- (void)jr_deleteWithComplete:(JRDBComplete)complete {
+    return [self jr_deleteWithComplete:complete fromDB:JR_DEFAULTDB];
 }
 
 @end

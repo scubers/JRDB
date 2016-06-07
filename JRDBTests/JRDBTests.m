@@ -175,11 +175,11 @@
         [p.money addObject:m];
     }
 
-    [p jr_save];
+    [p jr_saveWithComplete:^(BOOL success) {
+        NSLog(@"complete");
+    }];
+//    [p jr_save];
     
-    Person *p2 = [self createPerson:0 name:@"b"];
-    p2.money = [p.money copy];
-    [p2 jr_save];
 }
 
 - (void)testFindByID {

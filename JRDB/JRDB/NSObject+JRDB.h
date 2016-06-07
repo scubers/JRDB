@@ -10,6 +10,7 @@
 #import "JRPersistent.h"
 #import "JRQueryCondition.h"
 
+#define JR_DEFAULTDB [JRDBMgr defaultDB]
 
 @class FMDatabase;
 
@@ -29,18 +30,35 @@
 
 #pragma mark - save
 
-
 /**
  *  仅保存自身，不进行关联保存（不建议使用）
  *
  *  @param db
  */
-- (BOOL)jr_saveOnly;
+- (BOOL)jr_saveOnlyToDB:(FMDatabase * _Nonnull)db;
 
 /**
  *  保存自身到db， 并进行关联保存删除更新
  *
  *  @param db
+ *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
+ */
+- (BOOL)jr_saveUseTransaction:(BOOL)useTransaction toDB:(FMDatabase * _Nonnull)db;
+- (void)jr_saveUseTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete  toDB:(FMDatabase * _Nonnull)db;
+
+- (BOOL)jr_saveToDB:(FMDatabase * _Nonnull)db;
+- (void)jr_saveWithComplete:(JRDBComplete _Nullable)complete toDB:(FMDatabase * _Nonnull)db;
+
+#pragma mark - save use DefaultDB
+
+/**
+ *  仅保存自身，不进行关联保存（不建议使用）:使用默认数据库
+ */
+- (BOOL)jr_saveOnly;
+
+/**
+ *  保存自身到db， 并进行关联保存删除更新 :使用默认数据库
+ *
  *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
  */
 - (BOOL)jr_saveUseTransaction:(BOOL)useTransaction;
@@ -52,6 +70,38 @@
 
 #pragma mark - update
 
+/**
+ *  仅更新自身，不进行关联保存（不建议使用）
+ *
+ *  @param db
+ *  @param columns 要更新的字段
+ */
+- (BOOL)jr_updateOnlyColumns:(NSArray<NSString *> * _Nullable)columns toDB:(FMDatabase * _Nonnull)db;
+
+/**
+ *  更新自身到db， 并进行关联保存删除更新
+ *
+ *  @param db
+ *  @param columns 要更新的字段
+ *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
+ */
+- (BOOL)jr_updateColumns:(NSArray<NSString *> * _Nullable)columns
+          useTransaction:(BOOL)useTransaction
+                    toDB:(FMDatabase * _Nonnull)db;
+
+- (void)jr_updateColumns:(NSArray<NSString *> * _Nullable)columns
+          useTransaction:(BOOL)useTransaction
+                complete:(JRDBComplete _Nullable)complete
+                    toDB:(FMDatabase * _Nonnull)db;
+
+- (BOOL)jr_updateColumns:(NSArray<NSString *> * _Nullable)columns
+                    toDB:(FMDatabase * _Nonnull)db;
+
+- (void)jr_updateColumns:(NSArray<NSString *> * _Nullable)columns
+                complete:(JRDBComplete _Nullable)complete
+                    toDB:(FMDatabase * _Nonnull)db;
+
+#pragma mark - update use DefaultDB
 
 /**
  *  仅更新自身，不进行关联保存（不建议使用）
@@ -75,6 +125,26 @@
 
 #pragma mark - delete
 
+/**
+ *  仅删除自身，不进行关联保存（不建议使用）
+ *
+ *  @param db
+ */
+- (BOOL)jr_deleteOnlyFromDB:(FMDatabase * _Nonnull)db;
+
+/**
+ *  删除自身， 并进行关联保存删除更新
+ *
+ *  @param db
+ *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
+ */
+- (BOOL)jr_deleteUseTransaction:(BOOL)useTransaction fromDB:(FMDatabase * _Nonnull)db;
+- (void)jr_deleteUseTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete fromDB:(FMDatabase * _Nonnull)db;
+
+- (BOOL)jr_deleteFromDB:(FMDatabase * _Nonnull)db;
+- (void)jr_deleteWithComplete:(JRDBComplete _Nullable)complete fromDB:(FMDatabase * _Nonnull)db;
+
+#pragma mark - delete use DefaultDB
 
 /**
  *  仅删除自身，不进行关联保存（不建议使用）

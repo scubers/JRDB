@@ -12,16 +12,4 @@
 @class FMDatabase;
 
 @interface NSArray (JRDB)
-
-- (BOOL)jr_arraySaveUseTransaction:(BOOL)useTransaction toDB:(FMDatabase * _Nonnull)db;
-- (void)jr_arraySaveUseTransaction:(BOOL)useTransaction toDB:(FMDatabase * _Nonnull)db complete:(JRDBComplete _Nullable)complete;
-
-- (BOOL)jr_arrayUpdateColumns:(NSArray<NSString *> * _Nullable)columns useTransaction:(BOOL)useTransaction toDB:(FMDatabase * _Nonnull)db;
-- (void)jr_arrayUpdateColumns:(NSArray<NSString *> * _Nullable)columns useTransaction:(BOOL)useTransaction toDB:(FMDatabase * _Nonnull)db complete:(JRDBComplete _Nullable)complete;
-
-
-- (BOOL)jr_arrayDeleteUseTransaction:(BOOL)useTransaction toDB:(FMDatabase * _Nonnull)db;
-- (void)jr_arrayDeleteUseTransaction:(BOOL)useTransaction toDB:(FMDatabase * _Nonnull)db complete:(JRDBComplete _Nullable)complete;
-
-
 @end

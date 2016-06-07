@@ -61,7 +61,7 @@ static NSString * const queuekey = @"queuekey";
     }
 }
 
-- (BOOL)execute:(BOOL (^)(FMDatabase * _Nonnull))block useTransaction:(BOOL)useTransaction {
+- (BOOL)execute:(BOOL (^)(FMDatabase * _Nonnull db))block useTransaction:(BOOL)useTransaction {
     if (useTransaction) {
         NSAssert(![self inTransaction], @"database has been open a transaction");
         if (![self beginTransaction]) {
@@ -71,7 +71,7 @@ static NSString * const queuekey = @"queuekey";
     }
     BOOL flag = block(self);
     if (useTransaction) {
-        return  flag ? [self commit] : [self rollback];
+        flag ? [self commit] : [self rollback];
     }
     return flag;
 }
@@ -246,7 +246,7 @@ static NSString * const queuekey = @"queuekey";
     return !needRollBack;
 }
 
-#pragma mark - save
+#pragma mark - save one
 
 /**
  *  保存单条，不关联保存
@@ -277,33 +277,28 @@ static NSString * const queuekey = @"queuekey";
 - (BOOL)jr_saveOne:(id<JRPersistent>)one useTransaction:(BOOL)useTransaction {
     AssertRegisteredClazz([one class]);
     
-    if (useTransaction) {
-        NSAssert(![self inTransaction], @"save error: database has been open an transaction");
-        [self beginTransaction];
-    }
+    return
     
-    NSMutableArray *stack = [NSMutableArray array];
-    __block BOOL needRollBack = NO;
-    [self handleSave:one stack:&stack needRollBack:&needRollBack];
-    
-    if (!needRollBack) {
-        // 监测一对多的保存
-        needRollBack = ![self handleOneToManySaveWithObj:one columns:nil];
-    }
-    
-    if (useTransaction) {
-        if (needRollBack) {
-            [self rollback];
-        } else {
-            [self commit];
+    [self execute:^BOOL(FMDatabase * _Nonnull db) {
+        
+        NSMutableArray *stack = [NSMutableArray array];
+        __block BOOL needRollBack = NO;
+        [db handleSave:one stack:&stack needRollBack:&needRollBack];
+        
+        if (!needRollBack) {
+            // 监测一对多的保存
+            needRollBack = ![db handleOneToManySaveWithObj:one columns:nil];
         }
-    }
-    return !needRollBack;
+        return !needRollBack;
+        
+    } useTransaction:useTransaction];
+    
 }
 
 - (void)jr_saveOne:(id<JRPersistent>)one useTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete {
     [self inQueue:^(FMDatabase * _Nonnull db) {
-        EXE_BLOCK(complete, [db jr_saveOne:one useTransaction:useTransaction]);
+        BOOL flag = [db jr_saveOne:one useTransaction:useTransaction];
+        EXE_BLOCK(complete, flag);
     }];
 }
 
@@ -312,9 +307,36 @@ static NSString * const queuekey = @"queuekey";
 }
 
 - (void)jr_saveOne:(id<JRPersistent>)one complete:(JRDBComplete)complete {
+    [self jr_saveOne:one useTransaction:YES complete:complete];
+}
+
+#pragma mark - save array
+
+- (BOOL)jr_saveObjects:(NSArray<id<JRPersistent>> *)objects useTransaction:(BOOL)useTransaction {
+    return
+    [self execute:^BOOL(FMDatabase * _Nonnull db) {
+        __block BOOL needRollBack = NO;
+        [objects enumerateObjectsUsingBlock:^(id<JRPersistent>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            needRollBack = ![db jr_saveOne:obj useTransaction:NO];
+            *stop = needRollBack;
+        }];
+        return !needRollBack;
+    } useTransaction:useTransaction];
+}
+
+- (void)jr_saveObjects:(NSArray<id<JRPersistent>> *)objects useTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete {
     [self inQueue:^(FMDatabase * _Nonnull db) {
-        EXE_BLOCK(complete, [db jr_saveOne:one]);
+        BOOL flag = [db jr_saveObjects:objects useTransaction:useTransaction];
+        EXE_BLOCK(complete, flag);
     }];
+}
+
+- (BOOL)jr_saveObjects:(NSArray<id<JRPersistent>> *)objects {
+    return [self jr_saveObjects:objects useTransaction:YES];
+}
+
+- (void)jr_saveObjects:(NSArray<id<JRPersistent>> *)objects complete:(JRDBComplete)complete {
+    [self jr_saveObjects:objects useTransaction:YES complete:complete];
 }
 
 #pragma mark - update
@@ -366,31 +388,25 @@ static NSString * const queuekey = @"queuekey";
 }
 
 - (BOOL)jr_updateOne:(id<JRPersistent>)one columns:(NSArray<NSString *> *)columns useTransaction:(BOOL)useTransaction {
-    if (useTransaction) {
-        NSAssert(![self inTransaction], @"save error: database has been open an transaction");
-        [self beginTransaction];
-    }
-
-    BOOL needRollBack = ![self jr_updateOneOnly:one columns:columns];
     
-    if (!needRollBack) {
-        // 监测一对多的保存
-        needRollBack = ![self handleOneToManySaveWithObj:one columns:nil];
-    }
+    return
     
-    if (useTransaction) {
-        if (needRollBack) {
-            [self rollback];
-        } else {
-            [self commit];
+    [self execute:^BOOL(FMDatabase * _Nonnull db) {
+        BOOL needRollBack = ![self jr_updateOneOnly:one columns:columns];
+        if (!needRollBack) {
+            // 监测一对多的保存
+            needRollBack = ![self handleOneToManySaveWithObj:one columns:nil];
         }
-    }
-    return !needRollBack;
+        return !needRollBack;
+    } useTransaction:useTransaction];
+    
+
 }
 
 - (void)jr_updateOne:(id<JRPersistent>)one columns:(NSArray<NSString *> *)columns useTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete {
     [self inQueue:^(FMDatabase * _Nonnull db) {
-        EXE_BLOCK(complete, [db jr_updateOne:one columns:columns useTransaction:useTransaction]);
+        BOOL flag = [db jr_updateOne:one columns:columns useTransaction:useTransaction];
+        EXE_BLOCK(complete, flag);
     }];
 }
 
@@ -398,9 +414,36 @@ static NSString * const queuekey = @"queuekey";
     return [self jr_updateOne:one columns:columns useTransaction:YES];
 }
 - (void)jr_updateOne:(id<JRPersistent>)one columns:(NSArray<NSString *> *)columns complete:(JRDBComplete)complete {
+    [self jr_updateOne:one columns:columns useTransaction:YES complete:complete];
+}
+
+#pragma mark - update array
+
+- (BOOL)jr_updateObjects:(NSArray<id<JRPersistent>> *)objects columns:(NSArray<NSString *> *)columns useTransaction:(BOOL)useTransaction {
+    return
+    [self execute:^BOOL(FMDatabase * _Nonnull db) {
+        __block BOOL needRollBack = NO;
+        [objects enumerateObjectsUsingBlock:^(id<JRPersistent>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            needRollBack = ![db jr_updateOne:obj columns:columns useTransaction:NO];
+            *stop = needRollBack;
+        }];
+        return !needRollBack;
+    } useTransaction:useTransaction];
+}
+
+- (void)jr_updateObjects:(NSArray<id<JRPersistent>> *)objects columns:(NSArray<NSString *> *)columns useTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete {
     [self inQueue:^(FMDatabase * _Nonnull db) {
-        EXE_BLOCK(complete, [db jr_updateOne:one columns:columns]);
+        BOOL flag = [db jr_updateObjects:objects columns:columns useTransaction:useTransaction];
+        EXE_BLOCK(complete, flag);
     }];
+}
+
+- (BOOL)jr_updateObjects:(NSArray<id<JRPersistent>> *)objects columns:(NSArray<NSString *> *)columns {
+    return [self jr_updateObjects:objects columns:columns useTransaction:YES];
+}
+
+- (void)jr_updateObjects:(NSArray<id<JRPersistent>> *)objects columns:(NSArray<NSString *> *)columns complete:(JRDBComplete)complete {
+    return [self jr_updateObjects:objects columns:columns useTransaction:YES complete:complete];
 }
 
 #pragma mark - delete
@@ -424,36 +467,29 @@ static NSString * const queuekey = @"queuekey";
 }
 
 - (BOOL)jr_deleteOne:(id<JRPersistent>)one useTransaction:(BOOL)useTransaction {
-    if (useTransaction) {
-        NSAssert(![self inTransaction], @"save error: database has been open an transaction");
-        [self beginTransaction];
-    }
     
-    __block BOOL needRollBack = ![self jr_deleteOneOnly:one];
+    return
     
-    if (!needRollBack) {
-        // 监测一对多的 删除
-        [[[one class] jr_oneToManyLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull clazz, BOOL * _Nonnull stop) {
-            JRMiddleTable *mid = [JRMiddleTable table4Clazz:clazz andClazz:[one class] db:self];
-            needRollBack = ![mid deleteID:[one ID] forClazz:[one class]];
-            *stop = needRollBack;
-        }];
-        
-    }
-    
-    if (useTransaction) {
-        if (needRollBack) {
-            [self rollback];
-        } else {
-            [self commit];
+    [self execute:^BOOL(FMDatabase * _Nonnull db) {
+        __block BOOL needRollBack = ![self jr_deleteOneOnly:one];
+        if (!needRollBack) {
+            // 监测一对多的 删除
+            [[[one class] jr_oneToManyLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull clazz, BOOL * _Nonnull stop) {
+                JRMiddleTable *mid = [JRMiddleTable table4Clazz:clazz andClazz:[one class] db:self];
+                needRollBack = ![mid deleteID:[one ID] forClazz:[one class]];
+                *stop = needRollBack;
+            }];
+            
         }
-    }
-    return !needRollBack;
+        return !needRollBack;
+    } useTransaction:useTransaction];
+    
 }
 
 - (void)jr_deleteOne:(id<JRPersistent>)one useTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete {
     [self inQueue:^(FMDatabase * _Nonnull db) {
-        EXE_BLOCK(complete, [db jr_deleteOne:one useTransaction:useTransaction]);
+        BOOL flag = [db jr_deleteOne:one useTransaction:useTransaction];
+        EXE_BLOCK(complete, flag);
     }];
 }
 
@@ -462,10 +498,42 @@ static NSString * const queuekey = @"queuekey";
 }
 
 - (void)jr_deleteOne:(id<JRPersistent>)one complete:(JRDBComplete)complete {
+    [self jr_deleteOne:one useTransaction:YES complete:complete];
+}
+
+#pragma mark - delete array
+
+/**
+ *  删除array， 同时进行关联保存删除更新，可选择自带事务或者自行在外层包裹事务
+ *
+ *  @param objects
+ *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
+ */
+- (BOOL)jr_deleteObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction {
+    return
+    [self execute:^BOOL(FMDatabase * _Nonnull db) {
+        __block BOOL needRollBack = NO;
+        [objects enumerateObjectsUsingBlock:^(id<JRPersistent>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            needRollBack = ![db jr_deleteOne:obj useTransaction:NO];
+            *stop = needRollBack;
+        }];
+        return !needRollBack;
+    } useTransaction:useTransaction];
+}
+- (void)jr_deleteObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete {
     [self inQueue:^(FMDatabase * _Nonnull db) {
-        EXE_BLOCK(complete, [db jr_deleteOne:one]);
+        BOOL flag = [self jr_deleteObjects:objects useTransaction:useTransaction];
+        EXE_BLOCK(complete, flag);
     }];
 }
+
+- (BOOL)jr_deleteObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects {
+    return [self jr_deleteObjects:objects useTransaction:YES];
+}
+- (void)jr_deleteObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects complete:(JRDBComplete _Nullable)complete {
+    return [self jr_deleteObjects:objects useTransaction:YES complete:complete];
+}
+
 
 #pragma mark - single level query operation
 
@@ -582,12 +650,25 @@ static NSString * const queuekey = @"queuekey";
     return result;
 }
 
-- (NSArray *)findByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc {
-    NSArray<id<JRPersistent>> *list = [self getByConditions:conditions clazz:clazz groupBy:groupBy orderBy:orderBy limit:limit isDesc:isDesc];
+- (NSArray *)findByConditions:(NSArray<JRQueryCondition *> *)conditions
+                        clazz:(Class<JRPersistent>)clazz
+                      groupBy:(NSString *)groupBy
+                      orderBy:(NSString *)orderBy
+                        limit:(NSString *)limit
+                       isDesc:(BOOL)isDesc {
+    
+    NSArray<id<JRPersistent>> *list = [self getByConditions:conditions
+                                                      clazz:clazz
+                                                    groupBy:groupBy
+                                                    orderBy:orderBy
+                                                      limit:limit
+                                                     isDesc:isDesc];
+    
     NSMutableArray *result = [NSMutableArray array];
     [list enumerateObjectsUsingBlock:^(id<JRPersistent>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         [result addObject:[self findByID:[obj ID] clazz:[obj class]]];
     }];
+    
     return result;
 }
 
