@@ -42,7 +42,7 @@
     
     
     [sql appendString:@");"];
-    NSLog(@"sql: %@", sql);
+    JRLog(@"sql: %@", sql);
     return sql;
 }
 
@@ -76,14 +76,14 @@
     }];
     
     
-    NSLog(@"sqls: %@", sqls);
+    JRLog(@"sqls: %@", sqls);
     return sqls;
 }
 
 
 + (NSString *)dropTableSql4Clazz:(Class<JRPersistent>)clazz {
     NSString *sql = [NSString stringWithFormat:@"drop table if exists %@ ;",[clazz shortClazzName]];
-    NSLog(@"sql: %@", sql);
+    JRLog(@"sql: %@", sql);
     return sql;
 }
 
@@ -136,19 +136,19 @@
     [sql appendString:sql2];
     *args = argsList;
     
-    NSLog(@"sql: %@", sql);
+    JRLog(@"sql: %@", sql);
     return sql;
 }
 
 + (NSString *)sql4Delete:(id<JRPersistent>)obj {
     NSString *sql = [NSString stringWithFormat:@"delete from %@ where %@ = ? ;", [[obj class] shortClazzName], [[obj class] jr_primaryKey]];
-    NSLog(@"sql: %@", sql);
+    JRLog(@"sql: %@", sql);
     return sql;
 }
 
 + (NSString *)sql4DeleteAll:(Class<JRPersistent>)clazz {
     NSString *sql = [NSString stringWithFormat:@"delete from %@", [clazz shortClazzName]];
-    NSLog(@"sql: %@", sql);
+    JRLog(@"sql: %@", sql);
     return sql;
 }
 
@@ -202,19 +202,19 @@
     
     [sql appendFormat:@" where %@ = ? ;", [[obj class] jr_primaryKey]];
     *args = argsList;
-    NSLog(@"sql: %@", sql);
+    JRLog(@"sql: %@", sql);
     return sql;
 }
 
 + (NSString * _Nonnull)sql4GetByIDWithClazz:(Class<JRPersistent> _Nonnull)clazz {
     NSString *sql = [NSString stringWithFormat:@"select * from %@ where _ID = ?;", [clazz shortClazzName]];
-    NSLog(@"sql: %@", sql);
+    JRLog(@"sql: %@", sql);
     return sql;
 }
 
 + (NSString *)sql4GetByPrimaryKeyWithClazz:(Class<JRPersistent>)clazz {
     NSString *sql = [NSString stringWithFormat:@"select * from %@ where %@ = ?;", [clazz shortClazzName], [clazz jr_primaryKey]];
-    NSLog(@"sql: %@", sql);
+    JRLog(@"sql: %@", sql);
     return sql;
 }
 
@@ -224,7 +224,7 @@
         sql = [sql stringByAppendingFormat:@" order by %@ ", orderby.length ? orderby : [clazz jr_primaryKey]];
     }
     sql = [sql stringByAppendingFormat:@" %@ ;", isDesc ? @"desc" : @""];
-    NSLog(@"sql: %@", sql);
+    JRLog(@"sql: %@", sql);
     return sql;
 }
 
@@ -255,7 +255,7 @@
     
     [sql appendString:@";"];
     *args = argList;
-    NSLog(@"sql: %@", sql);
+    JRLog(@"sql: %@", sql);
     return sql;
 }
 

@@ -48,7 +48,7 @@ static NSString * const queuekey = @"queuekey";
 - (BOOL)jr_inTransaction:(void (^)(FMDatabase *, BOOL *))block {
     BOOL flag = [self beginTransaction];
     if (!flag) {
-        NSLog(@"begin transaction fail");
+        JRLog(@"begin transaction fail");
         return NO;
     }
     BOOL rollback = NO;
@@ -65,7 +65,7 @@ static NSString * const queuekey = @"queuekey";
     if (useTransaction) {
         NSAssert(![self inTransaction], @"database has been open a transaction");
         if (![self beginTransaction]) {
-            NSLog(@"begin a transaction error!!!");
+            JRLog(@"begin a transaction error!!!");
             return NO;
         }
     }
@@ -201,7 +201,7 @@ static NSString * const queuekey = @"queuekey";
     NSString *tableName = [[obj class] shortClazzName];
     if (![self tableExists:tableName]) {
         if(![self jr_createTable4Clazz:[obj class]]) {
-            NSLog(@"create table: %@ error", tableName);
+            JRLog(@"create table: %@ error", tableName);
             *needRollBack = YES;
             return NO;
         }
@@ -211,7 +211,7 @@ static NSString * const queuekey = @"queuekey";
         BOOL ret = [self jr_saveOneOnly:obj];
         *needRollBack = !ret;
         if (!ret) {
-            NSLog(@"save obj: %@ error, transaction will be rollback", obj);
+            JRLog(@"save obj: %@ error, transaction will be rollback", obj);
         }
         return ret;
     } else {
@@ -359,7 +359,7 @@ static NSString * const queuekey = @"queuekey";
     
     // 表不存在
     if (![self jr_checkExistsTable4Clazz:[one class]]) {
-        NSLog(@"table : %@ doesn't exists", [one class]);
+        JRLog(@"table : %@ doesn't exists", [one class]);
         return NO;
     }
     
@@ -367,7 +367,7 @@ static NSString * const queuekey = @"queuekey";
     NSObject<JRPersistent> *updateObj;
     if (columns.count) {
         if (!old) {
-            NSLog(@"The object doesn't exists in database");
+            JRLog(@"The object doesn't exists in database");
             return NO;
         }
         for (NSString *name in columns) {
@@ -457,7 +457,7 @@ static NSString * const queuekey = @"queuekey";
     NSAssert([one jr_primaryKeyValue], @"primary key should not be nil");
     
     if (![self jr_checkExistsTable4Clazz:[one class]]) {
-        NSLog(@"table : %@ doesn't exists", [one class]);
+        JRLog(@"table : %@ doesn't exists", [one class]);
         return NO;
     }
     
@@ -559,7 +559,7 @@ static NSString * const queuekey = @"queuekey";
 - (NSArray *)jr_getAll:(Class<JRPersistent>)clazz orderBy:(NSString *)orderby isDesc:(BOOL)isDesc {
     AssertRegisteredClazz(clazz);
     if (![self jr_checkExistsTable4Clazz:clazz]) {
-        NSLog(@"table %@ doesn't exists", clazz);
+        JRLog(@"table %@ doesn't exists", clazz);
         return @[];
     }
     NSString *sql = [JRSqlGenerator sql4FindAll:clazz orderby:orderby isDesc:isDesc];
@@ -570,7 +570,7 @@ static NSString * const queuekey = @"queuekey";
 - (NSArray *)jr_getByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc {
     AssertRegisteredClazz(clazz);
     if (![self jr_checkExistsTable4Clazz:clazz]) {
-        NSLog(@"table %@ doesn't exists", clazz);
+        JRLog(@"table %@ doesn't exists", clazz);
         return @[];
     }
     NSArray *args = nil;
@@ -633,7 +633,7 @@ static NSString * const queuekey = @"queuekey";
 
 - (id<JRPersistent>)jr_findByPrimaryKey:(id)primaryKey clazz:(Class<JRPersistent>)clazz {
     if (![self jr_checkExistsTable4Clazz:clazz]) {
-        NSLog(@"table %@ doesn't exists", clazz);
+        JRLog(@"table %@ doesn't exists", clazz);
         return nil;
     }
     NSObject<JRPersistent> *obj = [self jr_getByPrimaryKey:primaryKey clazz:clazz];

@@ -55,6 +55,7 @@ static JRDBMgr *__shareInstance;
 }
 
 - (void)registerClazz:(Class<JRPersistent> _Nonnull)clazz {
+    if ([_clazzArray containsObject:clazz]) { return; }
     [_clazzArray addObject:clazz];
     [self _configureRegisteredClazz:clazz];
 }
@@ -76,7 +77,7 @@ static JRDBMgr *__shareInstance;
 - (void)updateDB:(FMDatabase *)db {
     for (Class clazz in _clazzArray) {
         BOOL flag = [db jr_updateTable4Clazz:clazz];
-        NSLog(@"update table: %@ %@", [clazz description], flag ? @"success" : @"failure");
+        JRLog(@"update table: %@ %@", [clazz description], flag ? @"success" : @"failure");
     }
 }
 

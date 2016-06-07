@@ -10,7 +10,6 @@
 		5A7AED821D05294B000AD4FE /* JRMiddleTable.m in Sources */ = {isa = PBXBuildFile; fileRef = 5A7AED811D05294B000AD4FE /* JRMiddleTable.m */; };
 		5A7AED851D058AD7000AD4FE /* NSArray+JRDB.m in Sources */ = {isa = PBXBuildFile; fileRef = 5A7AED841D058AD7000AD4FE /* NSArray+JRDB.m */; };
 		5AA3DB331D067DD800795E80 /* JRDBTestJRDBMgr.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AA3DB321D067DD800795E80 /* JRDBTestJRDBMgr.m */; };
-		5AA3DB351D067FC600795E80 /* JRDBTestFMDBCatagory.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AA3DB341D067FC600795E80 /* JRDBTestFMDBCatagory.m */; };
 		5AA5B3DE1CE2D46900360DC0 /* JRFMDBResultSetHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AA5B3DD1CE2D46900360DC0 /* JRFMDBResultSetHandler.m */; };
 		5AA5B3E11CE3120B00360DC0 /* JRQueryCondition.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AA5B3E01CE3120B00360DC0 /* JRQueryCondition.m */; };
 		5AB1BFA91D00115F001595D3 /* JRColumnSchema.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AB1BFA81D00115F001595D3 /* JRColumnSchema.m */; };
@@ -61,7 +60,7 @@
 		5A7AED831D058AD7000AD4FE /* NSArray+JRDB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSArray+JRDB.h"; sourceTree = "<group>"; };
 		5A7AED841D058AD7000AD4FE /* NSArray+JRDB.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSArray+JRDB.m"; sourceTree = "<group>"; };
 		5AA3DB321D067DD800795E80 /* JRDBTestJRDBMgr.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRDBTestJRDBMgr.m; sourceTree = "<group>"; };
-		5AA3DB341D067FC600795E80 /* JRDBTestFMDBCatagory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRDBTestFMDBCatagory.m; sourceTree = "<group>"; };
+		5AA3DB371D06C96B00795E80 /* PrefixHeader.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PrefixHeader.pch; sourceTree = "<group>"; };
 		5AA5B3DC1CE2D46900360DC0 /* JRFMDBResultSetHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRFMDBResultSetHandler.h; sourceTree = "<group>"; };
 		5AA5B3DD1CE2D46900360DC0 /* JRFMDBResultSetHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRFMDBResultSetHandler.m; sourceTree = "<group>"; };
 		5AA5B3DF1CE3120B00360DC0 /* JRQueryCondition.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRQueryCondition.h; sourceTree = "<group>"; };
@@ -194,7 +193,6 @@
 			children = (
 				5ACBEECA1CE1B3A500371E01 /* JRDBTests.m */,
 				5AA3DB321D067DD800795E80 /* JRDBTestJRDBMgr.m */,
-				5AA3DB341D067FC600795E80 /* JRDBTestFMDBCatagory.m */,
 				5ACBEECC1CE1B3A500371E01 /* Info.plist */,
 			);
 			path = JRDBTests;
@@ -243,6 +241,7 @@
 				5A7AED811D05294B000AD4FE /* JRMiddleTable.m */,
 				5A7AED831D058AD7000AD4FE /* NSArray+JRDB.h */,
 				5A7AED841D058AD7000AD4FE /* NSArray+JRDB.m */,
+				5AA3DB371D06C96B00795E80 /* PrefixHeader.pch */,
 			);
 			path = JRDB;
 			sourceTree = "<group>";
@@ -474,7 +473,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5AA3DB351D067FC600795E80 /* JRDBTestFMDBCatagory.m in Sources */,
 				5AA3DB331D067DD800795E80 /* JRDBTestJRDBMgr.m in Sources */,
 				5ACBEECB1CE1B3A500371E01 /* JRDBTests.m in Sources */,
 			);
@@ -612,6 +610,8 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = JRDB/JRDB/PrefixHeader.pch;
 				INFOPLIST_FILE = JRDB/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -629,6 +629,8 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = JRDB/JRDB/PrefixHeader.pch;
 				INFOPLIST_FILE = JRDB/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -643,6 +645,8 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ENABLE_MODULES = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = JRDBTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = jrwong.abc.JRDBTests;
@@ -658,6 +662,8 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ENABLE_MODULES = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = JRDBTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = jrwong.abc.JRDBTests;

@@ -18,7 +18,8 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
     NSString *path = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).lastObject;
-    NSLog(@"app path : %@", path);
+    JRLog(@"--------------\napp path : %@", path);
+    
     return YES;
 }
 

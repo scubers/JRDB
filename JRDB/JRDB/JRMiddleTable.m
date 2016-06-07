@@ -95,13 +95,14 @@
 }
 
 - (BOOL)deleteID:(NSString *)ID forClazz:(Class<JRPersistent>)clazz {
+    if (![_db tableExists:[self tableName]]) { return YES; }
     NSString *sql = [NSString stringWithFormat:@"delete from %@ where %@ = ?;", [self tableName], MiddleColumn4Clazz(clazz)];
     return [_db executeUpdate:sql withArgumentsInArray:@[ID]];
 }
 
 - (BOOL)cleanRubbishData {
     if ([_db inTransaction]) {
-        NSLog(@"can not clean rubbish data due to the database is in transaction now");
+        JRLog(@"can not clean rubbish data due to the database is in transaction now");
         return NO;
     }
     [_db beginTransaction];
