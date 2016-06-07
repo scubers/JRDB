@@ -61,6 +61,13 @@
              };
 }
 
++ (NSString *)jr_primaryKey {
+    return @"_i_string";
+}
+
+- (id)jr_primaryKeyValue {
+    return self.i_string;
+}
 
 - (NSMutableArray<Money *> *)money {
     if (!_money) {

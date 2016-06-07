@@ -94,6 +94,13 @@ const NSString *jr_configureKey = @"jr_configureKey";
     return blocks;
 }
 
+- (BOOL)jr_objCanBeSave {
+    if ([[self class] jr_primaryKey]) {
+        return [self jr_primaryKeyValue];
+    }
+    return ![self ID];
+}
+
 #pragma mark - convinence method
 
 - (void)jr_setSingleLinkID:(NSString *)ID forKey:(NSString *)key {

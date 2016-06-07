@@ -206,8 +206,14 @@ static NSString * const queuekey = @"queuekey";
             return NO;
         }
     }
-    
-    if (![obj jr_primaryKeyValue]) {
+
+
+    id<JRPersistent> old;
+    if ([obj jr_primaryKeyValue]) {
+        old = [self jr_getByPrimaryKey:[obj jr_primaryKeyValue] clazz:[obj class]];
+    }
+
+    if (!old) {
         BOOL ret = [self jr_saveOneOnly:obj];
         *needRollBack = !ret;
         if (!ret) {
@@ -215,9 +221,8 @@ static NSString * const queuekey = @"queuekey";
         }
         return ret;
     } else {
-        if (![obj ID]) {
-            [obj setID:[[self jr_getByPrimaryKey:[obj jr_primaryKeyValue] clazz:[obj class]] ID]];
-        }
+        JRLog(@"obj for primary key : %@ ,has been exisist, can not be saved", [old jr_primaryKeyValue]);
+        [obj setID:[old ID]];
         // 子对象已经存在不用保存，直接返回，若需要更新，需要自行手动更新
         return YES;
     }
@@ -248,6 +253,12 @@ static NSString * const queuekey = @"queuekey";
         
     }];
     return !needRollBack;
+}
+
+#pragma mark - save or update
+
+- (BOOL)jr_saveOrUpdateOneOnly:(id<JRPersistent> _Nonnull)one {
+    return NO;
 }
 
 #pragma mark - save one

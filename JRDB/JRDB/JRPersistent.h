@@ -98,6 +98,12 @@ typedef void(^JRDBDidFinishBlock)(id<JRPersistent> _Nonnull obj);
 - (id _Nullable)jr_primaryKeyValue;
 
 
+/**
+ *  本对象是否可以被save
+ *  但不保证数据库中没有重复对象
+ */
+- (BOOL)jr_objCanBeSave;
+
 
 @end
 
