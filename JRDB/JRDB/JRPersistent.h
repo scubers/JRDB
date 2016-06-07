@@ -12,9 +12,6 @@
 #define EXE_BLOCK(block, ...) if(block){block(__VA_ARGS__);}
 
 #define SingleLinkColumn(property) [NSString stringWithFormat:@"_single_link_%@", property]
-#define OneToManyLinkColumn(clazz, property) [NSString stringWithFormat:@"_one_to_many_link_%@_%@", NSStringFromClass(clazz), property]
-
-@class JRExtraProperty;
 
 @protocol JRPersistent <JRReflectable>
 
@@ -71,6 +68,7 @@ typedef void(^JRDBDidFinishBlock)(id<JRPersistent> _Nonnull obj);
 
 /**
  *  完成save 或者 update 会调用
+ * （注意：如果有事务操作，也会在执行当前sql语句之后执行，即使之后有可能会被回滚）
  *
  *  @param block 代码块
  */
@@ -100,12 +98,6 @@ typedef void(^JRDBDidFinishBlock)(id<JRPersistent> _Nonnull obj);
 - (id _Nullable)jr_primaryKeyValue;
 
 
-/**
- *  返回需要除property之外，额外需要入库的property
- *
- *  @return 数组
- */
-+ (NSArray<JRExtraProperty *> * _Nullable)jr_extraProperties;
 
 @end
 

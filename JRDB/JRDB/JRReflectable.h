@@ -44,6 +44,8 @@
 + (void)objc_exchangeMethod:(SEL _Nonnull)selector withMethod:(SEL _Nonnull)aSelector;
 
 
+- (NSDictionary<NSString *, id> * _Nonnull)jr_toDict;
+
 @end
 
 #endif /* JRReflectable_h */

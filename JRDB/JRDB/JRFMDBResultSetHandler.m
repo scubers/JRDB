@@ -123,7 +123,7 @@ typedef enum {
             int idx = [resultSet columnIndexForName:SingleLinkColumn(key)];
             if (idx >= 0) {
                 NSString *ID = [resultSet stringForColumnIndex:idx];
-                [obj setSingleLinkID:ID forKey:key];
+                [obj jr_setSingleLinkID:ID forKey:key];
             }
         }];
         

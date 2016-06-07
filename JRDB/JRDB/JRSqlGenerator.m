@@ -188,7 +188,7 @@
     [[[obj class] jr_singleLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull clazz, BOOL * _Nonnull stop) {
         
         id<JRPersistent> value = [((NSObject *)obj) valueForKey:key];
-        [((NSObject *)obj) setSingleLinkID:[value ID] forKey:key];
+        [((NSObject *)obj) jr_setSingleLinkID:[value ID] forKey:key];
         
         [sql appendFormat:@" %@ = ?,", SingleLinkColumn(key)];
         [argsList addObject: [value ID] ? [value ID] : [NSNull null]];

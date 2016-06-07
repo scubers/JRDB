@@ -18,22 +18,22 @@
 
 #pragma mark - queue operation
 
-- (FMDatabaseQueue * _Nonnull)databaseQueue;
+- (FMDatabaseQueue * _Nonnull)jr_databaseQueue;
 
-- (void)closeQueue;
+- (void)jr_closeQueue;
 
 /**
  *  使用block来进行队列操作，后台操作，线程安全
  *
  *  @param block 执行block
  */
-- (void)inQueue:(void (^ _Nonnull)(FMDatabase * _Nonnull db))block;
+- (void)jr_inQueue:(void (^ _Nonnull)(FMDatabase * _Nonnull db))block;
 /**
  *  事物回滚操作
  *
  *  @param block 执行block
  */
-- (BOOL)inTransaction:(void (^ _Nonnull)(FMDatabase * _Nonnull db, BOOL * _Nonnull rollBack))block;
+- (BOOL)jr_inTransaction:(void (^ _Nonnull)(FMDatabase * _Nonnull db, BOOL * _Nonnull rollBack))block;
 
 
 /**
@@ -42,7 +42,7 @@
  *  @param block
  *  @param useTransaction 是否使用默认事务 NO:需要自己开启和提交事务
  */
-- (BOOL)execute:(BOOL (^ _Nonnull)(FMDatabase * _Nonnull db))block useTransaction:(BOOL)useTransaction;
+- (BOOL)jr_execute:(BOOL (^ _Nonnull)(FMDatabase * _Nonnull db))block useTransaction:(BOOL)useTransaction;
 
 #pragma mark - table operation
 
@@ -51,8 +51,8 @@
  *
  *  @param clazz 对应表的类
  */
-- (BOOL)createTable4Clazz:(Class<JRPersistent> _Nonnull)clazz;
-- (void)createTable4Clazz:(Class<JRPersistent> _Nonnull)clazz complete:(JRDBComplete _Nullable)complete;
+- (BOOL)jr_createTable4Clazz:(Class<JRPersistent> _Nonnull)clazz;
+- (void)jr_createTable4Clazz:(Class<JRPersistent> _Nonnull)clazz complete:(JRDBComplete _Nullable)complete;
 
 
 /**
@@ -62,8 +62,8 @@
  *
  *  @return 是否成功
  */
-- (BOOL)truncateTable4Clazz:(Class<JRPersistent> _Nonnull)clazz;
-- (void)truncateTable4Clazz:(Class<JRPersistent> _Nonnull)clazz complete:(JRDBComplete _Nullable)complete;
+- (BOOL)jr_truncateTable4Clazz:(Class<JRPersistent> _Nonnull)clazz;
+- (void)jr_truncateTable4Clazz:(Class<JRPersistent> _Nonnull)clazz complete:(JRDBComplete _Nullable)complete;
 
 
 /**
@@ -71,20 +71,20 @@
  *  (只会添加字段，不会删除和更改字段类型)
  *  @param clazz 对应表的类
  */
-- (BOOL)updateTable4Clazz:(Class<JRPersistent> _Nonnull)clazz;
-- (void)updateTable4Clazz:(Class<JRPersistent> _Nonnull)clazz complete:(JRDBComplete _Nullable)complete;
+- (BOOL)jr_updateTable4Clazz:(Class<JRPersistent> _Nonnull)clazz;
+- (void)jr_updateTable4Clazz:(Class<JRPersistent> _Nonnull)clazz complete:(JRDBComplete _Nullable)complete;
 
 /**
  *  删除表
  *
  *  @param clazz 对应表的类
  */
-- (BOOL)dropTable4Clazz:(Class<JRPersistent> _Nonnull)clazz;
-- (void)dropTable4Clazz:(Class<JRPersistent> _Nonnull)clazz complete:(JRDBComplete _Nullable)complete;
+- (BOOL)jr_dropTable4Clazz:(Class<JRPersistent> _Nonnull)clazz;
+- (void)jr_dropTable4Clazz:(Class<JRPersistent> _Nonnull)clazz complete:(JRDBComplete _Nullable)complete;
 
 #pragma mark - table message 
 
-- (NSArray<JRColumnSchema *> * _Nonnull)schemasInClazz:(Class<JRPersistent> _Nonnull)clazz;
+- (NSArray<JRColumnSchema *> * _Nonnull)jr_schemasInClazz:(Class<JRPersistent> _Nonnull)clazz;
 
 #pragma mark - save one
 
@@ -216,7 +216,7 @@
  *
  *  @return obj
  */
-- (id<JRPersistent> _Nullable)getByID:(NSString * _Nonnull)ID clazz:(Class<JRPersistent> _Nonnull)clazz;
+- (id<JRPersistent> _Nullable)jr_getByID:(NSString * _Nonnull)ID clazz:(Class<JRPersistent> _Nonnull)clazz;
 
 
 /**
@@ -227,7 +227,7 @@
  *
  *  @return 结果
  */
-- (id<JRPersistent> _Nullable)getByPrimaryKey:(id _Nonnull)primaryKey clazz:(Class<JRPersistent> _Nonnull)clazz;
+- (id<JRPersistent> _Nullable)jr_getByPrimaryKey:(id _Nonnull)primaryKey clazz:(Class<JRPersistent> _Nonnull)clazz;
 
 /**
  *  查找全部，不关联查询，只查询一级
@@ -238,7 +238,7 @@
  *
  *  @return 结果
  */
-- (NSArray * _Nonnull)getAll:(Class<JRPersistent> _Nonnull)clazz orderBy:(NSString * _Nullable)orderby isDesc:(BOOL)isDesc;
+- (NSArray * _Nonnull)jr_getAll:(Class<JRPersistent> _Nonnull)clazz orderBy:(NSString * _Nullable)orderby isDesc:(BOOL)isDesc;
 
 /**
  *  根据条件查询，不关联查询，只查询一级
@@ -252,7 +252,7 @@
  *
  *  @return 结果
  */
-- (NSArray<id<JRPersistent>> * _Nonnull)getByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions clazz:(Class<JRPersistent> _Nonnull)clazz groupBy:(NSString * _Nullable)groupBy orderBy:(NSString * _Nullable)orderBy limit:(NSString * _Nullable)limit isDesc:(BOOL)isDesc;
+- (NSArray<id<JRPersistent>> * _Nonnull)jr_getByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions clazz:(Class<JRPersistent> _Nonnull)clazz groupBy:(NSString * _Nullable)groupBy orderBy:(NSString * _Nullable)orderBy limit:(NSString * _Nullable)limit isDesc:(BOOL)isDesc;
 
 #pragma mark - multi level query operation
 
@@ -264,7 +264,7 @@
  *
  *  @return 结果
  */
-- (id<JRPersistent> _Nullable)findByID:(NSString * _Nonnull)ID clazz:(Class<JRPersistent> _Nonnull)clazz;
+- (id<JRPersistent> _Nullable)jr_findByID:(NSString * _Nonnull)ID clazz:(Class<JRPersistent> _Nonnull)clazz;
 
 /**
  *  根据指定主键进行查找，若已实现自定义主键，则根据自定义主键，若无，则根据默认主键『_ID』查找 若有关联数据，一并查询
@@ -274,10 +274,10 @@
  *
  *  @return 结果
  */
-- (id<JRPersistent> _Nullable)findByPrimaryKey:(id _Nonnull)primaryKey clazz:(Class<JRPersistent> _Nonnull)clazz;
+- (id<JRPersistent> _Nullable)jr_findByPrimaryKey:(id _Nonnull)primaryKey clazz:(Class<JRPersistent> _Nonnull)clazz;
 
-- (NSArray<id<JRPersistent>> * _Nonnull)findAll:(Class<JRPersistent> _Nonnull)clazz;
-- (NSArray<id<JRPersistent>> * _Nonnull)findAll:(Class<JRPersistent> _Nonnull)clazz orderBy:(NSString * _Nullable)orderby isDesc:(BOOL)isDesc;
+- (NSArray<id<JRPersistent>> * _Nonnull)jr_findAll:(Class<JRPersistent> _Nonnull)clazz;
+- (NSArray<id<JRPersistent>> * _Nonnull)jr_findAll:(Class<JRPersistent> _Nonnull)clazz orderBy:(NSString * _Nullable)orderby isDesc:(BOOL)isDesc;
 
 /**
  *  根据条件查询(条件名称需要是属性全称)
@@ -286,27 +286,27 @@
  *
  *  @return 查询结果
  */
-- (NSArray<id<JRPersistent>> * _Nonnull)findByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions clazz:(Class<JRPersistent> _Nonnull)clazz groupBy:(NSString * _Nullable)groupBy orderBy:(NSString * _Nullable)orderBy limit:(NSString * _Nullable)limit isDesc:(BOOL)isDesc;
+- (NSArray<id<JRPersistent>> * _Nonnull)jr_findByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions clazz:(Class<JRPersistent> _Nonnull)clazz groupBy:(NSString * _Nullable)groupBy orderBy:(NSString * _Nullable)orderBy limit:(NSString * _Nullable)limit isDesc:(BOOL)isDesc;
 
 /**
  *  单纯根据条件查询
  */
-- (NSArray<id<JRPersistent>> * _Nonnull)findByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions clazz:(Class<JRPersistent> _Nonnull)clazz isDesc:(BOOL)isDesc;
+- (NSArray<id<JRPersistent>> * _Nonnull)jr_findByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions clazz:(Class<JRPersistent> _Nonnull)clazz isDesc:(BOOL)isDesc;
 
 /**
  *  单纯根据groupby以及条件
  */
-- (NSArray<id<JRPersistent>> * _Nonnull)findByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions clazz:(Class<JRPersistent> _Nonnull)clazz groupBy:(NSString * _Nullable)groupBy isDesc:(BOOL)isDesc;
+- (NSArray<id<JRPersistent>> * _Nonnull)jr_findByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions clazz:(Class<JRPersistent> _Nonnull)clazz groupBy:(NSString * _Nullable)groupBy isDesc:(BOOL)isDesc;
 
 /**
  *  单纯根据orderby以及条件
  */
-- (NSArray<id<JRPersistent>> * _Nonnull)findByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions clazz:(Class<JRPersistent> _Nonnull)clazz orderBy:(NSString * _Nullable)orderBy isDesc:(BOOL)isDesc;
+- (NSArray<id<JRPersistent>> * _Nonnull)jr_findByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions clazz:(Class<JRPersistent> _Nonnull)clazz orderBy:(NSString * _Nullable)orderBy isDesc:(BOOL)isDesc;
 
 /**
  *  单纯根据limit以及条件
  */
-- (NSArray<id<JRPersistent>> * _Nonnull)findByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions clazz:(Class<JRPersistent> _Nonnull)clazz limit:(NSString * _Nullable)limit isDesc:(BOOL)isDesc;
+- (NSArray<id<JRPersistent>> * _Nonnull)jr_findByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions clazz:(Class<JRPersistent> _Nonnull)clazz limit:(NSString * _Nullable)limit isDesc:(BOOL)isDesc;
 
 #pragma mark - convenience method
 
@@ -317,7 +317,7 @@
  *
  *  @return 是否存在
  */
-- (BOOL)checkExistsTable4Clazz:(Class<JRPersistent> _Nonnull)clazz;
+- (BOOL)jr_checkExistsTable4Clazz:(Class<JRPersistent> _Nonnull)clazz;
 
 
 

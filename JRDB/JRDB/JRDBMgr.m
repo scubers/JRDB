@@ -75,7 +75,7 @@ static JRDBMgr *__shareInstance;
 
 - (void)updateDB:(FMDatabase *)db {
     for (Class clazz in _clazzArray) {
-        BOOL flag = [db updateTable4Clazz:clazz];
+        BOOL flag = [db jr_updateTable4Clazz:clazz];
         NSLog(@"update table: %@ %@", [clazz description], flag ? @"success" : @"failure");
     }
 }
@@ -113,9 +113,11 @@ static JRDBMgr *__shareInstance;
     if (_defaultDB == defaultDB) {
         return;
     }
-    [_defaultDB closeQueue];
+    [_defaultDB jr_closeQueue];
     [_defaultDB close];
+    
     _defaultDB = defaultDB;
+    [_defaultDB open];
 }
 
 #pragma mark - private method

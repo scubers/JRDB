@@ -175,9 +175,7 @@
         [p.money addObject:m];
     }
 
-    [p jr_saveWithComplete:^(BOOL success) {
-        NSLog(@"complete");
-    }];
+    [p jr_saveWithComplete:nil];
 //    [p jr_save];
     
 }
@@ -216,10 +214,7 @@
     NSDictionary *dict = [JRReflectUtil propNameAndEncode4Clazz:[Person class]];
     NSLog(@"%@", dict);
 
-    NSArray *arr = [Person jr_extraProperties];
-
-    NSLog(@"%@", arr);
-    
+//    CourierNewPSMT - 16.0
 }
 
 - (Person *)createPerson:(int)base name:(NSString *)name {

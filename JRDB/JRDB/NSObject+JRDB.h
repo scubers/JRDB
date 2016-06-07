@@ -23,8 +23,8 @@
 
 #pragma mark - convinence method
 
-- (void)setSingleLinkID:(NSString * _Nullable)ID forKey:(NSString * _Nonnull)key;
-- (NSString * _Nullable)singleLinkIDforKey:(NSString * _Nonnull)key;
+- (void)jr_setSingleLinkID:(NSString * _Nullable)ID forKey:(NSString * _Nonnull)key;
+- (NSString * _Nullable)jr_singleLinkIDforKey:(NSString * _Nonnull)key;
 
 - (NSMutableDictionary<NSString *,JRDBDidFinishBlock> * _Nonnull)jr_finishBlocks;
 
@@ -184,8 +184,8 @@
 
 #pragma mark - table message 
 
-+ (NSArray<NSString *> * _Nonnull)currentColumnsInDB:(FMDatabase * _Nonnull)db;
-+ (NSArray<NSString *> * _Nonnull)currentColumns;
++ (NSArray<NSString *> * _Nonnull)jr_currentColumnsInDB:(FMDatabase * _Nonnull)db;
++ (NSArray<NSString *> * _Nonnull)jr_currentColumns;
 
 #pragma mark - sql语句
 

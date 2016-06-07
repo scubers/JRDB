@@ -94,24 +94,13 @@ const NSString *jr_configureKey = @"jr_configureKey";
     return blocks;
 }
 
-NSString * const jr_extraPropertyKey = @"jr_extraPropertyKey";
-
-+ (NSArray<JRExtraProperty *> *)jr_extraProperties {
-    NSMutableArray *array = objc_getAssociatedObject(self, _cmd);
-    if (!array) {
-        array = [NSMutableArray array];
-        objc_setAssociatedObject(self, _cmd, array, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    }
-    return array;
-}
-
 #pragma mark - convinence method
 
-- (void)setSingleLinkID:(NSString *)ID forKey:(NSString *)key {
+- (void)jr_setSingleLinkID:(NSString *)ID forKey:(NSString *)key {
     objc_setAssociatedObject(self, NSSelectorFromString(SingleLinkColumn(key)), ID, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-- (NSString *)singleLinkIDforKey:(NSString *)key {
+- (NSString *)jr_singleLinkIDforKey:(NSString *)key {
     return objc_getAssociatedObject(self, NSSelectorFromString(SingleLinkColumn(key)));
 }
 
@@ -232,7 +221,7 @@ NSString * const jr_extraPropertyKey = @"jr_extraPropertyKey";
 #pragma mark - select
 
 + (instancetype _Nullable)jr_findByID:(NSString * _Nonnull)ID fromDB:(FMDatabase * _Nonnull)db {
-    return (NSObject *)[db findByID:ID clazz:self];
+    return (NSObject *)[db jr_findByID:ID clazz:self];
 }
 
 + (instancetype _Nullable)jr_findByID:(NSString * _Nonnull)ID {
@@ -240,28 +229,28 @@ NSString * const jr_extraPropertyKey = @"jr_extraPropertyKey";
 }
 
 + (instancetype)jr_findByPrimaryKey:(id)primaryKey fromDB:(FMDatabase * _Nonnull)db {
-    return (NSObject *)[db findByPrimaryKey:primaryKey clazz:[self class]];
+    return (NSObject *)[db jr_findByPrimaryKey:primaryKey clazz:[self class]];
 }
 + (instancetype)jr_findByPrimaryKey:(id)primaryKey {
     return [self jr_findByPrimaryKey:primaryKey fromDB:JR_DEFAULTDB];
 }
 
 + (NSArray<id<JRPersistent>> *)jr_findAllFromDB:(FMDatabase *)db {
-    return [db findAll:[self class]];
+    return [db jr_findAll:[self class]];
 }
 + (NSArray<id<JRPersistent>> *)jr_findAll {
     return [self jr_findAllFromDB:JR_DEFAULTDB];
 }
 
 + (NSArray<id<JRPersistent>> *)jr_findAllFromDB:(FMDatabase *)db orderBy:(NSString *)orderBy isDesc:(BOOL)isDesc {
-    return [db findAll:[self class] orderBy:orderBy isDesc:isDesc];
+    return [db jr_findAll:[self class] orderBy:orderBy isDesc:isDesc];
 }
 + (NSArray<id<JRPersistent>> *)jr_findAllOrderBy:(NSString *)orderBy isDesc:(BOOL)isDesc {
     return [self jr_findAllFromDB:JR_DEFAULTDB orderBy:orderBy isDesc:isDesc];
 }
 
 + (NSArray<id<JRPersistent>> *)jr_findByConditions:(NSArray<JRQueryCondition *> *)conditions groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc fromDB:(FMDatabase *)db {
-    return [db findByConditions:conditions clazz:[self class] groupBy:groupBy orderBy:orderBy limit:limit isDesc:isDesc];
+    return [db jr_findByConditions:conditions clazz:[self class] groupBy:groupBy orderBy:orderBy limit:limit isDesc:isDesc];
 }
 
 + (NSArray<id<JRPersistent>> *)jr_findByConditions:(NSArray<JRQueryCondition *> *)conditions groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc {
@@ -270,16 +259,16 @@ NSString * const jr_extraPropertyKey = @"jr_extraPropertyKey";
 
 #pragma mark - table message
 
-+ (NSArray<NSString *> * _Nonnull)currentColumnsInDB:(FMDatabase * _Nonnull)db {
-    NSArray<JRColumnSchema *> * arr = [db schemasInClazz:self];
++ (NSArray<NSString *> * _Nonnull)jr_currentColumnsInDB:(FMDatabase * _Nonnull)db {
+    NSArray<JRColumnSchema *> * arr = [db jr_schemasInClazz:self];
     NSMutableArray *array = [NSMutableArray array];
     [arr enumerateObjectsUsingBlock:^(JRColumnSchema * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         [array addObject:obj.name];
     }];
     return array;
 }
-+ (NSArray<NSString *> * _Nonnull)currentColumns {
-    return [self currentColumnsInDB:JR_DEFAULTDB];
++ (NSArray<NSString *> * _Nonnull)jr_currentColumns {
+    return [self jr_currentColumnsInDB:JR_DEFAULTDB];
 }
 
 #pragma mark - sql
@@ -312,7 +301,7 @@ NSString * const jr_extraPropertyKey = @"jr_extraPropertyKey";
 #pragma mark - table operation
 
 + (BOOL)jr_createTableInDB:(FMDatabase *)db {
-    return [db createTable4Clazz:[self class]];
+    return [db jr_createTable4Clazz:[self class]];
 }
 
 + (BOOL)jr_createTable {
@@ -320,7 +309,7 @@ NSString * const jr_extraPropertyKey = @"jr_extraPropertyKey";
 }
 
 + (BOOL)jr_updateTableInDB:(FMDatabase *)db {
-    return [db updateTable4Clazz:[self class]];
+    return [db jr_updateTable4Clazz:[self class]];
 }
 
 + (BOOL)jr_updateTable {
@@ -328,7 +317,7 @@ NSString * const jr_extraPropertyKey = @"jr_extraPropertyKey";
 }
 
 + (BOOL)jr_dropTableInDB:(FMDatabase *)db {
-    return [db dropTable4Clazz:[self class]];
+    return [db jr_dropTable4Clazz:[self class]];
 }
 
 + (BOOL)jr_dropTable {
@@ -336,7 +325,7 @@ NSString * const jr_extraPropertyKey = @"jr_extraPropertyKey";
 }
 
 + (BOOL)jr_truncateTableInDB:(FMDatabase *)db {
-    return [db truncateTable4Clazz:[self class]];
+    return [db jr_truncateTable4Clazz:[self class]];
 }
 
 + (BOOL)jr_truncateTable {

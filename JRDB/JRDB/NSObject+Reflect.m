@@ -74,4 +74,14 @@
     method_exchangeImplementations(m1, m2);
 }
 
+- (NSDictionary<NSString *,id> *)jr_toDict {
+    NSArray<OBJCProperty *> *props = [[self class] objc_properties];
+    NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+    [props enumerateObjectsUsingBlock:^(OBJCProperty * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        id value = [self valueForKey:obj.name];
+        dict[obj.name] = value ? value : [NSNull null];
+    }];
+    return [dict copy];
+}
+
 @end
