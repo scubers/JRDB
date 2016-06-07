@@ -27,13 +27,13 @@
 
 - (void)setUp {
     [super setUp];
-    FMDatabase *db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/jmacmini/Desktop/test.sqlite"];
+//    FMDatabase *db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/jmacmini/Desktop/test.sqlite"];
     [[JRDBMgr shareInstance] registerClazzes:@[
                                                 [Person class],
                                                 [Card class],
                                                 [Money class],
                                                 ]];
-    [JRDBMgr shareInstance].defaultDB = db;
+//    [JRDBMgr shareInstance].defaultDB = db;
 }
 
 - (void)tearDown {
@@ -156,7 +156,7 @@
 }
 
 - (void)testTransaction {
-    [[JRDBMgr defaultDB] inTransaction:^(FMDatabase * _Nonnull db, BOOL * _Nonnull rollBack) {
+    [[JRDBMgr defaultDB] jr_inTransaction:^(FMDatabase * _Nonnull db, BOOL * _Nonnull rollBack) {
         Person *p = [self createPerson:1 name:@"A"];
         Person *p2 = [self createPerson:2 name:@"B"];
 
