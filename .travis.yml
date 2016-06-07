@@ -1,4 +1,3 @@
 language: objective-c
-os: osx
-xcode_workspace: JRDB.xcworkspace # path to your xcodeproj folder
-xcode_scheme: JRDBTests
+
+osx_image: xcode7.1
