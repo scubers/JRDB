@@ -2,6 +2,12 @@
 
 **一个对FMDB进行类Hibernate封装的ios库，支持Objective-C 和 Swift。**
 
+[![Build Status](http://img.shields.io/travis/scubers/JRDB/developing.svg?style=flat)](https://travis-ci.org/scubers/JRDB)
+[![Pod Version](http://img.shields.io/cocoapods/v/JRDB.svg?style=flat)](http://cocoadocs.org/docsets/JRDB/)
+[![Pod Platform](http://img.shields.io/cocoapods/p/JRDB.svg?style=flat)](http://cocoadocs.org/docsets/JRDB/)
+[![Pod License](http://img.shields.io/cocoapods/l/JRDB.svg?style=flat)](https://www.apache.org/licenses/LICENSE-2.0.html)
+
+
 GitHub: [sucbers](https://github.com/scubers)
 
 Feedback: [jr-wong@qq.com](mailto:jrwong@qq.com)
