@@ -17,6 +17,14 @@
 #import "FMDatabase+JRDB.h"
 #import "JRFMDBResultSetHandler.h"
 #import "JRQueryCondition.h"
+#import "JRReflectable.h"
+#import "NSObject+Reflect.h"
+#import "OBJCProperty.h"
+#import "OBJCMethod.h"
+#import "JRColumnSchema.h"
+#import "JRUtils.h"
+#import "JRMiddleTable.h"
+#import "NSArray+JRDB.h"
 
 
 #endif /* JRDB_h */
