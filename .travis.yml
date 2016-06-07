@@ -1,9 +1,12 @@
-branches:
-    - developing
-    - master
 language: objective-c
 os: osx
 osx_image: xcode7.3
 
-xcode_project: JRDB.xcworkspace # path to your xcodeproj folder
+branches:
+	only:
+    - developing
+    - master
+
+xcworkspace: JRDB.xcworkspace
 xcode_scheme: JRDBTests
+# xcode_project:  # path to your xcodeproj folder
