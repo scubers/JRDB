@@ -6,5 +6,5 @@ branches:
 	only:
     - developing
     - master
-xcode_project: JRDB.xcworkspace # path to your xcodeproj folder
+xcode_workspace: JRDB.xcworkspace # path to your xcodeproj folder
 xcode_scheme: JRDBTests
