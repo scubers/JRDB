@@ -86,6 +86,10 @@
 
 - (NSArray<JRColumnSchema *> * _Nonnull)jr_schemasInClazz:(Class<JRPersistent> _Nonnull)clazz;
 
+#pragma mark - save or update
+
+//- (BOOL)jr_saveOrUpdateOneOnly:(id<JRPersistent> _Nonnull)one;
+
 #pragma mark - save one
 
 /**
