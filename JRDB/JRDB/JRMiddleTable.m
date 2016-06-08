@@ -10,8 +10,8 @@
 #import "FMDatabase+JRDB.h"
 #import "NSObject+Reflect.h"
 
-#define MiddleTableName(clazz1,clazz2) [NSString stringWithFormat:@"%@_%@_Mid_Table", clazz1, clazz2]
-#define MiddleColumn4Clazz(clazz) [NSString stringWithFormat:@"%@_ids", clazz]
+#define MiddleTableName(clazz1,clazz2) [NSString stringWithFormat:@"%@_%@_Mid_Table", [clazz1 shortClazzName],[clazz2 shortClazzName]]
+#define MiddleColumn4Clazz(clazz) [NSString stringWithFormat:@"%@_ids", [clazz shortClazzName]]
 
 
 @implementation JRMiddleTable
