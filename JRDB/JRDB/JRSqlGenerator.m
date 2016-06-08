@@ -15,7 +15,7 @@
 
 void SqlLog(id sql) {
     if ([JRDBMgr shareInstance].debugMode) {
-        SqlLog(sql);
+        NSLog(@"%@", sql);
     }
 }
 
