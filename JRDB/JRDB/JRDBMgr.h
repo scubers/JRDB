@@ -14,7 +14,6 @@
 @interface JRDBMgr : NSObject
 
 @property (nonatomic, strong) FMDatabase * _Nullable defaultDB;
-
 @property (nonatomic, assign) BOOL debugMode;
 
 + (instancetype _Nonnull)shareInstance;

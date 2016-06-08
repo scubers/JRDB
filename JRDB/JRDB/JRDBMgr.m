@@ -33,7 +33,7 @@ static JRDBMgr *__shareInstance;
 #ifdef DEBUG
         __shareInstance->_debugMode = YES;
 #else
-        __shareInstance->debugMode = NO;
+        __shareInstance->_debugMode = NO;
 #endif
     });
     return __shareInstance;
