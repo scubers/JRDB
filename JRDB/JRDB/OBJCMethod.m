@@ -61,7 +61,7 @@
         int cookie = va_arg(args, int);
         if(cookie != RT_ARG_MAGIC_COOKIE)
         {
-            JRLog(@"%s: incorrect magic cookie %08x; did you forget to use RTARG() around your arguments?", __func__, cookie);
+            NSLog(@"%s: incorrect magic cookie %08x; did you forget to use RTARG() around your arguments?", __func__, cookie);
             abort();
         }
         const char *typeStr = va_arg(args, char *);
@@ -74,7 +74,7 @@
 
         if(inSize != sigSize)
         {
-            JRLog(@"%s: size mismatch between passed-in argument and required argument; in type: %s (%lu) requested: %s (%lu)", __func__, typeStr, (long)inSize, [signature getArgumentTypeAtIndex: i], (long)sigSize);
+            NSLog(@"%s: size mismatch between passed-in argument and required argument; in type: %s (%lu) requested: %s (%lu)", __func__, typeStr, (long)inSize, [signature getArgumentTypeAtIndex: i], (long)sigSize);
             abort();
         }
 

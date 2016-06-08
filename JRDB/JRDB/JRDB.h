@@ -26,5 +26,4 @@
 #import "JRMiddleTable.h"
 #import "NSArray+JRDB.h"
 
-
 #endif /* JRDB_h */

@@ -30,6 +30,11 @@ static JRDBMgr *__shareInstance;
     dispatch_once(&onceToken, ^{
         __shareInstance = [super allocWithZone:zone];
         __shareInstance->_clazzArray = [NSMutableArray array];
+#ifdef DEBUG
+        __shareInstance->_debugMode = YES;
+#else
+        __shareInstance->debugMode = NO;
+#endif
     });
     return __shareInstance;
 }
@@ -77,7 +82,7 @@ static JRDBMgr *__shareInstance;
 - (void)updateDB:(FMDatabase *)db {
     for (Class clazz in _clazzArray) {
         BOOL flag = [db jr_updateTable4Clazz:clazz];
-        JRLog(@"update table: %@ %@", [clazz description], flag ? @"success" : @"failure");
+        NSLog(@"update table: %@ %@", [clazz description], flag ? @"success" : @"failure");
     }
 }
 

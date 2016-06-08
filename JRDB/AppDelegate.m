@@ -7,6 +7,8 @@
 //
 
 #import "AppDelegate.h"
+#import "JRDBMgr.h"
+#import "Person.h"
 
 @interface AppDelegate ()
 
@@ -18,7 +20,15 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
     NSString *path = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).lastObject;
-    JRLog(@"--------------\napp path : %@", path);
+    NSLog(@"--------------\napp path : %@", path);
+    
+    [[JRDBMgr shareInstance] registerClazzes:@[
+                                               [Person class],
+                                               [Money class],
+                                               [Card class],
+                                               ]];
+    
+    [[JRDBMgr shareInstance] updateDefaultDB];
     
     return YES;
 }

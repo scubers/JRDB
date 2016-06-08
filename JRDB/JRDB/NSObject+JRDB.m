@@ -406,8 +406,8 @@ const static NSString *jr_changedArrayKey = @"jr_changedArrayKey";
 #define IMPSomething(typeEncoding, jr_sel, jr_templateSel, jr_clazz, jr_type) \
 if ([paramType isEqualToString:[NSString stringWithUTF8String:@encode(jr_type)]]) { \
 imp = imp_implementationWithBlock(^(id target, jr_type value){ \
-    JRLog(@"new method "); \
-    JRLog(@"target: %@, value: %@ ", target, @(value)); \
+    NSLog(@"new method "); \
+    NSLog(@"target: %@, value: %@ ", target, @(value)); \
     NSInvocation *inv = [NSInvocation invocationWithMethodSignature:[NSMethodSignature signatureWithObjCTypes:typeEncoding]]; \
     inv.target = target; \
     inv.selector = jr_sel; \
@@ -431,7 +431,7 @@ else IMPSomething(typeEncoding, jr_sel, jr_templateSel, jr_clazz, jr_type)
 
     IMP imp = nil;
 
-    JRLog(@"%@", NSStringFromSelector(templeteSelector));
+    NSLog(@"%@", NSStringFromSelector(templeteSelector));
 
     const char *typeEncoding = method_getTypeEncoding(class_getInstanceMethod(self, templeteSelector));
     NSString *paramType = [self jr_type4SetterParameter:templeteSelector];
@@ -446,8 +446,8 @@ else IMPSomething(typeEncoding, jr_sel, jr_templateSel, jr_clazz, jr_type)
     {
         imp = imp_implementationWithBlock(^(id<NSObject> target, id value){
 
-            JRLog(@"new method ");
-            JRLog(@"target: %@, value: %@ ", target, value);
+            NSLog(@"new method ");
+            NSLog(@"target: %@, value: %@ ", target, value);
 
             NSInvocation *inv = [NSInvocation invocationWithMethodSignature:[NSMethodSignature signatureWithObjCTypes:typeEncoding]];
             inv.selector = newSelector;

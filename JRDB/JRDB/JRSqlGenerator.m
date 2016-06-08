@@ -11,6 +11,13 @@
 #import "NSObject+JRDB.h"
 #import "JRQueryCondition.h"
 #import "NSObject+Reflect.h"
+#import "JRDBMgr.h"
+
+void SqlLog(id sql) {
+    if ([JRDBMgr shareInstance].debugMode) {
+        SqlLog(sql);
+    }
+}
 
 @import FMDB;
 
@@ -42,7 +49,7 @@
     
     
     [sql appendString:@");"];
-    JRLog(@"sql: %@", sql);
+    SqlLog(sql);
     return sql;
 }
 
@@ -75,15 +82,14 @@
         }
     }];
     
-    
-    JRLog(@"sqls: %@", sqls);
+    SqlLog(sqls);
     return sqls;
 }
 
 
 + (NSString *)dropTableSql4Clazz:(Class<JRPersistent>)clazz {
     NSString *sql = [NSString stringWithFormat:@"drop table if exists %@ ;",[clazz shortClazzName]];
-    JRLog(@"sql: %@", sql);
+    SqlLog(sql);
     return sql;
 }
 
@@ -136,19 +142,19 @@
     [sql appendString:sql2];
     *args = argsList;
     
-    JRLog(@"sql: %@", sql);
+    SqlLog(sql);
     return sql;
 }
 
 + (NSString *)sql4Delete:(id<JRPersistent>)obj {
     NSString *sql = [NSString stringWithFormat:@"delete from %@ where %@ = ? ;", [[obj class] shortClazzName], [[obj class] jr_primaryKey]];
-    JRLog(@"sql: %@", sql);
+    SqlLog(sql);
     return sql;
 }
 
 + (NSString *)sql4DeleteAll:(Class<JRPersistent>)clazz {
     NSString *sql = [NSString stringWithFormat:@"delete from %@", [clazz shortClazzName]];
-    JRLog(@"sql: %@", sql);
+    SqlLog(sql);
     return sql;
 }
 
@@ -202,19 +208,19 @@
     
     [sql appendFormat:@" where %@ = ? ;", [[obj class] jr_primaryKey]];
     *args = argsList;
-    JRLog(@"sql: %@", sql);
+    SqlLog(sql);
     return sql;
 }
 
 + (NSString * _Nonnull)sql4GetByIDWithClazz:(Class<JRPersistent> _Nonnull)clazz {
     NSString *sql = [NSString stringWithFormat:@"select * from %@ where _ID = ?;", [clazz shortClazzName]];
-    JRLog(@"sql: %@", sql);
+    SqlLog(sql);
     return sql;
 }
 
 + (NSString *)sql4GetByPrimaryKeyWithClazz:(Class<JRPersistent>)clazz {
     NSString *sql = [NSString stringWithFormat:@"select * from %@ where %@ = ?;", [clazz shortClazzName], [clazz jr_primaryKey]];
-    JRLog(@"sql: %@", sql);
+    SqlLog(sql);
     return sql;
 }
 
@@ -224,7 +230,7 @@
         sql = [sql stringByAppendingFormat:@" order by %@ ", orderby.length ? orderby : [clazz jr_primaryKey]];
     }
     sql = [sql stringByAppendingFormat:@" %@ ;", isDesc ? @"desc" : @""];
-    JRLog(@"sql: %@", sql);
+    SqlLog(sql);
     return sql;
 }
 
@@ -255,7 +261,7 @@
     
     [sql appendString:@";"];
     *args = argList;
-    JRLog(@"sql: %@", sql);
+    SqlLog(sql);
     return sql;
 }
 

@@ -102,7 +102,7 @@
 
 - (BOOL)cleanRubbishData {
     if ([_db inTransaction]) {
-        JRLog(@"can not clean rubbish data due to the database is in transaction now");
+        NSLog(@"can not clean rubbish data due to the database is in transaction now");
         return NO;
     }
     [_db beginTransaction];

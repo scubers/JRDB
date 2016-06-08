@@ -18,14 +18,14 @@
     return @{@"_person" : [Person class]};
 }
 - (void)dealloc {
-    JRLog(@"%@, dealloc", self);
+    NSLog(@"%@, dealloc", self);
 }
 @end
 
 
 @implementation Animal
 - (void)dealloc {
-    JRLog(@"%@, dealloc", self);
+    NSLog(@"%@, dealloc", self);
 }
 @end
 

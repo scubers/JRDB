@@ -15,6 +15,8 @@
 
 @property (nonatomic, strong) FMDatabase * _Nullable defaultDB;
 
+@property (nonatomic, assign) BOOL debugMode;
+
 + (instancetype _Nonnull)shareInstance;
 + (FMDatabase * _Nonnull)defaultDB;
 - (FMDatabase * _Nullable)createDBWithPath:(NSString * _Nullable)path;
