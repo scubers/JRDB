@@ -87,7 +87,13 @@ static JRDBMgr *__shareInstance;
 }
 
 - (BOOL)isValidateClazz:(Class<JRPersistent>)clazz {
-    return [_clazzArray containsObject:clazz];
+//    return [_clazzArray containsObject:clazz]; //为什么在cocoapods会报错，其他就不会，神经病 艹
+    for (Class c in _clazzArray) {
+        if ([NSStringFromClass(c) isEqualToString:NSStringFromClass(clazz)]) {
+            return YES;
+        }
+    }
+    return NO;
 }
 
 - (void)clearMidTableRubbishDataForDB:(FMDatabase *)db {
