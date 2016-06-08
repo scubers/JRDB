@@ -29,8 +29,6 @@ Feedback: [jr-wong@qq.com](mailto:jrwong@qq.com)
 ```ruby
 use_frameworks!
 pod 'JRDB'
-
-// 请使用Cocoapods安装，切勿直接拖文件夹，囧，忘记打分支了，全在master上改了
 ```
 
 ```objc
@@ -39,6 +37,96 @@ pod 'JRDB'
 
 ---
 
+# Latest Update 【最新更新】
+
+### Prepare 【准备】
+
+* 相比之前版本，添加一步，所有需要操作入库的类都需要先注册一遍。
+
+```objc
+[[JRDBMgr shareInstance] registerClazzes:@[
+                                           [Person class],
+                                           [Card class],
+                                           [Money class],
+                                           ]];
+```
+
+* 每步的操作，实际都是根据数据转换成sql语句，可以设置是否打印
+
+```objc
+[JRDBMgr shareInstance].debugMode = NO;
+```
+
+### 关联操作 （保存）
+
+* 一对一关联（model内含有model）；默认是不会进行关联保存的，若有需要关联保存，需要实现一下方法，并且子model也需要注册。
+
+```objc
+@interface Person : NSObject
+@property (nonatomic, strong) Card *card;
+@property (nonatomic, strong) NSMutableArray<Money *> *money;
+@end
+
+@implementation Person
++ (NSDictionary<NSString *,Class<JRPersistent>> *)jr_singleLinkedPropertyNames {
+    return @{ @"_card" : [Card class]};
+}
+@end
+```
+
+
+* 一对多关联（model内含有model数组）；默认不会进行关联保存，若有需要关联保存，需要实现一下方法，并且子model也需要注册。
+
+```objc
+@interface Person : NSObject
+@property (nonatomic, strong) Card *card;
+@property (nonatomic, strong) NSMutableArray<Money *> *money;
+@end
+
+@implementation Person
++ (NSDictionary<NSString *,Class<JRPersistent>> *)jr_oneToManyLinkedPropertyNames {
+    return @{ @"_money" : [Money class] };
+}
+@end
+```
+
+**注意：若子对象都是没有保存过的（既数据库没有的对象），则全部保存。若有已存在对象，不保存不更新。**
+
+---
+
+### 关联操作（更新）
+
+* 出于更新的操作的随意性比较重，更新时不进行一切关联操作，即更新时，只更新本model相关信息，不更新所有子model的信息。当层级较多的时候，需要从子层级开始一步一步开始更新上来（所以不建议建立太多层级）
+
+* 更新本model的信息包括：
+   * 子model的ID会保存（若有）
+   * 子model数组的数量（若子model数组数量发生变更会更新，但是子model的数组不会更到数据库）
+
+---
+
+### 关联操作（删除）
+* 和更新一样，删除时，只会删除本model的信息，不会进行一切关联操作。
+* 删除时，会删除一对多的中间表无用信息
+
+---
+
+### 关联操作（查询）
+* jr\_get开头的查询操作，都不会进行关联操作，jr\_find开头的都会进行关联操作，当不需要关联查询的时候，使用get方法效率更高
+	* jr\_find关联查询包括所有存在的一对一和一对多关联对象
+	* jr\_get 得到的对象子对象都会是空的
+
+---
+
+### NSArray+JRDB
+* 重写了NSObject+JRDB中的方法，可以批量 增删改查
+
+```Objc
+[array jr_save];
+[[Person jr_findAll] jr_delete];
+[[Card jr_findAll] jr_updateColumns:nil];
+```
+
+---
 # Usage
 
 
@@ -81,7 +169,7 @@ p.jr_save()
 ```objc
 Person *p = [Person jr_findAll].firstObject;
 p.name = @"abc";
-[p jr_update columns:nil];
+[p jr_updateColumns:nil];
 ```
 	column: 需要更新的字段名，传入空为全量更新
 
@@ -174,36 +262,48 @@ NSArray *list = [Person jr_executeSql:sql args:@[@10]];
 
 ```objc
 @interface JRDBMgr : NSObject
-@property (nonatomic, strong) FMDatabase *defaultDB;
-+ (instancetype)shareInstance;
-+ (FMDatabase *)defaultDB;
-- (FMDatabase *)createDBWithPath:(NSString *)path;
-- (void)deleteDBWithPath:(NSString *)path;
+
+@property (nonatomic, strong) FMDatabase * _Nullable defaultDB;
+@property (nonatomic, assign) BOOL debugMode;
+
++ (instancetype _Nonnull)shareInstance;
++ (FMDatabase * _Nonnull)defaultDB;
+- (FMDatabase * _Nullable)createDBWithPath:(NSString * _Nullable)path;
+- (void)deleteDBWithPath:(NSString * _Nullable)path;
+
 /**
- *  在这里注册的类，使用本框架的数据库将全部建有这些表
+ *  在这里注册的类，使用本框架的只能操作已注册的类
  *  @param clazz 类名
  */
-- (void)registerClazzForUpdateTable:(Class<JRPersistent>)clazz;
-- (NSArray<Class> *)registedClazz;
+- (void)registerClazz:(Class<JRPersistent> _Nonnull)clazz;
+- (void)registerClazzes:(NSArray<Class<JRPersistent>> * _Nonnull)clazzArray;
+- (NSArray<Class> * _Nonnull)registeredClazz;
+
 /**
  * 更新默认数据库的表（或者新建没有的表）
  * 更新的表需要在本类先注册
  */
 - (void)updateDefaultDB;
-- (void)updateDB:(FMDatabase *)db;
-@end
+- (void)updateDB:(FMDatabase * _Nonnull)db;
+
+
+/**
+ *  检查是否注册
+ *
+ *  @param clazz 类
+ *  @return 结果
+ */
+- (BOOL)isValidateClazz:(Class<JRPersistent> _Nonnull)clazz;
+
+/**
+ *  清理中间表的缓存辣鸡
+ *
+ *  @param db
+ */
+- (void)clearMidTableRubbishDataForDB:(FMDatabase * _Nonnull)db;
 ```
 
 JRDBMgr持有一个默认数据库（~/Documents/jrdb/jrdb.sqlite），任何不指定数据库的操作，都在此数据库进行操作。默认数据库可以自行设置。
-
-###### Method
-
-	- (void)registerClazzForUpdateTable:(Class<JRPersistent>)clazz;
-
-在JRDBMgr中注册的类，可以使用
-
-	-(void)updateDB:(FMDatabase *)db
-进行统一更新或者创建表。	
 
 ---
 
