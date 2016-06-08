@@ -15,7 +15,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "78"
             endingLineNumber = "78"
-            landmarkName = "-testSaveMany"
+            landmarkName = "-testSaveCycle"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
@@ -31,7 +31,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "87"
             endingLineNumber = "87"
-            landmarkName = "-testSaveCycle"
+            landmarkName = "-test3CycleSave"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
