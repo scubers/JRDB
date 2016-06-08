@@ -489,7 +489,7 @@ static NSString * const queuekey = @"queuekey";
     [self jr_execute:^BOOL(FMDatabase * _Nonnull db) {
         __block BOOL needRollBack = ![self jr_deleteOneOnly:one];
         if (!needRollBack) {
-            // 监测一对多的 删除
+            // 监测一对多的 中间表 删除
             [[[one class] jr_oneToManyLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull clazz, BOOL * _Nonnull stop) {
                 JRMiddleTable *mid = [JRMiddleTable table4Clazz:clazz andClazz:[one class] db:self];
                 needRollBack = ![mid deleteID:[one ID] forClazz:[one class]];
@@ -554,7 +554,7 @@ static NSString * const queuekey = @"queuekey";
 
 - (id<JRPersistent>)jr_getByID:(NSString *)ID clazz:(Class<JRPersistent>)clazz {
     AssertRegisteredClazz(clazz);
-    NSAssert(ID, @"id should be nil");
+    NSAssert(ID, @"id should not be nil");
     NSString *sql = [JRSqlGenerator sql4GetByIDWithClazz:clazz];
     FMResultSet *ret = [self executeQuery:sql withArgumentsInArray:@[ID]];
     return [JRFMDBResultSetHandler handleResultSet:ret forClazz:clazz].firstObject;

@@ -36,6 +36,8 @@
                                                ]];
     [JRDBMgr shareInstance].defaultDB = db;
     
+    [JRDBMgr shareInstance].debugMode = NO;
+    
     NSLog(@"%@", [[JRDBMgr shareInstance] registeredClazz]);
 }
 
@@ -63,6 +65,7 @@
 #pragma mark - test save
 - (void)testSaveOne {
     Person *p = [self createPerson:1 name:@"1"];
+    [p jr_updateColumns:nil];
     [p jr_save];
 }
 

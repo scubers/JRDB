@@ -39,14 +39,6 @@
              ];
 }
 
-//+ (NSString *)jr_customPrimarykey {
-//    return @"_i_string";
-//}
-//
-//- (id)jr_customPrimarykeyValue {
-//    return self.i_string;
-//}
-
 + (NSDictionary<NSString *,Class<JRPersistent>> *)jr_singleLinkedPropertyNames {
     return @{
              @"_card" : [Card class],
