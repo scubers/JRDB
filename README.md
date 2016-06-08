@@ -169,7 +169,7 @@ p.jr_save()
 ```objc
 Person *p = [Person jr_findAll].firstObject;
 p.name = @"abc";
-[p jr_update columns:nil];
+[p jr_updateColumns:nil];
 ```
 	column: 需要更新的字段名，传入空为全量更新
 
@@ -262,36 +262,48 @@ NSArray *list = [Person jr_executeSql:sql args:@[@10]];
 
 ```objc
 @interface JRDBMgr : NSObject
-@property (nonatomic, strong) FMDatabase *defaultDB;
-+ (instancetype)shareInstance;
-+ (FMDatabase *)defaultDB;
-- (FMDatabase *)createDBWithPath:(NSString *)path;
-- (void)deleteDBWithPath:(NSString *)path;
+
+@property (nonatomic, strong) FMDatabase * _Nullable defaultDB;
+@property (nonatomic, assign) BOOL debugMode;
+
++ (instancetype _Nonnull)shareInstance;
++ (FMDatabase * _Nonnull)defaultDB;
+- (FMDatabase * _Nullable)createDBWithPath:(NSString * _Nullable)path;
+- (void)deleteDBWithPath:(NSString * _Nullable)path;
+
 /**
- *  在这里注册的类，使用本框架的数据库将全部建有这些表
+ *  在这里注册的类，使用本框架的只能操作已注册的类
  *  @param clazz 类名
  */
-- (void)registerClazzForUpdateTable:(Class<JRPersistent>)clazz;
-- (NSArray<Class> *)registedClazz;
+- (void)registerClazz:(Class<JRPersistent> _Nonnull)clazz;
+- (void)registerClazzes:(NSArray<Class<JRPersistent>> * _Nonnull)clazzArray;
+- (NSArray<Class> * _Nonnull)registeredClazz;
+
 /**
  * 更新默认数据库的表（或者新建没有的表）
  * 更新的表需要在本类先注册
  */
 - (void)updateDefaultDB;
-- (void)updateDB:(FMDatabase *)db;
-@end
+- (void)updateDB:(FMDatabase * _Nonnull)db;
+
+
+/**
+ *  检查是否注册
+ *
+ *  @param clazz 类
+ *  @return 结果
+ */
+- (BOOL)isValidateClazz:(Class<JRPersistent> _Nonnull)clazz;
+
+/**
+ *  清理中间表的缓存辣鸡
+ *
+ *  @param db
+ */
+- (void)clearMidTableRubbishDataForDB:(FMDatabase * _Nonnull)db;
 ```
 
 JRDBMgr持有一个默认数据库（~/Documents/jrdb/jrdb.sqlite），任何不指定数据库的操作，都在此数据库进行操作。默认数据库可以自行设置。
-
-###### Method
-
-	- (void)registerClazzForUpdateTable:(Class<JRPersistent>)clazz;
-
-在JRDBMgr中注册的类，可以使用
-
-	-(void)updateDB:(FMDatabase *)db
-进行统一更新或者创建表。	
 
 ---
 
