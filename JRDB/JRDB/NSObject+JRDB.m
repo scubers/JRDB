@@ -111,6 +111,14 @@ const NSString *jr_configureKey = @"jr_configureKey";
     return objc_getAssociatedObject(self, NSSelectorFromString(SingleLinkColumn(key)));
 }
 
+- (void)jr_setParentLinkID:(NSString *)ID forKey:(NSString *)key {
+    objc_setAssociatedObject(self, NSSelectorFromString(ParentLinkColumn(key)), ID, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+- (NSString *)jr_parentLinkIDforKey:(NSString *)key {
+    return objc_getAssociatedObject(self, NSSelectorFromString(ParentLinkColumn(key)));
+}
+
 #pragma mark - save
 
 - (BOOL)jr_saveOnlyToDB:(FMDatabase *)db {

@@ -59,5 +59,7 @@
 
 @property (nonatomic, strong) NSMutableArray<Money *> *money;
 
+@property (nonatomic, strong) NSMutableArray<Person *> *children;
+
 
 @end

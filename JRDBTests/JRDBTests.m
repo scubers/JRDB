@@ -36,7 +36,7 @@
                                                ]];
     [JRDBMgr shareInstance].defaultDB = db;
     
-    [JRDBMgr shareInstance].debugMode = NO;
+//    [JRDBMgr shareInstance].debugMode = NO;
     
     NSLog(@"%@", [[JRDBMgr shareInstance] registeredClazz]);
 }
@@ -102,6 +102,14 @@
     }
     [p jr_save];
     
+}
+
+- (void)testOneToManyChildren {
+    Person *p = [self createPerson:0 name:nil];
+    for (int i = 0; i < 1; i++) {
+        [p.children addObject:[self createPerson:i + 1 name:nil]];
+    }
+    [p jr_save];
 }
 
 #pragma mark - test update

@@ -50,6 +50,7 @@
 + (NSDictionary<NSString *,Class<JRPersistent>> *)jr_oneToManyLinkedPropertyNames {
     return @{
              @"_money" : [Money class],
+             @"_children" : [Person class],
              };
 }
 
@@ -66,6 +67,12 @@
         _money = [NSMutableArray array];
     }
     return _money;
+}
+- (NSMutableArray<Person *> *)children {
+    if (!_children) {
+        _children = [NSMutableArray array];
+    }
+    return _children;
 }
 
 @end

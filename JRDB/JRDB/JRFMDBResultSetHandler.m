@@ -127,6 +127,14 @@ typedef enum {
             }
         }];
         
+        // 一对多 父子关系  AModel -> NSArray<AModel *> *_aModels; 存储父对象字段
+        [[clazz jr_oneToManyLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull subClazz, BOOL * _Nonnull stop) {
+            if (clazz == subClazz) {
+                NSString *parentID = [resultSet stringForColumn:ParentLinkColumn(key)];
+                [obj jr_setParentLinkID:parentID forKey:key];
+            }
+        }];
+        
         
         [list addObject:obj];
     }

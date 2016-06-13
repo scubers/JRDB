@@ -26,6 +26,10 @@
 - (void)jr_setSingleLinkID:(NSString * _Nullable)ID forKey:(NSString * _Nonnull)key;
 - (NSString * _Nullable)jr_singleLinkIDforKey:(NSString * _Nonnull)key;
 
+- (void)jr_setParentLinkID:(NSString * _Nullable)ID forKey:(NSString * _Nonnull)key;
+- (NSString * _Nullable)jr_parentLinkIDforKey:(NSString * _Nonnull)key;
+
+
 - (NSMutableDictionary<NSString *,JRDBDidFinishBlock> * _Nonnull)jr_finishBlocks;
 
 #pragma mark - save

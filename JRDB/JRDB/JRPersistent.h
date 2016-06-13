@@ -12,6 +12,7 @@
 #define EXE_BLOCK(block, ...) if(block){block(__VA_ARGS__);}
 
 #define SingleLinkColumn(property) [NSString stringWithFormat:@"_single_link_%@", property]
+#define ParentLinkColumn(property) [NSString stringWithFormat:@"_parent_link_%@", property]
 
 @protocol JRPersistent <JRReflectable>
 

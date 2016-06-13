@@ -47,6 +47,13 @@ void SqlLog(id sql) {
         [sql appendFormat:@", %@ TEXT ", SingleLinkColumn(key)];
     }];
     
+    // 一对多 父子关系  AModel -> NSArray<AModel *> *_aModels;
+    [[clazz jr_oneToManyLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull obj, BOOL * _Nonnull stop) {
+        if (clazz == obj) {
+            [sql appendFormat:@", %@ TEXT", ParentLinkColumn(key)];
+        }
+    }];
+    
     
     [sql appendString:@");"];
     SqlLog(sql);
@@ -66,21 +73,35 @@ void SqlLog(id sql) {
     // alter 'tableName' add 'name' 'type';
     for (NSString *name in dict.allKeys) {
         
+        // 如果是关键字'ID' 或 '_ID' 或是 jr_excludePropertyNames 则继续循环
+        NSString *type = [self typeWithEncodeName:dict[name]];
+        if (!type) { continue; }
+        
         if (![db columnExists:name inTableWithName:tableName] && ![excludes containsObject:name]) {
-            // 忽略不支持类型
-            NSString *type = [self typeWithEncodeName:dict[name]];
-            if (!type) { continue; }
-            
             [sqls addObject:[NSString stringWithFormat:@"alter table %@ add column %@ %@;", tableName, name, type]];
         }
     }
     
     // 检测一对一关系
     [[clazz jr_singleLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull obj, BOOL * _Nonnull stop) {
+        
+        if ([self isIgnoreProperty:key inClazz:clazz]) { return ;}
+        
         if (![db columnExists:SingleLinkColumn(key) inTableWithName:tableName]) {
             [sqls addObject:[NSString stringWithFormat:@"alter table %@ add column %@ TEXT;", tableName, SingleLinkColumn(key)]];
         }
     }];
+    
+    // 一对多 父子关系  AModel -> NSArray<AModel *> *_aModels;
+    [[clazz jr_oneToManyLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull obj, BOOL * _Nonnull stop) {
+        
+        if ([self isIgnoreProperty:key inClazz:clazz]) { return ;}
+        
+        if (clazz == obj && ![db columnExists:ParentLinkColumn(key) inTableWithName:tableName]) {
+            [sqls addObject:[NSString stringWithFormat:@"alter table %@ add column %@ TEXT;", tableName, ParentLinkColumn(key)]];
+        }
+    }];
+    
     
     SqlLog(sqls);
     return sqls;
@@ -134,6 +155,17 @@ void SqlLog(id sql) {
         [sql appendFormat:@" , %@", SingleLinkColumn(key)];
         [sql2 appendFormat:@" , ?"];
         [argsList addObject:[value ID] ? [value ID] : [NSNull null]];
+    }];
+    
+    // 一对多 父子关系  AModel -> NSArray<AModel *> *_aModels; 存储父对象字段
+    [[[obj class] jr_oneToManyLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull clazz, BOOL * _Nonnull stop) {
+        if ([obj class] == clazz) {
+            [sql appendFormat:@" , %@", ParentLinkColumn(key)];
+            [sql2 appendFormat:@" , ?"];
+            
+            NSString *parentID = [((NSObject *)obj) jr_parentLinkIDforKey:key];
+            [argsList addObject:parentID ? parentID : [NSNull null]];
+        }
     }];
     
     
@@ -200,6 +232,20 @@ void SqlLog(id sql) {
         [argsList addObject: [value ID] ? [value ID] : [NSNull null]];
     }];
     
+    // 一对多 父子关系  AModel -> NSArray<AModel *> *_aModels; 存储父对象字段
+    [[[obj class] jr_oneToManyLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull clazz, BOOL * _Nonnull stop) {
+        if ([obj class] == clazz) {
+            
+            // 是否在指定更新列中
+            if (columns.count && ![columns containsObject:key]) { return; }
+            // 检测字段是否存在
+            if (![db columnExists:key inTableWithName:tableName]) { return; }
+            
+            [sql appendFormat:@" %@ = ?,", ParentLinkColumn(key)];
+            NSString *parentID = [((NSObject *)obj) jr_parentLinkIDforKey:key];
+            [argsList addObject:parentID ? parentID : [NSNull null]];
+        }
+    }];
     
     
     if ([sql hasSuffix:@","]) {
