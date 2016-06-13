@@ -28,7 +28,7 @@
 - (void)setUp {
     [super setUp];
     [JRDBMgr defaultDB];
-    FMDatabase *db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/jmacmini/Desktop/test.sqlite"];
+    FMDatabase *db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/Jrwong/Desktop/test.sqlite"];
     [[JRDBMgr shareInstance] registerClazzes:@[
                                                [Person class],
                                                [Card class],
@@ -106,7 +106,7 @@
 
 - (void)testOneToManyChildren {
     Person *p = [self createPerson:0 name:nil];
-    for (int i = 0; i < 1; i++) {
+    for (int i = 0; i < 10; i++) {
         [p.children addObject:[self createPerson:i + 1 name:nil]];
     }
     [p jr_save];

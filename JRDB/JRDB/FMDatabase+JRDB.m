@@ -17,6 +17,7 @@
 #import "NSObject+JRDB.h"
 #import "JRUtils.h"
 #import "JRMiddleTable.h"
+#import "JRSql.h"
 
 
 #define AssertRegisteredClazz(clazz) NSAssert([[JRDBMgr shareInstance] isValidateClazz:clazz], @"class: %@ should be registered in JRDBMgr", clazz)
@@ -84,7 +85,7 @@ static NSString * const queuekey = @"queuekey";
     AssertRegisteredClazz(clazz);
     
     if (![self jr_checkExistsTable4Clazz:clazz]) {
-        return [self executeUpdate:[JRSqlGenerator createTableSql4Clazz:clazz]];
+        return [self executeUpdate:[JRSqlGenerator createTableSql4Clazz:clazz].sqlString];
     }
     return YES;
 }
@@ -100,7 +101,7 @@ static NSString * const queuekey = @"queuekey";
 - (BOOL)jr_truncateTable4Clazz:(Class<JRPersistent>)clazz {
     AssertRegisteredClazz(clazz);
     if ([self jr_checkExistsTable4Clazz:clazz]) {
-        [self executeUpdate:[JRSqlGenerator dropTableSql4Clazz:clazz]];
+        [self executeUpdate:[JRSqlGenerator dropTableSql4Clazz:clazz].sqlString];
     }
     return [self jr_createTable4Clazz:clazz];
 }
@@ -137,7 +138,7 @@ static NSString * const queuekey = @"queuekey";
 - (BOOL)jr_dropTable4Clazz:(Class<JRPersistent>)clazz {
     AssertRegisteredClazz(clazz);
     if ([self jr_checkExistsTable4Clazz:clazz]) {
-        return [self executeUpdate:[JRSqlGenerator dropTableSql4Clazz:clazz]];
+        return [self executeUpdate:[JRSqlGenerator dropTableSql4Clazz:clazz].sqlString];
     }
     return YES;
 }
@@ -284,11 +285,10 @@ static NSString * const queuekey = @"queuekey";
         NSAssert(one.ID == nil, @"The obj:%@ to be saved should not hold a primary key", one);
     }
     
-    NSArray *args;
-    NSString *sql = [JRSqlGenerator sql4Insert:one args:&args toDB:self];
+    JRSql *sql = [JRSqlGenerator sql4Insert:one toDB:self];
     [one setID:[JRUtils uuid]];
-    args = [@[one.ID] arrayByAddingObjectsFromArray:args];
-    BOOL ret = [self executeUpdate:sql withArgumentsInArray:args];
+    [sql.args insertObject:one.ID atIndex:0];
+    BOOL ret = [self jr_executeUpdate:sql];
     
     if (ret) {
         // 保存完，执行block
@@ -398,11 +398,10 @@ static NSString * const queuekey = @"queuekey";
         updateObj = one;
     }
     
-    NSArray *args;
-    NSString *sql = [JRSqlGenerator sql4Update:updateObj columns:columns args:&args toDB:self];
-    args = [args arrayByAddingObject:[updateObj jr_primaryKeyValue]];
-    
-    BOOL ret = [self executeUpdate:sql withArgumentsInArray:args];
+    JRSql *sql = [JRSqlGenerator sql4Update:updateObj columns:columns toDB:self];
+    [sql.args addObject:[updateObj jr_primaryKeyValue]];
+
+    BOOL ret = [self jr_executeUpdate:sql];
     if (ret) {
         // 保存完，执行block
         if (ret) [one jr_executeFinishBlocks];
@@ -482,8 +481,9 @@ static NSString * const queuekey = @"queuekey";
         return NO;
     }
     
-    NSString *sql = [JRSqlGenerator sql4Delete:one];
-    BOOL ret = [self executeUpdate:sql withArgumentsInArray:@[[one jr_primaryKeyValue]]];
+    JRSql *sql = [JRSqlGenerator sql4Delete:one];
+    [sql.args addObject:[one jr_primaryKeyValue]];
+    BOOL ret = [self jr_executeUpdate:sql];
     if (ret) {
         // 保存完，执行block
         [one jr_executeFinishBlocks];
@@ -573,16 +573,18 @@ static NSString * const queuekey = @"queuekey";
 - (id<JRPersistent>)jr_getByID:(NSString *)ID clazz:(Class<JRPersistent>)clazz {
     AssertRegisteredClazz(clazz);
     NSAssert(ID, @"id should not be nil");
-    NSString *sql = [JRSqlGenerator sql4GetByIDWithClazz:clazz];
-    FMResultSet *ret = [self executeQuery:sql withArgumentsInArray:@[ID]];
+    JRSql *sql = [JRSqlGenerator sql4GetByIDWithClazz:clazz];
+    [sql.args addObject:ID];
+    FMResultSet *ret = [self jr_executeQuery:sql];
     return [JRFMDBResultSetHandler handleResultSet:ret forClazz:clazz].firstObject;
 }
 
 - (id<JRPersistent>)jr_getByPrimaryKey:(id)primaryKey clazz:(Class<JRPersistent>)clazz {
     AssertRegisteredClazz(clazz);
     NSAssert(primaryKey, @"id should be nil");
-    NSString *sql = [JRSqlGenerator sql4GetByPrimaryKeyWithClazz:clazz];
-    FMResultSet *ret = [self executeQuery:sql withArgumentsInArray:@[primaryKey]];
+    JRSql *sql = [JRSqlGenerator sql4GetByPrimaryKeyWithClazz:clazz];
+    [sql.args addObject:primaryKey];
+    FMResultSet *ret = [self jr_executeQuery:sql];
     return [JRFMDBResultSetHandler handleResultSet:ret forClazz:clazz].firstObject;
 }
 
@@ -592,8 +594,8 @@ static NSString * const queuekey = @"queuekey";
         NSLog(@"table %@ doesn't exists", clazz);
         return @[];
     }
-    NSString *sql = [JRSqlGenerator sql4FindAll:clazz orderby:orderby isDesc:isDesc];
-    FMResultSet *ret = [self executeQuery:sql];
+    JRSql *sql = [JRSqlGenerator sql4FindAll:clazz orderby:orderby isDesc:isDesc];
+    FMResultSet *ret = [self jr_executeQuery:sql];
     return [JRFMDBResultSetHandler handleResultSet:ret forClazz:clazz];
 }
 
@@ -603,9 +605,8 @@ static NSString * const queuekey = @"queuekey";
         NSLog(@"table %@ doesn't exists", clazz);
         return @[];
     }
-    NSArray *args = nil;
-    NSString *sql = [JRSqlGenerator sql4FindByConditions:conditions clazz:clazz groupBy:groupBy orderBy:orderBy limit:limit isDesc:isDesc args:&args];
-    FMResultSet *ret = [self executeQuery:sql withArgumentsInArray:args];
+    JRSql *sql = [JRSqlGenerator sql4FindByConditions:conditions clazz:clazz groupBy:groupBy orderBy:orderBy limit:limit isDesc:isDesc];
+    FMResultSet *ret = [self jr_executeQuery:sql];
     return [JRFMDBResultSetHandler handleResultSet:ret forClazz:clazz];
 }
 
@@ -735,6 +736,14 @@ static NSString * const queuekey = @"queuekey";
 - (BOOL)jr_checkExistsTable4Clazz:(Class<JRPersistent>)clazz {
     AssertRegisteredClazz(clazz);
     return [self tableExists:[clazz shortClazzName]];
+}
+
+- (FMResultSet *)jr_executeQuery:(JRSql *)sql {
+    return [self executeQuery:sql.sqlString withArgumentsInArray:sql.args];
+}
+
+- (BOOL)jr_executeUpdate:(JRSql *)sql {
+    return [self executeUpdate:sql.sqlString withArgumentsInArray:sql.args];
 }
 
 @end

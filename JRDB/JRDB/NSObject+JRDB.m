@@ -15,17 +15,17 @@
 #import "JRColumnSchema.h"
 
 
-const NSString *JRDB_IDKEY = @"JRDB_IDKEY";
-
-const NSString *jr_configureKey = @"jr_configureKey";
+const NSString *JRDB_IDKEY                = @"JRDB_IDKEY";
+const NSString *jr_configureKey           = @"jr_configureKey";
+const NSString *jr_activatedPropertiesKey = @"jr_activatedPropertiesKey";
 
 @implementation NSObject (JRDB)
 
 + (void)jr_configure {
     NSAssert(![objc_getAssociatedObject(self, _cmd) boolValue], @"This class's -[jr_configure] has been executed");
-    
-    // TODO: configure something
-    
+    // TODO: configure something like - jr_activatedProperties
+    NSArray *activatedProp = [JRReflectUtil activitedProperties4Clazz:self];
+    objc_setAssociatedObject(self, &jr_activatedPropertiesKey, activatedProp, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     objc_setAssociatedObject(self, _cmd, @(YES), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
@@ -94,11 +94,8 @@ const NSString *jr_configureKey = @"jr_configureKey";
     return blocks;
 }
 
-- (BOOL)jr_objCanBeSave {
-    if ([[self class] jr_primaryKey]) {
-        return [self jr_primaryKeyValue];
-    }
-    return ![self ID];
++ (NSArray<JRActivatedProperty *> *)jr_activatedProperties {
+    return objc_getAssociatedObject(self, &jr_activatedPropertiesKey);
 }
 
 #pragma mark - convinence method

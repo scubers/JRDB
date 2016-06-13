@@ -12,7 +12,7 @@
 
 @import FMDB;
 
-@class JRQueryCondition;
+@class JRQueryCondition, JRSql;
 
 @interface FMDatabase (JRDB)
 
@@ -324,5 +324,8 @@
 - (BOOL)jr_checkExistsTable4Clazz:(Class<JRPersistent> _Nonnull)clazz;
 
 
+
+- (BOOL)jr_executeUpdate:(JRSql * _Nonnull)sql;
+- (FMResultSet * _Nonnull)jr_executeQuery:(JRSql * _Nonnull)sql;
 
 @end
