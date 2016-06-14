@@ -19,13 +19,13 @@
 - (void)setUp {
     [super setUp];
     [JRDBMgr defaultDB];
-//    FMDatabase *db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/jmacmini/Desktop/test.sqlite"];
+    FMDatabase *db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/jmacmini/Desktop/test.sqlite"];
     [[JRDBMgr shareInstance] registerClazzes:@[
                                                [Person class],
                                                [Card class],
                                                [Money class],
                                                ]];
-//    [JRDBMgr shareInstance].defaultDB = db;
+    [JRDBMgr shareInstance].defaultDB = db;
     
     NSLog(@"%@", [[JRDBMgr shareInstance] registeredClazz]);
 }

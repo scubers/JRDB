@@ -56,7 +56,7 @@
     // 一对一字段
     [[clazz jr_singleLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull obj, BOOL * _Nonnull stop) {
         JRActivatedProperty *p = [JRActivatedProperty property:key relationShip:JRRelationOneToOne];
-        p.dataBaseType = [self dataBaseTypeWithEncodeName:[NSString stringWithUTF8String:@encode(NSString *)]];
+        p.dataBaseType = [self dataBaseTypeWithEncodeName:[NSString stringWithUTF8String:@encode(NSString)]];
         p.clazz = obj;
         p.dataBaseName = SingleLinkColumn(key);
         [properties addObject:p];
@@ -65,9 +65,9 @@
     [[clazz jr_oneToManyLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull subClazz, BOOL * _Nonnull stop) {
         JRActivatedProperty *p = [JRActivatedProperty property:key
                                                   relationShip:clazz == subClazz ? JRRelationChildren : JRRelationOneToMany];
-        p.dataBaseType = [self dataBaseTypeWithEncodeName:[NSString stringWithUTF8String:@encode(NSString *)]];
+        p.dataBaseType = [self dataBaseTypeWithEncodeName:[NSString stringWithUTF8String:@encode(NSString)]];
         p.clazz = subClazz;
-        if (clazz != subClazz) {
+        if (clazz == subClazz) {
             p.dataBaseName = ParentLinkColumn(key);
         }
         [properties addObject:p];

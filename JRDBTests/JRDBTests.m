@@ -28,7 +28,7 @@
 - (void)setUp {
     [super setUp];
     [JRDBMgr defaultDB];
-    FMDatabase *db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/Jrwong/Desktop/test.sqlite"];
+    FMDatabase *db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/jmacmini/Desktop/test.sqlite"];
     [[JRDBMgr shareInstance] registerClazzes:@[
                                                [Person class],
                                                [Card class],
@@ -36,7 +36,7 @@
                                                ]];
     [JRDBMgr shareInstance].defaultDB = db;
     
-//    [JRDBMgr shareInstance].debugMode = NO;
+    [JRDBMgr shareInstance].debugMode = NO;
     
     NSLog(@"%@", [[JRDBMgr shareInstance] registeredClazz]);
 }
@@ -97,9 +97,18 @@
 
 - (void)testOneToManySave {
     Person *p = [self createPerson:1 name:nil];
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 10000; i++) {
         [p.money addObject:[self createMoney:i]];
     }
+    Person *p1 = [self createPerson:1 name:nil];
+    for (int i = 0; i < 10000; i++) {
+        [p1.money addObject:[self createMoney:i]];
+    }
+    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        [p1 jr_saveWithComplete:^(BOOL success) {
+            NSLog(@"===");
+        }];
+    });
     [p jr_save];
     
 }

@@ -20,4 +20,15 @@
     return property;
 }
 
+- (NSString *)description {
+    return [NSString stringWithFormat:@"%@: name:%@, databaseName:%@, databaseType:%@, relation:%d, clazz:%@"
+            , @"JRActivatedProperty"
+            , self.name
+            , self.dataBaseName
+            , self.dataBaseType
+            , self.relateionShip
+            , self.clazz
+            ];
+}
+
 @end

@@ -65,75 +65,27 @@ void SqlLog(id sql) {
     if (![db tableExists:tableName]) { return @[[self createTableSql4Clazz:clazz]]; }
 
     NSArray<JRActivatedProperty *> *ap = [clazz jr_activatedProperties];
-
-    NSDictionary *dict   = [JRReflectUtil propNameAndEncode4Clazz:clazz];
-    NSArray *excludes    = [clazz jr_excludePropertyNames];
     NSMutableArray *sqls = [NSMutableArray array];
 
     [ap enumerateObjectsUsingBlock:^(JRActivatedProperty * _Nonnull prop, NSUInteger idx, BOOL * _Nonnull stop) {
         // 如果是关键字'ID' 或 '_ID' 则继续循环
         if (isID(prop.name)) {return;}
-
         if ([db columnExists:prop.dataBaseName inTableWithName:tableName]) { return; }
 
         JRSql *jrsql;
         switch (prop.relateionShip) {
             case JRRelationNormal:
+            case JRRelationOneToOne:
+            case JRRelationChildren:
             {
                 jrsql = [JRSql sql:[NSString stringWithFormat:@"alter table %@ add column %@ %@;", tableName, prop.dataBaseName, prop.dataBaseType] args:nil];
                 [sqls addObject:jrsql];
                 break;
             }
-            case JRRelationOneToOne:
-            {
-                break;
-            }
-            case JRRelationChildren:
-            {
-                break;
-            }
-            default:
-                break;
-        }
-
-    }];
-
-    // alter 'tableName' add 'name' 'type';
-    for (NSString *name in dict.allKeys) {
-
-        // 如果是关键字'ID' 或 '_ID' 或是 jr_excludePropertyNames 则继续循环
-        NSString *type = [self typeWithEncodeName:dict[name]];
-        if (!type) { continue; }
-        
-        if (![db columnExists:name inTableWithName:tableName] && ![excludes containsObject:name]) {
-
-            JRSql *jrsql = [JRSql sql:[NSString stringWithFormat:@"alter table %@ add column %@ %@;", tableName, name, type] args:nil];
-            [sqls addObject:jrsql];
-        }
-    }
-    
-    // 检测一对一关系
-    [[clazz jr_singleLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull obj, BOOL * _Nonnull stop) {
-        
-        if ([self isIgnoreProperty:key inClazz:clazz]) { return ;}
-        
-        if (![db columnExists:SingleLinkColumn(key) inTableWithName:tableName]) {
-            JRSql *jrsql = [JRSql sql:[NSString stringWithFormat:@"alter table %@ add column %@ TEXT;", tableName, SingleLinkColumn(key)] args:nil];
-            [sqls addObject:jrsql];
+            default: return;
         }
     }];
-    
-    // 一对多 父子关系  AModel -> NSArray<AModel *> *_aModels;
-    [[clazz jr_oneToManyLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull obj, BOOL * _Nonnull stop) {
-        
-        if ([self isIgnoreProperty:key inClazz:clazz]) { return ;}
-        
-        if (clazz == obj && ![db columnExists:ParentLinkColumn(key) inTableWithName:tableName]) {
-            JRSql *jrsql = [JRSql sql:[NSString stringWithFormat:@"alter table %@ add column %@ TEXT;", tableName, ParentLinkColumn(key)] args:nil];
-            [sqls addObject:jrsql];
-        }
-    }];
-    
+
     
     SqlLog(sqls);
     return sqls;
@@ -151,55 +103,52 @@ void SqlLog(id sql) {
 + (JRSql *)sql4Insert:(id<JRPersistent>)obj toDB:(FMDatabase * _Nonnull)db {
     
     NSString *tableName = [[obj class] shortClazzName];
-    
+    NSArray<JRActivatedProperty *> *ap = [JRReflectUtil activitedProperties4Clazz:[obj class]];
     NSMutableArray *argsList = [NSMutableArray array];
-    NSDictionary *dict       = [JRReflectUtil propNameAndEncode4Clazz:[obj class]];
     NSMutableString *sql     = [NSMutableString string];
     NSMutableString *sql2    = [NSMutableString string];
     
     [sql appendFormat:@" insert into %@ ('_ID' ", tableName];
     [sql2 appendFormat:@" values ( ? "];
     
-    for (NSString *name in dict.allKeys) {
-        // 如果是关键字'ID' 或 '_ID' 或是 jr_excludePropertyNames 则继续循环
-        if ([self isIgnoreProperty:name inClazz:[obj class]]) { continue; }
-        
-        // 检测字段是否存在
-        if (![db columnExists:name inTableWithName:tableName]) { continue; }
-        
-        // 检测是否支持字段
-        if (![self typeWithEncodeName:dict[name]]) { continue;}
+    [ap enumerateObjectsUsingBlock:^(JRActivatedProperty * _Nonnull prop, NSUInteger idx, BOOL * _Nonnull stop) {
+        // 如果是关键字'ID' 或 '_ID' 则继续循环
+        if (isID(prop.name)) {return;}
+        if (![db columnExists:prop.dataBaseName inTableWithName:tableName]) { return; }
         
         // 拼接语句
-        [sql appendFormat:@" , %@", name];
+        [sql appendFormat:@" , %@", prop.dataBaseName];
         [sql2 appendFormat:@" , ?"];
-
-        // 空值转换
-        id value = [(NSObject *)obj valueForKey:name];
-        if (!value) { value = [NSNull null]; }
         
+        id value;
+        switch (prop.relateionShip) {
+            case JRRelationNormal:
+            {
+                value = [(NSObject *)obj valueForKey:prop.name];
+                break;
+            }
+            case JRRelationOneToOne:
+            {
+                NSObject<JRPersistent> *sub = [((NSObject *)obj) valueForKey:prop.name];
+                value = [sub ID];
+                break;
+            }
+            case JRRelationChildren:
+            {
+                NSString *parentID = [((NSObject *)obj) jr_parentLinkIDforKey:prop.name];
+                value = parentID;
+                break;
+            }
+            default: return;
+        }
+        
+        // 空值转换
+        if (!value) { value = [NSNull null]; }
         // 添加参数
         [argsList addObject:value];
-    }
-    
-    // 检测一对一字段
-    [[[obj class] jr_singleLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull clazz, BOOL * _Nonnull stop) {
-        NSObject<JRPersistent> *value = [((NSObject *)obj) valueForKey:key];
-        [sql appendFormat:@" , %@", SingleLinkColumn(key)];
-        [sql2 appendFormat:@" , ?"];
-        [argsList addObject:[value ID] ? [value ID] : [NSNull null]];
+        
     }];
     
-    // 一对多 父子关系  AModel -> NSArray<AModel *> *_aModels; 存储父对象字段
-    [[[obj class] jr_oneToManyLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull clazz, BOOL * _Nonnull stop) {
-        if ([obj class] == clazz) {
-            [sql appendFormat:@" , %@", ParentLinkColumn(key)];
-            [sql2 appendFormat:@" , ?"];
-            
-            NSString *parentID = [((NSObject *)obj) jr_parentLinkIDforKey:key];
-            [argsList addObject:parentID ? parentID : [NSNull null]];
-        }
-    }];
     
     
     [sql appendString:@")"];
@@ -230,58 +179,50 @@ void SqlLog(id sql) {
 // update 'tableName' set name = 'abc' where xx = xx
 + (JRSql *)sql4Update:(id<JRPersistent>)obj columns:(NSArray<NSString *> *)columns toDB:(FMDatabase * _Nonnull)db {
     
+    NSArray<JRActivatedProperty *> *ap = [JRReflectUtil activitedProperties4Clazz:[obj class]];
+    
     NSString *tableName      = [[obj class] shortClazzName];
     NSMutableArray *argsList = [NSMutableArray array];
     NSMutableString *sql     = [NSMutableString string];
-    NSDictionary *dict       = [JRReflectUtil propNameAndEncode4Clazz:[obj class]];
     
     [sql appendFormat:@" update %@ set ", tableName];
     
-    for (NSString *name in dict.allKeys) {
-        
-        if ([self isIgnoreProperty:name inClazz:[obj class]]) { continue; }
-        
+    [ap enumerateObjectsUsingBlock:^(JRActivatedProperty * _Nonnull prop, NSUInteger idx, BOOL * _Nonnull stop) {
+        // 如果是关键字'ID' 或 '_ID' 则继续循环
+        if (isID(prop.name)) {return;}
         // 是否在指定更新列中
-        if (columns.count && ![columns containsObject:name]) { continue; }
+        if (columns.count && ![columns containsObject:prop.name]) { return; }
+        if (![db columnExists:prop.dataBaseName inTableWithName:tableName]) { return; }
         
-        // 检测字段是否存在
-        if (![db columnExists:name inTableWithName:tableName]) { continue; }
+        [sql appendFormat:@" %@ = ?,", prop.dataBaseName];
         
-        // 检测是否支持字段
-        if (![self typeWithEncodeName:dict[name]]) { continue; }
-        
-        [sql appendFormat:@" %@ = ?,", name];
-        
-        // 空值转换
-        id value = [(NSObject *)obj valueForKey:name];
-        if (!value) { value = [NSNull null]; }
-        
-        [argsList addObject:value];
-    }
-    
-    // 检测一对一字段
-    [[[obj class] jr_singleLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull clazz, BOOL * _Nonnull stop) {
-        
-        id<JRPersistent> value = [((NSObject *)obj) valueForKey:key];
-        [((NSObject *)obj) jr_setSingleLinkID:[value ID] forKey:key];
-        
-        [sql appendFormat:@" %@ = ?,", SingleLinkColumn(key)];
-        [argsList addObject: [value ID] ? [value ID] : [NSNull null]];
-    }];
-    
-    // 一对多 父子关系  AModel -> NSArray<AModel *> *_aModels; 存储父对象字段
-    [[[obj class] jr_oneToManyLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull clazz, BOOL * _Nonnull stop) {
-        if ([obj class] == clazz) {
-            
-            // 是否在指定更新列中
-            if (columns.count && ![columns containsObject:key]) { return; }
-            // 检测字段是否存在
-            if (![db columnExists:key inTableWithName:tableName]) { return; }
-            
-            [sql appendFormat:@" %@ = ?,", ParentLinkColumn(key)];
-            NSString *parentID = [((NSObject *)obj) jr_parentLinkIDforKey:key];
-            [argsList addObject:parentID ? parentID : [NSNull null]];
+        id value;
+        switch (prop.relateionShip) {
+            case JRRelationNormal:
+            {
+                value = [(NSObject *)obj valueForKey:prop.name];
+                break;
+            }
+            case JRRelationOneToOne:
+            {
+                NSObject<JRPersistent> *sub = [((NSObject *)obj) valueForKey:prop.name];
+                [((NSObject *)obj) jr_setSingleLinkID:[sub ID] forKey:prop.name];
+                value = [sub ID];
+                break;
+            }
+            case JRRelationChildren:
+            {
+                NSString *parentID = [((NSObject *)obj) jr_parentLinkIDforKey:prop.name];
+                value = parentID;
+                break;
+            }
+            default: return;
         }
+        // 空值转换
+        if (!value) { value = [NSNull null]; }
+        // 添加参数
+        [argsList addObject:value];
+
     }];
     
     
@@ -358,6 +299,24 @@ void SqlLog(id sql) {
 
 }
 
+
+#pragma mark - convenience
+
++ (JRSql *)sql4CountByPrimaryKey:(id)pk clazz:(Class<JRPersistent>)clazz {
+    NSString *sql = [NSString stringWithFormat:@"select count(1) from %@ where %@ = ?", [clazz shortClazzName], [clazz jr_primaryKey]];
+    JRSql *jrsql = [JRSql sql:sql args:@[pk]];
+    SqlLog(jrsql);
+    return jrsql;
+}
+
++ (JRSql *)sql4CountByID:(NSString *)ID clazz:(Class<JRPersistent>)clazz {
+    NSString *sql = [NSString stringWithFormat:@"select count(1) from %@ where _ID = ?", [clazz shortClazzName]];
+    JRSql *jrsql = [JRSql sql:sql args:@[ID]];
+    SqlLog(jrsql);
+    return jrsql;
+}
+
+#pragma mark - private method
 + (NSString *)typeWithEncodeName:(NSString *)encode {
     if ([encode isEqualToString:[NSString stringWithUTF8String:@encode(int)]]
         ||[encode isEqualToString:[NSString stringWithUTF8String:@encode(unsigned int)]]
@@ -386,10 +345,11 @@ void SqlLog(id sql) {
     return nil;
 }
 
-#pragma mark - private method
 + (BOOL)isIgnoreProperty:(NSString *)property inClazz:(Class<JRPersistent>)clazz {
     NSArray *excludes = [clazz jr_excludePropertyNames];
     return [excludes containsObject:property] || isID(property);
 }
+
+
 
 @end

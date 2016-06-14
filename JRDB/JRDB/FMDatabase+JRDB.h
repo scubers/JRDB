@@ -328,4 +328,7 @@
 - (BOOL)jr_executeUpdate:(JRSql * _Nonnull)sql;
 - (FMResultSet * _Nonnull)jr_executeQuery:(JRSql * _Nonnull)sql;
 
+- (long)jr_count4PrimaryKey:(id _Nonnull)pk clazz:(Class<JRPersistent> _Nonnull)clazz;
+- (long)jr_count4ID:(NSString * _Nonnull)ID clazz:(Class<JRPersistent> _Nonnull)clazz;
+
 @end

@@ -25,6 +25,8 @@ typedef enum {
 } DBType;
 
 @interface JRSqlGenerator : NSObject
+
+#pragma mark - table operation
 /**
  *  建表
  *
@@ -51,12 +53,14 @@ typedef enum {
  */
 + (NSArray<JRSql *> * _Nonnull)updateTableSql4Clazz:(Class<JRPersistent> _Nonnull)clazz inDB:(FMDatabase * _Nonnull)db;
 
+#pragma mark - insert
 
 /**
  *  返回占位符的sql insert into tablename values (name= ? , name2 = ?,)
  */
 + (JRSql * _Nonnull)sql4Insert:(id<JRPersistent> _Nonnull)obj toDB:(FMDatabase * _Nonnull)db;
 
+#pragma mark - update
 /**
  *  返回占位符的sql update tablename set name = ?, name2 = ? where ID = ?
  *  columns 需要更新的列，传nil则全部更新
@@ -66,6 +70,7 @@ typedef enum {
                           toDB:(FMDatabase * _Nonnull)db;
 
 
+#pragma mark - delete
 /**
  *  返回占位符的sql delete from tablename where ID = ?
  */
@@ -77,6 +82,7 @@ typedef enum {
 + (JRSql * _Nonnull)sql4DeleteAll:(Class<JRPersistent> _Nonnull)clazz;
 
 
+#pragma mark - query
 /**
  *  根据ID （数据库主键）获取对象
  *
@@ -121,5 +127,9 @@ typedef enum {
                                  orderBy:(NSString * _Nullable)orderBy
                                    limit:(NSString * _Nullable)limit
                                   isDesc:(BOOL)isDesc;
+#pragma mark - conenience
+
++ (JRSql * _Nonnull)sql4CountByPrimaryKey:(id _Nonnull)pk clazz:(Class<JRPersistent> _Nonnull)clazz;
++ (JRSql * _Nonnull)sql4CountByID:(NSString * _Nonnull)ID clazz:(Class<JRPersistent> _Nonnull)clazz;
 
 @end

@@ -85,7 +85,7 @@ static NSString * const queuekey = @"queuekey";
     AssertRegisteredClazz(clazz);
     
     if (![self jr_checkExistsTable4Clazz:clazz]) {
-        return [self executeUpdate:[JRSqlGenerator createTableSql4Clazz:clazz].sqlString];
+        return [self jr_executeUpdate:[JRSqlGenerator createTableSql4Clazz:clazz]];
     }
     return YES;
 }
@@ -101,7 +101,7 @@ static NSString * const queuekey = @"queuekey";
 - (BOOL)jr_truncateTable4Clazz:(Class<JRPersistent>)clazz {
     AssertRegisteredClazz(clazz);
     if ([self jr_checkExistsTable4Clazz:clazz]) {
-        [self executeUpdate:[JRSqlGenerator dropTableSql4Clazz:clazz].sqlString];
+        [self jr_executeUpdate:[JRSqlGenerator dropTableSql4Clazz:clazz]];
     }
     return [self jr_createTable4Clazz:clazz];
 }
@@ -118,8 +118,8 @@ static NSString * const queuekey = @"queuekey";
     AssertRegisteredClazz(clazz);
     NSArray *sqls = [JRSqlGenerator updateTableSql4Clazz:clazz inDB:self];
     BOOL flag = YES;
-    for (NSString *sql in sqls) {
-        flag = [self executeUpdate:sql];
+    for (JRSql *sql in sqls) {
+        flag = [self jr_executeUpdate:sql];
         if (!flag) {
             break;
         }
@@ -279,10 +279,10 @@ static NSString * const queuekey = @"queuekey";
     AssertRegisteredClazz([one class]);
     if ([[one class] jr_customPrimarykey]) { // 自定义主键
         NSAssert([one jr_customPrimarykeyValue] != nil, @"custom Primary key should not be nil");
-        NSObject *old = (NSObject *)[self jr_getByPrimaryKey:[one jr_customPrimarykeyValue] clazz:[one class]];
-        NSAssert(!old, @"primary key is exists");
+//        NSObject *old = (NSObject *)[self jr_getByPrimaryKey:[one jr_customPrimarykeyValue] clazz:[one class]];
+        NSAssert(![self jr_count4PrimaryKey:[one jr_customPrimarykeyValue] clazz:[one class]], @"primary key is exists");
     } else { // 默认主键
-        NSAssert(one.ID == nil, @"The obj:%@ to be saved should not hold a primary key", one);
+        NSAssert(one.ID == nil, @"The obj:%@ to be saved should not hold a ID", one);
     }
     
     JRSql *sql = [JRSqlGenerator sql4Insert:one toDB:self];
@@ -647,7 +647,7 @@ static NSString * const queuekey = @"queuekey";
     [[[obj class] jr_oneToManyLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull clazz, BOOL * _Nonnull stop) {
         
         NSMutableArray *subList = [NSMutableArray array];
-        if ([obj class] == clazz) {
+        if ([obj class] == clazz) { // 父子关系 同个类
             NSString *condition = [NSString stringWithFormat:@"%@ = ?", ParentLinkColumn(key)];
             NSArray *array = [self jr_findByConditions:@[
                                                          [JRQueryCondition condition:condition args:@[[obj ID]] type:JRQueryConditionTypeAnd],
@@ -746,6 +746,23 @@ static NSString * const queuekey = @"queuekey";
     return [self executeUpdate:sql.sqlString withArgumentsInArray:sql.args];
 }
 
+- (long)jr_count4PrimaryKey:(id)pk clazz:(Class<JRPersistent>)clazz {
+    NSAssert(pk, @"primary key should not be nil");
+    FMResultSet *ret = [self jr_executeQuery:[JRSqlGenerator sql4CountByPrimaryKey:pk clazz:clazz]];
+    while ([ret next]) {
+        return [ret longForColumnIndex:0];
+    }
+    return 0;
+}
+
+- (long)jr_count4ID:(NSString *)ID clazz:(Class<JRPersistent>)clazz {
+    NSAssert(ID, @"ID should not be nil");
+    FMResultSet *ret = [self jr_executeQuery:[JRSqlGenerator sql4CountByID:ID clazz:clazz]];
+    while ([ret next]) {
+        return [ret longForColumnIndex:0];
+    }
+    return 0;
+}
 @end
 
 
