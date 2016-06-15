@@ -29,7 +29,7 @@
 //    [self test];
 //    [self test2];
 //    [self test3];
-    [self testOneToManySave];
+//    [self testOneToManySave];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
