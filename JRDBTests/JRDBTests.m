@@ -97,11 +97,28 @@
 
 - (void)testOneToManySave {
     Person *p = [self createPerson:1 name:nil];
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 10000; i++) {
         [p.money addObject:[self createMoney:i]];
     }
+    Person *p1 = [self createPerson:1 name:nil];
+    for (int i = 0; i < 10000; i++) {
+        [p1.money addObject:[self createMoney:i]];
+    }
+    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        [p1 jr_saveWithComplete:^(BOOL success) {
+            NSLog(@"===");
+        }];
+    });
     [p jr_save];
     
+}
+
+- (void)testOneToManyChildren {
+    Person *p = [self createPerson:0 name:nil];
+    for (int i = 0; i < 10; i++) {
+        [p.children addObject:[self createPerson:i + 1 name:nil]];
+    }
+    [p jr_save];
 }
 
 #pragma mark - test update

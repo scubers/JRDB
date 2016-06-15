@@ -50,22 +50,29 @@
 + (NSDictionary<NSString *,Class<JRPersistent>> *)jr_oneToManyLinkedPropertyNames {
     return @{
              @"_money" : [Money class],
+             @"_children" : [Person class],
              };
 }
 
-+ (NSString *)jr_primaryKey {
-    return @"_i_string";
-}
-
-- (id)jr_primaryKeyValue {
-    return self.i_string;
-}
+//+ (NSString *)jr_primaryKey {
+//    return @"_i_string";
+//}
+//
+//- (id)jr_primaryKeyValue {
+//    return self.i_string;
+//}
 
 - (NSMutableArray<Money *> *)money {
     if (!_money) {
         _money = [NSMutableArray array];
     }
     return _money;
+}
+- (NSMutableArray<Person *> *)children {
+    if (!_children) {
+        _children = [NSMutableArray array];
+    }
+    return _children;
 }
 
 @end

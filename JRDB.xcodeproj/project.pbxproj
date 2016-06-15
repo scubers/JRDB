@@ -28,6 +28,8 @@
 		5AD63F211CE1BE540044ACE6 /* JRReflectUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AD63F201CE1BE540044ACE6 /* JRReflectUtil.m */; };
 		5AD63F241CE1C2480044ACE6 /* Person.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AD63F231CE1C2480044ACE6 /* Person.m */; };
 		5AD63F271CE1C40F0044ACE6 /* AViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AD63F261CE1C40F0044ACE6 /* AViewController.swift */; };
+		A80015F41D0EE499000EA41A /* JRSql.m in Sources */ = {isa = PBXBuildFile; fileRef = A80015F31D0EE499000EA41A /* JRSql.m */; };
+		A80015F71D0EEC29000EA41A /* JRActivatedProperty.m in Sources */ = {isa = PBXBuildFile; fileRef = A80015F61D0EEC29000EA41A /* JRActivatedProperty.m */; };
 		A8A1B2251D033C8C00886403 /* NSObject+Reflect.m in Sources */ = {isa = PBXBuildFile; fileRef = A8A1B2241D033C8C00886403 /* NSObject+Reflect.m */; };
 		A8A1B2281D033CDC00886403 /* OBJCProperty.m in Sources */ = {isa = PBXBuildFile; fileRef = A8A1B2271D033CDC00886403 /* OBJCProperty.m */; };
 		A8A1B22F1D03D47B00886403 /* OBJCMethod.m in Sources */ = {isa = PBXBuildFile; fileRef = A8A1B22E1D03D47B00886403 /* OBJCMethod.m */; };
@@ -98,6 +100,10 @@
 		5AD63F231CE1C2480044ACE6 /* Person.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Person.m; sourceTree = "<group>"; };
 		5AD63F251CE1C40F0044ACE6 /* JRDB-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "JRDB-Bridging-Header.h"; sourceTree = "<group>"; };
 		5AD63F261CE1C40F0044ACE6 /* AViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AViewController.swift; sourceTree = "<group>"; };
+		A80015F21D0EE499000EA41A /* JRSql.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRSql.h; sourceTree = "<group>"; };
+		A80015F31D0EE499000EA41A /* JRSql.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRSql.m; sourceTree = "<group>"; };
+		A80015F51D0EEC29000EA41A /* JRActivatedProperty.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRActivatedProperty.h; sourceTree = "<group>"; };
+		A80015F61D0EEC29000EA41A /* JRActivatedProperty.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRActivatedProperty.m; sourceTree = "<group>"; };
 		A8A1B2231D033C8C00886403 /* NSObject+Reflect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+Reflect.h"; sourceTree = "<group>"; };
 		A8A1B2241D033C8C00886403 /* NSObject+Reflect.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+Reflect.m"; sourceTree = "<group>"; };
 		A8A1B2261D033CDC00886403 /* OBJCProperty.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OBJCProperty.h; sourceTree = "<group>"; };
@@ -220,6 +226,10 @@
 				5ACBEEE81CE1B8B800371E01 /* JRPersistent.h */,
 				5ACBEEE41CE1B65700371E01 /* JRDBMgr.h */,
 				5ACBEEE51CE1B65700371E01 /* JRDBMgr.m */,
+				A80015F21D0EE499000EA41A /* JRSql.h */,
+				A80015F31D0EE499000EA41A /* JRSql.m */,
+				A80015F51D0EEC29000EA41A /* JRActivatedProperty.h */,
+				A80015F61D0EEC29000EA41A /* JRActivatedProperty.m */,
 				5ACBEEE91CE1B91F00371E01 /* JRSqlGenerator.h */,
 				5ACBEEEA1CE1B91F00371E01 /* JRSqlGenerator.m */,
 				5AD63F1F1CE1BE540044ACE6 /* JRReflectUtil.h */,
@@ -455,6 +465,7 @@
 				5AA5B3DE1CE2D46900360DC0 /* JRFMDBResultSetHandler.m in Sources */,
 				A8ED7A521D01CCA3009ED474 /* JRUtils.m in Sources */,
 				5ACBEEB21CE1B3A500371E01 /* main.m in Sources */,
+				A80015F41D0EE499000EA41A /* JRSql.m in Sources */,
 				5AB1BFA91D00115F001595D3 /* JRColumnSchema.m in Sources */,
 				5ACBEEEB1CE1B91F00371E01 /* JRSqlGenerator.m in Sources */,
 				5AC8B3321CE1DA2500079BC8 /* NSObject+JRDB.m in Sources */,
@@ -463,6 +474,7 @@
 				A8A1B2251D033C8C00886403 /* NSObject+Reflect.m in Sources */,
 				5AA5B3E11CE3120B00360DC0 /* JRQueryCondition.m in Sources */,
 				5A7AED821D05294B000AD4FE /* JRMiddleTable.m in Sources */,
+				A80015F71D0EEC29000EA41A /* JRActivatedProperty.m in Sources */,
 				5AD63F211CE1BE540044ACE6 /* JRReflectUtil.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
