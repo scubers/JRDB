@@ -307,7 +307,7 @@ const NSString *jr_activatedPropertiesKey = @"jr_activatedPropertiesKey";
 }
 
 + (BOOL)jr_executeUpdate:(NSString *)sql args:(NSArray *)args fromDB:(FMDatabase *)db {
-    return [db executeQuery:sql withArgumentsInArray:args];
+    return [db executeUpdate:sql withArgumentsInArray:args];
 }
 
 #pragma mark - table operation
