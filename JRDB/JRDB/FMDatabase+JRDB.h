@@ -88,7 +88,11 @@
 
 #pragma mark - save or update
 
-//- (BOOL)jr_saveOrUpdateOneOnly:(id<JRPersistent> _Nonnull)one;
+- (BOOL)jr_saveOrUpdateOneOnly:(id<JRPersistent> _Nonnull)one;
+
+- (BOOL)jr_saveOrUpdateOne:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction;
+
+- (void)jr_saveOrUpdateOne:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete;
 
 #pragma mark - save one
 
