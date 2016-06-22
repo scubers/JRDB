@@ -46,7 +46,7 @@
 - (BOOL)isValidateClazz:(Class<JRPersistent> _Nonnull)clazz;
 
 /**
- *  清理中间表的缓存辣鸡
+ *  清理中间表的缓存垃圾
  *
  *  @param db
  */
