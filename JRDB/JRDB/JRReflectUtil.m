@@ -50,6 +50,7 @@
         JRActivatedProperty *p = [JRActivatedProperty property:key relationShip:JRRelationNormal];
         p.dataBaseType = dataBaseType;
         p.dataBaseName = key;
+        p.typeEncode = type;
         [properties addObject:p];
     }];
 
@@ -59,6 +60,7 @@
         p.dataBaseType = [self dataBaseTypeWithEncodeName:[NSString stringWithUTF8String:@encode(NSString)]];
         p.clazz = obj;
         p.dataBaseName = SingleLinkColumn(key);
+        p.typeEncode = NSStringFromClass(obj);
         [properties addObject:p];
     }];
     // 一对多字段
@@ -70,6 +72,7 @@
         if (clazz == subClazz) {
             p.dataBaseName = ParentLinkColumn(key);
         }
+        p.typeEncode = NSStringFromClass(subClazz);
         [properties addObject:p];
     }];
 

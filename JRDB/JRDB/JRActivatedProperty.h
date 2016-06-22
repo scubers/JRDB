@@ -21,6 +21,7 @@ typedef enum {
 @property (nonatomic, nonnull, copy   ) NSString   *name;
 @property (nonatomic, nonnull, copy   ) NSString   *dataBaseName;
 @property (nonatomic, nonnull, copy   ) NSString   *dataBaseType;
+@property (nonatomic, nonnull, copy   ) NSString   *typeEncode;
 @property (nonatomic, nonnull, strong ) Class      clazz;
 
 + (instancetype _Nonnull)property:(NSString * _Nonnull)name relationShip:(JRRelation)relationShip;
