@@ -197,7 +197,7 @@
     p.m_date = [NSDate date];
     p.type = [NSString stringWithFormat:@"Person+%d", base];
     p.animal = [Animal new];
-    
+    p.bbbbb = base % 2;
     return p;
 }
 

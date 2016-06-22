@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 
     s.name                  = "JRDB"
-    s.version               = "0.1.8"
+    s.version               = "0.1.10"
     s.summary               = "The light packing of fmdb for my self"
 
     s.homepage              = "https://github.com/scubers/JRDB"

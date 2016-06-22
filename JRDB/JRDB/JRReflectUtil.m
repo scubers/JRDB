@@ -82,6 +82,7 @@
         ||[encode isEqualToString:[NSString stringWithUTF8String:@encode(unsigned int)]]
         ||[encode isEqualToString:[NSString stringWithUTF8String:@encode(long)]]
         ||[encode isEqualToString:[NSString stringWithUTF8String:@encode(unsigned long)]]
+        ||[encode isEqualToString:[NSString stringWithUTF8String:@encode(BOOL)]]
         ) {
         return @"INTEGER";
     }

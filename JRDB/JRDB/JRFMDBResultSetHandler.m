@@ -143,7 +143,8 @@ typedef enum {
 }
 
 + (RetDataType)typeWithEncode:(NSString *)encode {
-    if ([encode isEqualToString:[NSString stringWithUTF8String:@encode(int)]]) {
+    if ([encode isEqualToString:[NSString stringWithUTF8String:@encode(int)]]
+        ||[encode isEqualToString:[NSString stringWithUTF8String:@encode(BOOL)]]) {
         return RetDataTypeInt;
     }
     if ([encode isEqualToString:[NSString stringWithUTF8String:@encode(unsigned int)]]) {
