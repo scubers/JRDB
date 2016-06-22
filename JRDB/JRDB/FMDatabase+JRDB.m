@@ -267,8 +267,62 @@ static NSString * const queuekey = @"queuekey";
 #pragma mark - save or update
 
 - (BOOL)jr_saveOrUpdateOneOnly:(id<JRPersistent> _Nonnull)one {
-    return NO;
+    AssertRegisteredClazz([one class]);
+    BOOL isSave = YES;
+    if ([[one class] jr_customPrimarykey]) { // 自定义主键
+        NSAssert([one jr_customPrimarykeyValue] != nil, @"custom Primary key should not be nil");
+        isSave = ![self jr_count4PrimaryKey:[one jr_customPrimarykeyValue] clazz:[one class]];
+    } else { // 默认主键
+        isSave = !one.ID;
+    }
+    
+    if (isSave) {
+        return [self jr_saveOneOnly:one];
+    } else {
+        return [self jr_updateOneOnly:one columns:nil];
+    }
 }
+
+- (BOOL)jr_saveOrUpdateOne:(id<JRPersistent>)one useTransaction:(BOOL)useTransaction {
+    BOOL isSave = YES;
+    if ([[one class] jr_customPrimarykey]) { // 自定义主键
+        NSAssert([one jr_customPrimarykeyValue] != nil, @"custom Primary key should not be nil");
+        isSave = ![self jr_count4PrimaryKey:[one jr_customPrimarykeyValue] clazz:[one class]];
+    } else { // 默认主键
+        isSave = !one.ID;
+    }
+    if (isSave) {
+        return [self jr_saveOne:one useTransaction:useTransaction];
+    } else {
+        return [self jr_updateOne:one columns:nil useTransaction:useTransaction];
+    }
+}
+
+- (void)jr_saveOrUpdateOne:(id<JRPersistent>)one useTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete {
+    [self jr_inQueue:^(FMDatabase * _Nonnull db) {
+        BOOL ret = [db jr_saveOrUpdateOne:one useTransaction:useTransaction];
+        EXE_BLOCK(complete, ret);
+    }];
+}
+
+- (BOOL)jr_saveOrUpdateObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction {
+    return
+    [self jr_execute:^BOOL(FMDatabase * _Nonnull db) {
+        __block BOOL needRollBack = NO;
+        [objects enumerateObjectsUsingBlock:^(id<JRPersistent>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            needRollBack = ![db jr_saveOrUpdateOne:obj useTransaction:NO];
+            *stop = needRollBack;
+        }];
+        return !needRollBack;
+    } useTransaction:useTransaction];
+}
+- (void)jr_saveOrUpdateObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete {
+    [self jr_inQueue:^(FMDatabase * _Nonnull db) {
+        BOOL ret = [db jr_saveOrUpdateObjects:objects useTransaction:useTransaction];
+        EXE_BLOCK(complete, ret);
+    }];
+}
+
 
 #pragma mark - save one
 
@@ -279,7 +333,6 @@ static NSString * const queuekey = @"queuekey";
     AssertRegisteredClazz([one class]);
     if ([[one class] jr_customPrimarykey]) { // 自定义主键
         NSAssert([one jr_customPrimarykeyValue] != nil, @"custom Primary key should not be nil");
-//        NSObject *old = (NSObject *)[self jr_getByPrimaryKey:[one jr_customPrimarykeyValue] clazz:[one class]];
         NSAssert(![self jr_count4PrimaryKey:[one jr_customPrimarykeyValue] clazz:[one class]], @"primary key is exists");
     } else { // 默认主键
         NSAssert(one.ID == nil, @"The obj:%@ to be saved should not hold a ID", one);
@@ -565,6 +618,25 @@ static NSString * const queuekey = @"queuekey";
 }
 - (void)jr_deleteObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects complete:(JRDBComplete _Nullable)complete {
     return [self jr_deleteObjects:objects useTransaction:YES complete:complete];
+}
+
+#pragma mark - delete all
+
+- (BOOL)jr_deleteAllOnly:(Class<JRPersistent>)clazz {
+    AssertRegisteredClazz(clazz);
+    JRSql *sql = [JRSqlGenerator sql4DeleteAll:clazz];
+    return [self jr_executeUpdate:sql];
+}
+
+- (BOOL)jr_deleteAll:(Class<JRPersistent> _Nonnull)clazz useTransaction:(BOOL)useTransaction {
+    NSArray<id<JRPersistent>> *objects = [self jr_findAll:clazz];
+    return [self jr_deleteObjects:objects useTransaction:useTransaction];
+}
+- (void)jr_deleteAll:(Class<JRPersistent> _Nonnull)clazz useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete {
+    [self jr_inQueue:^(FMDatabase * _Nonnull db) {
+        BOOL ret = [db jr_deleteAll:clazz useTransaction:useTransaction];
+        EXE_BLOCK(complete, ret);
+    }];
 }
 
 

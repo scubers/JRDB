@@ -32,6 +32,30 @@
 
 - (NSMutableDictionary<NSString *,JRDBDidFinishBlock> * _Nonnull)jr_finishBlocks;
 
+#pragma mark - save or update
+
+- (BOOL)jr_saveOrUpdateOnlyToDB:(FMDatabase * _Nonnull)db;
+
+/**
+ *  保存或更新自身到db， 并进行关联保存删除更新
+ *
+ *  @param db
+ *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
+ */
+- (BOOL)jr_saveOrUpdateUseTransaction:(BOOL)useTransaction toDB:(FMDatabase * _Nonnull)db;
+- (void)jr_saveOrUpdateUseTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete  toDB:(FMDatabase * _Nonnull)db;
+
+- (BOOL)jr_saveOrUpdateToDB:(FMDatabase * _Nonnull)db;
+- (void)jr_saveOrUpdateWithComplete:(JRDBComplete _Nullable)complete toDB:(FMDatabase * _Nonnull)db;
+
+#pragma mark - save or update use DefaultDB
+
+- (BOOL)jr_saveOrUpdateUseTransaction:(BOOL)useTransaction;
+- (void)jr_saveOrUpdateUseTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete;
+
+- (BOOL)jr_saveOrUpdate;
+- (void)jr_saveOrUpdateWithComplete:(JRDBComplete _Nullable)complete;
+
 #pragma mark - save
 
 /**
@@ -129,6 +153,8 @@
 
 #pragma mark - delete
 
++ (BOOL)jr_deleteAllOnlyFromDB:(FMDatabase * _Nonnull)db;
+
 /**
  *  仅删除自身，不进行关联保存（不建议使用）
  *
@@ -149,6 +175,8 @@
 - (void)jr_deleteWithComplete:(JRDBComplete _Nullable)complete fromDB:(FMDatabase * _Nonnull)db;
 
 #pragma mark - delete use DefaultDB
+
++ (BOOL)jr_deleteAllOnly;
 
 /**
  *  仅删除自身，不进行关联保存（不建议使用）
