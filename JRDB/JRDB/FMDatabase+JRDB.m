@@ -305,6 +305,25 @@ static NSString * const queuekey = @"queuekey";
     }];
 }
 
+- (BOOL)jr_saveOrUpdateObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction {
+    return
+    [self jr_execute:^BOOL(FMDatabase * _Nonnull db) {
+        __block BOOL needRollBack = NO;
+        [objects enumerateObjectsUsingBlock:^(id<JRPersistent>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            needRollBack = ![db jr_saveOrUpdateOne:obj useTransaction:NO];
+            *stop = needRollBack;
+        }];
+        return !needRollBack;
+    } useTransaction:useTransaction];
+}
+- (void)jr_saveOrUpdateObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete {
+    [self jr_inQueue:^(FMDatabase * _Nonnull db) {
+        BOOL ret = [db jr_saveOrUpdateObjects:objects useTransaction:useTransaction];
+        EXE_BLOCK(complete, ret);
+    }];
+}
+
+
 #pragma mark - save one
 
 /**
@@ -599,6 +618,25 @@ static NSString * const queuekey = @"queuekey";
 }
 - (void)jr_deleteObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects complete:(JRDBComplete _Nullable)complete {
     return [self jr_deleteObjects:objects useTransaction:YES complete:complete];
+}
+
+#pragma mark - delete all
+
+- (BOOL)jr_deleteAllOnly:(Class<JRPersistent>)clazz {
+    AssertRegisteredClazz(clazz);
+    JRSql *sql = [JRSqlGenerator sql4DeleteAll:clazz];
+    return [self jr_executeUpdate:sql];
+}
+
+- (BOOL)jr_deleteAll:(Class<JRPersistent> _Nonnull)clazz useTransaction:(BOOL)useTransaction {
+    NSArray<id<JRPersistent>> *objects = [self jr_findAll:clazz];
+    return [self jr_deleteObjects:objects useTransaction:useTransaction];
+}
+- (void)jr_deleteAll:(Class<JRPersistent> _Nonnull)clazz useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete {
+    [self jr_inQueue:^(FMDatabase * _Nonnull db) {
+        BOOL ret = [db jr_deleteAll:clazz useTransaction:useTransaction];
+        EXE_BLOCK(complete, ret);
+    }];
 }
 
 

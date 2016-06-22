@@ -36,7 +36,7 @@
                                                ]];
     [JRDBMgr shareInstance].defaultDB = db;
     
-    [JRDBMgr shareInstance].debugMode = NO;
+//    [JRDBMgr shareInstance].debugMode = NO;
     
     NSLog(@"%@", [[JRDBMgr shareInstance] registeredClazz]);
 }
@@ -50,6 +50,9 @@
 }
 
 #pragma mark - test delete
+- (void)testDeleteAll1 {
+    [Person jr_deleteAllOnly];
+}
 
 - (void)testDeleteAll {
     [[Person jr_findAll] jr_delete];
@@ -140,6 +143,21 @@
     [ps jr_updateColumns:nil];
 }
 
+#pragma mark - test saveOrUpdate
+- (void)testSaveOrUpdateObjects {
+    NSArray<Person *> *ps = [Person jr_findAll];
+    NSMutableArray *array = [NSMutableArray array];
+    for (int i = 100; i < 110; i++) {
+        [array addObject:[self createPerson:i name:nil]];
+    }
+    [array addObjectsFromArray:ps];
+    [array jr_saveOrUpdate];
+}
+
+- (void)testSaveOrUpdateOne {
+    Person *p = [self createPerson:100 name:nil];
+    [[JRDBMgr defaultDB] jr_saveOrUpdateOne:p useTransaction:YES];
+}
 
 #pragma mark - test find 
 - (void)testFindByCondition {

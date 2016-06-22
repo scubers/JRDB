@@ -116,120 +116,166 @@ const NSString *jr_activatedPropertiesKey = @"jr_activatedPropertiesKey";
     return objc_getAssociatedObject(self, NSSelectorFromString(ParentLinkColumn(key)));
 }
 
+#pragma mark - save or update
+
+- (BOOL)jr_saveOrUpdateOnlyToDB:(FMDatabase * _Nonnull)db {
+    return [db jr_saveOrUpdateOneOnly:self];
+}
+
+- (BOOL)jr_saveOrUpdateUseTransaction:(BOOL)useTransaction toDB:(FMDatabase * _Nonnull)db {
+    return [db jr_saveOrUpdateOne:self useTransaction:useTransaction];
+}
+- (void)jr_saveOrUpdateUseTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete  toDB:(FMDatabase * _Nonnull)db {
+    [db jr_saveOrUpdateOne:self useTransaction:useTransaction complete:complete];
+}
+
+- (BOOL)jr_saveOrUpdateToDB:(FMDatabase * _Nonnull)db {
+    return [db jr_saveOrUpdateOne:self useTransaction:YES];
+}
+- (void)jr_saveOrUpdateWithComplete:(JRDBComplete _Nullable)complete toDB:(FMDatabase * _Nonnull)db {
+    [db jr_saveOrUpdateOne:self useTransaction:YES complete:complete];
+}
+
+#pragma mark - save or update use DefaultDB
+
+- (BOOL)jr_saveOrUpdateUseTransaction:(BOOL)useTransaction {
+    return [self jr_saveOrUpdateUseTransaction:useTransaction toDB:JR_DEFAULTDB];
+}
+- (void)jr_saveOrUpdateUseTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete {
+    [self jr_saveOrUpdateUseTransaction:useTransaction complete:complete toDB:JR_DEFAULTDB];
+}
+
+- (BOOL)jr_saveOrUpdate {
+    return [self jr_saveOrUpdateUseTransaction:YES toDB:JR_DEFAULTDB];
+}
+- (void)jr_saveOrUpdateWithComplete:(JRDBComplete _Nullable)complete {
+    [self jr_saveOrUpdateUseTransaction:YES complete:complete toDB:JR_DEFAULTDB];
+}
+
 #pragma mark - save
 
 - (BOOL)jr_saveOnlyToDB:(FMDatabase *)db {
     return [db jr_saveOneOnly:self];
-}
-- (BOOL)jr_saveOnly {
-    return [self jr_saveOnlyToDB:JR_DEFAULTDB];
 }
 
 
 - (BOOL)jr_saveUseTransaction:(BOOL)useTransaction toDB:(FMDatabase *)db {
     return [db jr_saveUseTransaction:useTransaction];
 }
-- (BOOL)jr_saveUseTransaction:(BOOL)useTransaction {
-    return [self jr_saveUseTransaction:useTransaction toDB:JR_DEFAULTDB];
-}
 
 - (void)jr_saveUseTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete toDB:(FMDatabase *)db {
     [db jr_saveOne:self useTransaction:useTransaction complete:complete];
-}
-- (void)jr_saveUseTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete {
-    [self jr_saveUseTransaction:useTransaction complete:complete toDB:JR_DEFAULTDB];
 }
 
 
 - (BOOL)jr_saveToDB:(FMDatabase *)db {
     return [db jr_saveOne:self useTransaction:YES];
 }
-- (BOOL)jr_save {
-    return [self jr_saveToDB:JR_DEFAULTDB];
-}
 
 - (void)jr_saveWithComplete:(JRDBComplete)complete toDB:(FMDatabase *)db {
     [db jr_saveOne:self complete:complete];
 }
+
+#pragma mark - save use defaultDB
+
+- (BOOL)jr_saveOnly {
+    return [self jr_saveOnlyToDB:JR_DEFAULTDB];
+}
+- (BOOL)jr_saveUseTransaction:(BOOL)useTransaction {
+    return [self jr_saveUseTransaction:useTransaction toDB:JR_DEFAULTDB];
+}
+- (void)jr_saveUseTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete {
+    [self jr_saveUseTransaction:useTransaction complete:complete toDB:JR_DEFAULTDB];
+}
+- (BOOL)jr_save {
+    return [self jr_saveToDB:JR_DEFAULTDB];
+}
 - (void)jr_saveWithComplete:(JRDBComplete)complete {
     [self jr_saveWithComplete:complete toDB:JR_DEFAULTDB];
 }
-
 #pragma mark - update
 
 - (BOOL)jr_updateOnlyColumns:(NSArray<NSString *> *)columns toDB:(FMDatabase *)db {
     return [db jr_updateOneOnly:self columns:columns];
 }
-- (BOOL)jr_updateOnlyColumns:(NSArray<NSString *> *)columns {
-    return [self jr_updateOnlyColumns:columns toDB:JR_DEFAULTDB];
-}
 
 - (BOOL)jr_updateColumns:(NSArray<NSString *> *)columns useTransaction:(BOOL)useTransaction toDB:(FMDatabase *)db{
     return [db jr_updateOne:self columns:columns useTransaction:useTransaction];
-}
-- (BOOL)jr_updateColumns:(NSArray<NSString *> *)columns useTransaction:(BOOL)useTransaction {
-    return [self jr_updateColumns:columns useTransaction:useTransaction toDB:JR_DEFAULTDB];
 }
 
 - (void)jr_updateColumns:(NSArray<NSString *> *)columns useTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete toDB:(FMDatabase *)db{
     [db jr_updateOne:self columns:columns useTransaction:useTransaction complete:complete];
 }
-- (void)jr_updateColumns:(NSArray<NSString *> *)columns useTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete {
-    [self jr_updateColumns:columns useTransaction:useTransaction complete:complete toDB:JR_DEFAULTDB];
-}
 
 - (BOOL)jr_updateColumns:(NSArray<NSString *> *)columns toDB:(FMDatabase *)db{
     return [db jr_updateOne:self columns:columns];
-}
-- (BOOL)jr_updateColumns:(NSArray<NSString *> *)columns {
-    return [self jr_updateColumns:columns toDB:JR_DEFAULTDB];
 }
 
 - (void)jr_updateColumns:(NSArray<NSString *> *)columns complete:(JRDBComplete)complete toDB:(FMDatabase *)db{
     [db jr_updateOne:self columns:columns complete:complete];
 }
+
+#pragma mark - update use defaultDB
+
+- (BOOL)jr_updateOnlyColumns:(NSArray<NSString *> *)columns {
+    return [self jr_updateOnlyColumns:columns toDB:JR_DEFAULTDB];
+}
+- (BOOL)jr_updateColumns:(NSArray<NSString *> *)columns useTransaction:(BOOL)useTransaction {
+    return [self jr_updateColumns:columns useTransaction:useTransaction toDB:JR_DEFAULTDB];
+}
+- (void)jr_updateColumns:(NSArray<NSString *> *)columns useTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete {
+    [self jr_updateColumns:columns useTransaction:useTransaction complete:complete toDB:JR_DEFAULTDB];
+}
+- (BOOL)jr_updateColumns:(NSArray<NSString *> *)columns {
+    return [self jr_updateColumns:columns toDB:JR_DEFAULTDB];
+}
 - (void)jr_updateColumns:(NSArray<NSString *> *)columns complete:(JRDBComplete)complete {
     [self jr_updateColumns:columns complete:complete toDB:JR_DEFAULTDB];
 }
 
-
 #pragma mark - delete
 
-- (BOOL)jr_deleteOnlyFromDB:(FMDatabase *)db {
-    return [db jr_deleteOneOnly:self];
-}
-- (BOOL)jr_deleteOnly {
-    return [self jr_deleteOnlyFromDB:JR_DEFAULTDB];
++ (BOOL)jr_deleteAllOnlyFromDB:(FMDatabase *)db {
+    return [db jr_deleteAllOnly:self];
 }
 
 - (BOOL)jr_deleteUseTransaction:(BOOL)useTransaction fromDB:(FMDatabase *)db {
     return [db jr_deleteOne:self useTransaction:useTransaction];
 }
-- (BOOL)jr_deleteUseTransaction:(BOOL)useTransaction {
-    return [self jr_deleteUseTransaction:useTransaction fromDB:JR_DEFAULTDB];
-}
 
 - (void)jr_deleteUseTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete fromDB:(FMDatabase *)db{
     [db jr_deleteOne:self useTransaction:useTransaction complete:complete];
-}
-- (void)jr_deleteUseTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete {
-    [self jr_deleteUseTransaction:useTransaction complete:complete fromDB:JR_DEFAULTDB];
 }
 
 - (BOOL)jr_deleteFromDB:(FMDatabase *)db {
     return [db jr_deleteOne:self];
 }
-- (BOOL)jr_delete {
-    return [self jr_deleteFromDB:JR_DEFAULTDB];
-}
 
 - (void)jr_deleteWithComplete:(JRDBComplete _Nullable)complete fromDB:(FMDatabase *)db{
     [db jr_deleteOne:self complete:complete];
 }
+
+#pragma mark - delete use DefaultDB
+
++ (BOOL)jr_deleteAllOnly {
+    return [self jr_deleteAllOnlyFromDB:JR_DEFAULTDB];
+}
+
+- (BOOL)jr_deleteOnly {
+    return [self jr_deleteOnlyFromDB:JR_DEFAULTDB];
+}
+- (BOOL)jr_deleteUseTransaction:(BOOL)useTransaction {
+    return [self jr_deleteUseTransaction:useTransaction fromDB:JR_DEFAULTDB];
+}
+- (void)jr_deleteUseTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete {
+    [self jr_deleteUseTransaction:useTransaction complete:complete fromDB:JR_DEFAULTDB];
+}
+- (BOOL)jr_delete {
+    return [self jr_deleteFromDB:JR_DEFAULTDB];
+}
 - (void)jr_deleteWithComplete:(JRDBComplete _Nullable)complete {
     [self jr_deleteWithComplete:complete fromDB:JR_DEFAULTDB];
 }
-
 #pragma mark - select
 
 + (instancetype _Nullable)jr_findByID:(NSString * _Nonnull)ID fromDB:(FMDatabase * _Nonnull)db {
