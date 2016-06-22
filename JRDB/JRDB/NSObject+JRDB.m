@@ -160,7 +160,7 @@ const NSString *jr_activatedPropertiesKey = @"jr_activatedPropertiesKey";
 
 
 - (BOOL)jr_saveUseTransaction:(BOOL)useTransaction toDB:(FMDatabase *)db {
-    return [db jr_saveUseTransaction:useTransaction];
+    return [db jr_saveOne:self useTransaction:useTransaction];
 }
 
 - (void)jr_saveUseTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete toDB:(FMDatabase *)db {
@@ -237,6 +237,10 @@ const NSString *jr_activatedPropertiesKey = @"jr_activatedPropertiesKey";
 
 + (BOOL)jr_deleteAllOnlyFromDB:(FMDatabase *)db {
     return [db jr_deleteAllOnly:self];
+}
+
+- (BOOL)jr_deleteOnlyFromDB:(FMDatabase *)db {
+    return [db jr_deleteOneOnly:self];
 }
 
 - (BOOL)jr_deleteUseTransaction:(BOOL)useTransaction fromDB:(FMDatabase *)db {
