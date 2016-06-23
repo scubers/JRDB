@@ -72,11 +72,16 @@
 }
 
 - (void)testSaveMany {
+    
     NSMutableArray *array = [NSMutableArray array];
     for (int i = 0; i < 10; i++) {
         [array addObject:[self createPerson:i name:[NSString stringWithFormat:@"%d", i]]];
     }
-    [array jr_save];
+//    [array jr_save];
+    [Person jr_findAll];
+    [array jr_saveWithComplete:^(BOOL success) {
+        NSLog(@"success");
+    }];
 }
 
 - (void)testSaveCycle {
@@ -100,11 +105,11 @@
 
 - (void)testOneToManySave {
     Person *p = [self createPerson:1 name:nil];
-    for (int i = 0; i < 10000; i++) {
+    for (int i = 0; i < 10; i++) {
         [p.money addObject:[self createMoney:i]];
     }
     Person *p1 = [self createPerson:1 name:nil];
-    for (int i = 0; i < 10000; i++) {
+    for (int i = 0; i < 10; i++) {
         [p1.money addObject:[self createMoney:i]];
     }
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
@@ -175,7 +180,9 @@
 
 - (void)testFindAll {
     NSArray<Person *> *p = [Person jr_findAll];
+    NSArray<Person *> *p1 = [Person jr_findAll];
     [p isEqual:nil];
+    [p1 isEqual:nil];
 }
 
 #pragma mark - convenience method
@@ -197,7 +204,7 @@
     p.m_date = [NSDate date];
     p.type = [NSString stringWithFormat:@"Person+%d", base];
     p.animal = [Animal new];
-    
+    p.bbbbb = base % 2;
     return p;
 }
 

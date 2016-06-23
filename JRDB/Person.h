@@ -32,6 +32,7 @@
 
 @property (nonatomic, strong) Animal *animal;
 
+@property (nonatomic, assign) BOOL bbbbb;
 
 @property (nonatomic, strong) NSString *name;
 @property (nonatomic, assign) int a_int;

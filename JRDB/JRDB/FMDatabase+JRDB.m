@@ -167,6 +167,7 @@ static NSString * const queuekey = @"queuekey";
         schema.pk = [ret intForColumn:@"pk"];
         [schemas addObject:schema];
     }
+    [ret close];
     return schemas;
 }
 
@@ -822,7 +823,9 @@ static NSString * const queuekey = @"queuekey";
     NSAssert(pk, @"primary key should not be nil");
     FMResultSet *ret = [self jr_executeQuery:[JRSqlGenerator sql4CountByPrimaryKey:pk clazz:clazz]];
     while ([ret next]) {
-        return [ret longForColumnIndex:0];
+        long count = [ret longForColumnIndex:0];
+        [ret close];
+        return count;
     }
     return 0;
 }

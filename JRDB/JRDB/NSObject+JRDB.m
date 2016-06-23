@@ -345,7 +345,10 @@ const NSString *jr_activatedPropertiesKey = @"jr_activatedPropertiesKey";
 
 + (NSUInteger)jr_countForSql:(NSString *)sql args:(NSArray *)args fromDB:(FMDatabase *)db {
     FMResultSet *ret = [db executeQuery:sql withArgumentsInArray:args];
-    return (NSUInteger)[ret unsignedLongLongIntForColumnIndex:0];
+    while ([ret next]) {
+        return (NSUInteger)[ret unsignedLongLongIntForColumnIndex:0];
+    }
+    return 0;
 }
 
 + (NSUInteger)jr_countForSql:(NSString *)sql args:(NSArray *)args {
