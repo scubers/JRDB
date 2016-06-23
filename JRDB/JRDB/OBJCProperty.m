@@ -38,6 +38,7 @@
         objc_property_attribute_t attr = attrs[i];
         p->_attributeDict[TONSString(attr.name)] = TONSString(attr.value).length ? TONSString(attr.value) : @"";
     }
+    free(attrs);
     return p;
 }
 

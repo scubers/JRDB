@@ -32,6 +32,7 @@
     for (int i = 0; i < outCount; i++) {
         [array addObject:[OBJCProperty prop:props[i]]];
     }
+    free(props);
     return array;
 }
 
