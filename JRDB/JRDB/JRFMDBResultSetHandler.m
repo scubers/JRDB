@@ -137,7 +137,7 @@ typedef enum {
         
         [list addObject:obj];
     }
-    
+    [resultSet close];
     return list;
 }
 
