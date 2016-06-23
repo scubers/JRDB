@@ -12,6 +12,9 @@
 #define EXE_BLOCK(block, ...) if(block){block(__VA_ARGS__);}
 
 #define SingleLinkColumn(property) [NSString stringWithFormat:@"_single_link_%@", property]
+#define ParentLinkColumn(property) [NSString stringWithFormat:@"_parent_link_%@", property]
+
+@class JRActivatedProperty;
 
 @protocol JRPersistent <JRReflectable>
 
@@ -99,11 +102,11 @@ typedef void(^JRDBDidFinishBlock)(id<JRPersistent> _Nonnull obj);
 
 
 /**
- *  本对象是否可以被save
- *  但不保证数据库中没有重复对象
+ *  在注册之后，才会有值
+ *
+ *  @return 返回处于激活状态的属性数组
  */
-- (BOOL)jr_objCanBeSave;
-
++ (NSArray<JRActivatedProperty *> * _Nullable)jr_activatedProperties;
 
 @end
 

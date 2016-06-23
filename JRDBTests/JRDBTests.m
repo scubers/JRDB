@@ -36,7 +36,7 @@
                                                ]];
     [JRDBMgr shareInstance].defaultDB = db;
     
-    [JRDBMgr shareInstance].debugMode = NO;
+//    [JRDBMgr shareInstance].debugMode = NO;
     
     NSLog(@"%@", [[JRDBMgr shareInstance] registeredClazz]);
 }
@@ -50,6 +50,9 @@
 }
 
 #pragma mark - test delete
+- (void)testDeleteAll1 {
+    [Person jr_deleteAllOnly];
+}
 
 - (void)testDeleteAll {
     [[Person jr_findAll] jr_delete];
@@ -69,11 +72,16 @@
 }
 
 - (void)testSaveMany {
+    
     NSMutableArray *array = [NSMutableArray array];
     for (int i = 0; i < 10; i++) {
         [array addObject:[self createPerson:i name:[NSString stringWithFormat:@"%d", i]]];
     }
-    [array jr_save];
+//    [array jr_save];
+    [Person jr_findAll];
+    [array jr_saveWithComplete:^(BOOL success) {
+        NSLog(@"success");
+    }];
 }
 
 - (void)testSaveCycle {
@@ -100,8 +108,25 @@
     for (int i = 0; i < 10; i++) {
         [p.money addObject:[self createMoney:i]];
     }
+    Person *p1 = [self createPerson:1 name:nil];
+    for (int i = 0; i < 10; i++) {
+        [p1.money addObject:[self createMoney:i]];
+    }
+    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        [p1 jr_saveWithComplete:^(BOOL success) {
+            NSLog(@"===");
+        }];
+    });
     [p jr_save];
     
+}
+
+- (void)testOneToManyChildren {
+    Person *p = [self createPerson:0 name:nil];
+    for (int i = 0; i < 10; i++) {
+        [p.children addObject:[self createPerson:i + 1 name:nil]];
+    }
+    [p jr_save];
 }
 
 #pragma mark - test update
@@ -123,6 +148,21 @@
     [ps jr_updateColumns:nil];
 }
 
+#pragma mark - test saveOrUpdate
+- (void)testSaveOrUpdateObjects {
+    NSArray<Person *> *ps = [Person jr_findAll];
+    NSMutableArray *array = [NSMutableArray array];
+    for (int i = 100; i < 110; i++) {
+        [array addObject:[self createPerson:i name:nil]];
+    }
+    [array addObjectsFromArray:ps];
+    [array jr_saveOrUpdate];
+}
+
+- (void)testSaveOrUpdateOne {
+    Person *p = [self createPerson:100 name:nil];
+    [[JRDBMgr defaultDB] jr_saveOrUpdateOne:p useTransaction:YES];
+}
 
 #pragma mark - test find 
 - (void)testFindByCondition {
@@ -140,7 +180,9 @@
 
 - (void)testFindAll {
     NSArray<Person *> *p = [Person jr_findAll];
+    NSArray<Person *> *p1 = [Person jr_findAll];
     [p isEqual:nil];
+    [p1 isEqual:nil];
 }
 
 #pragma mark - convenience method
@@ -162,7 +204,7 @@
     p.m_date = [NSDate date];
     p.type = [NSString stringWithFormat:@"Person+%d", base];
     p.animal = [Animal new];
-    
+    p.bbbbb = base % 2;
     return p;
 }
 

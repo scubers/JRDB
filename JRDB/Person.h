@@ -32,6 +32,7 @@
 
 @property (nonatomic, strong) Animal *animal;
 
+@property (nonatomic, assign) BOOL bbbbb;
 
 @property (nonatomic, strong) NSString *name;
 @property (nonatomic, assign) int a_int;
@@ -58,6 +59,8 @@
 
 
 @property (nonatomic, strong) NSMutableArray<Money *> *money;
+
+@property (nonatomic, strong) NSMutableArray<Person *> *children;
 
 
 @end

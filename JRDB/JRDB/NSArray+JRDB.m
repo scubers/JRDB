@@ -13,6 +13,39 @@
 
 @implementation NSArray (JRDB)
 
+
+#pragma mark - save or update
+
+- (BOOL)jr_saveOrUpdateUseTransaction:(BOOL)useTransaction toDB:(FMDatabase * _Nonnull)db {
+    return [db jr_saveOrUpdateObjects:self useTransaction:useTransaction];
+}
+- (void)jr_saveOrUpdateUseTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete  toDB:(FMDatabase * _Nonnull)db {
+    [db jr_saveOrUpdateObjects:self useTransaction:useTransaction complete:complete];
+}
+
+- (BOOL)jr_saveOrUpdateToDB:(FMDatabase * _Nonnull)db {
+    return [db jr_saveOrUpdateObjects:self useTransaction:YES];
+}
+- (void)jr_saveOrUpdateWithComplete:(JRDBComplete _Nullable)complete toDB:(FMDatabase * _Nonnull)db {
+    [db jr_saveOrUpdateObjects:self useTransaction:YES complete:complete];
+}
+
+#pragma mark - save or update use DefaultDB
+
+- (BOOL)jr_saveOrUpdateUseTransaction:(BOOL)useTransaction {
+    return [self jr_saveOrUpdateUseTransaction:useTransaction toDB:JR_DEFAULTDB];
+}
+- (void)jr_saveOrUpdateUseTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete {
+    [self jr_saveOrUpdateUseTransaction:useTransaction complete:complete toDB:JR_DEFAULTDB];
+}
+
+- (BOOL)jr_saveOrUpdate {
+    return [self jr_saveOrUpdateUseTransaction:YES toDB:JR_DEFAULTDB];
+}
+- (void)jr_saveOrUpdateWithComplete:(JRDBComplete _Nullable)complete {
+    [self jr_saveOrUpdateUseTransaction:YES complete:complete toDB:JR_DEFAULTDB];
+}
+
 #pragma mark - save
 - (BOOL)jr_saveUseTransaction:(BOOL)useTransaction toDB:(FMDatabase *)db {
     return [db jr_saveObjects:self useTransaction:useTransaction];
@@ -28,24 +61,6 @@
 
 - (void)jr_saveWithComplete:(JRDBComplete)complete toDB:(FMDatabase *)db {
     return [db jr_saveObjects:self complete:complete];
-}
-
-#pragma mark - save use DefaultDB
-
-- (BOOL)jr_saveUseTransaction:(BOOL)useTransaction {
-    return [self jr_saveUseTransaction:useTransaction toDB:JR_DEFAULTDB];
-}
-
-- (void)jr_saveUseTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete {
-    [self jr_saveUseTransaction:useTransaction complete:complete toDB:JR_DEFAULTDB];
-}
-
-- (BOOL)jr_save {
-    return [self jr_saveToDB:JR_DEFAULTDB];
-}
-
-- (void)jr_saveWithComplete:(JRDBComplete)complete {
-    return [self jr_saveWithComplete:complete toDB:JR_DEFAULTDB];
 }
 
 #pragma mark - update
@@ -66,24 +81,6 @@
     [db jr_updateObjects:self columns:columns complete:complete];
 }
 
-#pragma mark - update use DefaultDB
-
-- (BOOL)jr_updateColumns:(NSArray<NSString *> *)columns useTransaction:(BOOL)useTransaction {
-    return [self jr_updateColumns:self useTransaction:useTransaction toDB:JR_DEFAULTDB];
-}
-
-- (void)jr_updateColumns:(NSArray<NSString *> *)columns useTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete {
-    return [self jr_updateColumns:columns useTransaction:useTransaction complete:complete toDB:JR_DEFAULTDB];
-}
-
-- (BOOL)jr_updateColumns:(NSArray<NSString *> *)columns {
-    return [self jr_updateColumns:columns toDB:JR_DEFAULTDB];
-}
-
-- (void)jr_updateColumns:(NSArray<NSString *> *)columns complete:(JRDBComplete)complete {
-    return [self jr_updateColumns:columns complete:complete toDB:JR_DEFAULTDB];
-}
-
 #pragma mark - delete
 
 - (BOOL)jr_deleteUseTransaction:(BOOL)useTransaction fromDB:(FMDatabase *)db {
@@ -100,24 +97,6 @@
 
 - (void)jr_deleteWithComplete:(JRDBComplete)complete fromDB:(FMDatabase *)db {
     [db jr_deleteObjects:self complete:complete];
-}
-
-#pragma mark - delete use DefaultDB
-
-- (BOOL)jr_deleteUseTransaction:(BOOL)useTransaction {
-    return [self jr_deleteUseTransaction:useTransaction fromDB:JR_DEFAULTDB];
-}
-
-- (void)jr_deleteUseTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete {
-    return [self jr_deleteUseTransaction:useTransaction complete:complete fromDB:JR_DEFAULTDB];
-}
-
-- (BOOL)jr_delete {
-    return [self jr_deleteFromDB:JR_DEFAULTDB];
-}
-
-- (void)jr_deleteWithComplete:(JRDBComplete)complete {
-    return [self jr_deleteWithComplete:complete fromDB:JR_DEFAULTDB];
 }
 
 @end

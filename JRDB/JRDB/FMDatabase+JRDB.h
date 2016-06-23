@@ -12,7 +12,7 @@
 
 @import FMDB;
 
-@class JRQueryCondition;
+@class JRQueryCondition, JRSql;
 
 @interface FMDatabase (JRDB)
 
@@ -88,7 +88,13 @@
 
 #pragma mark - save or update
 
-//- (BOOL)jr_saveOrUpdateOneOnly:(id<JRPersistent> _Nonnull)one;
+- (BOOL)jr_saveOrUpdateOneOnly:(id<JRPersistent> _Nonnull)one;
+
+- (BOOL)jr_saveOrUpdateOne:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction;
+- (void)jr_saveOrUpdateOne:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete;
+
+- (BOOL)jr_saveOrUpdateObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction;
+- (void)jr_saveOrUpdateObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete;
 
 #pragma mark - save one
 
@@ -210,6 +216,13 @@
 - (BOOL)jr_deleteObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects;
 - (void)jr_deleteObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects complete:(JRDBComplete _Nullable)complete;
 
+#pragma mark - delete all
+
+- (BOOL)jr_deleteAllOnly:(Class<JRPersistent> _Nonnull)clazz;
+
+- (BOOL)jr_deleteAll:(Class<JRPersistent> _Nonnull)clazz useTransaction:(BOOL)useTransaction;
+- (void)jr_deleteAll:(Class<JRPersistent> _Nonnull)clazz useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete;
+
 #pragma mark - single level query operation
 
 /**
@@ -324,5 +337,11 @@
 - (BOOL)jr_checkExistsTable4Clazz:(Class<JRPersistent> _Nonnull)clazz;
 
 
+
+- (BOOL)jr_executeUpdate:(JRSql * _Nonnull)sql;
+- (FMResultSet * _Nonnull)jr_executeQuery:(JRSql * _Nonnull)sql;
+
+- (long)jr_count4PrimaryKey:(id _Nonnull)pk clazz:(Class<JRPersistent> _Nonnull)clazz;
+- (long)jr_count4ID:(NSString * _Nonnull)ID clazz:(Class<JRPersistent> _Nonnull)clazz;
 
 @end
