@@ -47,68 +47,68 @@ typedef enum {
         NSString *ID = [resultSet stringForColumn:@"_ID"];
         [obj setID:ID];
         
-        [props enumerateObjectsUsingBlock:^(JRActivatedProperty * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            if (isID(obj.name)) { return; }
-            RetDataType type = [self typeWithEncode:obj.dataBaseType];
+        [props enumerateObjectsUsingBlock:^(JRActivatedProperty * _Nonnull prop, NSUInteger idx, BOOL * _Nonnull stop) {
+            if (isID(prop.name)) { return; }
+            RetDataType type = [self typeWithEncode:prop.typeEncode];
             switch (type) {
                 case RetDataTypeNSData: {
-                    id value = [resultSet dataForColumn:obj.dataBaseName];
-                    [obj setValue:value forKey:obj.name];
+                    id value = [resultSet dataForColumn:prop.dataBaseName];
+                    [obj setValue:value forKey:prop.name];
                     break;
                 }
                 case RetDataTypeString: {
-                    id value = [resultSet stringForColumn:obj.dataBaseName];
-                    [obj setValue:value forKey:obj.name];
+                    id value = [resultSet stringForColumn:prop.dataBaseName];
+                    [obj setValue:value forKey:prop.name];
                     break;
                 }
                 case RetDataTypeNSNumber: {
-                    id value = [NSNumber numberWithDouble:[resultSet doubleForColumn:obj.dataBaseName]];
-                    [obj setValue:value forKey:obj.name];
+                    id value = [NSNumber numberWithDouble:[resultSet doubleForColumn:prop.dataBaseName]];
+                    [obj setValue:value forKey:prop.name];
                     break;
                 }
                 case RetDataTypeInt: {
-                    Ivar ivar = class_getInstanceVariable(clazz, [obj.name UTF8String]);
-                    *(int *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = [resultSet intForColumn:obj.dataBaseName];
+                    Ivar ivar = class_getInstanceVariable(clazz, [prop.name UTF8String]);
+                    *(int *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = [resultSet intForColumn:prop.dataBaseName];
                     break;
                 }
                 case RetDataTypeUnsignedInt: {
-                    Ivar ivar = class_getInstanceVariable(clazz, [obj.name UTF8String]);
-                    *(unsigned int *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = (unsigned int)[resultSet unsignedLongLongIntForColumn:obj.dataBaseName];
+                    Ivar ivar = class_getInstanceVariable(clazz, [prop.name UTF8String]);
+                    *(unsigned int *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = (unsigned int)[resultSet unsignedLongLongIntForColumn:prop.dataBaseName];
                     break;
                 }
                 case RetDataTypeLong: {
-                    Ivar ivar = class_getInstanceVariable(clazz, [obj.name UTF8String]);
-                    *(long *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = [resultSet longForColumn:obj.dataBaseName];
+                    Ivar ivar = class_getInstanceVariable(clazz, [prop.name UTF8String]);
+                    *(long *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = [resultSet longForColumn:prop.dataBaseName];
                     break;
                 }
                 case RetDataTypeLongLong: {
-                    Ivar ivar = class_getInstanceVariable(clazz, [obj.name UTF8String]);
-                    *(long long *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = [resultSet longLongIntForColumn:obj.dataBaseName];
+                    Ivar ivar = class_getInstanceVariable(clazz, [prop.name UTF8String]);
+                    *(long long *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = [resultSet longLongIntForColumn:prop.dataBaseName];
                     break;
                 }
                 case RetDataTypeUnsignedLong: {
-                    Ivar ivar = class_getInstanceVariable(clazz, [obj.name UTF8String]);
-                    *(unsigned long *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = (unsigned long)[resultSet unsignedLongLongIntForColumn:obj.dataBaseName];
+                    Ivar ivar = class_getInstanceVariable(clazz, [prop.name UTF8String]);
+                    *(unsigned long *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = (unsigned long)[resultSet unsignedLongLongIntForColumn:prop.dataBaseName];
                     break;
                 }
                 case RetDataTypeUnsignedLongLong:{
-                    Ivar ivar = class_getInstanceVariable(clazz, [obj.name UTF8String]);
-                    *(unsigned long long *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = [resultSet unsignedLongLongIntForColumn:obj.dataBaseName];
+                    Ivar ivar = class_getInstanceVariable(clazz, [prop.name UTF8String]);
+                    *(unsigned long long *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = [resultSet unsignedLongLongIntForColumn:prop.dataBaseName];
                     break;
                 }
                 case RetDataTypeDouble: {
-                    Ivar ivar = class_getInstanceVariable(clazz, [obj.name UTF8String]);
-                    *(double *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = [resultSet doubleForColumn:obj.dataBaseName];
+                    Ivar ivar = class_getInstanceVariable(clazz, [prop.name UTF8String]);
+                    *(double *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = [resultSet doubleForColumn:prop.dataBaseName];
                     break;
                 }
                 case RetDataTypeFloat: {
-                    Ivar ivar = class_getInstanceVariable(clazz, [obj.name UTF8String]);
-                    *(float *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = [resultSet doubleForColumn:obj.dataBaseName];
+                    Ivar ivar = class_getInstanceVariable(clazz, [prop.name UTF8String]);
+                    *(float *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = [resultSet doubleForColumn:prop.dataBaseName];
                     break;
                 }
                 case RetDataTypeNSDate:{
-                    NSDate *date = [resultSet dateForColumn:obj.dataBaseName];
-                    [obj setValue:date forKey:obj.name];
+                    NSDate *date = [resultSet dateForColumn:prop.dataBaseName];
+                    [obj setValue:date forKey:prop.name];
                     break;
                 }
                 case RetDataTypeUnsupport:
