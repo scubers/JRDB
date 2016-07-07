@@ -19,8 +19,8 @@
         return nil;
     } else {
         NSMutableDictionary *dict = [NSMutableDictionary dictionary];
-        id obj = [[NSClassFromString(NSStringFromClass(clazz)) alloc] init];
-        if ([obj conformsToProtocol:@protocol(JRPersistent)]) {
+        id aobj = [[NSClassFromString(NSStringFromClass(clazz)) alloc] init];
+        if ([aobj conformsToProtocol:@protocol(JRPersistent)]) {
             [[clazz objc_properties] enumerateObjectsUsingBlock:^(OBJCProperty * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                 if ([[clazz jr_excludePropertyNames] containsObject:obj.ivarName]) {return ;}
                 if (!obj.ivarName.length) { return; }
