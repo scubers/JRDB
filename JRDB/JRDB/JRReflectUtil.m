@@ -19,10 +19,14 @@
         return nil;
     } else {
         NSMutableDictionary *dict = [NSMutableDictionary dictionary];
-        [[clazz objc_properties] enumerateObjectsUsingBlock:^(OBJCProperty * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            if ([[clazz jr_excludePropertyNames] containsObject:obj.ivarName]) {return ;}
-            dict[obj.ivarName] = obj.typeEncoding;
-        }];
+        id obj = [[NSClassFromString(NSStringFromClass(clazz)) alloc] init];
+        if ([obj conformsToProtocol:@protocol(JRPersistent)]) {
+            [[clazz objc_properties] enumerateObjectsUsingBlock:^(OBJCProperty * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                if ([[clazz jr_excludePropertyNames] containsObject:obj.ivarName]) {return ;}
+                if (!obj.ivarName.length) { return; }
+                dict[obj.ivarName] = obj.typeEncoding;
+            }];
+        }
         [dict addEntriesFromDictionary:[self propNameAndEncode4Clazz:class_getSuperclass(clazz)]];
         return dict;
     }
