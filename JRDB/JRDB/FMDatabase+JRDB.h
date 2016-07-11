@@ -88,7 +88,7 @@
 
 #pragma mark - save or update
 
-- (BOOL)jr_saveOrUpdateOneOnly:(id<JRPersistent> _Nonnull)one;
+- (BOOL)jr_saveOrUpdateOneOnly:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction;
 
 - (BOOL)jr_saveOrUpdateOne:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction;
 - (void)jr_saveOrUpdateOne:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete;
@@ -99,11 +99,13 @@
 #pragma mark - save one
 
 /**
- *  只保存one，没事务操作，不进行关联保存和删除更新（不建议使用）
+ *  只保存one，不进行关联保存和删除更新
  *
  *  @param one
  */
-- (BOOL)jr_saveOneOnly:(id<JRPersistent> _Nonnull)one;
+- (BOOL)jr_saveOneOnly:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction;
+- (void)jr_saveOneOnly:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete;
+
 
 /**
  *  保存one， 同时进行关联保存删除更新（建议使用），可选择自带事务或者自行在外层包裹事务
@@ -145,12 +147,14 @@
 #pragma mark - update
 
 /**
- *  只更新one，不进行关联保存和删除更新（不建议使用）
+ *  只更新one，不进行关联保存和删除更新
  *
  *  @param one
  *  @param columns 需要更新的字段
  */
-- (BOOL)jr_updateOneOnly:(id<JRPersistent> _Nonnull)one columns:(NSArray<NSString *> * _Nullable)columns;
+- (BOOL)jr_updateOneOnly:(id<JRPersistent> _Nonnull)one columns:(NSArray<NSString *> * _Nullable)columns useTransaction:(BOOL)useTransaction;
+- (void)jr_updateOneOnly:(id<JRPersistent> _Nonnull)one columns:(NSArray<NSString *> * _Nullable)columns useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete;
+
 
 /**
  *  更新one， 同时进行关联保存删除更新（建议使用），可选择自带事务或者自行在外层包裹事务
@@ -166,7 +170,6 @@
 - (void)jr_updateOne:(id<JRPersistent> _Nonnull)one columns:(NSArray<NSString *> * _Nullable)columns complete:(JRDBComplete _Nullable)complete;
 
 #pragma mark - update array
-
 
 /**
  *  更新array， 同时进行关联保存删除更新，可选择自带事务或者自行在外层包裹事务
@@ -184,11 +187,12 @@
 #pragma mark - delete
 
 /**
- *  只删除one，不进行关联保存和删除更新（不建议使用）
+ *  只删除one，不进行关联保存和删除更新
  *
  *  @param one
  */
-- (BOOL)jr_deleteOneOnly:(id<JRPersistent> _Nonnull)one;
+- (BOOL)jr_deleteOneOnly:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction;
+- (void)jr_deleteOneOnly:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete;
 
 /**
  *  删除one， 同时进行关联保存删除更新（建议使用），可选择自带事务或者自行在外层包裹事务
@@ -218,7 +222,8 @@
 
 #pragma mark - delete all
 
-- (BOOL)jr_deleteAllOnly:(Class<JRPersistent> _Nonnull)clazz;
+- (BOOL)jr_deleteAllOnly:(Class<JRPersistent> _Nonnull)clazz useTransaction:(BOOL)useTransaction;
+- (void)jr_deleteAllOnly:(Class<JRPersistent> _Nonnull)clazz useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete;
 
 - (BOOL)jr_deleteAll:(Class<JRPersistent> _Nonnull)clazz useTransaction:(BOOL)useTransaction;
 - (void)jr_deleteAll:(Class<JRPersistent> _Nonnull)clazz useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete;

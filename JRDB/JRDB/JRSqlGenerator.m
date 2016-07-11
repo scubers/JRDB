@@ -26,11 +26,11 @@ void SqlLog(id sql) {
 @implementation JRSqlGenerator
 
 // create table 'tableName' (ID text primary key, 'p1' 'type1')
-+ (JRSql *)createTableSql4Clazz:(Class<JRPersistent>)clazz {
++ (JRSql *)createTableSql4Clazz:(Class<JRPersistent>)clazz table:(NSString * _Nullable)table{
 
     NSArray<JRActivatedProperty *> *ap = [clazz jr_activatedProperties];
 
-    NSString *tableName  = [clazz shortClazzName];
+    NSString *tableName  = table ?: [clazz shortClazzName];
     NSMutableString *sql = [NSMutableString string];
     
     [sql appendFormat:@"create table if not exists %@ (_ID text primary key ", tableName];
@@ -59,10 +59,10 @@ void SqlLog(id sql) {
 }
 
 // {alter 'tableName' add column xx}
-+ (NSArray<JRSql *> *)updateTableSql4Clazz:(Class<JRPersistent>)clazz inDB:(FMDatabase *)db {
-    NSString *tableName = [clazz shortClazzName];
++ (NSArray<JRSql *> *)updateTableSql4Clazz:(Class<JRPersistent>)clazz inDB:(FMDatabase *)db table:(NSString * _Nullable)table {
+    NSString *tableName  = table ? : [clazz shortClazzName];
     // 检测表是否存在, 不存在则直接返回创建表语句
-    if (![db tableExists:tableName]) { return @[[self createTableSql4Clazz:clazz]]; }
+    if (![db tableExists:tableName]) { return @[[self createTableSql4Clazz:clazz table:tableName]]; }
 
     NSArray<JRActivatedProperty *> *ap = [clazz jr_activatedProperties];
     NSMutableArray *sqls = [NSMutableArray array];
@@ -92,17 +92,17 @@ void SqlLog(id sql) {
 }
 
 
-+ (JRSql *)dropTableSql4Clazz:(Class<JRPersistent>)clazz {
-    NSString *sql = [NSString stringWithFormat:@"drop table if exists %@ ;",[clazz shortClazzName]];
++ (JRSql *)dropTableSql4Clazz:(Class<JRPersistent>)clazz table:(NSString * _Nullable)table{
+    NSString *sql = [NSString stringWithFormat:@"drop table if exists %@ ;", table ?: [clazz shortClazzName]];
     JRSql *jrsql = [JRSql sql:sql args:nil];
     SqlLog(jrsql);
     return jrsql;
 }
 
 // insert into tablename (_ID) values (?)
-+ (JRSql *)sql4Insert:(id<JRPersistent>)obj toDB:(FMDatabase * _Nonnull)db {
++ (JRSql *)sql4Insert:(id<JRPersistent>)obj toDB:(FMDatabase * _Nonnull)db table:(NSString * _Nullable)table {
     
-    NSString *tableName = [[obj class] shortClazzName];
+    NSString *tableName = table ?: [[obj class] shortClazzName];
     NSArray<JRActivatedProperty *> *ap = [JRReflectUtil activitedProperties4Clazz:[obj class]];
     NSMutableArray *argsList = [NSMutableArray array];
     NSMutableString *sql     = [NSMutableString string];
@@ -160,16 +160,16 @@ void SqlLog(id sql) {
     return jrsql;
 }
 
-+ (JRSql *)sql4Delete:(id<JRPersistent>)obj {
-    NSString *sql = [NSString stringWithFormat:@"delete from %@ where %@ = ? ;", [[obj class] shortClazzName], [[obj class] jr_primaryKey]];
++ (JRSql *)sql4Delete:(id<JRPersistent>)obj table:(NSString * _Nullable)table {
+    NSString *sql = [NSString stringWithFormat:@"delete from %@ where %@ = ? ;", table ?: [[obj class] shortClazzName], [[obj class] jr_primaryKey]];
     JRSql *jrsql = [JRSql sql:sql args:nil];
     SqlLog(jrsql);
     return jrsql;
 
 }
 
-+ (JRSql *)sql4DeleteAll:(Class<JRPersistent>)clazz {
-    NSString *sql = [NSString stringWithFormat:@"delete from %@", [clazz shortClazzName]];
++ (JRSql *)sql4DeleteAll:(Class<JRPersistent>)clazz table:(NSString * _Nullable)table {
+    NSString *sql = [NSString stringWithFormat:@"delete from %@", table ?: [clazz shortClazzName]];
     JRSql *jrsql = [JRSql sql:sql args:nil];
     SqlLog(jrsql);
     return jrsql;
@@ -177,11 +177,11 @@ void SqlLog(id sql) {
 }
 
 // update 'tableName' set name = 'abc' where xx = xx
-+ (JRSql *)sql4Update:(id<JRPersistent>)obj columns:(NSArray<NSString *> *)columns toDB:(FMDatabase * _Nonnull)db {
++ (JRSql *)sql4Update:(id<JRPersistent>)obj columns:(NSArray<NSString *> *)columns toDB:(FMDatabase * _Nonnull)db table:(NSString * _Nullable)table {
     
     NSArray<JRActivatedProperty *> *ap = [JRReflectUtil activitedProperties4Clazz:[obj class]];
     
-    NSString *tableName      = [[obj class] shortClazzName];
+    NSString *tableName      = table ?: [[obj class] shortClazzName];
     NSMutableArray *argsList = [NSMutableArray array];
     NSMutableString *sql     = [NSMutableString string];
     
@@ -238,23 +238,23 @@ void SqlLog(id sql) {
 
 }
 
-+ (JRSql * _Nonnull)sql4GetByIDWithClazz:(Class<JRPersistent> _Nonnull)clazz {
-    NSString *sql = [NSString stringWithFormat:@"select * from %@ where _ID = ?;", [clazz shortClazzName]];
++ (JRSql * _Nonnull)sql4GetByIDWithClazz:(Class<JRPersistent> _Nonnull)clazz table:(NSString * _Nullable)table {
+    NSString *sql = [NSString stringWithFormat:@"select * from %@ where _ID = ?;", table ?:[clazz shortClazzName]];
     JRSql *jrsql = [JRSql sql:sql args:nil];
     SqlLog(jrsql);
     return jrsql;
 }
 
-+ (JRSql *)sql4GetByPrimaryKeyWithClazz:(Class<JRPersistent>)clazz {
-    NSString *sql = [NSString stringWithFormat:@"select * from %@ where %@ = ?;", [clazz shortClazzName], [clazz jr_primaryKey]];
++ (JRSql *)sql4GetByPrimaryKeyWithClazz:(Class<JRPersistent>)clazz table:(NSString * _Nullable)table {
+    NSString *sql = [NSString stringWithFormat:@"select * from %@ where %@ = ?;", table ?:[clazz shortClazzName], [clazz jr_primaryKey]];
     JRSql *jrsql = [JRSql sql:sql args:nil];
     SqlLog(jrsql);
     return jrsql;
 
 }
 
-+ (JRSql *)sql4FindAll:(Class<JRPersistent>)clazz orderby:(NSString *)orderby isDesc:(BOOL)isDesc {
-    NSString *sql = [NSString stringWithFormat:@"select * from %@ ", [clazz shortClazzName]];
++ (JRSql *)sql4FindAll:(Class<JRPersistent>)clazz orderby:(NSString *)orderby isDesc:(BOOL)isDesc table:(NSString * _Nullable)table {
+    NSString *sql = [NSString stringWithFormat:@"select * from %@ ", table ?: [clazz shortClazzName]];
     if (orderby.length) {
         sql = [sql stringByAppendingFormat:@" order by %@ ", orderby.length ? orderby : [clazz jr_primaryKey]];
     }
@@ -266,12 +266,12 @@ void SqlLog(id sql) {
 
 }
 
-+ (JRSql *)sql4FindByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc {
++ (JRSql *)sql4FindByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc table:(NSString * _Nullable)table {
     
     NSMutableArray *argList = [NSMutableArray array];
     NSMutableString *sql    = [NSMutableString string];
     
-    [sql appendFormat:@" select * from %@ where 1=1 ", [clazz shortClazzName]];
+    [sql appendFormat:@" select * from %@ where 1=1 ", table ?: [clazz shortClazzName]];
     
     for (JRQueryCondition *condition in conditions) {
         
@@ -302,15 +302,15 @@ void SqlLog(id sql) {
 
 #pragma mark - convenience
 
-+ (JRSql *)sql4CountByPrimaryKey:(id)pk clazz:(Class<JRPersistent>)clazz {
-    NSString *sql = [NSString stringWithFormat:@"select count(1) from %@ where %@ = ?", [clazz shortClazzName], [clazz jr_primaryKey]];
++ (JRSql *)sql4CountByPrimaryKey:(id)pk clazz:(Class<JRPersistent>)clazz table:(NSString * _Nullable)table {
+    NSString *sql = [NSString stringWithFormat:@"select count(1) from %@ where %@ = ?", table ?: [clazz shortClazzName], [clazz jr_primaryKey]];
     JRSql *jrsql = [JRSql sql:sql args:@[pk]];
     SqlLog(jrsql);
     return jrsql;
 }
 
-+ (JRSql *)sql4CountByID:(NSString *)ID clazz:(Class<JRPersistent>)clazz {
-    NSString *sql = [NSString stringWithFormat:@"select count(1) from %@ where _ID = ?", [clazz shortClazzName]];
++ (JRSql *)sql4CountByID:(NSString *)ID clazz:(Class<JRPersistent>)clazz table:(NSString * _Nullable)table {
+    NSString *sql = [NSString stringWithFormat:@"select count(1) from %@ where _ID = ?", table ?: [clazz shortClazzName]];
     JRSql *jrsql = [JRSql sql:sql args:@[ID]];
     SqlLog(jrsql);
     return jrsql;

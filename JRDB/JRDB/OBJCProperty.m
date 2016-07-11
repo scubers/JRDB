@@ -21,7 +21,7 @@
 @implementation OBJCProperty
 
 @synthesize name            = _name;
-@synthesize ivarName         = _ivarName;
+@synthesize ivarName        = _ivarName;
 @synthesize typeEncoding    = _typeEncoding;
 @synthesize oldTypeEncoding = _oldTypeEncoding;
 @synthesize ownerShip       = _ownerShip;
