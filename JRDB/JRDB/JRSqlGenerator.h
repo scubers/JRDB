@@ -33,7 +33,7 @@ typedef enum {
  *  @param clazz 对应的类
  *  @return sql
  */
-+ (JRSql * _Nonnull)createTableSql4Clazz:(Class<JRPersistent> _Nonnull)clazz table:(NSString * _Nullable)table;
++ (JRSql * _Nonnull)createTableSql4Clazz:(Class<JRPersistent> _Nonnull)clazz;
 
 /**
  *  删表
@@ -41,7 +41,7 @@ typedef enum {
  *  @param clazz 对应的类
  *  @return sql
  */
-+ (JRSql * _Nonnull)dropTableSql4Clazz:(Class<JRPersistent> _Nonnull)clazz table:(NSString * _Nullable)table;
++ (JRSql * _Nonnull)dropTableSql4Clazz:(Class<JRPersistent> _Nonnull)clazz;
 
 /**
  *  因为sqlite不支持批量添加字段，只能返回多条语句，多次更新表
@@ -51,14 +51,14 @@ typedef enum {
  *
  *  @return sql数组
  */
-+ (NSArray<JRSql *> * _Nonnull)updateTableSql4Clazz:(Class<JRPersistent> _Nonnull)clazz inDB:(FMDatabase * _Nonnull)db table:(NSString * _Nullable)table;
++ (NSArray<JRSql *> * _Nonnull)updateTableSql4Clazz:(Class<JRPersistent> _Nonnull)clazz inDB:(FMDatabase * _Nonnull)db;
 
 #pragma mark - insert
 
 /**
  *  返回占位符的sql insert into tablename values (name= ? , name2 = ?,)
  */
-+ (JRSql * _Nonnull)sql4Insert:(id<JRPersistent> _Nonnull)obj toDB:(FMDatabase * _Nonnull)db table:(NSString * _Nullable)table;
++ (JRSql * _Nonnull)sql4Insert:(id<JRPersistent> _Nonnull)obj toDB:(FMDatabase * _Nonnull)db;
 
 #pragma mark - update
 /**
@@ -67,20 +67,19 @@ typedef enum {
  */
 + (JRSql * _Nonnull)sql4Update:(id<JRPersistent> _Nonnull)obj
                        columns:(NSArray<NSString *> * _Nullable)columns
-                          toDB:(FMDatabase * _Nonnull)db
-                         table:(NSString * _Nullable)table;
+                          toDB:(FMDatabase * _Nonnull)db;
 
 
 #pragma mark - delete
 /**
  *  返回占位符的sql delete from tablename where ID = ?
  */
-+ (JRSql * _Nonnull)sql4Delete:(id<JRPersistent> _Nonnull)obj table:(NSString * _Nullable)table;
++ (JRSql * _Nonnull)sql4Delete:(id<JRPersistent> _Nonnull)obj;
 
 /**
  *  返回占位符的sql delete from tablename
  */
-+ (JRSql * _Nonnull)sql4DeleteAll:(Class<JRPersistent> _Nonnull)clazz table:(NSString * _Nullable)table;
++ (JRSql * _Nonnull)sql4DeleteAll:(Class<JRPersistent> _Nonnull)clazz;
 
 
 #pragma mark - query
@@ -91,7 +90,7 @@ typedef enum {
  *
  *  @return sql
  */
-+ (JRSql * _Nonnull)sql4GetByIDWithClazz:(Class<JRPersistent> _Nonnull)clazz table:(NSString * _Nullable)table;
++ (JRSql * _Nonnull)sql4GetByIDWithClazz:(Class<JRPersistent> _Nonnull)clazz;
 
 
 /**
@@ -101,7 +100,7 @@ typedef enum {
  *
  *  @return sql
  */
-+ (JRSql * _Nonnull)sql4GetByPrimaryKeyWithClazz:(Class<JRPersistent> _Nonnull)clazz table:(NSString * _Nullable)table;
++ (JRSql * _Nonnull)sql4GetByPrimaryKeyWithClazz:(Class<JRPersistent> _Nonnull)clazz;
 
 /**
  *  查找某个类的所有对象
@@ -111,7 +110,7 @@ typedef enum {
  *
  *  @return sql
  */
-+ (JRSql * _Nonnull)sql4FindAll:(Class<JRPersistent> _Nonnull)clazz orderby:(NSString * _Nullable)orderby isDesc:(BOOL)isDesc table:(NSString * _Nullable)table;
++ (JRSql * _Nonnull)sql4FindAll:(Class<JRPersistent> _Nonnull)clazz orderby:(NSString * _Nullable)orderby isDesc:(BOOL)isDesc;
 
 /**
  *  根据条件查询
@@ -127,11 +126,10 @@ typedef enum {
                                  groupBy:(NSString * _Nullable)groupBy
                                  orderBy:(NSString * _Nullable)orderBy
                                    limit:(NSString * _Nullable)limit
-                                  isDesc:(BOOL)isDesc
-                                   table:(NSString * _Nullable)table;
+                                  isDesc:(BOOL)isDesc;
 #pragma mark - conenience
 
-+ (JRSql * _Nonnull)sql4CountByPrimaryKey:(id _Nonnull)pk clazz:(Class<JRPersistent> _Nonnull)clazz table:(NSString * _Nullable)table;
-+ (JRSql * _Nonnull)sql4CountByID:(NSString * _Nonnull)ID clazz:(Class<JRPersistent> _Nonnull)clazz table:(NSString * _Nullable)table;
++ (JRSql * _Nonnull)sql4CountByPrimaryKey:(id _Nonnull)pk clazz:(Class<JRPersistent> _Nonnull)clazz;
++ (JRSql * _Nonnull)sql4CountByID:(NSString * _Nonnull)ID clazz:(Class<JRPersistent> _Nonnull)clazz;
 
 @end

@@ -150,6 +150,7 @@
 - (BOOL)jr_updateColumns:(NSArray<NSString *> * _Nullable)columns;
 - (void)jr_updateColumns:(NSArray<NSString *> * _Nullable)columns complete:(JRDBComplete _Nullable)complete;
 
+
 #pragma mark - delete
 
 + (BOOL)jr_deleteAllOnlyFromDB:(FMDatabase * _Nonnull)db;

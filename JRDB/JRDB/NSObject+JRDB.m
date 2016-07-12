@@ -119,7 +119,7 @@ const NSString *jr_activatedPropertiesKey = @"jr_activatedPropertiesKey";
 #pragma mark - save or update
 
 - (BOOL)jr_saveOrUpdateOnlyToDB:(FMDatabase * _Nonnull)db {
-    return [db jr_saveOrUpdateOneOnly:self useTransaction:YES];
+    return [db jr_saveOrUpdateOneOnly:self];
 }
 
 - (BOOL)jr_saveOrUpdateUseTransaction:(BOOL)useTransaction toDB:(FMDatabase * _Nonnull)db {
@@ -155,7 +155,7 @@ const NSString *jr_activatedPropertiesKey = @"jr_activatedPropertiesKey";
 #pragma mark - save
 
 - (BOOL)jr_saveOnlyToDB:(FMDatabase *)db {
-    return [db jr_saveOneOnly:self useTransaction:YES];
+    return [db jr_saveOneOnly:self];
 }
 
 
@@ -196,7 +196,7 @@ const NSString *jr_activatedPropertiesKey = @"jr_activatedPropertiesKey";
 #pragma mark - update
 
 - (BOOL)jr_updateOnlyColumns:(NSArray<NSString *> *)columns toDB:(FMDatabase *)db {
-    return [db jr_updateOneOnly:self columns:columns useTransaction:YES];
+    return [db jr_updateOneOnly:self columns:columns];
 }
 
 - (BOOL)jr_updateColumns:(NSArray<NSString *> *)columns useTransaction:(BOOL)useTransaction toDB:(FMDatabase *)db{
@@ -236,11 +236,11 @@ const NSString *jr_activatedPropertiesKey = @"jr_activatedPropertiesKey";
 #pragma mark - delete
 
 + (BOOL)jr_deleteAllOnlyFromDB:(FMDatabase *)db {
-    return [db jr_deleteAllOnly:self useTransaction:YES];
+    return [db jr_deleteAllOnly:self];
 }
 
 - (BOOL)jr_deleteOnlyFromDB:(FMDatabase *)db {
-    return [db jr_deleteOneOnly:self useTransaction:YES];
+    return [db jr_deleteOneOnly:self];
 }
 
 - (BOOL)jr_deleteUseTransaction:(BOOL)useTransaction fromDB:(FMDatabase *)db {
