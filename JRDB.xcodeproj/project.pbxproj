@@ -13,6 +13,8 @@
 		5AA5B3DE1CE2D46900360DC0 /* JRFMDBResultSetHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AA5B3DD1CE2D46900360DC0 /* JRFMDBResultSetHandler.m */; };
 		5AA5B3E11CE3120B00360DC0 /* JRQueryCondition.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AA5B3E01CE3120B00360DC0 /* JRQueryCondition.m */; };
 		5AB1BFA91D00115F001595D3 /* JRColumnSchema.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AB1BFA81D00115F001595D3 /* JRColumnSchema.m */; };
+		5ABBFEDB1D3486F3008FA656 /* JRDBChainTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 5ABBFEDA1D3486F3008FA656 /* JRDBChainTest.m */; };
+		5ABBFEDF1D34DC54008FA656 /* JRFMDBResultSetHandler+Chain.m in Sources */ = {isa = PBXBuildFile; fileRef = 5ABBFEDE1D34DC54008FA656 /* JRFMDBResultSetHandler+Chain.m */; };
 		5AC8B3321CE1DA2500079BC8 /* NSObject+JRDB.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AC8B3311CE1DA2500079BC8 /* NSObject+JRDB.m */; };
 		5AC8B3381CE1EDA700079BC8 /* FMDatabase+JRDB.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AC8B3371CE1EDA700079BC8 /* FMDatabase+JRDB.m */; };
 		5ACBEEB21CE1B3A500371E01 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 5ACBEEB11CE1B3A500371E01 /* main.m */; };
@@ -35,7 +37,6 @@
 		A80015F71D0EEC29000EA41A /* JRActivatedProperty.m in Sources */ = {isa = PBXBuildFile; fileRef = A80015F61D0EEC29000EA41A /* JRActivatedProperty.m */; };
 		A8A1B2251D033C8C00886403 /* NSObject+Reflect.m in Sources */ = {isa = PBXBuildFile; fileRef = A8A1B2241D033C8C00886403 /* NSObject+Reflect.m */; };
 		A8A1B2281D033CDC00886403 /* OBJCProperty.m in Sources */ = {isa = PBXBuildFile; fileRef = A8A1B2271D033CDC00886403 /* OBJCProperty.m */; };
-		A8A1B22F1D03D47B00886403 /* OBJCMethod.m in Sources */ = {isa = PBXBuildFile; fileRef = A8A1B22E1D03D47B00886403 /* OBJCMethod.m */; };
 		A8ED7A521D01CCA3009ED474 /* JRUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = A8ED7A511D01CCA3009ED474 /* JRUtils.m */; };
 		FD5163EC2C7D76B58D26C0E2 /* Pods.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FE689461577A49BE510217A6 /* Pods.framework */; };
 /* End PBXBuildFile section */
@@ -72,6 +73,9 @@
 		5AA7387B1CE430E20020947F /* JRDB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRDB.h; sourceTree = "<group>"; };
 		5AB1BFA71D00115F001595D3 /* JRColumnSchema.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRColumnSchema.h; sourceTree = "<group>"; };
 		5AB1BFA81D00115F001595D3 /* JRColumnSchema.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRColumnSchema.m; sourceTree = "<group>"; };
+		5ABBFEDA1D3486F3008FA656 /* JRDBChainTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRDBChainTest.m; sourceTree = "<group>"; };
+		5ABBFEDD1D34DC54008FA656 /* JRFMDBResultSetHandler+Chain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "JRFMDBResultSetHandler+Chain.h"; sourceTree = "<group>"; };
+		5ABBFEDE1D34DC54008FA656 /* JRFMDBResultSetHandler+Chain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "JRFMDBResultSetHandler+Chain.m"; sourceTree = "<group>"; };
 		5AC8B3301CE1DA2500079BC8 /* NSObject+JRDB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+JRDB.h"; sourceTree = "<group>"; };
 		5AC8B3311CE1DA2500079BC8 /* NSObject+JRDB.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+JRDB.m"; sourceTree = "<group>"; };
 		5AC8B3361CE1EDA700079BC8 /* FMDatabase+JRDB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "FMDatabase+JRDB.h"; sourceTree = "<group>"; };
@@ -118,8 +122,6 @@
 		A8A1B2261D033CDC00886403 /* OBJCProperty.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OBJCProperty.h; sourceTree = "<group>"; };
 		A8A1B2271D033CDC00886403 /* OBJCProperty.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OBJCProperty.m; sourceTree = "<group>"; };
 		A8A1B22C1D03D29900886403 /* JRReflectable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JRReflectable.h; sourceTree = "<group>"; };
-		A8A1B22D1D03D47B00886403 /* OBJCMethod.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OBJCMethod.h; sourceTree = "<group>"; };
-		A8A1B22E1D03D47B00886403 /* OBJCMethod.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OBJCMethod.m; sourceTree = "<group>"; };
 		A8ED7A501D01CCA3009ED474 /* JRUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRUtils.h; sourceTree = "<group>"; };
 		A8ED7A511D01CCA3009ED474 /* JRUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRUtils.m; sourceTree = "<group>"; };
 		FE689461577A49BE510217A6 /* Pods.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -205,6 +207,7 @@
 		5ACBEEC91CE1B3A500371E01 /* JRDBTests */ = {
 			isa = PBXGroup;
 			children = (
+				5ABBFEDA1D3486F3008FA656 /* JRDBChainTest.m */,
 				5ACBEECA1CE1B3A500371E01 /* JRDBTests.m */,
 				5AA3DB321D067DD800795E80 /* JRDBTestJRDBMgr.m */,
 				5ACBEECC1CE1B3A500371E01 /* Info.plist */,
@@ -230,8 +233,6 @@
 				A8A1B2241D033C8C00886403 /* NSObject+Reflect.m */,
 				A8A1B2261D033CDC00886403 /* OBJCProperty.h */,
 				A8A1B2271D033CDC00886403 /* OBJCProperty.m */,
-				A8A1B22D1D03D47B00886403 /* OBJCMethod.h */,
-				A8A1B22E1D03D47B00886403 /* OBJCMethod.m */,
 				5ACBEEE81CE1B8B800371E01 /* JRPersistent.h */,
 				5ACBEEE41CE1B65700371E01 /* JRDBMgr.h */,
 				5ACBEEE51CE1B65700371E01 /* JRDBMgr.m */,
@@ -255,6 +256,8 @@
 				5AD17B331D3354BC00F2B669 /* JRDBChain.m */,
 				5AA5B3DC1CE2D46900360DC0 /* JRFMDBResultSetHandler.h */,
 				5AA5B3DD1CE2D46900360DC0 /* JRFMDBResultSetHandler.m */,
+				5ABBFEDD1D34DC54008FA656 /* JRFMDBResultSetHandler+Chain.h */,
+				5ABBFEDE1D34DC54008FA656 /* JRFMDBResultSetHandler+Chain.m */,
 				5AA5B3DF1CE3120B00360DC0 /* JRQueryCondition.h */,
 				5AA5B3E01CE3120B00360DC0 /* JRQueryCondition.m */,
 				5AB1BFA71D00115F001595D3 /* JRColumnSchema.h */,
@@ -487,9 +490,9 @@
 				5AD17B341D3354BC00F2B669 /* JRDBChain.m in Sources */,
 				5ACBEEEB1CE1B91F00371E01 /* JRSqlGenerator.m in Sources */,
 				5AC8B3321CE1DA2500079BC8 /* NSObject+JRDB.m in Sources */,
-				A8A1B22F1D03D47B00886403 /* OBJCMethod.m in Sources */,
 				A8A1B2281D033CDC00886403 /* OBJCProperty.m in Sources */,
 				A8A1B2251D033C8C00886403 /* NSObject+Reflect.m in Sources */,
+				5ABBFEDF1D34DC54008FA656 /* JRFMDBResultSetHandler+Chain.m in Sources */,
 				5AA5B3E11CE3120B00360DC0 /* JRQueryCondition.m in Sources */,
 				5A7AED821D05294B000AD4FE /* JRMiddleTable.m in Sources */,
 				A80015F71D0EEC29000EA41A /* JRActivatedProperty.m in Sources */,
@@ -503,6 +506,7 @@
 			files = (
 				5AA3DB331D067DD800795E80 /* JRDBTestJRDBMgr.m in Sources */,
 				5ACBEECB1CE1B3A500371E01 /* JRDBTests.m in Sources */,
+				5ABBFEDB1D3486F3008FA656 /* JRDBChainTest.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

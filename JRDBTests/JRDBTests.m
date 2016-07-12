@@ -11,13 +11,11 @@
 #import "Person.h"
 #import "JRColumnSchema.h"
 #import "NSObject+Reflect.h"
+#import "JRDBChain.h"
+#import <objc/runtime.h>
 
 
-//#import "Person.h"
-//#import "JRReflectUtil.h"
-//#import "NSObject+JRDB.h"
-//#import "JRSqlGenerator.h"
-
+#define Chain 1
 
 @interface JRDBTests : XCTestCase
 
@@ -37,12 +35,11 @@
     [JRDBMgr shareInstance].defaultDB = db;
     
 //    [JRDBMgr shareInstance].debugMode = NO;
-    
     NSLog(@"%@", [[JRDBMgr shareInstance] registeredClazz]);
 }
 
 - (void)tearDown {
-    // Put teardown code here. This method is called after the invocation of each test method in the class.
+    
     [[JRDBMgr defaultDB] jr_closeQueue];
     [[JRDBMgr defaultDB] close];
     [super tearDown];
@@ -51,24 +48,49 @@
 
 #pragma mark - test delete
 - (void)testDeleteAll1 {
+#ifndef Chain
     [Person jr_deleteAllOnly];
+#else
+    [[JRDBChain new].DeleteAll([Person class]).Recursive(NO) exe:^(JRDBChain *chain, id result) {
+        NSLog(@"%@", result);
+    }];
+    
+    
+#endif
 }
 
 - (void)testDeleteAll {
+#ifndef Chain
     [[Person jr_findAll] jr_delete];
     [[Card jr_findAll] jr_delete];
     [[Money jr_findAll] jr_delete];
+#else
+    [[JRDBChain new].DeleteAll([Person class]) exe:nil];
+    [[JRDBChain new].DeleteAll([Card class]) exe:nil];
+    [[JRDBChain new].DeleteAll([Money class]) exe:nil];
+#endif
 }
 
 - (void)testDeleteOne {
+#ifndef Chain
     Person *p = [Person jr_findAll].firstObject;
     [p jr_delete];
+#else
+    Person *p = [[J_SELECT([Person class]) exe:nil] firstObject];
+    [J_DELETE(p) exe:nil];
+#endif
+
 }
 
 #pragma mark - test save
 - (void)testSaveOne {
     Person *p = [self createPerson:1 name:@"1"];
+#ifndef Chain
     [p jr_save];
+#else
+    [J_INSERT(p) exe:nil];
+#endif
+
 }
 
 - (void)testSaveMany {
@@ -77,11 +99,15 @@
     for (int i = 0; i < 10; i++) {
         [array addObject:[self createPerson:i name:[NSString stringWithFormat:@"%d", i]]];
     }
+#ifndef Chain
 //    [array jr_save];
-    [Person jr_findAll];
     [array jr_saveWithComplete:^(BOOL success) {
         NSLog(@"success");
     }];
+#else
+    [J_INSERT(array) exe:nil];
+#endif
+
 }
 
 - (void)testSaveCycle {
@@ -89,8 +115,11 @@
     Card *c = [self createCard:@"111"];
     p.card = c;
     c.person = p;
-    
-    [[JRDBMgr defaultDB] jr_saveOne:p recursave:NO useTransaction:YES];
+#ifndef Chain
+    [p jr_save];
+#else
+    [J_INSERT(p) exe:nil];
+#endif
     
 }
 
@@ -101,7 +130,11 @@
     p.son = p1;
     p1.son = p2;
     p2.son = p;
+#ifndef Chain
     [p jr_save];
+#else
+    [J_INSERT(p) exe:nil];
+#endif
 }
 
 - (void)testOneToManySave {
@@ -114,11 +147,22 @@
         [p1.money addObject:[self createMoney:i]];
     }
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
+#ifndef Chain
         [p1 jr_saveWithComplete:^(BOOL success) {
             NSLog(@"===");
         }];
+#else
+        [J_INSERT(p).NowInMain(NO) exe:^(JRDBChain *chain, id result) {
+            NSLog(@"===");
+        }];
+#endif
     });
+#ifndef Chain
     [p jr_save];
+#else
+    
+    [J_INSERT(p) exe:nil];
+#endif
     
 }
 
@@ -127,7 +171,11 @@
     for (int i = 0; i < 10; i++) {
         [p.children addObject:[self createPerson:i + 1 name:nil]];
     }
+#ifndef Chain
     [p jr_save];
+#else
+    [J_INSERT(p) exe:nil];
+#endif
 }
 
 #pragma mark - test update
@@ -136,9 +184,13 @@
     Person *p = [Person jr_findAll].firstObject;
     p.a_int = 9999;
     p.b_unsigned_int = 9999;
-//    p.money = [[p.money subarrayWithRange:NSMakeRange(0, 3)] mutableCopy];
+#ifndef Chain
 //    [p jr_updateColumns:nil];
     [p jr_updateColumns:@[@"_a_int", @"_money"]];
+#else
+//    [[JRDBChain new].J_UPDATE(p) exe:nil];
+    [J_UPDATE(p).Columns(@"_a_int", @"_money", nil) exe:nil];
+#endif
 }
 
 - (void)testUpdateMany {
@@ -146,7 +198,11 @@
     [ps enumerateObjectsUsingBlock:^(Person * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         obj.c_long = 3000;
     }];
+#ifndef Chain
     [ps jr_updateColumns:nil];
+#else
+    [J_UPDATE(ps) exe:nil];
+#endif
 }
 
 #pragma mark - test saveOrUpdate
@@ -167,23 +223,53 @@
 
 #pragma mark - test find 
 - (void)testFindByCondition {
+#ifndef Chain
     NSArray<Person *> *ps =[Person jr_findByConditions:@[
-                                     [JRQueryCondition condition:@"_b_unsigned_int > ?" args:@[@6] type:JRQueryConditionTypeAnd],
-                                     [JRQueryCondition condition:@"_c_long = ?" args:@[@3000] type:JRQueryConditionTypeOr],
-                                     ]
+                                                         [JRQueryCondition condition:@"_b_unsigned_int > ?" args:@[@6] type:JRQueryConditionTypeAnd],
+                                                         [JRQueryCondition condition:@"_c_long = ?" args:@[@3000] type:JRQueryConditionTypeOr],
+                                                         ]
                                                groupBy:nil
                                                orderBy:@"_ID"
                                                  limit:nil
                                                 isDesc:YES];
+#else
+    NSArray<Person *> *ps = [J_SELECT([Person class])
+                             .Where(@"_b_unsigned_int > ? or _c_long = ?")
+                             .Params(@6, @3000, nil)
+                             .Order(@"_ID")
+                             .Desc(YES)
+                             exe:nil];
+#endif
     
     NSLog(@"%@", ps);
 }
 
 - (void)testFindAll {
+#ifndef Chain
     NSArray<Person *> *p = [Person jr_findAll];
     NSArray<Person *> *p1 = [Person jr_findAll];
+#else
+    NSArray<Person *> *p = [J_SELECT([Person class]) exe:nil];
+    NSArray<Person *> *p1 = [J_SELECT([Person class]) exe:nil];
+#endif
+    
     [p isEqual:nil];
     [p1 isEqual:nil];
+}
+
+/**
+ [J_SELECT([Person class]).From(@"table").Where(@"_age = ?").Params(@[@1]) exe:nil];
+ [J_SELECT([Person class]).From(@"table").Where(@"_age = ?").Params(@[@1]) exe:nil];
+ [J_SELECT(*).From(@"table").Where(@"_age = ?").Params(@[@1]) exe:nil];
+ [J_SELECT(@[@"_age",@"_name"]).From(@"table").Where(@"_age = ?").Params(@[@1]) exe:nil];
+ [J_SELECT([Person class]).count().From(@"table").Where(@"_age = ?").Params(@[@1]) exe:nil];
+ 
+ */
+- (void)testSelectChain {
+//    some(@"1", @"2", nil);
+//    id re = [[JRDBChain new].SelectS(JRCount).From([Person class]) exe:nil];
+    id re = [J_SELECT(@"_a_int", nil).From([Person class]).Order(@"_a_int") exe:nil];
+    NSLog(@"%@", re);
 }
 
 #pragma mark - convenience method

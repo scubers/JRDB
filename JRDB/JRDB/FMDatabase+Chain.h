@@ -17,6 +17,7 @@
 - (void)jr_executeUpdateChain:(JRDBChain *)chain complete:(JRDBComplete)complete;
 
 
-- (NSArray<id<JRPersistent>> *)jr_executeQueryChain:(JRDBChain *)chain;
+- (id)jr_executeQueryChain:(JRDBChain *)chain;
+- (id)jr_executeCustomizedQueryChain:(JRDBChain *)chain;
 
 @end

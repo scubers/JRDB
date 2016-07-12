@@ -126,6 +126,11 @@
 
 #pragma mark - save array
 
+
+- (BOOL)jr_saveObjectsOnly:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction;
+- (void)jr_saveObjectsOnly:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete;
+
+
 /**
  *  保存数组， 同时进行关联保存删除更新，可选择自带事务或者自行在外层包裹事务
  *
@@ -171,6 +176,10 @@
 
 #pragma mark - update array
 
+- (BOOL)jr_updateObjectsOnly:(NSArray<id<JRPersistent>> * _Nonnull)objects columns:(NSArray<NSString *> * _Nullable)columns useTransaction:(BOOL)useTransaction;
+- (void)jr_updateObjectsOnly:(NSArray<id<JRPersistent>> * _Nonnull)objects columns:(NSArray<NSString *> * _Nullable)columns useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete;
+
+
 /**
  *  更新array， 同时进行关联保存删除更新，可选择自带事务或者自行在外层包裹事务
  *
@@ -207,6 +216,9 @@
 - (void)jr_deleteOne:(id<JRPersistent> _Nonnull)one complete:(JRDBComplete _Nullable)complete;
 
 #pragma mark - delete array
+
+- (BOOL)jr_deleteObjectsOnly:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction;
+- (void)jr_deleteObjectsOnly:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete;
 
 /**
  *  删除array， 同时进行关联保存删除更新，可选择自带事务或者自行在外层包裹事务

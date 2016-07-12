@@ -18,5 +18,6 @@
 + (JRSql *)sql4ChainDelete:(JRDBChain *)chain;
 + (JRSql *)sql4ChainDeleteAll:(JRDBChain *)chain;
 + (JRSql *)sql4ChainSelect:(JRDBChain *)chain;
++ (JRSql *)sql4ChainCustomizedSelect:(JRDBChain *)chain;
 
 @end

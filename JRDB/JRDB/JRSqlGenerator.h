@@ -11,6 +11,8 @@
 
 @class FMDatabase, JRQueryCondition, JRSql;
 
+void SqlLog(id _Nonnull sql);
+
 typedef enum {
     DBTypeNull = 1,
     DBTypeInteger,

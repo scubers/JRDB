@@ -11,8 +11,28 @@
 
 @class FMResultSet;
 
+typedef enum {
+    RetDataTypeInt = 1,
+    RetDataTypeUnsignedInt,
+    RetDataTypeLong,
+    RetDataTypeLongLong,
+    RetDataTypeUnsignedLong,
+    RetDataTypeUnsignedLongLong,
+    RetDataTypeDouble,
+    RetDataTypeFloat,
+    RetDataTypeString,
+    
+    RetDataTypeNSNumber,
+    RetDataTypeNSData,
+    RetDataTypeNSDate,
+    
+    RetDataTypeUnsupport
+} RetDataType;
+
 @interface JRFMDBResultSetHandler : NSObject
 
 + (NSArray<id<JRPersistent>> * _Nonnull)handleResultSet:(FMResultSet * _Nonnull)resultSet forClazz:(Class<JRPersistent> _Nonnull)clazz;
+
++ (RetDataType)typeWithEncode:(NSString * _Nonnull)encode;
 
 @end
