@@ -12,6 +12,7 @@
 #import "JRDBMgr.h"
 #import <objc/runtime.h>
 #import "NSObject+Reflect.h"
+#import "JRQueryCondition.h"
 @import FMDB;
 
 #define BlockPropertyImpl(_type_, _methodName_, _propName_)\
@@ -158,6 +159,14 @@
         }
         return self;
     };
+}
+
+- (NSArray<JRQueryCondition *> *)queryCondition {
+    NSArray *conditions = nil;
+    if (_whereString.length) {
+        conditions = @[[JRQueryCondition condition:_whereString args:_parameters type:JRQueryConditionTypeAnd]];
+    }
+    return conditions;
 }
 
 OperationBlockImpl(InsertBlock, Insert, CInsert)

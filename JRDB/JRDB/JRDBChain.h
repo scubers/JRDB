@@ -46,7 +46,7 @@ typedef enum {
 
 static NSString * const JRCount = @"_|-JRCount-|_";
 
-@class FMDatabase, JRDBChain;
+@class FMDatabase, JRDBChain, JRQueryCondition;
 
 typedef void(^JRDBChainComplete)(JRDBChain *chain, id result);
 
@@ -79,10 +79,11 @@ static inline NSArray * _JRBoxValue(id arg) {
 
 @interface JRDBChain : NSObject
 
-@property (nonatomic, strong, readonly) id             target;///< 有可能是obj对象, 也可能obj array，也有可能是class对象
-@property (nonatomic, assign, readonly) ChainOperation operation;
-@property (nonatomic, strong, readonly) NSString       *tableName;
+@property (nonatomic, strong, readonly) id               target;///< 有可能是obj对象, 也可能obj array，也有可能是class对象
+@property (nonatomic, assign, readonly) ChainOperation   operation;
+@property (nonatomic, strong, readonly) NSString         *tableName;
 
+@property (nonatomic, strong, readonly) NSArray<JRQueryCondition *> *queryCondition;
 @property (nonatomic, strong, readonly) NSArray<NSString*> *selectColumns;///< 自定义select时的
 
 - (id)exe:(JRDBChainComplete)complete;

@@ -58,11 +58,11 @@
 }
 
 + (JRSql *)sql4ChainSelect:(JRDBChain *)chain {
-    NSArray *conditions = nil;
-    if (chain.whereString.length) {
-        conditions = @[[JRQueryCondition condition:chain.whereString args:chain.parameters type:JRQueryConditionTypeAnd]];
+    if (chain.isRecursive) {
+        return [self sql4GetColumns:@[@"_ID"] byConditions:chain.queryCondition clazz:chain.target groupBy:chain.groupBy orderBy:chain.orderBy limit:chain.limitIn isDesc:chain.isDesc table:chain.tableName];
+    } else {
+        return [self sql4FindByConditions:chain.queryCondition clazz:chain.target groupBy:chain.groupBy orderBy:chain.orderBy limit:chain.limitIn isDesc:chain.isDesc table:chain.tableName];
     }
-    return [self sql4FindByConditions:conditions clazz:chain.target groupBy:chain.groupBy orderBy:chain.orderBy limit:chain.limitIn isDesc:chain.isDesc table:chain.tableName];
 }
 
 + (JRSql *)sql4ChainCustomizedSelect:(JRDBChain *)chain {
