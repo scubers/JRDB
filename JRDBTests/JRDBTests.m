@@ -89,8 +89,9 @@
     Card *c = [self createCard:@"111"];
     p.card = c;
     c.person = p;
-    //    [p jr_save];
-    [c jr_save];
+    
+    [[JRDBMgr defaultDB] jr_saveOne:p recursave:NO useTransaction:YES];
+    
 }
 
 - (void)test3CycleSave {
