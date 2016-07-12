@@ -51,7 +51,6 @@
         _isRecursive = YES;
         _isNowInMain = YES;
         _db = [JRDBMgr defaultDB];
-        // test
         [self.Select([self class]).From(@"abc") execute:^(JRDBChain *chain, id result) {
             
         }];
