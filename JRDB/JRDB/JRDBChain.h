@@ -68,7 +68,7 @@ typedef JRDBChain *(^SelectBlock)(id first, ...);
 @property(nonatomic,copy,readonly)JRDBChain*(^_name_)(id param, ...);
 
 
-#define OperationBlockDeclear(_name_, _type_) \
+#define OperationBlockDeclare(_name_, _type_) \
 @property(nonatomic,copy,readonly)_type_ _name_;
 
 static inline NSArray * _JRBoxValue(id arg) {
@@ -79,18 +79,18 @@ static inline NSArray * _JRBoxValue(id arg) {
 
 @interface JRDBChain : NSObject
 
-@property (nonatomic, strong, readonly) id             target;///< 有可能是obj对象，也有可能是class对象
+@property (nonatomic, strong, readonly) id             target;///< 有可能是obj对象, 也可能obj array，也有可能是class对象
 @property (nonatomic, assign, readonly) ChainOperation operation;
-@property (nonatomic, strong, readonly) NSArray<NSString       *> *selectColumns;
 @property (nonatomic, strong, readonly) NSString       *tableName;
+
+@property (nonatomic, strong, readonly) NSArray<NSString*> *selectColumns;///< 自定义select时的
 
 - (id)exe:(JRDBChainComplete)complete;
 
-BlockPropertyDeclare(strong, InDB, FMDatabase *, db);
-//BlockPropertyDeclare(strong, From, NSString *, tableName);
 @property (nonatomic, copy) JRDBChain *(^From)(id from);
-//- (JRDBChain *(^)(id from))From;
 
+// value param
+BlockPropertyDeclare(strong, InDB, FMDatabase *, db);
 BlockPropertyDeclare(strong, Order, NSString *, orderBy);
 BlockPropertyDeclare(strong, Group, NSString *, groupBy);
 BlockPropertyDeclare(strong, Limit, NSString *, limitIn);
@@ -101,20 +101,17 @@ BlockPropertyDeclare(assign, Trasaction, BOOL, useTransaction);
 BlockPropertyDeclare(assign, Desc, BOOL, isDesc);
 BlockPropertyDeclare(copy, Complete, JRDBChainComplete, completeBlock);
 
-
-//BlockPropertyDeclare(strong, Params, NSArray *, parameters);
-//@property (nonatomic, copy) JRDBChain *(^Params)(id obj, ...);
-//- (JRDBChain *(^)(id obj, ...))Params;
+// array param
 ArrayPropertyDeclare(strong, Params, NSArray *, parameters);
 ArrayPropertyDeclare(strong, Columns, NSArray *, columnsArray);
 ArrayPropertyDeclare(strong, Ignore, NSArray *, ignoreArray);
 
 
-// block
-OperationBlockDeclear(Insert, InsertBlock);
-OperationBlockDeclear(Update, UpdateBlock);
-OperationBlockDeclear(Delete, DeleteBlock);
-OperationBlockDeclear(DeleteAll, DeleteAllBlock);
-OperationBlockDeclear(Select, SelectBlock);
+// operation
+OperationBlockDeclare(Insert, InsertBlock);
+OperationBlockDeclare(Update, UpdateBlock);
+OperationBlockDeclare(Delete, DeleteBlock);
+OperationBlockDeclare(DeleteAll, DeleteAllBlock);
+OperationBlockDeclare(Select, SelectBlock);
 
 @end

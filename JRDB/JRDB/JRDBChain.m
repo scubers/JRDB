@@ -65,8 +65,9 @@
 
 @interface JRDBChain ()
 
-@property (nonatomic, strong) NSMutableArray *history;
-@property (nonatomic, strong) id             result;
+@property (nonatomic, strong) NSMutableArray<NSString *> *history;///< 链式调用历史，用于检测
+
+@property (nonatomic, strong) id result;///< 存储执行结果
 
 @end
 

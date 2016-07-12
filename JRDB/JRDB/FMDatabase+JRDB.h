@@ -361,4 +361,11 @@
 - (long)jr_count4PrimaryKey:(id _Nonnull)pk clazz:(Class<JRPersistent> _Nonnull)clazz;
 - (long)jr_count4ID:(NSString * _Nonnull)ID clazz:(Class<JRPersistent> _Nonnull)clazz;
 
+- (NSArray<NSString *> * _Nonnull)jr_getIDsByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions
+                                                  clazz:(Class<JRPersistent> _Nonnull)clazz
+                                                groupBy:(NSString * _Nullable)groupBy
+                                                orderBy:(NSString * _Nullable)orderBy
+                                                  limit:(NSString * _Nullable)limit
+                                                 isDesc:(BOOL)isDesc;
+
 @end

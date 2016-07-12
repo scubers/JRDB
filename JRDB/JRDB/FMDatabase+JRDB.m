@@ -743,8 +743,7 @@ static NSString * const queuekey = @"queuekey";
 - (id<JRPersistent>)jr_getByID:(NSString *)ID clazz:(Class<JRPersistent>)clazz {
     AssertRegisteredClazz(clazz);
     NSAssert(ID, @"id should not be nil");
-    JRSql *sql = [JRSqlGenerator sql4GetByIDWithClazz:clazz table:nil];
-    [sql.args addObject:ID];
+    JRSql *sql = [JRSqlGenerator sql4GetByIDWithClazz:clazz ID:ID table:nil];
     FMResultSet *ret = [self jr_executeQuery:sql];
     return [JRFMDBResultSetHandler handleResultSet:ret forClazz:clazz].firstObject;
 }
@@ -752,8 +751,7 @@ static NSString * const queuekey = @"queuekey";
 - (id<JRPersistent>)jr_getByPrimaryKey:(id)primaryKey clazz:(Class<JRPersistent>)clazz {
     AssertRegisteredClazz(clazz);
     NSAssert(primaryKey, @"id should be nil");
-    JRSql *sql = [JRSqlGenerator sql4GetByPrimaryKeyWithClazz:clazz table:nil];
-    [sql.args addObject:primaryKey];
+    JRSql *sql = [JRSqlGenerator sql4GetByPrimaryKeyWithClazz:clazz primaryKey:primaryKey table:nil];
     FMResultSet *ret = [self jr_executeQuery:sql];
     return [JRFMDBResultSetHandler handleResultSet:ret forClazz:clazz].firstObject;
 }
@@ -872,17 +870,17 @@ static NSString * const queuekey = @"queuekey";
                       orderBy:(NSString *)orderBy
                         limit:(NSString *)limit
                        isDesc:(BOOL)isDesc {
-    
-    NSArray<id<JRPersistent>> *list = [self jr_getByConditions:conditions
-                                                      clazz:clazz
-                                                    groupBy:groupBy
-                                                    orderBy:orderBy
-                                                      limit:limit
-                                                     isDesc:isDesc];
-    
+
+    NSArray<NSString *> *list = [self jr_getIDsByConditions:conditions
+                                                            clazz:clazz
+                                                          groupBy:groupBy
+                                                          orderBy:orderBy
+                                                            limit:limit
+                                                           isDesc:isDesc];
+
     NSMutableArray *result = [NSMutableArray array];
-    [list enumerateObjectsUsingBlock:^(id<JRPersistent>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        [result addObject:[self jr_findByID:[obj ID] clazz:[obj class]]];
+    [list enumerateObjectsUsingBlock:^(NSString * ID, NSUInteger idx, BOOL * _Nonnull stop) {
+        [result addObject:[self jr_findByID:ID clazz:clazz]];
     }];
     
     return result;
@@ -934,6 +932,21 @@ static NSString * const queuekey = @"queuekey";
         return [ret longForColumnIndex:0];
     }
     return 0;
+}
+
+- (NSArray<NSString *> * _Nonnull)jr_getIDsByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions
+                                                  clazz:(Class<JRPersistent> _Nonnull)clazz
+                                                groupBy:(NSString * _Nullable)groupBy
+                                                orderBy:(NSString * _Nullable)orderBy
+                                                  limit:(NSString * _Nullable)limit
+                                                 isDesc:(BOOL)isDesc {
+    JRSql *sql = [JRSqlGenerator sql4GetColumns:@[@"_ID"] byConditions:conditions clazz:clazz groupBy:groupBy orderBy:orderBy limit:limit isDesc:isDesc table:nil];
+    FMResultSet *resultset = [self jr_executeQuery:sql];
+    NSMutableArray *array = [NSMutableArray array];
+    while ([resultset next]) {
+        [array addObject:[resultset stringForColumnIndex:0]];
+    }
+    return array;
 }
 @end
 

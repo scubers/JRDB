@@ -93,7 +93,7 @@ typedef enum {
  *
  *  @return sql
  */
-+ (JRSql * _Nonnull)sql4GetByIDWithClazz:(Class<JRPersistent> _Nonnull)clazz table:(NSString * _Nullable)table;
++ (JRSql * _Nonnull)sql4GetByIDWithClazz:(Class<JRPersistent> _Nonnull)clazz ID:(NSString * _Nonnull)ID table:(NSString * _Nullable)table;
 
 
 /**
@@ -103,7 +103,7 @@ typedef enum {
  *
  *  @return sql
  */
-+ (JRSql * _Nonnull)sql4GetByPrimaryKeyWithClazz:(Class<JRPersistent> _Nonnull)clazz table:(NSString * _Nullable)table;
++ (JRSql * _Nonnull)sql4GetByPrimaryKeyWithClazz:(Class<JRPersistent> _Nonnull)clazz primaryKey:(id _Nonnull)primaryKey table:(NSString * _Nullable)table;
 
 /**
  *  查找某个类的所有对象
@@ -132,8 +132,16 @@ typedef enum {
                                   isDesc:(BOOL)isDesc
                                    table:(NSString * _Nullable)table;
 #pragma mark - conenience
-
 + (JRSql * _Nonnull)sql4CountByPrimaryKey:(id _Nonnull)pk clazz:(Class<JRPersistent> _Nonnull)clazz table:(NSString * _Nullable)table;
 + (JRSql * _Nonnull)sql4CountByID:(NSString * _Nonnull)ID clazz:(Class<JRPersistent> _Nonnull)clazz table:(NSString * _Nullable)table;
+
++ (JRSql * _Nonnull)sql4GetColumns:(NSArray<NSString *> * _Nullable)columns
+                      byConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions
+                             clazz:(Class<JRPersistent> _Nonnull)clazz
+                           groupBy:(NSString * _Nullable)groupBy
+                           orderBy:(NSString * _Nullable)orderBy
+                             limit:(NSString * _Nullable)limit
+                            isDesc:(BOOL)isDesc
+                             table:(NSString * _Nullable)table;
 
 @end

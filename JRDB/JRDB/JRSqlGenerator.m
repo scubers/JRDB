@@ -238,65 +238,48 @@ void SqlLog(id sql) {
 
 }
 
-+ (JRSql * _Nonnull)sql4GetByIDWithClazz:(Class<JRPersistent> _Nonnull)clazz table:(NSString * _Nullable)table {
-    NSString *sql = [NSString stringWithFormat:@"select * from %@ where _ID = ?;", table ?:[clazz shortClazzName]];
-    JRSql *jrsql = [JRSql sql:sql args:nil];
-    SqlLog(jrsql);
-    return jrsql;
++ (JRSql * _Nonnull)sql4GetByIDWithClazz:(Class<JRPersistent> _Nonnull)clazz ID:(NSString *)ID table:(NSString * _Nullable)table {
+    return [self sql4GetColumns:nil
+                   byConditions:@[
+                                  [JRQueryCondition type:JRQueryConditionTypeAnd condition:@"_ID=?", ID]
+                                  ]
+                          clazz:clazz
+                        groupBy:nil
+                        orderBy:nil
+                          limit:nil
+                         isDesc:NO
+                          table:table];
 }
 
-+ (JRSql *)sql4GetByPrimaryKeyWithClazz:(Class<JRPersistent>)clazz table:(NSString * _Nullable)table {
-    NSString *sql = [NSString stringWithFormat:@"select * from %@ where %@ = ?;", table ?:[clazz shortClazzName], [clazz jr_primaryKey]];
-    JRSql *jrsql = [JRSql sql:sql args:nil];
-    SqlLog(jrsql);
-    return jrsql;
++ (JRSql *)sql4GetByPrimaryKeyWithClazz:(Class<JRPersistent>)clazz primaryKey:(id _Nonnull)primaryKey table:(NSString * _Nullable)table {
 
+    NSString *string = [NSString stringWithFormat:@"%@=?", [clazz jr_primaryKey]];
+    return [self sql4GetColumns:nil
+                   byConditions:@[
+                                  [JRQueryCondition type:JRQueryConditionTypeAnd condition:string, primaryKey]
+                                  ]
+                          clazz:clazz
+                        groupBy:nil
+                        orderBy:nil
+                          limit:nil
+                         isDesc:NO
+                          table:table];
 }
 
 + (JRSql *)sql4FindAll:(Class<JRPersistent>)clazz orderby:(NSString *)orderby isDesc:(BOOL)isDesc table:(NSString * _Nullable)table {
-    NSString *sql = [NSString stringWithFormat:@"select * from %@ ", table ?: [clazz shortClazzName]];
-    if (orderby.length) {
-        sql = [sql stringByAppendingFormat:@" order by %@ ", orderby.length ? orderby : [clazz jr_primaryKey]];
-    }
-    sql = [sql stringByAppendingFormat:@" %@ ;", isDesc ? @"desc" : @""];
-
-    JRSql *jrsql = [JRSql sql:sql args:nil];
-    SqlLog(jrsql);
-    return jrsql;
-
+    return [self sql4GetColumns:nil
+                   byConditions:nil
+                          clazz:clazz
+                        groupBy:nil
+                        orderBy:orderby
+                          limit:nil
+                         isDesc:isDesc
+                          table:table];
 }
 
 + (JRSql *)sql4FindByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc table:(NSString * _Nullable)table {
-    
-    NSMutableArray *argList = [NSMutableArray array];
-    NSMutableString *sql    = [NSMutableString string];
-    
-    [sql appendFormat:@" select * from %@ where 1=1 ", table ?: [clazz shortClazzName]];
-    
-    for (JRQueryCondition *condition in conditions) {
-        
-        [sql appendFormat:@" %@ (%@)", condition.type == JRQueryConditionTypeAnd ? @"and" : @"or", condition.condition];
-        
-        if (condition.args.count) {
-            [argList addObjectsFromArray:condition.args];
-        }
-    }
-    
-    // group
-    if (groupBy.length) { [sql appendFormat:@" group by %@ ", groupBy]; }
-    // orderby
-    if (orderBy.length) { [sql appendFormat:@" order by %@ ", orderBy]; }
-    // desc asc
-    if (isDesc) {[sql appendString:@" desc "];}
-    // limit
-    if (limit.length) { [sql appendFormat:@" %@ ", limit]; }
-    
-    [sql appendString:@";"];
 
-    JRSql *jrsql = [JRSql sql:sql args:argList];
-    SqlLog(jrsql);
-    return jrsql;
-
+    return [self sql4GetColumns:nil byConditions:conditions clazz:clazz groupBy:groupBy orderBy:orderBy limit:limit isDesc:isDesc table:table];
 }
 
 
@@ -314,6 +297,56 @@ void SqlLog(id sql) {
     JRSql *jrsql = [JRSql sql:sql args:@[ID]];
     SqlLog(jrsql);
     return jrsql;
+}
+
++ (JRSql * _Nonnull)sql4GetColumns:(NSArray<NSString *> * _Nullable)columns
+                      byConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions
+                             clazz:(Class<JRPersistent> _Nonnull)clazz
+                           groupBy:(NSString * _Nullable)groupBy
+                           orderBy:(NSString * _Nullable)orderBy
+                             limit:(NSString * _Nullable)limit
+                            isDesc:(BOOL)isDesc
+                             table:(NSString * _Nullable)table {
+
+    NSMutableArray *argList = [NSMutableArray array];
+    NSString *tableName = table ?: [clazz shortClazzName];
+    NSMutableString *sqlString = [NSMutableString string];
+
+    if (columns.count) {
+        [sqlString appendString:@" select "];
+        [columns enumerateObjectsUsingBlock:^(NSString * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            idx ? [sqlString appendFormat:@", %@ ", obj] : [sqlString appendFormat:@"%@", obj];
+        }];
+    } else {
+        [sqlString appendString:@" select * from "];
+    }
+
+    [sqlString appendFormat:@" %@ where 1=1 ", tableName];
+
+    for (JRQueryCondition *condition in conditions) {
+
+        [sqlString appendFormat:@" %@ (%@)", condition.type == JRQueryConditionTypeAnd ? @"and" : @"or", condition.condition];
+
+        if (condition.args.count) {
+            [argList addObjectsFromArray:condition.args];
+        }
+    }
+
+    // group
+    if (groupBy.length) { [sqlString appendFormat:@" group by %@ ", groupBy]; }
+    // orderby
+    if (orderBy.length) { [sqlString appendFormat:@" order by %@ ", orderBy]; }
+    // desc asc
+    if (isDesc) {[sqlString appendString:@" desc "];}
+    // limit
+    if (limit.length) { [sqlString appendFormat:@" %@ ", limit]; }
+
+    [sqlString appendString:@";"];
+
+    JRSql *jrsql = [JRSql sql:sqlString args:argList];
+    SqlLog(jrsql);
+    return jrsql;
+
 }
 
 #pragma mark - private method

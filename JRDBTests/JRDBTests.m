@@ -26,7 +26,7 @@
 - (void)setUp {
     [super setUp];
     [JRDBMgr defaultDB];
-    FMDatabase *db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/jmacmini/Desktop/test.sqlite"];
+    FMDatabase *db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/Jrwong/Desktop/test.sqlite"];
     [[JRDBMgr shareInstance] registerClazzes:@[
                                                [Person class],
                                                [Card class],
@@ -174,6 +174,7 @@
 #ifndef Chain
     [p jr_save];
 #else
+//    [J_INSERT(p) exe:nil];
     [J_INSERT(p) exe:nil];
 #endif
 }
@@ -189,19 +190,20 @@
     [p jr_updateColumns:@[@"_a_int", @"_money"]];
 #else
 //    [[JRDBChain new].J_UPDATE(p) exe:nil];
-    [J_UPDATE(p).Columns(@"_a_int", @"_money", nil) exe:nil];
+//    NSLog(@"%@", [J_UPDATE(p).Columns(@[@"_a_int", @"_money"]) exe:nil]);
+    NSLog(@"%@", [J_UPDATE(p).Columns(@"_a_int", @"_money", nil) exe:nil]);
 #endif
 }
 
 - (void)testUpdateMany {
     NSArray<Person *> * ps = [Person jr_findAll];
     [ps enumerateObjectsUsingBlock:^(Person * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        obj.c_long = 3000;
+        obj.c_long = 5000;
     }];
 #ifndef Chain
     [ps jr_updateColumns:nil];
 #else
-    [J_UPDATE(ps) exe:nil];
+    [J_UPDATE(ps).Recursive(NO).Columns(@"_c_long", nil) exe:nil];
 #endif
 }
 
@@ -268,7 +270,7 @@
 - (void)testSelectChain {
 //    some(@"1", @"2", nil);
 //    id re = [[JRDBChain new].SelectS(JRCount).From([Person class]) exe:nil];
-    id re = [J_SELECT(@"_a_int", nil).From([Person class]).Order(@"_a_int") exe:nil];
+    id re = [J_SELECT([Person class]) exe:nil];
     NSLog(@"%@", re);
 }
 
