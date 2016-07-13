@@ -21,48 +21,48 @@
 - (BOOL)jr_executeUpdateChain:(JRDBChain *)chain {
     if (chain.operation == CInsert) {
         if (!chain.isRecursive) {
-            if ([chain.target isKindOfClass:[NSArray class]]) {
-                return [self jr_saveObjectsOnly:chain.target useTransaction:chain.useTransaction];
+            if (chain.targetArray) {
+                return [self jr_saveObjectsOnly:chain.targetArray useTransaction:chain.useTransaction];
             }
             return [self jr_saveOneOnly:chain.target useTransaction:chain.useTransaction];
         } else {
-            if ([chain.target isKindOfClass:[NSArray class]]) {
-                return [self jr_saveObjects:chain.target useTransaction:chain.useTransaction];
+            if (chain.targetArray) {
+                return [self jr_saveObjects:chain.targetArray useTransaction:chain.useTransaction];
             }
             return [self jr_saveOne:chain.target useTransaction:chain.useTransaction];
         }
     }
     else if (chain.operation == CUpdate) {
         if (!chain.isRecursive) {
-            if ([chain.target isKindOfClass:[NSArray class]]) {
-                return [self jr_updateObjectsOnly:chain.target columns:[self _needUpdateColumnsInChain:chain] useTransaction:chain.useTransaction];
+            if (chain.targetArray) {
+                return [self jr_updateObjectsOnly:chain.targetArray columns:[self _needUpdateColumnsInChain:chain] useTransaction:chain.useTransaction];
             }
             return [self jr_updateOneOnly:chain.target columns:[self _needUpdateColumnsInChain:chain] useTransaction:chain.useTransaction];
         } else {
-            if ([chain.target isKindOfClass:[NSArray class]]) {
-                return [self jr_updateObjects:chain.target columns:[self _needUpdateColumnsInChain:chain] useTransaction:chain.useTransaction];
+            if (chain.targetArray) {
+                return [self jr_updateObjects:chain.targetArray columns:[self _needUpdateColumnsInChain:chain] useTransaction:chain.useTransaction];
             }
             return [self jr_updateOne:chain.target columns:[self _needUpdateColumnsInChain:chain] useTransaction:chain.useTransaction];
         }
     }
     else if (chain.operation == CDelete) {
         if (!chain.isRecursive) {
-            if ([chain.target isKindOfClass:[NSArray class]]) {
-                return [self jr_deleteObjectsOnly:chain.target useTransaction:chain.useTransaction];
+            if (chain.targetArray) {
+                return [self jr_deleteObjectsOnly:chain.targetArray useTransaction:chain.useTransaction];
             }
             return [self jr_deleteOneOnly:chain.target useTransaction:chain.useTransaction];
         } else {
-            if ([chain.target isKindOfClass:[NSArray class]]) {
-                return [self jr_deleteObjects:chain.target useTransaction:chain.useTransaction];
+            if (chain.targetArray) {
+                return [self jr_deleteObjects:chain.targetArray useTransaction:chain.useTransaction];
             }
             return [self jr_deleteOne:chain.target useTransaction:chain.useTransaction];
         }
     }
     else if (chain.operation == CDeleteAll) {
         if (!chain.isRecursive) {
-            return [self jr_deleteAllOnly:chain.target useTransaction:chain.useTransaction];
+            return [self jr_deleteAllOnly:chain.targetClazz useTransaction:chain.useTransaction];
         } else {
-            return [self jr_deleteAll:chain.target useTransaction:chain.useTransaction];
+            return [self jr_deleteAll:chain.targetClazz useTransaction:chain.useTransaction];
         }
     }
     else {
@@ -74,14 +74,14 @@
 - (void)jr_executeUpdateChain:(JRDBChain *)chain complete:(JRDBComplete)complete {
     if (chain.operation == CInsert) {
         if (!chain.isRecursive) {
-            if ([chain.target isKindOfClass:[NSArray class]]) {
-                [self jr_saveObjectsOnly:chain.target useTransaction:chain.useTransaction complete:complete];
+            if (chain.targetArray) {
+                [self jr_saveObjectsOnly:chain.targetArray useTransaction:chain.useTransaction complete:complete];
             } else {
                 [self jr_saveOneOnly:chain.target useTransaction:chain.useTransaction complete:complete];
             }
         } else {
-            if ([chain.target isKindOfClass:[NSArray class]]) {
-                [self jr_saveObjects:chain.target useTransaction:chain.useTransaction complete:complete];
+            if (chain.targetArray) {
+                [self jr_saveObjects:chain.targetArray useTransaction:chain.useTransaction complete:complete];
             } else {
                 [self jr_saveOne:chain.target useTransaction:chain.useTransaction complete:complete];
             }
@@ -89,15 +89,15 @@
     }
     else if (chain.operation == CUpdate) {
         if (!chain.isRecursive) {
-            if ([chain.target isKindOfClass:[NSArray class]]) {
-                [self jr_updateObjectsOnly:chain.target columns:[self _needUpdateColumnsInChain:chain] useTransaction:chain.useTransaction complete:complete];
+            if (chain.targetArray) {
+                [self jr_updateObjectsOnly:chain.targetArray columns:[self _needUpdateColumnsInChain:chain] useTransaction:chain.useTransaction complete:complete];
             } else {
                 [self jr_updateOneOnly:chain.target columns:[self _needUpdateColumnsInChain:chain] useTransaction:chain.useTransaction complete:complete];
             }
 
         } else {
-            if ([chain.target isKindOfClass:[NSArray class]]) {
-                [self jr_updateObjects:chain.target columns:[self _needUpdateColumnsInChain:chain] useTransaction:chain.useTransaction complete:complete];
+            if (chain.targetArray) {
+                [self jr_updateObjects:chain.targetArray columns:[self _needUpdateColumnsInChain:chain] useTransaction:chain.useTransaction complete:complete];
             } else {
                 [self jr_updateOne:chain.target columns:[self _needUpdateColumnsInChain:chain] useTransaction:chain.useTransaction  complete:complete];
             }
@@ -105,14 +105,14 @@
     }
     else if (chain.operation == CDelete) {
         if (!chain.isRecursive) {
-            if ([chain.target isKindOfClass:[NSArray class]]) {
-                [self jr_deleteObjectsOnly:chain.target useTransaction:chain.useTransaction complete:complete];
+            if (chain.targetArray) {
+                [self jr_deleteObjectsOnly:chain.targetArray useTransaction:chain.useTransaction complete:complete];
             } else {
                 [self jr_deleteOneOnly:chain.target useTransaction:chain.useTransaction complete:complete];
             }
         } else {
-            if ([chain.target isKindOfClass:[NSArray class]]) {
-                [self jr_deleteObjects:chain.target useTransaction:chain.useTransaction complete:complete];
+            if (chain.targetArray) {
+                [self jr_deleteObjects:chain.targetArray useTransaction:chain.useTransaction complete:complete];
             } else {
                 [self jr_deleteOne:chain.target useTransaction:chain.useTransaction complete:complete];
             }
@@ -120,9 +120,9 @@
     }
     else if (chain.operation == CDeleteAll) {
         if (!chain.isRecursive) {
-            [self jr_deleteAllOnly:chain.target useTransaction:chain.useTransaction complete:complete];
+            [self jr_deleteAllOnly:chain.targetClazz useTransaction:chain.useTransaction complete:complete];
         } else {
-            [self jr_deleteAll:chain.target useTransaction:chain.useTransaction  complete:complete];
+            [self jr_deleteAll:chain.targetClazz useTransaction:chain.useTransaction  complete:complete];
         }
     }
     else {
@@ -131,9 +131,18 @@
 }
 
 - (id)jr_executeQueryChain:(JRDBChain *)chain {
-    JRSql *sql = [JRSqlGenerator sql4ChainSelect:chain];
-    FMResultSet *resultset = [self jr_executeQuery:sql];
-    return [JRFMDBResultSetHandler handleResultSet:resultset forClazz:chain.target];
+    if (!chain.isRecursive || chain.selectColumns.count) {
+        JRSql *sql = [JRSqlGenerator sql4ChainSelect:chain];
+        FMResultSet *resultset = [self jr_executeQuery:sql];
+        return [JRFMDBResultSetHandler handleResultSet:resultset forClazz:chain.targetClazz];
+    } else {
+        NSArray<NSString *> *ids = [self jr_getIDsByConditions:chain.queryCondition clazz:chain.targetClazz groupBy:chain.groupBy orderBy:chain.orderBy limit:chain.limitIn isDesc:chain.isDesc];
+        NSMutableArray *list = [NSMutableArray array];
+        [ids enumerateObjectsUsingBlock:^(NSString * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            [list addObject:[self jr_findByID:obj clazz:chain.targetClazz]];
+        }];
+        return list;
+    }
 }
 
 - (id)jr_executeCustomizedQueryChain:(JRDBChain *)chain {
@@ -143,19 +152,19 @@
 }
 
 - (NSArray *)_needUpdateColumnsInChain:(JRDBChain *)chain {
-    NSMutableArray *columns = nil;
+    NSMutableArray *columns = [NSMutableArray array];
     if (chain.columnsArray.count) {
         return chain.columnsArray;
     }
     else if (chain.ignoreArray.count) {
-        Class<JRPersistent> clazz = [chain.target class];
+        Class<JRPersistent> clazz = chain.targetClazz;
         [[clazz jr_activatedProperties] enumerateObjectsUsingBlock:^(JRActivatedProperty * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            if (![chain.ignoreArray containsObject:obj]) {
+            if (![chain.ignoreArray containsObject:obj.name]) {
                 [columns addObject:obj.name];
             }
         }];
     }
-    return columns;
+    return columns.count ? columns : nil;
 }
 
 @end

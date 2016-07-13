@@ -46,6 +46,10 @@
     BOOL ret = [self deleteID:ID forClazz:IDClazz];
     if (!ret) { return NO; }
     
+    if (!IDs.count) {
+        return YES;
+    }
+    
     NSArray<NSString *> *exisisIDs = [self anotherClazzIDsWithID:ID clazz:IDClazz];
     NSMutableArray *array = [NSMutableArray array];
     [IDs enumerateObjectsUsingBlock:^(NSString * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -84,9 +88,9 @@
 }
 
 - (BOOL)saveObjs:(NSArray<id<JRPersistent>> *)objs forObj:(id<JRPersistent>)obj {
-    if (!objs.count) {
-        return YES;
-    }
+//    if (!objs.count) {
+//        return YES;
+//    }
     NSMutableArray *ids = [NSMutableArray array];
     [objs enumerateObjectsUsingBlock:^(id<JRPersistent>  _Nonnull object, NSUInteger idx, BOOL * _Nonnull stop) {
         [ids addObject:[object ID]];

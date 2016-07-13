@@ -187,7 +187,7 @@ static NSString * const queuekey = @"queuekey";
             if ([*stack containsObject:value]) {
                 [value jr_addDidFinishBlock:^(id<JRPersistent>  _Nonnull object) {
                     [object jr_removeDidFinishBlockForIdentifier:identifier];
-                    [self jr_updateOne:obj columns:nil useTransaction:NO];
+                    [self jr_updateOne:obj columns:@[key] useTransaction:NO];
                 } forIdentifier:identifier];
             } else {
                 if (![*stack containsObject:obj]) {
@@ -240,28 +240,27 @@ static NSString * const queuekey = @"queuekey";
     // 监测一对多的保存
     [[[obj class] jr_oneToManyLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull clazz, BOOL * _Nonnull stop) {
         
-        if (!columns || [columns containsObject:key]) {
-            NSArray *array = [((NSObject *)obj) valueForKey:key];
-            // 逐个保存
-            [array enumerateObjectsUsingBlock:^(NSObject<JRPersistent> * _Nonnull subObj, NSUInteger idx, BOOL * _Nonnull stop) {
-                if (![subObj ID]) {
-                    // 设置父ID
-                    if ([obj class] == clazz) {
-                        [subObj jr_setParentLinkID:[obj ID] forKey:key];
-                    }
-                    needRollBack = ![self jr_saveOne:subObj useTransaction:NO];
-                    *stop = needRollBack;
-                }
-            }];
-            
-            if ([obj class] != clazz) {// 如果是同一张表则不需要中建表，是父子关系
-                // 保存中建表
-                JRMiddleTable *mid = [JRMiddleTable table4Clazz:clazz andClazz:[obj class] db:self];
-                needRollBack = ![mid saveObjs:array forObj:obj];
-            }
-            *stop = needRollBack;
-        }
+        if (!(!columns || [columns containsObject:key])) { return; }
         
+        NSArray *array = [((NSObject *)obj) valueForKey:key];
+        // 逐个保存
+        [array enumerateObjectsUsingBlock:^(NSObject<JRPersistent> * _Nonnull subObj, NSUInteger idx, BOOL * _Nonnull stop) {
+            if (![subObj ID]) {
+                // 设置父ID
+                if ([obj class] == clazz) {
+                    [subObj jr_setParentLinkID:[obj ID] forKey:key];
+                }
+                needRollBack = ![self jr_saveOne:subObj useTransaction:NO];
+                *stop = needRollBack;
+            }
+        }];
+        
+        if ([obj class] != clazz) {// 如果是同一张表则不需要中间表，是父子关系
+            // 保存中建表
+            JRMiddleTable *mid = [JRMiddleTable table4Clazz:clazz andClazz:[obj class] db:self];
+            needRollBack = ![mid saveObjs:array forObj:obj];
+        }
+        *stop = needRollBack;
     }];
     return !needRollBack;
 }
@@ -507,12 +506,28 @@ static NSString * const queuekey = @"queuekey";
     return
     
     [self jr_execute:^BOOL(FMDatabase * _Nonnull db) {
-        BOOL needRollBack = ![self jr_updateOneOnly:one columns:columns useTransaction:NO];
+        __block BOOL needRollBack = ![self jr_updateOneOnly:one columns:columns useTransaction:NO];
+        
+        // 检测一对一是否需要更新持有id
+        if (!needRollBack) {
+            NSObject<JRPersistent> *oneObj = (NSObject<JRPersistent> *)one;
+            [[[one class] jr_singleLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull clazz, BOOL * _Nonnull stop) {
+                if (![columns containsObject:key]) { return;}
+                id<JRPersistent> subObj = [oneObj valueForKey:key];
+                if (subObj && ![subObj ID]) {
+                    needRollBack = ![self jr_saveOne:subObj useTransaction:NO];
+                    *stop = needRollBack;
+                }
+                [oneObj jr_setSingleLinkID:[subObj ID] forKey:key];
+                needRollBack = ![self jr_updateOneOnly:oneObj columns:columns useTransaction:NO];
+                *stop = needRollBack;
+            }];
+        }
         
         // TODO: 更新时，是否保存一对多，需要检讨
         if (!needRollBack) {
             // 监测一对多的保存
-            needRollBack = ![self jr_handleOneToManySaveWithObj:one columns:nil];
+            needRollBack = ![self jr_handleOneToManySaveWithObj:one columns:columns];
         }
         return !needRollBack;
     } useTransaction:useTransaction];
@@ -940,7 +955,7 @@ static NSString * const queuekey = @"queuekey";
                                                 orderBy:(NSString * _Nullable)orderBy
                                                   limit:(NSString * _Nullable)limit
                                                  isDesc:(BOOL)isDesc {
-    JRSql *sql = [JRSqlGenerator sql4GetColumns:@[@"_ID"] byConditions:conditions clazz:clazz groupBy:groupBy orderBy:orderBy limit:limit isDesc:isDesc table:nil];
+    JRSql *sql = [JRSqlGenerator sql4GetColumns:@[@" _ID "] byConditions:conditions clazz:clazz groupBy:groupBy orderBy:orderBy limit:limit isDesc:isDesc table:nil];
     FMResultSet *resultset = [self jr_executeQuery:sql];
     NSMutableArray *array = [NSMutableArray array];
     while ([resultset next]) {

@@ -79,16 +79,20 @@ static inline NSArray * _JRBoxValue(id arg) {
 
 @interface JRDBChain : NSObject
 
-@property (nonatomic, strong, readonly) id               target;///< 有可能是obj对象, 也可能obj array，也有可能是class对象
-@property (nonatomic, assign, readonly) ChainOperation   operation;
-@property (nonatomic, strong, readonly) NSString         *tableName;
+@property (nonatomic, strong, readonly) id<JRPersistent>          target;///< obj对象
+@property (nonatomic, strong, readonly) Class<JRPersistent>       targetClazz; ///< obj array，
+@property (nonatomic, strong, readonly) NSArray<id<JRPersistent>> *targetArray; ///< clazz，
 
-@property (nonatomic, strong, readonly) NSArray<JRQueryCondition *> *queryCondition;
-@property (nonatomic, strong, readonly) NSArray<NSString*> *selectColumns;///< 自定义select时的
+
+@property (nonatomic, assign, readonly) ChainOperation   operation;///< 操作类型
+@property (nonatomic, strong, readonly) NSString         *tableName;///< 被指定的表明
+
+@property (nonatomic, strong, readonly) NSArray<JRQueryCondition *> *queryCondition; ///< 根据where语句生成的查询条件
+@property (nonatomic, strong, readonly) NSArray<NSString*> *selectColumns;///< 自定义select时的columns
 
 - (id)exe:(JRDBChainComplete)complete;
 
-@property (nonatomic, copy) JRDBChain *(^From)(id from);
+@property (nonatomic, copy) JRDBChain *(^From)(id from);///< 接收Class类 或者 NSString表名
 
 // value param
 BlockPropertyDeclare(strong, InDB, FMDatabase *, db);

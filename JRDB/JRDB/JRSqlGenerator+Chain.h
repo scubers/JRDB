@@ -12,12 +12,16 @@
 
 @interface JRSqlGenerator (Chain)
 
++ (JRSql *)sql4ChainSelect:(JRDBChain *)chain;
++ (JRSql *)sql4ChainCustomizedSelect:(JRDBChain *)chain;
++ (JRSql *)sql4GetColumns:(NSArray<NSString *> *)columns forChain:(JRDBChain *)chain;
+
+#pragma mark - unuseful
+
 + (JRSql *)sql4Chain:(JRDBChain *)chain;
 + (JRSql *)sql4ChainInsert:(JRDBChain *)chain;
 + (JRSql *)sql4ChainUpdate:(JRDBChain *)chain;
 + (JRSql *)sql4ChainDelete:(JRDBChain *)chain;
 + (JRSql *)sql4ChainDeleteAll:(JRDBChain *)chain;
-+ (JRSql *)sql4ChainSelect:(JRDBChain *)chain;
-+ (JRSql *)sql4ChainCustomizedSelect:(JRDBChain *)chain;
 
 @end

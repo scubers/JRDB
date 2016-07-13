@@ -29,13 +29,28 @@
 #define OperationBlockImpl(_block_, _methodName_, _operation_)\
 - (_block_)_methodName_ {\
     jr_weak(self);\
-    return ^JRDBChain *(id obj){\
+    return ^JRDBChain *(NSArray<id<JRPersistent>> *array) {\
         jr_strong(self);\
         self->_operation = _operation_;\
-        self->_target = obj;\
+        if (array.count <= 1) {\
+            self->_target = array.firstObject;\
+        } else {\
+            self->_targetArray = array;\
+        }\
         return self;\
     };\
 }
+//- (_block_)_methodName_ {\
+//    jr_weak(self);\
+//    return ^JRDBChain *(id obj){\
+//        jr_strong(self);\
+//        self->_operation = _operation_;\
+//        self->_target = obj;\
+//        return self;\
+//    };\
+//}
+
+
 
 #define ArrrayPropertyImpl(_method_,_propName_)                        \
 @synthesize _propName_ = _##_propName_;\
@@ -52,9 +67,9 @@
             id arg;                                         \
             while( (arg = va_arg(ap,id)) )                      \
             {                       \
-            if ( arg ){                 \
-            [args addObject:arg];       \
-            }   \
+                if ( arg ){                 \
+                [args addObject:arg];       \
+                }   \
             }                   \
             va_end(ap);                             \
             [args insertObject:obj atIndex:0];              \
@@ -74,8 +89,9 @@
 
 @implementation JRDBChain
 
-@synthesize target    = _target;
-@synthesize operation = _operation;
+@synthesize target      = _target;
+@synthesize operation   = _operation;
+@synthesize targetClazz = _targetClazz;
 
 - (instancetype)init {
     if (self = [super init]) {
@@ -117,7 +133,7 @@
         jr_strong(self);
         if (object_isClass(first)) {
             self->_operation = CSelect;
-            self->_target = first;
+            self->_targetClazz = first;
         }
         else if([first isEqualToString:JRCount]) {
             self->_operation = CSelectCount;
@@ -128,7 +144,6 @@
             va_list ap;
             va_start(ap, first);
             id arg;
-            
             while( (arg = va_arg(ap,id)) )
             {
                 if ( arg ){
@@ -142,19 +157,33 @@
         return self;
     };
 }
+- (DeleteAllBlock)DeleteAll {
+    jr_weak(self);
+    return ^JRDBChain *(Class<JRPersistent> clazz) {
+        jr_strong(self);
+        self->_operation = CDeleteAll;
+        self->_targetClazz = clazz;
+        return self;
+    };
+}
+
+OperationBlockImpl(InsertBlock, Insert, CInsert)
+OperationBlockImpl(UpdateBlock, Update, CUpdate)
+OperationBlockImpl(DeleteBlock, Delete, CDelete)
+
 
 - (JRDBChain *(^)(id))From {
     jr_weak(self);
     return ^JRDBChain *(id from) {
         jr_strong(self);
         if (object_isClass(from)) {
-            self->_target = from;
+            self->_targetClazz = from;
             self->_tableName = [((Class)from) shortClazzName];
         } else {
             self->_tableName = from;
             Class clazz = NSClassFromString(from);
             if (clazz) {
-                self->_target = clazz;
+                self->_targetClazz = clazz;
             }
         }
         return self;
@@ -168,11 +197,6 @@
     }
     return conditions;
 }
-
-OperationBlockImpl(InsertBlock, Insert, CInsert)
-OperationBlockImpl(UpdateBlock, Update, CUpdate)
-OperationBlockImpl(DeleteBlock, Delete, CDelete)
-OperationBlockImpl(DeleteAllBlock, DeleteAll, CDeleteAll)
 
 
 BlockPropertyImpl(FMDatabase *, InDB, db)
@@ -191,5 +215,31 @@ ArrrayPropertyImpl(Params, parameters)
 ArrrayPropertyImpl(Columns, columnsArray)
 ArrrayPropertyImpl(Ignore, ignoreArray)
 
+- (NSArray *)variableListToArray:(va_list)valist {
+    NSMutableArray *args = [NSMutableArray array];
+    id arg;
+    while( (arg = va_arg(valist,id)) )
+    {
+        if ( arg ){
+            [args addObject:arg];
+        }
+    }
+    self->_selectColumns = args;
+    return args;
+}
+
+#pragma mark - Setter Getter
+- (Class<JRPersistent>)targetClazz {
+    if (_targetClazz) {
+        return _targetClazz;
+    }
+    if (_target) {
+        return [_target class];
+    }
+    if ([_targetArray count]) {
+        return [[_targetArray firstObject] class];
+    }
+    return nil;
+}
 
 @end

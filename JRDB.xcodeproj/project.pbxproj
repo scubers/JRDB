@@ -32,6 +32,7 @@
 		5AD63F211CE1BE540044ACE6 /* JRReflectUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AD63F201CE1BE540044ACE6 /* JRReflectUtil.m */; };
 		5AD63F241CE1C2480044ACE6 /* Person.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AD63F231CE1C2480044ACE6 /* Person.m */; };
 		5AD63F271CE1C40F0044ACE6 /* AViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AD63F261CE1C40F0044ACE6 /* AViewController.swift */; };
+		5AE115421D364ED400886657 /* JRDBChainTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AE115411D364ED400886657 /* JRDBChainTest.m */; };
 		A80015F41D0EE499000EA41A /* JRSql.m in Sources */ = {isa = PBXBuildFile; fileRef = A80015F31D0EE499000EA41A /* JRSql.m */; };
 		A80015F71D0EEC29000EA41A /* JRActivatedProperty.m in Sources */ = {isa = PBXBuildFile; fileRef = A80015F61D0EEC29000EA41A /* JRActivatedProperty.m */; };
 		A8A1B2251D033C8C00886403 /* NSObject+Reflect.m in Sources */ = {isa = PBXBuildFile; fileRef = A8A1B2241D033C8C00886403 /* NSObject+Reflect.m */; };
@@ -111,6 +112,7 @@
 		5AD63F231CE1C2480044ACE6 /* Person.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Person.m; sourceTree = "<group>"; };
 		5AD63F251CE1C40F0044ACE6 /* JRDB-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "JRDB-Bridging-Header.h"; sourceTree = "<group>"; };
 		5AD63F261CE1C40F0044ACE6 /* AViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AViewController.swift; sourceTree = "<group>"; };
+		5AE115411D364ED400886657 /* JRDBChainTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRDBChainTest.m; sourceTree = "<group>"; };
 		A80015F21D0EE499000EA41A /* JRSql.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRSql.h; sourceTree = "<group>"; };
 		A80015F31D0EE499000EA41A /* JRSql.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRSql.m; sourceTree = "<group>"; };
 		A80015F51D0EEC29000EA41A /* JRActivatedProperty.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRActivatedProperty.h; sourceTree = "<group>"; };
@@ -208,6 +210,7 @@
 				5ACBEECA1CE1B3A500371E01 /* JRDBTests.m */,
 				5AA3DB321D067DD800795E80 /* JRDBTestJRDBMgr.m */,
 				5ACBEECC1CE1B3A500371E01 /* Info.plist */,
+				5AE115411D364ED400886657 /* JRDBChainTest.m */,
 			);
 			path = JRDBTests;
 			sourceTree = "<group>";
@@ -503,6 +506,7 @@
 			files = (
 				5AA3DB331D067DD800795E80 /* JRDBTestJRDBMgr.m in Sources */,
 				5ACBEECB1CE1B3A500371E01 /* JRDBTests.m in Sources */,
+				5AE115421D364ED400886657 /* JRDBChainTest.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

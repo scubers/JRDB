@@ -179,7 +179,7 @@ void SqlLog(id sql) {
 // update 'tableName' set name = 'abc' where xx = xx
 + (JRSql *)sql4Update:(id<JRPersistent>)obj columns:(NSArray<NSString *> *)columns toDB:(FMDatabase * _Nonnull)db table:(NSString * _Nullable)table {
     
-    NSArray<JRActivatedProperty *> *ap = [JRReflectUtil activitedProperties4Clazz:[obj class]];
+    NSArray<JRActivatedProperty *> *ap = [[obj class] jr_activatedProperties];
     
     NSString *tableName      = table ?: [[obj class] shortClazzName];
     NSMutableArray *argsList = [NSMutableArray array];
@@ -194,8 +194,6 @@ void SqlLog(id sql) {
         if (columns.count && ![columns containsObject:prop.name]) { return; }
         if (![db columnExists:prop.dataBaseName inTableWithName:tableName]) { return; }
         
-        [sql appendFormat:@" %@ = ?,", prop.dataBaseName];
-        
         id value;
         switch (prop.relateionShip) {
             case JRRelationNormal:
@@ -206,6 +204,9 @@ void SqlLog(id sql) {
             case JRRelationOneToOne:
             {
                 NSObject<JRPersistent> *sub = [((NSObject *)obj) valueForKey:prop.name];
+                if (sub && ![sub ID]) {// 如果有新的子对象，则不更新
+                    return;
+                }
                 [((NSObject *)obj) jr_setSingleLinkID:[sub ID] forKey:prop.name];
                 value = [sub ID];
                 break;
@@ -218,6 +219,7 @@ void SqlLog(id sql) {
             }
             default: return;
         }
+        [sql appendFormat:@" %@ = ?,", prop.dataBaseName];
         // 空值转换
         if (!value) { value = [NSNull null]; }
         // 添加参数
@@ -241,7 +243,7 @@ void SqlLog(id sql) {
 + (JRSql * _Nonnull)sql4GetByIDWithClazz:(Class<JRPersistent> _Nonnull)clazz ID:(NSString *)ID table:(NSString * _Nullable)table {
     return [self sql4GetColumns:nil
                    byConditions:@[
-                                  [JRQueryCondition type:JRQueryConditionTypeAnd condition:@"_ID=?", ID]
+                                  [JRQueryCondition type:JRQueryConditionTypeAnd condition:@"_ID=?", ID, nil]
                                   ]
                           clazz:clazz
                         groupBy:nil
@@ -256,7 +258,7 @@ void SqlLog(id sql) {
     NSString *string = [NSString stringWithFormat:@"%@=?", [clazz jr_primaryKey]];
     return [self sql4GetColumns:nil
                    byConditions:@[
-                                  [JRQueryCondition type:JRQueryConditionTypeAnd condition:string, primaryKey]
+                                  [JRQueryCondition type:JRQueryConditionTypeAnd condition:string, primaryKey, nil]
                                   ]
                           clazz:clazz
                         groupBy:nil
@@ -318,10 +320,10 @@ void SqlLog(id sql) {
             idx ? [sqlString appendFormat:@", %@ ", obj] : [sqlString appendFormat:@"%@", obj];
         }];
     } else {
-        [sqlString appendString:@" select * from "];
+        [sqlString appendString:@" select * "];
     }
 
-    [sqlString appendFormat:@" %@ where 1=1 ", tableName];
+    [sqlString appendFormat:@" from %@ where 1=1 ", tableName];
 
     for (JRQueryCondition *condition in conditions) {
 

@@ -26,7 +26,7 @@
 - (void)setUp {
     [super setUp];
     [JRDBMgr defaultDB];
-    FMDatabase *db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/Jrwong/Desktop/test.sqlite"];
+    FMDatabase *db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/jmacmini/Desktop/test.sqlite"];
     [[JRDBMgr shareInstance] registerClazzes:@[
                                                [Person class],
                                                [Card class],
@@ -77,7 +77,7 @@
     [p jr_delete];
 #else
     Person *p = [[J_SELECT([Person class]) exe:nil] firstObject];
-    [J_DELETE(p) exe:nil];
+    [J_DELETE(p).Recursive(NO) exe:nil];
 #endif
 
 }
@@ -118,7 +118,7 @@
 #ifndef Chain
     [p jr_save];
 #else
-    [J_INSERT(p) exe:nil];
+    [J_INSERT(p).Recursive(YES) exe:nil];
 #endif
     
 }
@@ -133,7 +133,7 @@
 #ifndef Chain
     [p jr_save];
 #else
-    [J_INSERT(p) exe:nil];
+    [J_INSERT(p).Recursive(YES) exe:nil];
 #endif
 }
 
@@ -142,6 +142,7 @@
     for (int i = 0; i < 10; i++) {
         [p.money addObject:[self createMoney:i]];
     }
+    [p.money addObjectsFromArray:[Money jr_findAll]];
     Person *p1 = [self createPerson:1 name:nil];
     for (int i = 0; i < 10; i++) {
         [p1.money addObject:[self createMoney:i]];
@@ -152,16 +153,16 @@
             NSLog(@"===");
         }];
 #else
-        [J_INSERT(p).NowInMain(NO) exe:^(JRDBChain *chain, id result) {
-            NSLog(@"===");
-        }];
+//        [J_INSERT(p).NowInMain(NO) exe:^(JRDBChain *chain, id result) {
+//            NSLog(@"===");
+//        }];
 #endif
     });
 #ifndef Chain
     [p jr_save];
 #else
     
-    [J_INSERT(p) exe:nil];
+    [J_INSERT(p).Recursive(YES) exe:nil];
 #endif
     
 }
@@ -171,11 +172,12 @@
     for (int i = 0; i < 10; i++) {
         [p.children addObject:[self createPerson:i + 1 name:nil]];
     }
+//    p.money = [[Money jr_findAll] mutableCopy];
 #ifndef Chain
     [p jr_save];
 #else
 //    [J_INSERT(p) exe:nil];
-    [J_INSERT(p) exe:nil];
+    [J_INSERT(p).Recursive(YES) exe:nil];
 #endif
 }
 
@@ -183,27 +185,32 @@
 
 - (void)testUpdateOne {
     Person *p = [Person jr_findAll].firstObject;
-    p.a_int = 9999;
+    p.a_int = 99999;
     p.b_unsigned_int = 9999;
+    p.card = [self createCard:@"1121"];
+    p.card.person = p;
+    [p.money removeLastObject];
+    
 #ifndef Chain
 //    [p jr_updateColumns:nil];
     [p jr_updateColumns:@[@"_a_int", @"_money"]];
 #else
 //    [[JRDBChain new].J_UPDATE(p) exe:nil];
 //    NSLog(@"%@", [J_UPDATE(p).Columns(@[@"_a_int", @"_money"]) exe:nil]);
-    NSLog(@"%@", [J_UPDATE(p).Columns(@"_a_int", @"_money", nil) exe:nil]);
+    NSLog(@"%@", [J_UPDATE(p).Recursive(YES).Ignore(@"_money", nil) exe:nil]);
 #endif
 }
 
 - (void)testUpdateMany {
     NSArray<Person *> * ps = [Person jr_findAll];
     [ps enumerateObjectsUsingBlock:^(Person * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        obj.c_long = 5000;
+        obj.c_long = 4000;
+        obj.a_int = 3000;
     }];
 #ifndef Chain
     [ps jr_updateColumns:nil];
 #else
-    [J_UPDATE(ps).Recursive(NO).Columns(@"_c_long", nil) exe:nil];
+    [J_UPDATE(ps).Recursive(NO).Ignore(@"_c_long", nil) exe:nil];
 #endif
 }
 
@@ -265,13 +272,17 @@
  [J_SELECT(*).From(@"table").Where(@"_age = ?").Params(@[@1]) exe:nil];
  [J_SELECT(@[@"_age",@"_name"]).From(@"table").Where(@"_age = ?").Params(@[@1]) exe:nil];
  [J_SELECT([Person class]).count().From(@"table").Where(@"_age = ?").Params(@[@1]) exe:nil];
- 
  */
 - (void)testSelectChain {
-//    some(@"1", @"2", nil);
-//    id re = [[JRDBChain new].SelectS(JRCount).From([Person class]) exe:nil];
-    id re = [J_SELECT([Person class]) exe:nil];
+    id re = [J_SELECT([Person class]).Desc(YES) exe:nil];
     NSLog(@"%@", re);
+}
+
+- (void)testAAA {
+    Person *p = [Person jr_findAll].firstObject;
+    p.a_int = 2;
+    p.money = [[Money jr_findAll] mutableCopy];
+    [J_UPDATE(p).Recursive(YES) exe:nil];
 }
 
 #pragma mark - convenience method
