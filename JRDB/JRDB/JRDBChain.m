@@ -79,9 +79,39 @@
     };              \
 }
 
+#define HistoryKey(key) \
+static NSString * const key = @#key;
+
+typedef enum {
+    OH_Insert = 1000,
+    OH_Update,
+    OH_Delete,
+    OH_DeleteAll,
+    OH_Select,
+} OperationHistory;
+
+typedef enum {
+    PH_InDB = 2000,
+    PH_From,
+    PH_Where,
+    PH_Group,
+    PH_Order,
+    PH_Desc,
+    PH_Limit,
+
+    PH_Recursive,
+    PH_NowInMain,
+    PH_Transaction,
+    PH_Complete,
+
+    PH_Params,
+    PH_Columns,
+    PH_Ignore,
+} PropertyHistory;
+
 @interface JRDBChain ()
 
-@property (nonatomic, strong) NSMutableArray<NSString *> *history;///< 链式调用历史，用于检测
+@property (nonatomic, strong) NSMutableArray<NSNumber *> *history;///< 链式调用历史，用于检测
 
 @property (nonatomic, strong) id result;///< 存储执行结果
 
@@ -199,10 +229,18 @@ OperationBlockImpl(DeleteBlock, Delete, CDelete)
 }
 
 
+- (JRDBChain *(^)(int, int))Limit {
+    jr_weak(self);
+    return ^JRDBChain *(int start, int length){
+        jr_strong(self);
+        self->_limitIn = (JRLimit){start, length};
+        return self;
+    };
+}
+
 BlockPropertyImpl(FMDatabase *, InDB, db)
 BlockPropertyImpl(NSString *, Group, groupBy)
 BlockPropertyImpl(NSString *, Order, orderBy)
-BlockPropertyImpl(NSString *, Limit, limitIn)
 BlockPropertyImpl(NSString *, Where, whereString)
 BlockPropertyImpl(BOOL, Recursive, isRecursive)
 BlockPropertyImpl(BOOL, NowInMain, isNowInMain)
@@ -240,6 +278,63 @@ ArrrayPropertyImpl(Ignore, ignoreArray)
         return [[_targetArray firstObject] class];
     }
     return nil;
+}
+
+- (NSString *)limitString {
+    return [NSString stringWithFormat:@" limit %d,%d ", _limitIn.start, _limitIn.length];
+}
+
+- (NSMutableArray<NSNumber *> *)history {
+    if (!_history) {
+        _history = [NSMutableArray array];
+    }
+    return _history;
+}
+
+#pragma mark - private method
+- (BOOL)_checkValid:(NSNumber *)action {
+    if ([self _isOperationBlock:action]) {
+        return [self _validOperation:action];
+    } else {
+        return [self _validOperation:action];
+    }
+}
+
+- (BOOL)_isOperationBlock:(NSNumber *)action {
+    return [action intValue] < 2000;
+}
+
+- (BOOL)_validOperation:(NSNumber *)action {
+    for (NSNumber *historyAction in self.history) {
+        if ([historyAction intValue] > 999 && [historyAction intValue] < 2000) {
+            return NO;
+        }
+    }
+    return YES;
+}
+
+- (BOOL)_validProperty:(NSNumber *)action {
+    switch ([action intValue]) {
+        case PH_Columns:
+            break;
+        case PH_Ignore:
+            break;
+        case PH_Where:break;
+        case PH_Group:break;
+        case PH_Order:break;
+        case PH_InDB:break;
+        case PH_From:break;
+        case PH_Desc:break;
+        case PH_Limit:break;
+        case PH_Params:break;
+        case PH_Recursive:
+        case PH_NowInMain:
+        case PH_Complete:
+        case PH_Transaction:
+            return YES;
+        default:return NO;
+    }
+    return NO;
 }
 
 @end

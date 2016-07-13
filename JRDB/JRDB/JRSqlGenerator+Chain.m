@@ -23,8 +23,7 @@
 }
 
 + (JRSql *)sql4ChainCustomizedSelect:(JRDBChain *)chain {
-    NSAssert(chain.tableName.length, @"customized query should specified a table");
-    NSAssert(chain.target, @"customized query should specified a Class");
+    NSAssert(chain.targetClazz, @"customized query should specified a table");
     
     NSMutableArray *selectColumns = [NSMutableArray array];
     if (chain.operation == CSelectCustomized) {
@@ -44,7 +43,7 @@
 }
 
 + (JRSql *)sql4GetColumns:(NSArray<NSString *> *)columns forChain:(JRDBChain *)chain {
-    return [self sql4GetColumns:columns byConditions:chain.queryCondition clazz:chain.targetClazz groupBy:chain.groupBy orderBy:chain.orderBy limit:chain.limitIn isDesc:chain.isDesc table:chain.tableName];
+    return [self sql4GetColumns:columns byConditions:chain.queryCondition clazz:chain.targetClazz groupBy:chain.groupBy orderBy:chain.orderBy limit:chain.limitString isDesc:chain.isDesc table:chain.tableName];
 }
 
 

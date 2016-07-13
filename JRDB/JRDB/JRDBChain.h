@@ -76,6 +76,11 @@ static inline NSArray * _JRBoxValue(id arg) {
     return [arg isKindOfClass:[NSArray class]] ? arg : arg ? @[arg] : @[];
 }
 
+struct JRLimit {
+    int start;
+    int length;
+};
+typedef struct JRLimit JRLimit;
 
 @interface JRDBChain : NSObject
 
@@ -95,10 +100,13 @@ static inline NSArray * _JRBoxValue(id arg) {
 @property (nonatomic, copy) JRDBChain *(^From)(id from);///< 接收Class类 或者 NSString表名
 
 // value param
+@property (nonatomic, strong, readonly) JRDBChain *(^Limit)(int start, int length);
+@property (nonatomic, assign, readonly) JRLimit limitIn;
+@property (nonatomic, strong, readonly) NSString *limitString;
+
 BlockPropertyDeclare(strong, InDB, FMDatabase *, db);
 BlockPropertyDeclare(strong, Order, NSString *, orderBy);
 BlockPropertyDeclare(strong, Group, NSString *, groupBy);
-BlockPropertyDeclare(strong, Limit, NSString *, limitIn);
 BlockPropertyDeclare(strong, Where, NSString *, whereString);
 BlockPropertyDeclare(assign, Recursive, BOOL, isRecursive);
 BlockPropertyDeclare(assign, NowInMain, BOOL, isNowInMain);

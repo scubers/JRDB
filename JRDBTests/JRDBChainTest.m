@@ -24,7 +24,7 @@
 - (void)setUp {
     [super setUp];
     [JRDBMgr defaultDB];
-    FMDatabase *db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/jmacmini/Desktop/test.sqlite"];
+    FMDatabase *db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/Jrwong/Desktop/test.sqlite"];
     [[JRDBMgr shareInstance] registerClazzes:@[
                                                [Person class],
                                                [Card class],
@@ -203,15 +203,63 @@
 
 #pragma mark - Select
 
+- (void)testSelectAll {
+    NSArray<Person *> *ps = [J_SELECT([Person class]).Recursive(YES) exe:nil];
+    NSLog(@"%@", ps);
+}
+
+- (void)testOtherCondition {
+    NSArray<Person *> *ps =
+    [J_SELECT([Person class])
+    .Recursive(YES)
+    .From(@"Person")
+    .Order(@"_a_int")
+    .Group(@"_bbbbb")
+    .Limit(0,3)
+    .Desc(YES)
+     exe:nil];
+    ;
+
+    NSLog(@"%@", ps);
+}
+
+- (void)testSelectCount {
+    NSNumber *count =
+    [J_SELECT(JRCount)
+    .From([Person class])
+//    .From(@"Person")
+    .Order(@"_a_int")
+    .Group(@"_bbbbb")
+    .Limit(0, 3)
+    .Desc(YES)
+     exe:nil];
+
+    NSLog(@"%@", count);
+}
+
+- (void)testSelectColumn {
+    NSArray<Person *> *ps =
+    [J_SELECT(@"_a_int", @"_b_unsigned_int", nil)
+    .Recursive(YES) // 自定义查询，即使设置关联查询，也不会进行关联查询
+    .From([Person class])
+    .Order(@"_a_int")
+    .Group(@"_bbbbb")
+    .Limit(0, 3)
+    .Desc(YES)
+     exe:nil];
+
+
+    NSLog(@"%@", ps);
+}
+
+
+#pragma mark - convenience method
 - (void)testPerformanceExample {
     // This is an example of a performance test case.
     [self measureBlock:^{
         // Put the code you want to measure the time of here.
     }];
 }
-
-
-#pragma mark - convenience method
 - (Person *)createPerson:(int)base name:(NSString *)name {
     Person *p = [[Person alloc] init];
     p.name = name;
@@ -244,6 +292,10 @@
     Money *m = [Money new];
     m.value = [NSString stringWithFormat:@"%d", value];
     return m;
+}
+
+- (void)abc:(int[])aa {
+
 }
 
 @end

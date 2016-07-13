@@ -25,7 +25,7 @@
     
     NSMutableArray *list = [NSMutableArray array];
     
-    NSArray<JRActivatedProperty *> *props = [chain.target jr_activatedProperties];
+    NSArray<JRActivatedProperty *> *props = [chain.targetClazz jr_activatedProperties];
     
     NSMutableArray *selectCols = [chain.selectColumns mutableCopy];
     

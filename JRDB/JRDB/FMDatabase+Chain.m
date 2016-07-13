@@ -136,7 +136,7 @@
         FMResultSet *resultset = [self jr_executeQuery:sql];
         return [JRFMDBResultSetHandler handleResultSet:resultset forClazz:chain.targetClazz];
     } else {
-        NSArray<NSString *> *ids = [self jr_getIDsByConditions:chain.queryCondition clazz:chain.targetClazz groupBy:chain.groupBy orderBy:chain.orderBy limit:chain.limitIn isDesc:chain.isDesc];
+        NSArray<NSString *> *ids = [self jr_getIDsByConditions:chain.queryCondition clazz:chain.targetClazz groupBy:chain.groupBy orderBy:chain.orderBy limit:chain.limitString isDesc:chain.isDesc];
         NSMutableArray *list = [NSMutableArray array];
         [ids enumerateObjectsUsingBlock:^(NSString * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             [list addObject:[self jr_findByID:obj clazz:chain.targetClazz]];
