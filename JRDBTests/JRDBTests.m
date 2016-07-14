@@ -227,7 +227,7 @@
 
 - (void)testSaveOrUpdateOne {
     Person *p = [self createPerson:100 name:nil];
-    [[JRDBMgr defaultDB] jr_saveOrUpdateOne:p useTransaction:YES];
+    [[JRDBMgr defaultDB] jr_saveOrUpdateOne:p useTransaction:YES complete:nil];
 }
 
 #pragma mark - test find 

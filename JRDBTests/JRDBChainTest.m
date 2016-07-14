@@ -24,7 +24,7 @@
 - (void)setUp {
     [super setUp];
     [JRDBMgr defaultDB];
-    FMDatabase *db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/jmacmini/Desktop/test.sqlite"];
+    FMDatabase *db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/Jrwong/Desktop/test.sqlite"];
     [[JRDBMgr shareInstance] registerClazzes:@[
                                                [Person class],
                                                [Card class],
@@ -265,6 +265,9 @@
 //        NSLog(@"%@", @([result count]));
 //        [[JRDBMgr defaultDB] jr_saveOneOnly:[self createPerson:i name:nil] useTransaction:YES complete:nil];
 //        continue;
+
+//        [[self createPerson:i name:nil] jr_save];
+//        continue;
         dispatch_async(dispatch_get_global_queue(0, 0), ^{
 //            [J_INSERT([self createPerson:i name:nil]).NowInMain(NO) exe:^(JRDBChain *chain, id result) {
 //                NSLog(@"%d", i);
@@ -274,10 +277,13 @@
 //                NSLog(@"%@", @([result count]));
 //            }];
             
-            [[JRDBMgr defaultDB] jr_saveOneOnly:[self createPerson:i name:nil] useTransaction:YES complete:^(BOOL success) {
-                
+//            [[JRDBMgr defaultDB] jr_saveOneOnly:[self createPerson:i name:nil] useTransaction:YES complete:^(BOOL success) {
+//            }];
+
+            [[self createPerson:i name:nil] jr_saveWithComplete:^(BOOL success) {
+
             }];
-            
+
         });
     }
     

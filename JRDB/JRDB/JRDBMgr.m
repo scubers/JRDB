@@ -81,7 +81,7 @@ static JRDBMgr *__shareInstance;
 
 - (void)updateDB:(FMDatabase *)db {
     for (Class clazz in _clazzArray) {
-        BOOL flag = [db jr_updateTable4Clazz:clazz];
+        BOOL flag = [db jr_updateTable4Clazz:clazz synchronized:YES complete:nil];
         NSLog(@"update table: %@ %@", [clazz description], flag ? @"success" : @"failure");
     }
 }

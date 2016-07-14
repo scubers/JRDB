@@ -21,12 +21,12 @@
     if (chain.operation == CInsert) {
         if (!chain.isRecursive) {
             if (chain.targetArray) {
-                return [self jr_saveObjectsOnly:chain.targetArray useTransaction:chain.useTransaction];
+                return [self jr_saveObjectsOnly:chain.targetArray useTransaction:chain.useTransaction complete:nil];
             }
             return [self jr_saveOneOnly:chain.target useTransaction:chain.useTransaction complete:nil];
         } else {
             if (chain.targetArray) {
-                return [self jr_saveObjects:chain.targetArray useTransaction:chain.useTransaction];
+                return [self jr_saveObjects:chain.targetArray useTransaction:chain.useTransaction complete:nil];
             }
             return [self jr_saveOne:chain.target useTransaction:chain.useTransaction complete:nil];
         }
@@ -34,34 +34,34 @@
     else if (chain.operation == CUpdate) {
         if (!chain.isRecursive) {
             if (chain.targetArray) {
-                return [self jr_updateObjectsOnly:chain.targetArray columns:[self _needUpdateColumnsInChain:chain] useTransaction:chain.useTransaction];
+                return [self jr_updateObjectsOnly:chain.targetArray columns:[self _needUpdateColumnsInChain:chain] useTransaction:chain.useTransaction complete:nil];
             }
-            return [self jr_updateOneOnly:chain.target columns:[self _needUpdateColumnsInChain:chain] useTransaction:chain.useTransaction];
+            return [self jr_updateOneOnly:chain.target columns:[self _needUpdateColumnsInChain:chain] useTransaction:chain.useTransaction complete:nil];
         } else {
             if (chain.targetArray) {
-                return [self jr_updateObjects:chain.targetArray columns:[self _needUpdateColumnsInChain:chain] useTransaction:chain.useTransaction];
+                return [self jr_updateObjects:chain.targetArray columns:[self _needUpdateColumnsInChain:chain] useTransaction:chain.useTransaction complete:nil];
             }
-            return [self jr_updateOne:chain.target columns:[self _needUpdateColumnsInChain:chain] useTransaction:chain.useTransaction];
+            return [self jr_updateOne:chain.target columns:[self _needUpdateColumnsInChain:chain] useTransaction:chain.useTransaction complete:nil];
         }
     }
     else if (chain.operation == CDelete) {
         if (!chain.isRecursive) {
             if (chain.targetArray) {
-                return [self jr_deleteObjectsOnly:chain.targetArray useTransaction:chain.useTransaction];
+                return [self jr_deleteObjectsOnly:chain.targetArray useTransaction:chain.useTransaction complete:nil];
             }
-            return [self jr_deleteOneOnly:chain.target useTransaction:chain.useTransaction];
+            return [self jr_deleteOneOnly:chain.target useTransaction:chain.useTransaction complete:nil];
         } else {
             if (chain.targetArray) {
-                return [self jr_deleteObjects:chain.targetArray useTransaction:chain.useTransaction];
+                return [self jr_deleteObjects:chain.targetArray useTransaction:chain.useTransaction complete:nil];
             }
-            return [self jr_deleteOne:chain.target useTransaction:chain.useTransaction];
+            return [self jr_deleteOne:chain.target useTransaction:chain.useTransaction complete:nil];
         }
     }
     else if (chain.operation == CDeleteAll) {
         if (!chain.isRecursive) {
-            return [self jr_deleteAllOnly:chain.targetClazz useTransaction:chain.useTransaction];
+            return [self jr_deleteAllOnly:chain.targetClazz useTransaction:chain.useTransaction complete:nil];
         } else {
-            return [self jr_deleteAll:chain.targetClazz useTransaction:chain.useTransaction];
+            return [self jr_deleteAll:chain.targetClazz useTransaction:chain.useTransaction complete:nil];
         }
     }
     else {
@@ -135,10 +135,10 @@
         FMResultSet *resultset = [self jr_executeQuery:sql];
         return [JRFMDBResultSetHandler handleResultSet:resultset forClazz:chain.targetClazz];
     } else {
-        NSArray<NSString *> *ids = [self jr_getIDsByConditions:chain.queryCondition clazz:chain.targetClazz groupBy:chain.groupBy orderBy:chain.orderBy limit:chain.limitString isDesc:chain.isDesc];
+        NSArray<NSString *> *ids = [self jr_getIDsByConditions:chain.queryCondition clazz:chain.targetClazz groupBy:chain.groupBy orderBy:chain.orderBy limit:chain.limitString isDesc:chain.isDesc complete:nil];
         NSMutableArray *list = [NSMutableArray array];
         [ids enumerateObjectsUsingBlock:^(NSString * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            [list addObject:[self jr_findByID:obj clazz:chain.targetClazz]];
+            [list addObject:[self jr_findByID:obj clazz:chain.targetClazz complete:nil]];
         }];
         return list;
     }

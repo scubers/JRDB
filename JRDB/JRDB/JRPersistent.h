@@ -19,6 +19,7 @@
 @protocol JRPersistent <JRReflectable>
 
 typedef void(^JRDBComplete)(BOOL success);
+typedef void(^JRDBQueryComplete)(id _Nullable result);
 typedef void(^JRDBDidFinishBlock)(id<JRPersistent> _Nonnull obj);
 
 @required

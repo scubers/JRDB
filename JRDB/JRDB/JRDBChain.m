@@ -135,6 +135,9 @@ typedef enum {
 
 - (id)exe:(JRDBChainComplete)complete {
     _completeBlock = complete;
+
+
+
     if (self.operation == CSelect) {
         id result = [_db jr_executeQueryChain:self];
         EXE_BLOCK(_completeBlock, self, result);

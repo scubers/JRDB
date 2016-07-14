@@ -17,17 +17,17 @@
 #pragma mark - save or update
 
 - (BOOL)jr_saveOrUpdateUseTransaction:(BOOL)useTransaction toDB:(FMDatabase * _Nonnull)db {
-    return [db jr_saveOrUpdateObjects:self useTransaction:useTransaction];
+    return [db jr_saveOrUpdateObjects:self useTransaction:useTransaction synchronized:YES complete:nil];
 }
 - (void)jr_saveOrUpdateUseTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete  toDB:(FMDatabase * _Nonnull)db {
-    [db jr_saveOrUpdateObjects:self useTransaction:useTransaction complete:complete];
+    [db jr_saveOrUpdateObjects:self useTransaction:useTransaction synchronized:YES complete:complete];
 }
 
 - (BOOL)jr_saveOrUpdateToDB:(FMDatabase * _Nonnull)db {
-    return [db jr_saveOrUpdateObjects:self useTransaction:YES];
+    return [db jr_saveOrUpdateObjects:self useTransaction:YES synchronized:YES complete:nil];
 }
 - (void)jr_saveOrUpdateWithComplete:(JRDBComplete _Nullable)complete toDB:(FMDatabase * _Nonnull)db {
-    [db jr_saveOrUpdateObjects:self useTransaction:YES complete:complete];
+    [db jr_saveOrUpdateObjects:self useTransaction:YES synchronized:YES complete:complete];
 }
 
 #pragma mark - save or update use DefaultDB
@@ -48,55 +48,55 @@
 
 #pragma mark - save
 - (BOOL)jr_saveUseTransaction:(BOOL)useTransaction toDB:(FMDatabase *)db {
-    return [db jr_saveObjects:self useTransaction:useTransaction];
+    return [db jr_saveObjects:self useTransaction:useTransaction synchronized:YES complete:nil];
 }
 
 - (void)jr_saveUseTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete toDB:(FMDatabase *)db {
-    return [db jr_saveObjects:self useTransaction:useTransaction complete:complete];
+    [db jr_saveObjects:self useTransaction:useTransaction synchronized:YES complete:complete];
 }
 
 - (BOOL)jr_saveToDB:(FMDatabase *)db {
-    return [db jr_saveObjects:self];
+    return [db jr_saveObjects:self useTransaction:YES synchronized:YES complete:nil];
 }
 
 - (void)jr_saveWithComplete:(JRDBComplete)complete toDB:(FMDatabase *)db {
-    return [db jr_saveObjects:self complete:complete];
+    [db jr_saveObjects:self useTransaction:YES synchronized:YES complete:complete];
 }
 
 #pragma mark - update
 
 - (BOOL)jr_updateColumns:(NSArray<NSString *> *)columns useTransaction:(BOOL)useTransaction toDB:(FMDatabase *)db {
-    return [db jr_updateObjects:self columns:columns useTransaction:useTransaction];
+    return [db jr_updateObjects:self columns:columns useTransaction:useTransaction synchronized:YES complete:nil];
 }
 
 - (void)jr_updateColumns:(NSArray<NSString *> *)columns useTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete toDB:(FMDatabase *)db {
-    return [db jr_updateObjects:self columns:columns useTransaction:useTransaction complete:complete];
+    [db jr_updateObjects:self columns:columns useTransaction:useTransaction synchronized:YES complete:complete];
 }
 
 - (BOOL)jr_updateColumns:(NSArray<NSString *> *)columns toDB:(FMDatabase *)db {
-    return [db jr_updateObjects:self columns:columns useTransaction:YES];
+    return [db jr_updateObjects:self columns:columns useTransaction:YES synchronized:YES complete:nil];
 }
 
 - (void)jr_updateColumns:(NSArray<NSString *> *)columns complete:(JRDBComplete)complete toDB:(FMDatabase *)db {
-    [db jr_updateObjects:self columns:columns complete:complete];
+    [db jr_updateObjects:self columns:columns useTransaction:YES synchronized:YES complete:complete];
 }
 
 #pragma mark - delete
 
 - (BOOL)jr_deleteUseTransaction:(BOOL)useTransaction fromDB:(FMDatabase *)db {
-    return [db jr_deleteObjects:self useTransaction:useTransaction];
+    return [db jr_deleteObjects:self useTransaction:useTransaction synchronized:YES complete:nil];
 }
 
 - (void)jr_deleteUseTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete fromDB:(FMDatabase *)db {
-    [db jr_deleteObjects:self useTransaction:useTransaction complete:complete];
+    [db jr_deleteObjects:self useTransaction:useTransaction synchronized:YES complete:complete];
 }
 
 - (BOOL)jr_deleteFromDB:(FMDatabase *)db {
-    return [db jr_deleteObjects:self];
+    return [db jr_deleteObjects:self useTransaction:YES synchronized:YES complete:nil];
 }
 
 - (void)jr_deleteWithComplete:(JRDBComplete)complete fromDB:(FMDatabase *)db {
-    [db jr_deleteObjects:self complete:complete];
+    [db jr_deleteObjects:self useTransaction:YES synchronized:YES complete:complete];
 }
 
 @end
