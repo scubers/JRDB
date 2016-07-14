@@ -12,16 +12,45 @@
 #import "JRQueryCondition.h"
 #import "NSObject+Reflect.h"
 #import "JRDBMgr.h"
-#import "JRSql.h"
 #import "JRActivatedProperty.h"
 
+@import FMDB;
+
+
+@implementation JRSql
+
+@synthesize sqlString = _sqlString;
+@synthesize args = _args;
+
++ (instancetype)sql:(NSString *)sql args:(NSArray *)args {
+    JRSql *jrsql = [[self alloc] init];
+    jrsql->_sqlString = sql;
+    jrsql->_args = [args mutableCopy];
+    return jrsql;
+}
+
+- (NSMutableArray *)args {
+    if (!_args) {
+        _args = [NSMutableArray array];
+    }
+    return _args;
+}
+
+- (NSString *)description {
+    return _sqlString ? _sqlString : @"";
+}
+
+@end
+
+
 void SqlLog(id sql) {
+#ifdef DEBUG
     if ([JRDBMgr shareInstance].debugMode) {
         NSLog(@"%@", sql);
     }
+#endif
 }
 
-@import FMDB;
 
 @implementation JRSqlGenerator
 
@@ -339,7 +368,7 @@ void SqlLog(id sql) {
     // orderby
     if (orderBy.length) { [sqlString appendFormat:@" order by %@ ", orderBy]; }
     // desc asc
-    if (isDesc) {[sqlString appendString:@" desc "];}
+    if (isDesc && orderBy.length) {[sqlString appendString:@" desc "];}
     // limit
     if (limit.length) { [sqlString appendFormat:@" %@ ", limit]; }
 

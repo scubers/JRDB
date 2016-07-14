@@ -24,7 +24,7 @@
 - (void)setUp {
     [super setUp];
     [JRDBMgr defaultDB];
-    FMDatabase *db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/Jrwong/Desktop/test.sqlite"];
+    FMDatabase *db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/jmacmini/Desktop/test.sqlite"];
     [[JRDBMgr shareInstance] registerClazzes:@[
                                                [Person class],
                                                [Card class],
@@ -70,8 +70,9 @@
 #pragma mark - Insert
 
 - (void)testSaveOne {
+    NSLog(@"default db: %@", [JRDBMgr defaultDB]);
     Person *p = [self createPerson:1 name:nil];
-    [J_INSERT(p) exe:nil];
+    [J_INSERT(p).Recursive(NO).NowInMain(YES) exe:nil];
 }
 
 - (void)testSaveOneWithSituation {
@@ -252,6 +253,42 @@
     NSLog(@"%@", ps);
 }
 
+- (void)testGCD {
+//    [JRDBMgr shareInstance].debugMode = NO;
+    
+    NSMutableArray *ori = [NSMutableArray array];
+    int count = 100;
+    
+    for (int i = 0; i<count; i++) {
+        [ori addObject:@(i)];
+//        NSArray *result = [[JRDBMgr defaultDB] jr_findByConditions:nil clazz:[Person class] groupBy:nil orderBy:nil limit:nil isDesc:NO];
+//        NSLog(@"%@", @([result count]));
+//        [[JRDBMgr defaultDB] jr_saveOneOnly:[self createPerson:i name:nil] useTransaction:YES complete:nil];
+//        continue;
+        dispatch_async(dispatch_get_global_queue(0, 0), ^{
+//            [J_INSERT([self createPerson:i name:nil]).NowInMain(NO) exe:^(JRDBChain *chain, id result) {
+//                NSLog(@"%d", i);
+//            }];
+            
+//            [[JRDBMgr defaultDB] jr_findByConditions:nil clazz:[Person class] groupBy:nil orderBy:nil limit:nil isDesc:NO block:^(id result) {
+//                NSLog(@"%@", @([result count]));
+//            }];
+            
+            [[JRDBMgr defaultDB] jr_saveOneOnly:[self createPerson:i name:nil] useTransaction:YES complete:^(BOOL success) {
+                
+            }];
+            
+        });
+    }
+    
+    sleep(100);
+}
+
+- (void)testGCD2 {
+    dispatch_sync(dispatch_get_main_queue(), ^{
+//        
+    });
+}
 
 #pragma mark - convenience method
 - (void)testPerformanceExample {

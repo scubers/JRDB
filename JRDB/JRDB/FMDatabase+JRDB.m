@@ -17,7 +17,6 @@
 #import "NSObject+JRDB.h"
 #import "JRUtils.h"
 #import "JRMiddleTable.h"
-#import "JRSql.h"
 #import "JRActivatedProperty.h"
 
 
@@ -78,6 +77,18 @@ static NSString * const queuekey = @"queuekey";
     }
     return flag;
 }
+
+- (id)jr_executeSync:(id)sync block:(id (^)(FMDatabase *db))block {
+    if (sync) {
+        [self jr_inQueue:^(FMDatabase * _Nonnull db) {
+            block(db);
+        }];
+        return nil;
+    } else {
+        return block(self);
+    }
+}
+
 
 #pragma mark - table operation
 
@@ -354,11 +365,13 @@ static NSString * const queuekey = @"queuekey";
     } useTransaction:useTransaction];
 }
 
-- (void)jr_saveOneOnly:(id<JRPersistent>)one useTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete {
-    [self jr_inQueue:^(FMDatabase * _Nonnull db) {
-        BOOL ret = [db jr_saveOneOnly:one useTransaction:useTransaction];
-        EXE_BLOCK(complete, ret);
-    }];
+- (BOOL)jr_saveOneOnly:(id<JRPersistent>)one useTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete {
+    return
+    [[self jr_executeSync:complete block:^id(FMDatabase *db) {
+        BOOL flag = [db jr_saveOneOnly:one useTransaction:useTransaction];
+        EXE_BLOCK(complete, flag);
+        return @(flag);
+    }] boolValue];
 }
 
 - (BOOL)jr_saveOne:(id<JRPersistent>)one useTransaction:(BOOL)useTransaction {
@@ -382,20 +395,15 @@ static NSString * const queuekey = @"queuekey";
     
 }
 
-- (void)jr_saveOne:(id<JRPersistent>)one useTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete {
-    [self jr_inQueue:^(FMDatabase * _Nonnull db) {
+- (BOOL)jr_saveOne:(id<JRPersistent>)one useTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete {
+    return
+    [[self jr_executeSync:complete block:^id(FMDatabase *db) {
         BOOL flag = [db jr_saveOne:one useTransaction:useTransaction];
         EXE_BLOCK(complete, flag);
-    }];
+        return @(flag);
+    }] boolValue];
 }
 
-- (BOOL)jr_saveOne:(id<JRPersistent>)one {
-    return [self jr_saveOne:one useTransaction:YES];
-}
-
-- (void)jr_saveOne:(id<JRPersistent>)one complete:(JRDBComplete)complete {
-    [self jr_saveOne:one useTransaction:YES complete:complete];
-}
 
 #pragma mark - save array
 
@@ -641,7 +649,13 @@ static NSString * const queuekey = @"queuekey";
                     NSString *condition = [NSString stringWithFormat:@"%@ = ?", ParentLinkColumn(key)];
                     NSArray *children = [self jr_findByConditions:@[
                                                                     [JRQueryCondition condition:condition args:@[[one ID]] type:JRQueryConditionTypeAnd]
-                                                                    ] clazz:clazz isDesc:NO];
+                                                                    ]
+                                                            clazz:clazz
+                                                          groupBy:nil
+                                                          orderBy:nil
+                                                            limit:nil
+                                                           isDesc:NO];
+//                                                           isDesc:NO];
                     needRollBack = ![self jr_deleteObjects:children useTransaction:NO];
                 } else {
                     JRMiddleTable *mid = [JRMiddleTable table4Clazz:clazz andClazz:[one class] db:self];
@@ -741,7 +755,7 @@ static NSString * const queuekey = @"queuekey";
 }
 
 - (BOOL)jr_deleteAll:(Class<JRPersistent> _Nonnull)clazz useTransaction:(BOOL)useTransaction {
-    NSArray<id<JRPersistent>> *objects = [self jr_findAll:clazz];
+    NSArray<id<JRPersistent>> *objects = [self jr_getByConditions:nil clazz:clazz groupBy:nil orderBy:nil limit:nil isDesc:NO];
     return [self jr_deleteObjects:objects useTransaction:useTransaction];
 }
 
@@ -771,17 +785,6 @@ static NSString * const queuekey = @"queuekey";
     return [JRFMDBResultSetHandler handleResultSet:ret forClazz:clazz].firstObject;
 }
 
-- (NSArray *)jr_getAll:(Class<JRPersistent>)clazz orderBy:(NSString *)orderby isDesc:(BOOL)isDesc {
-    AssertRegisteredClazz(clazz);
-    if (![self jr_checkExistsTable4Clazz:clazz]) {
-        NSLog(@"table %@ doesn't exists", clazz);
-        return @[];
-    }
-    JRSql *sql = [JRSqlGenerator sql4FindAll:clazz orderby:orderby isDesc:isDesc table:nil];
-    FMResultSet *ret = [self jr_executeQuery:sql];
-    return [JRFMDBResultSetHandler handleResultSet:ret forClazz:clazz];
-}
-
 - (NSArray *)jr_getByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc {
     AssertRegisteredClazz(clazz);
     if (![self jr_checkExistsTable4Clazz:clazz]) {
@@ -792,6 +795,14 @@ static NSString * const queuekey = @"queuekey";
     FMResultSet *ret = [self jr_executeQuery:sql];
     return [JRFMDBResultSetHandler handleResultSet:ret forClazz:clazz];
 }
+
+- (void)jr_getByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions clazz:(Class<JRPersistent> _Nonnull)clazz groupBy:(NSString * _Nullable)groupBy orderBy:(NSString * _Nullable)orderBy limit:(NSString * _Nullable)limit isDesc:(BOOL)isDesc complete:(void (^ _Nullable)(id _Nonnull result))complete {
+    [self jr_inQueue:^(FMDatabase * _Nonnull db) {
+        NSArray *arr = [db jr_getByConditions:conditions clazz:clazz groupBy:groupBy orderBy:orderBy limit:limit isDesc:isDesc];
+        complete(arr);
+    }];
+}
+
 
 #pragma mark - multi level query operation
 
@@ -834,7 +845,12 @@ static NSString * const queuekey = @"queuekey";
             NSString *condition = [NSString stringWithFormat:@"%@ = ?", ParentLinkColumn(key)];
             NSArray *array = [self jr_findByConditions:@[
                                                          [JRQueryCondition condition:condition args:@[[obj ID]] type:JRQueryConditionTypeAnd],
-                                                         ] clazz:clazz isDesc:NO];
+                                                         ]
+                                                 clazz:clazz
+                                               groupBy:nil
+                                               orderBy:nil
+                                                 limit:nil
+                                                isDesc:NO];
             [subList addObjectsFromArray:array];
         } else {
             JRMiddleTable *mid = [JRMiddleTable table4Clazz:clazz andClazz:[obj class] db:self];
@@ -863,35 +879,19 @@ static NSString * const queuekey = @"queuekey";
     return [self jr_findByID:[obj ID] clazz:[obj class]];
 }
 
-
-- (NSArray *)jr_findAll:(Class<JRPersistent>)clazz {
-    return [self jr_findAll:clazz orderBy:nil isDesc:NO];
-}
-
-- (NSArray *)jr_findAll:(Class<JRPersistent>)clazz orderBy:(NSString *)orderby isDesc:(BOOL)isDesc {
-    NSArray *list = [self jr_getAll:clazz orderBy:orderby isDesc:isDesc];
-    NSMutableArray *result = [NSMutableArray array];
-    
-    [list enumerateObjectsUsingBlock:^(id<JRPersistent>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        [result addObject:[self jr_findByID:[obj ID] clazz:[obj class]]];
-    }];
-    
-    return result;
-}
-
 - (NSArray *)jr_findByConditions:(NSArray<JRQueryCondition *> *)conditions
-                        clazz:(Class<JRPersistent>)clazz
-                      groupBy:(NSString *)groupBy
-                      orderBy:(NSString *)orderBy
-                        limit:(NSString *)limit
-                       isDesc:(BOOL)isDesc {
+                           clazz:(Class<JRPersistent>)clazz
+                         groupBy:(NSString *)groupBy
+                         orderBy:(NSString *)orderBy
+                           limit:(NSString *)limit
+                          isDesc:(BOOL)isDesc {
 
     NSArray<NSString *> *list = [self jr_getIDsByConditions:conditions
-                                                            clazz:clazz
-                                                          groupBy:groupBy
-                                                          orderBy:orderBy
-                                                            limit:limit
-                                                           isDesc:isDesc];
+                                                      clazz:clazz
+                                                    groupBy:groupBy
+                                                    orderBy:orderBy
+                                                      limit:limit
+                                                     isDesc:isDesc];
 
     NSMutableArray *result = [NSMutableArray array];
     [list enumerateObjectsUsingBlock:^(NSString * ID, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -901,18 +901,11 @@ static NSString * const queuekey = @"queuekey";
     return result;
 }
 
-- (NSArray *)jr_findByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz isDesc:(BOOL)isDesc {
-    return [self jr_findByConditions:conditions clazz:clazz groupBy:nil orderBy:nil limit:nil isDesc:isDesc];
-}
-
-- (NSArray *)jr_findByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz groupBy:(NSString *)groupBy isDesc:(BOOL)isDesc {
-    return [self jr_findByConditions:conditions clazz:clazz groupBy:groupBy orderBy:nil limit:nil isDesc:isDesc];
-}
-- (NSArray *)jr_findByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz orderBy:(NSString *)orderBy isDesc:(BOOL)isDesc {
-    return [self jr_findByConditions:conditions clazz:clazz groupBy:nil orderBy:orderBy limit:nil isDesc:isDesc];
-}
-- (NSArray *)jr_findByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz limit:(NSString *)limit isDesc:(BOOL)isDesc {
-    return [self jr_findByConditions:conditions clazz:clazz groupBy:nil orderBy:nil limit:limit isDesc:isDesc];
+- (void)jr_findByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions clazz:(Class<JRPersistent> _Nonnull)clazz groupBy:(NSString * _Nullable)groupBy orderBy:(NSString * _Nullable)orderBy limit:(NSString * _Nullable)limit isDesc:(BOOL)isDesc complete:(void (^ _Nullable)(id _Nonnull result))complete {
+    [self jr_inQueue:^(FMDatabase * _Nonnull db) {
+        NSArray *arr = [db jr_findByConditions:conditions clazz:clazz groupBy:groupBy orderBy:orderBy limit:limit isDesc:isDesc];
+        complete(arr);
+    }];
 }
 
 #pragma mark - convenience method
@@ -963,6 +956,9 @@ static NSString * const queuekey = @"queuekey";
     }
     return array;
 }
+
+
+
 @end
 
 

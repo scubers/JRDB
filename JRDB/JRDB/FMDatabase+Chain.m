@@ -9,7 +9,6 @@
 #import "FMDatabase+Chain.h"
 #import "JRSqlGenerator+Chain.h"
 #import "JRSqlGenerator.h"
-#import "JRSql.h"
 #import "JRDBChain.h"
 #import "FMDatabase+JRDB.h"
 #import "JRActivatedProperty.h"
@@ -24,12 +23,12 @@
             if (chain.targetArray) {
                 return [self jr_saveObjectsOnly:chain.targetArray useTransaction:chain.useTransaction];
             }
-            return [self jr_saveOneOnly:chain.target useTransaction:chain.useTransaction];
+            return [self jr_saveOneOnly:chain.target useTransaction:chain.useTransaction complete:nil];
         } else {
             if (chain.targetArray) {
                 return [self jr_saveObjects:chain.targetArray useTransaction:chain.useTransaction];
             }
-            return [self jr_saveOne:chain.target useTransaction:chain.useTransaction];
+            return [self jr_saveOne:chain.target useTransaction:chain.useTransaction complete:nil];
         }
     }
     else if (chain.operation == CUpdate) {

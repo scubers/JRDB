@@ -14,7 +14,6 @@
 #import "JRReflectUtil.h"
 #import "NSObject+Reflect.h"
 #import "JRUtils.h"
-#import "JRSql.h"
 
 @implementation JRSqlGenerator (Chain)
 

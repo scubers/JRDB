@@ -155,12 +155,12 @@ const NSString *jr_activatedPropertiesKey = @"jr_activatedPropertiesKey";
 #pragma mark - save
 
 - (BOOL)jr_saveOnlyToDB:(FMDatabase *)db {
-    return [db jr_saveOneOnly:self useTransaction:YES];
+    return [db jr_saveOneOnly:self useTransaction:YES complete:nil];
 }
 
 
 - (BOOL)jr_saveUseTransaction:(BOOL)useTransaction toDB:(FMDatabase *)db {
-    return [db jr_saveOne:self useTransaction:useTransaction];
+    return [db jr_saveOne:self useTransaction:useTransaction complete:nil];
 }
 
 - (void)jr_saveUseTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete toDB:(FMDatabase *)db {
@@ -169,11 +169,11 @@ const NSString *jr_activatedPropertiesKey = @"jr_activatedPropertiesKey";
 
 
 - (BOOL)jr_saveToDB:(FMDatabase *)db {
-    return [db jr_saveOne:self useTransaction:YES];
+    return [db jr_saveOne:self useTransaction:YES complete:nil];
 }
 
 - (void)jr_saveWithComplete:(JRDBComplete)complete toDB:(FMDatabase *)db {
-    [db jr_saveOne:self complete:complete];
+    [db jr_saveOne:self useTransaction:YES complete:complete];
 }
 
 #pragma mark - save use defaultDB
@@ -298,14 +298,14 @@ const NSString *jr_activatedPropertiesKey = @"jr_activatedPropertiesKey";
 }
 
 + (NSArray<id<JRPersistent>> *)jr_findAllFromDB:(FMDatabase *)db {
-    return [db jr_findAll:[self class]];
+    return [db jr_findByConditions:nil clazz:[self class] groupBy:nil orderBy:nil limit:nil isDesc:NO];
 }
 + (NSArray<id<JRPersistent>> *)jr_findAll {
     return [self jr_findAllFromDB:JR_DEFAULTDB];
 }
 
 + (NSArray<id<JRPersistent>> *)jr_findAllFromDB:(FMDatabase *)db orderBy:(NSString *)orderBy isDesc:(BOOL)isDesc {
-    return [db jr_findAll:[self class] orderBy:orderBy isDesc:isDesc];
+    return [db jr_findByConditions:nil clazz:[self class] groupBy:nil orderBy:orderBy limit:nil isDesc:isDesc];
 }
 + (NSArray<id<JRPersistent>> *)jr_findAllOrderBy:(NSString *)orderBy isDesc:(BOOL)isDesc {
     return [self jr_findAllFromDB:JR_DEFAULTDB orderBy:orderBy isDesc:isDesc];

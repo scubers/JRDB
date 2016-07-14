@@ -20,15 +20,14 @@
     
     if (chain.operation == CSelectCount) {
         [resultSet next];
-        return @([resultSet unsignedLongLongIntForColumnIndex:0]);
+        NSNumber *count = @([resultSet unsignedLongLongIntForColumnIndex:0]);
+        [resultSet close];
+        return count;
     }
     
     NSMutableArray *list = [NSMutableArray array];
-    
     NSArray<JRActivatedProperty *> *props = [chain.targetClazz jr_activatedProperties];
-    
     NSMutableArray *selectCols = [chain.selectColumns mutableCopy];
-    
     
     while ([resultSet next]) {
         Class c = objc_getClass(class_getName(chain.targetClazz));

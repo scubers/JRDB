@@ -40,11 +40,6 @@
 }
 
 - (void)test2 {
-    FMDatabase *db = [JRDBMgr defaultDB];
-    NSArray *array = [db jr_findAll:[Person class]];
-    
-    
-    NSLog(@"%@", array);
 }
 
 - (void)testOneToManySave {

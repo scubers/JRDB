@@ -103,8 +103,7 @@
  *
  *  @param one
  */
-- (BOOL)jr_saveOneOnly:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction;
-- (void)jr_saveOneOnly:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete;
+- (BOOL)jr_saveOneOnly:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete;
 
 
 /**
@@ -113,16 +112,7 @@
  *  @param one
  *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
  */
-- (BOOL)jr_saveOne:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction;
-- (void)jr_saveOne:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete;
-
-/**
- *  保存one， 同时进行关联保存删除更新（建议使用），自带事务操作，外层不能包裹事务
- *
- *  @param one
- */
-- (BOOL)jr_saveOne:(id<JRPersistent> _Nonnull)one;
-- (void)jr_saveOne:(id<JRPersistent> _Nonnull)one complete:(JRDBComplete _Nullable)complete;
+- (BOOL)jr_saveOne:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete;
 
 #pragma mark - save array
 
@@ -264,17 +254,6 @@
 - (id<JRPersistent> _Nullable)jr_getByPrimaryKey:(id _Nonnull)primaryKey clazz:(Class<JRPersistent> _Nonnull)clazz;
 
 /**
- *  查找全部，不关联查询，只查询一级
- *
- *  @param clazz   class
- *  @param orderby 排序字段
- *  @param isDesc  是否倒序
- *
- *  @return 结果
- */
-- (NSArray * _Nonnull)jr_getAll:(Class<JRPersistent> _Nonnull)clazz orderBy:(NSString * _Nullable)orderby isDesc:(BOOL)isDesc;
-
-/**
  *  根据条件查询，不关联查询，只查询一级
  *
  *  @param conditions 条件
@@ -287,6 +266,8 @@
  *  @return 结果
  */
 - (NSArray<id<JRPersistent>> * _Nonnull)jr_getByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions clazz:(Class<JRPersistent> _Nonnull)clazz groupBy:(NSString * _Nullable)groupBy orderBy:(NSString * _Nullable)orderBy limit:(NSString * _Nullable)limit isDesc:(BOOL)isDesc;
+
+- (void)jr_getByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions clazz:(Class<JRPersistent> _Nonnull)clazz groupBy:(NSString * _Nullable)groupBy orderBy:(NSString * _Nullable)orderBy limit:(NSString * _Nullable)limit isDesc:(BOOL)isDesc complete:(void (^ _Nullable)(id _Nonnull result))complete;
 
 #pragma mark - multi level query operation
 
@@ -310,9 +291,6 @@
  */
 - (id<JRPersistent> _Nullable)jr_findByPrimaryKey:(id _Nonnull)primaryKey clazz:(Class<JRPersistent> _Nonnull)clazz;
 
-- (NSArray<id<JRPersistent>> * _Nonnull)jr_findAll:(Class<JRPersistent> _Nonnull)clazz;
-- (NSArray<id<JRPersistent>> * _Nonnull)jr_findAll:(Class<JRPersistent> _Nonnull)clazz orderBy:(NSString * _Nullable)orderby isDesc:(BOOL)isDesc;
-
 /**
  *  根据条件查询(条件名称需要是属性全称)
  *
@@ -321,26 +299,7 @@
  *  @return 查询结果
  */
 - (NSArray<id<JRPersistent>> * _Nonnull)jr_findByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions clazz:(Class<JRPersistent> _Nonnull)clazz groupBy:(NSString * _Nullable)groupBy orderBy:(NSString * _Nullable)orderBy limit:(NSString * _Nullable)limit isDesc:(BOOL)isDesc;
-
-/**
- *  单纯根据条件查询
- */
-- (NSArray<id<JRPersistent>> * _Nonnull)jr_findByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions clazz:(Class<JRPersistent> _Nonnull)clazz isDesc:(BOOL)isDesc;
-
-/**
- *  单纯根据groupby以及条件
- */
-- (NSArray<id<JRPersistent>> * _Nonnull)jr_findByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions clazz:(Class<JRPersistent> _Nonnull)clazz groupBy:(NSString * _Nullable)groupBy isDesc:(BOOL)isDesc;
-
-/**
- *  单纯根据orderby以及条件
- */
-- (NSArray<id<JRPersistent>> * _Nonnull)jr_findByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions clazz:(Class<JRPersistent> _Nonnull)clazz orderBy:(NSString * _Nullable)orderBy isDesc:(BOOL)isDesc;
-
-/**
- *  单纯根据limit以及条件
- */
-- (NSArray<id<JRPersistent>> * _Nonnull)jr_findByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions clazz:(Class<JRPersistent> _Nonnull)clazz limit:(NSString * _Nullable)limit isDesc:(BOOL)isDesc;
+- (void)jr_findByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions clazz:(Class<JRPersistent> _Nonnull)clazz groupBy:(NSString * _Nullable)groupBy orderBy:(NSString * _Nullable)orderBy limit:(NSString * _Nullable)limit isDesc:(BOOL)isDesc complete:(void (^ _Nullable)(id _Nonnull result))complete;
 
 #pragma mark - convenience method
 

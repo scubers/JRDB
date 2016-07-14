@@ -9,7 +9,17 @@
 #import <Foundation/Foundation.h>
 #import "JRPersistent.h"
 
-@class FMDatabase, JRQueryCondition, JRSql;
+@class FMDatabase, JRQueryCondition;
+
+@interface JRSql : NSObject
+
+@property (nonatomic, nullable, readonly) NSString *sqlString;
+@property (nonatomic, nullable, readonly) NSMutableArray *args;
+
++ (instancetype _Nonnull)sql:(NSString * _Nonnull)sql args:(NSArray * _Nullable)args;
+
+@end
+
 
 void SqlLog(id _Nonnull sql);
 
