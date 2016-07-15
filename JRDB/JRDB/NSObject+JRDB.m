@@ -36,6 +36,11 @@ const NSString *jr_activatedPropertiesKey = @"jr_activatedPropertiesKey";
 - (NSString *)ID {
     return objc_getAssociatedObject(self, &JRDB_IDKEY);
 }
+
+- (BOOL)isCacheHit {
+    return [objc_getAssociatedObject(self, _cmd) boolValue];
+}
+
 + (NSArray *)jr_excludePropertyNames {
     return @[];
 }
@@ -119,21 +124,21 @@ const NSString *jr_activatedPropertiesKey = @"jr_activatedPropertiesKey";
 #pragma mark - save or update
 
 - (BOOL)jr_saveOrUpdateOnlyToDB:(FMDatabase * _Nonnull)db {
-    return [db jr_saveOrUpdateOneOnly:self useTransaction:YES complete:nil];
+    return [db jr_saveOrUpdateOneOnly:self useTransaction:YES synchronized:YES complete:nil];
 }
 
 - (BOOL)jr_saveOrUpdateUseTransaction:(BOOL)useTransaction toDB:(FMDatabase * _Nonnull)db {
-    return [db jr_saveOrUpdateOne:self useTransaction:useTransaction complete:nil];
+    return [db jr_saveOrUpdateOne:self useTransaction:useTransaction synchronized:YES complete:nil];
 }
 - (void)jr_saveOrUpdateUseTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete  toDB:(FMDatabase * _Nonnull)db {
-    [db jr_saveOrUpdateOne:self useTransaction:useTransaction complete:complete];
+    [db jr_saveOrUpdateOne:self useTransaction:useTransaction synchronized:YES complete:complete];
 }
 
 - (BOOL)jr_saveOrUpdateToDB:(FMDatabase * _Nonnull)db {
-    return [db jr_saveOrUpdateOne:self useTransaction:YES complete:nil];
+    return [db jr_saveOrUpdateOne:self useTransaction:YES synchronized:YES complete:nil];
 }
 - (void)jr_saveOrUpdateWithComplete:(JRDBComplete _Nullable)complete toDB:(FMDatabase * _Nonnull)db {
-    [db jr_saveOrUpdateOne:self useTransaction:YES complete:complete];
+    [db jr_saveOrUpdateOne:self useTransaction:YES synchronized:YES complete:complete];
 }
 
 #pragma mark - save or update use DefaultDB
@@ -155,25 +160,25 @@ const NSString *jr_activatedPropertiesKey = @"jr_activatedPropertiesKey";
 #pragma mark - save
 
 - (BOOL)jr_saveOnlyToDB:(FMDatabase *)db {
-    return [db jr_saveOneOnly:self useTransaction:YES complete:nil];
+    return [db jr_saveOneOnly:self useTransaction:YES synchronized:YES complete:nil];
 }
 
 
 - (BOOL)jr_saveUseTransaction:(BOOL)useTransaction toDB:(FMDatabase *)db {
-    return [db jr_saveOne:self useTransaction:useTransaction complete:nil];
+    return [db jr_saveOne:self useTransaction:useTransaction synchronized:YES complete:nil];
 }
 
 - (void)jr_saveUseTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete toDB:(FMDatabase *)db {
-    [db jr_saveOne:self useTransaction:useTransaction complete:complete];
+    [db jr_saveOne:self useTransaction:useTransaction synchronized:YES complete:complete];
 }
 
 
 - (BOOL)jr_saveToDB:(FMDatabase *)db {
-    return [db jr_saveOne:self useTransaction:YES complete:nil];
+    return [db jr_saveOne:self useTransaction:YES synchronized:YES complete:nil];
 }
 
 - (void)jr_saveWithComplete:(JRDBComplete)complete toDB:(FMDatabase *)db {
-    [db jr_saveOne:self useTransaction:YES complete:complete];
+    [db jr_saveOne:self useTransaction:YES synchronized:YES complete:complete];
 }
 
 #pragma mark - save use defaultDB
@@ -196,23 +201,23 @@ const NSString *jr_activatedPropertiesKey = @"jr_activatedPropertiesKey";
 #pragma mark - update
 
 - (BOOL)jr_updateOnlyColumns:(NSArray<NSString *> *)columns toDB:(FMDatabase *)db {
-    return [db jr_updateOneOnly:self columns:columns useTransaction:YES complete:nil];
+    return [db jr_updateOneOnly:self columns:columns useTransaction:YES synchronized:YES complete:nil];
 }
 
 - (BOOL)jr_updateColumns:(NSArray<NSString *> *)columns useTransaction:(BOOL)useTransaction toDB:(FMDatabase *)db{
-    return [db jr_updateOne:self columns:columns useTransaction:useTransaction complete:nil];
+    return [db jr_updateOne:self columns:columns useTransaction:useTransaction synchronized:YES complete:nil];
 }
 
 - (void)jr_updateColumns:(NSArray<NSString *> *)columns useTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete toDB:(FMDatabase *)db{
-    [db jr_updateOne:self columns:columns useTransaction:useTransaction complete:complete];
+    [db jr_updateOne:self columns:columns useTransaction:useTransaction synchronized:YES complete:complete];
 }
 
 - (BOOL)jr_updateColumns:(NSArray<NSString *> *)columns toDB:(FMDatabase *)db{
-    return [db jr_updateOne:self columns:columns useTransaction:YES complete:nil];
+    return [db jr_updateOne:self columns:columns useTransaction:YES synchronized:YES complete:nil];
 }
 
 - (void)jr_updateColumns:(NSArray<NSString *> *)columns complete:(JRDBComplete)complete toDB:(FMDatabase *)db{
-    [db jr_updateOne:self columns:columns useTransaction:YES complete:complete];
+    [db jr_updateOne:self columns:columns useTransaction:YES synchronized:YES complete:complete];
 }
 
 #pragma mark - update use defaultDB
@@ -236,27 +241,27 @@ const NSString *jr_activatedPropertiesKey = @"jr_activatedPropertiesKey";
 #pragma mark - delete
 
 + (BOOL)jr_deleteAllOnlyFromDB:(FMDatabase *)db {
-    return [db jr_deleteAllOnly:self useTransaction:YES complete:nil];
+    return [db jr_deleteAllOnly:self useTransaction:YES synchronized:YES complete:nil];
 }
 
 - (BOOL)jr_deleteOnlyFromDB:(FMDatabase *)db {
-    return [db jr_deleteOneOnly:self useTransaction:YES complete:nil];
+    return [db jr_deleteOneOnly:self useTransaction:YES synchronized:YES complete:nil];
 }
 
 - (BOOL)jr_deleteUseTransaction:(BOOL)useTransaction fromDB:(FMDatabase *)db {
-    return [db jr_deleteOne:self useTransaction:useTransaction complete:nil];
+    return [db jr_deleteOne:self useTransaction:useTransaction synchronized:YES complete:nil];
 }
 
 - (void)jr_deleteUseTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete fromDB:(FMDatabase *)db{
-    [db jr_deleteOne:self useTransaction:useTransaction complete:complete];
+    [db jr_deleteOne:self useTransaction:useTransaction synchronized:YES complete:complete];
 }
 
 - (BOOL)jr_deleteFromDB:(FMDatabase *)db {
-    return [db jr_deleteOne:self useTransaction:YES complete:nil];
+    return [db jr_deleteOne:self useTransaction:YES synchronized:YES complete:nil];
 }
 
 - (void)jr_deleteWithComplete:(JRDBComplete _Nullable)complete fromDB:(FMDatabase *)db{
-    [db jr_deleteOne:self useTransaction:YES complete:complete];
+    [db jr_deleteOne:self useTransaction:YES synchronized:YES complete:complete];
 }
 
 #pragma mark - delete use DefaultDB
@@ -283,7 +288,7 @@ const NSString *jr_activatedPropertiesKey = @"jr_activatedPropertiesKey";
 #pragma mark - select
 
 + (instancetype _Nullable)jr_findByID:(NSString * _Nonnull)ID fromDB:(FMDatabase * _Nonnull)db {
-    return (NSObject *)[db jr_findByID:ID clazz:self complete:nil];
+    return (NSObject *)[db jr_findByID:ID clazz:self synchronized:YES useCache:YES complete:nil];
 }
 
 + (instancetype _Nullable)jr_findByID:(NSString * _Nonnull)ID {
@@ -291,28 +296,28 @@ const NSString *jr_activatedPropertiesKey = @"jr_activatedPropertiesKey";
 }
 
 + (instancetype)jr_findByPrimaryKey:(id)primaryKey fromDB:(FMDatabase * _Nonnull)db {
-    return (NSObject *)[db jr_findByPrimaryKey:primaryKey clazz:[self class] complete:nil];
+    return (NSObject *)[db jr_findByPrimaryKey:primaryKey clazz:[self class] synchronized:YES complete:nil];
 }
 + (instancetype)jr_findByPrimaryKey:(id)primaryKey {
     return [self jr_findByPrimaryKey:primaryKey fromDB:JR_DEFAULTDB];
 }
 
 + (NSArray<id<JRPersistent>> *)jr_findAllFromDB:(FMDatabase *)db {
-    return [db jr_findByConditions:nil clazz:[self class] groupBy:nil orderBy:nil limit:nil isDesc:NO complete:nil];
+    return [db jr_findByConditions:nil clazz:[self class] groupBy:nil orderBy:nil limit:nil isDesc:NO synchronized:YES useCache:YES complete:nil];
 }
 + (NSArray<id<JRPersistent>> *)jr_findAll {
     return [self jr_findAllFromDB:JR_DEFAULTDB];
 }
 
 + (NSArray<id<JRPersistent>> *)jr_findAllFromDB:(FMDatabase *)db orderBy:(NSString *)orderBy isDesc:(BOOL)isDesc {
-    return [db jr_findByConditions:nil clazz:[self class] groupBy:nil orderBy:orderBy limit:nil isDesc:isDesc complete:nil];
+    return [db jr_findByConditions:nil clazz:[self class] groupBy:nil orderBy:orderBy limit:nil isDesc:isDesc synchronized:YES useCache:YES complete:nil];
 }
 + (NSArray<id<JRPersistent>> *)jr_findAllOrderBy:(NSString *)orderBy isDesc:(BOOL)isDesc {
     return [self jr_findAllFromDB:JR_DEFAULTDB orderBy:orderBy isDesc:isDesc];
 }
 
 + (NSArray<id<JRPersistent>> *)jr_findByConditions:(NSArray<JRQueryCondition *> *)conditions groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc fromDB:(FMDatabase *)db {
-    return [db jr_findByConditions:conditions clazz:[self class] groupBy:groupBy orderBy:orderBy limit:limit isDesc:isDesc complete:nil];
+    return [db jr_findByConditions:conditions clazz:[self class] groupBy:groupBy orderBy:orderBy limit:limit isDesc:isDesc synchronized:YES useCache:YES complete:nil];
 }
 
 + (NSArray<id<JRPersistent>> *)jr_findByConditions:(NSArray<JRQueryCondition *> *)conditions groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc {
@@ -366,7 +371,7 @@ const NSString *jr_activatedPropertiesKey = @"jr_activatedPropertiesKey";
 #pragma mark - table operation
 
 + (BOOL)jr_createTableInDB:(FMDatabase *)db {
-    return [db jr_createTable4Clazz:[self class] complete:nil];
+    return [db jr_createTable4Clazz:[self class] synchronized:YES complete:nil];
 }
 
 + (BOOL)jr_createTable {
@@ -374,7 +379,7 @@ const NSString *jr_activatedPropertiesKey = @"jr_activatedPropertiesKey";
 }
 
 + (BOOL)jr_updateTableInDB:(FMDatabase *)db {
-    return [db jr_updateTable4Clazz:[self class] complete:nil];
+    return [db jr_updateTable4Clazz:[self class] synchronized:YES complete:nil];
 }
 
 + (BOOL)jr_updateTable {
@@ -382,7 +387,7 @@ const NSString *jr_activatedPropertiesKey = @"jr_activatedPropertiesKey";
 }
 
 + (BOOL)jr_dropTableInDB:(FMDatabase *)db {
-    return [db jr_dropTable4Clazz:[self class] complete:nil];
+    return [db jr_dropTable4Clazz:[self class] synchronized:YES complete:nil];
 }
 
 + (BOOL)jr_dropTable {
@@ -390,7 +395,7 @@ const NSString *jr_activatedPropertiesKey = @"jr_activatedPropertiesKey";
 }
 
 + (BOOL)jr_truncateTableInDB:(FMDatabase *)db {
-    return [db jr_truncateTable4Clazz:[self class] complete:nil];
+    return [db jr_truncateTable4Clazz:[self class] synchronized:YES complete:nil];
 }
 
 + (BOOL)jr_truncateTable {

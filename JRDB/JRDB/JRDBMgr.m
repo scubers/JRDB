@@ -20,6 +20,9 @@
     NSMutableArray<Class<JRPersistent>> *_clazzArray;
 }
 
+@property (nonatomic, strong) NSMutableDictionary<NSString *, NSMutableDictionary<NSString *, id<JRPersistent>> *> *recursiveCache;
+@property (nonatomic, strong) NSMutableDictionary<NSString *, NSMutableDictionary<NSString *, id<JRPersistent>> *> *unRecursiveCache;
+
 @end
 
 @implementation JRDBMgr
@@ -28,16 +31,18 @@ static JRDBMgr *__shareInstance;
 + (instancetype)allocWithZone:(struct _NSZone *)zone {
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
+        
         __shareInstance = [super allocWithZone:zone];
         __shareInstance->_clazzArray = [NSMutableArray array];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_clearObjCaches) name:UIApplicationDidReceiveMemoryWarningNotification object:nil];
 #ifdef DEBUG
         __shareInstance->_debugMode = YES;
-#else
-        __shareInstance->_debugMode = NO;
 #endif
     });
     return __shareInstance;
 }
+
 + (instancetype)shareInstance {
     return [[self alloc] init];
 }
@@ -132,6 +137,20 @@ static JRDBMgr *__shareInstance;
     [_defaultDB open];
 }
 
+- (NSMutableDictionary<NSString *,NSMutableDictionary<NSString *,id<JRPersistent>> *> *)recursiveCache {
+    if (!_recursiveCache) {
+        _recursiveCache = [NSMutableDictionary dictionary];
+    }
+    return _recursiveCache;
+}
+
+- (NSMutableDictionary<NSString *,NSMutableDictionary<NSString *,id<JRPersistent>> *> *)unRecursiveCache {
+    if (!_unRecursiveCache) {
+        _unRecursiveCache = [NSMutableDictionary dictionary];
+    }
+    return _unRecursiveCache;
+}
+
 #pragma mark - private method
 
 - (NSString *)_defaultPath {
@@ -149,5 +168,31 @@ static JRDBMgr *__shareInstance;
 - (void)_configureRegisteredClazz:(Class)clazz {
     [clazz jr_configure];
 }
+
+- (void)_clearObjCaches {
+    self.unRecursiveCache = nil;
+    self.recursiveCache = nil;
+}
+
+#pragma mark - cache
+
+- (NSMutableDictionary<NSString *,id<JRPersistent>> *)recursiveCacheForDBPath:(NSString *)dbpath {
+    NSMutableDictionary *cache = self.recursiveCache[dbpath];
+    if (!cache) {
+        cache = [NSMutableDictionary dictionary];
+        self.recursiveCache[dbpath] = cache;
+    }
+    return cache;
+}
+
+- (NSMutableDictionary<NSString *,id<JRPersistent>> *)unRecursiveCacheForDBPath:(NSString *)dbpath {
+    NSMutableDictionary *cache = self.unRecursiveCache[dbpath];
+    if (!cache) {
+        cache = [NSMutableDictionary dictionary];
+        self.unRecursiveCache[dbpath] = cache;
+    }
+    return cache;
+}
+
 
 @end

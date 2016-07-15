@@ -43,6 +43,9 @@
 - (BOOL)jr_execute:(BOOL (^ _Nonnull)(FMDatabase * _Nonnull db))block useTransaction:(BOOL)useTransaction;
 
 
+- (id _Nullable)jr_executeSync:(BOOL)sync block:(id _Nullable (^ _Nonnull)(FMDatabase * _Nonnull db))block;
+
+
 - (BOOL)jr_executeUpdate:(JRSql * _Nonnull)sql;
 - (FMResultSet * _Nonnull)jr_executeQuery:(JRSql * _Nonnull)sql;
 
@@ -110,6 +113,10 @@
 - (BOOL)jr_saveOrUpdateOneOnly:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized complete:(JRDBComplete _Nullable)complete;
 
 - (BOOL)jr_saveOrUpdateOne:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized complete:(JRDBComplete _Nullable)complete;
+
+#pragma mark - save or update array
+
+- (BOOL)jr_saveOrUpdateObjectsOnly:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized complete:(JRDBComplete _Nullable)complete;
 
 - (BOOL)jr_saveOrUpdateObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized complete:(JRDBComplete _Nullable)complete;
 
@@ -241,7 +248,7 @@
  *
  *  @return obj
  */
-- (id<JRPersistent> _Nullable)jr_getByID:(NSString * _Nonnull)ID clazz:(Class<JRPersistent> _Nonnull)clazz synchronized:(BOOL)synchronized complete:(JRDBQueryComplete _Nullable)complete;
+- (id<JRPersistent> _Nullable)jr_getByID:(NSString * _Nonnull)ID clazz:(Class<JRPersistent> _Nonnull)clazz synchronized:(BOOL)synchronized useCache:(BOOL)useCache complete:(JRDBQueryComplete _Nullable)complete;
 
 
 /**
@@ -278,7 +285,7 @@
  *
  *  @return 结果
  */
-- (id<JRPersistent> _Nullable)jr_findByID:(NSString * _Nonnull)ID clazz:(Class<JRPersistent> _Nonnull)clazz synchronized:(BOOL)synchronized complete:(JRDBQueryComplete _Nullable)complete;
+- (id<JRPersistent> _Nullable)jr_findByID:(NSString * _Nonnull)ID clazz:(Class<JRPersistent> _Nonnull)clazz synchronized:(BOOL)synchronized useCache:(BOOL)useCache complete:(JRDBQueryComplete _Nullable)complete;
 
 /**
  *  根据指定主键进行查找，若已实现自定义主键，则根据自定义主键，若无，则根据默认主键『_ID』查找 若有关联数据，一并查询
@@ -297,7 +304,7 @@
  *
  *  @return 查询结果
  */
-- (NSArray<id<JRPersistent>> * _Nonnull)jr_findByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions clazz:(Class<JRPersistent> _Nonnull)clazz groupBy:(NSString * _Nullable)groupBy orderBy:(NSString * _Nullable)orderBy limit:(NSString * _Nullable)limit isDesc:(BOOL)isDesc synchronized:(BOOL)synchronized complete:(JRDBQueryComplete _Nullable)complete;
+- (NSArray<id<JRPersistent>> * _Nonnull)jr_findByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions clazz:(Class<JRPersistent> _Nonnull)clazz groupBy:(NSString * _Nullable)groupBy orderBy:(NSString * _Nullable)orderBy limit:(NSString * _Nullable)limit isDesc:(BOOL)isDesc synchronized:(BOOL)synchronized useCache:(BOOL)useCache complete:(JRDBQueryComplete _Nullable)complete;
 
 #pragma mark - convenience method
 
@@ -312,6 +319,26 @@
                                                   limit:(NSString * _Nullable)limit
                                                  isDesc:(BOOL)isDesc
                                            synchronized:(BOOL)synchronized
+                                               useCache:(BOOL)useCache
                                                complete:(JRDBQueryComplete _Nullable)complete;
 
 @end
+
+#pragma mark - cache
+
+@interface FMDatabase (JRDBCache)
+
+- (void)saveObjInRecursiveCache:(id<JRPersistent> _Nonnull)obj;
+
+- (void)saveObjInUnRecursiveCache:(id<JRPersistent> _Nonnull)obj;
+
+- (void)removeObjInRecursiveCache:(NSString * _Nonnull)ID;
+
+- (void)removeObjInUnRecursiveCache:(NSString * _Nonnull)ID;
+
+- (id<JRPersistent> _Nullable)objInRecursiveCache:(NSString * _Nonnull)ID;
+
+- (id<JRPersistent> _Nullable)objInUnRecursiveCache:(NSString * _Nonnull)ID ;
+
+@end
+

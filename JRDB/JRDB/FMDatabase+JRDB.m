@@ -18,11 +18,15 @@
 #import "JRUtils.h"
 #import "JRMiddleTable.h"
 #import "JRActivatedProperty.h"
+#import "JRDBQueue.h"
 
 
 #define AssertRegisteredClazz(clazz) NSAssert([[JRDBMgr shareInstance] isValidateClazz:clazz], @"class: %@ should be registered in JRDBMgr", clazz)
 
 static NSString * const queuekey = @"queuekey";
+
+static NSString * const jrdb_synchronizing = @"jrdb_synchronizing";
+
 
 @implementation FMDatabase (JRDB)
 
@@ -34,7 +38,7 @@ static NSString * const queuekey = @"queuekey";
 - (FMDatabaseQueue *)jr_databaseQueue {
     FMDatabaseQueue *q = objc_getAssociatedObject(self, &queuekey);
     if (!q) {
-        q = [FMDatabaseQueue databaseQueueWithPath:self.databasePath];
+        q = [JRDBQueue databaseQueueWithPath:self.databasePath];
         objc_setAssociatedObject(self, &queuekey, q, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
     return q;
@@ -42,24 +46,30 @@ static NSString * const queuekey = @"queuekey";
 
 - (void)jr_inQueue:(void (^)(FMDatabase *))block {
     [[self jr_databaseQueue] inDatabase:^(FMDatabase *db) {
+        objc_setAssociatedObject(db, &jrdb_synchronizing, @(YES), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         EXE_BLOCK(block, db);
+        objc_setAssociatedObject(db, &jrdb_synchronizing, @(NO), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }];
 }
 
 - (BOOL)jr_inTransaction:(void (^)(FMDatabase *, BOOL *))block {
-    BOOL flag = [self beginTransaction];
-    if (!flag) {
-        NSLog(@"begin transaction fail");
-        return NO;
-    }
-    BOOL rollback = NO;
-    EXE_BLOCK(block, self, &rollback);
-    if (rollback) {
-        [self rollback];
-        return NO;
-    } else {
-        return [self commit];
-    }
+    return
+    [[self jr_executeSync:YES block:^id _Nullable(FMDatabase * _Nonnull db) {
+        BOOL rollback = ![db beginTransaction];
+        if (rollback) {
+            NSLog(@"begin transaction fail");
+            return @(!rollback);
+        }
+        rollback = NO;
+        EXE_BLOCK(block, db, &rollback);
+        if (rollback) {
+            [self rollback];
+            return @NO;
+        } else {
+            rollback = ![db commit];
+        }
+        return @(!rollback);
+    }] boolValue];
 }
 
 - (BOOL)jr_execute:(BOOL (^)(FMDatabase * _Nonnull db))block useTransaction:(BOOL)useTransaction {
@@ -72,17 +82,23 @@ static NSString * const queuekey = @"queuekey";
     }
     BOOL flag = block(self);
     if (useTransaction) {
-        flag ? [self commit] : [self rollback];
+        if (flag) {
+            return [self commit];
+        } else {
+            [self rollback];
+            return NO;
+        }
     }
     return flag;
 }
 
 - (id)jr_executeSync:(BOOL)sync block:(id (^)(FMDatabase *db))block {
-    if (sync) {
+    if (sync && ![objc_getAssociatedObject(self, &jrdb_synchronizing) boolValue]) {
+        __block id result;
         [self jr_inQueue:^(FMDatabase * _Nonnull db) {
-            block(db);
+            result = block(db);
         }];
-        return nil;
+        return result;
     } else {
         return block(self);
     }
@@ -192,7 +208,6 @@ static NSString * const queuekey = @"queuekey";
 - (NSArray<JRColumnSchema *> *)jr_schemasInClazz:(Class<JRPersistent>)clazz {
     AssertRegisteredClazz(clazz);
     FMResultSet *ret = [[JRDBMgr defaultDB] getTableSchema:[clazz shortClazzName]];
-//    get table schema: result colums: cid[INTEGER], name,type [STRING], notnull[INTEGER], dflt_value[],pk[INTEGER]
     NSMutableArray *schemas = [NSMutableArray array];
     while ([ret next]) {
         JRColumnSchema *schema = [JRColumnSchema new];
@@ -359,6 +374,29 @@ static NSString * const queuekey = @"queuekey";
     }] boolValue];
 }
 
+#pragma mark - save or update array
+
+- (BOOL)jr_saveOrUpdateObjectsOnly:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction {
+    return
+    [self jr_execute:^BOOL(FMDatabase * _Nonnull db) {
+        __block BOOL needRollBack = NO;
+        [objects enumerateObjectsUsingBlock:^(id<JRPersistent>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            needRollBack = ![db jr_saveOrUpdateOneOnly:obj useTransaction:NO];
+            *stop = needRollBack;
+        }];
+        return !needRollBack;
+    } useTransaction:useTransaction];
+}
+
+- (BOOL)jr_saveOrUpdateObjectsOnly:(NSArray<id<JRPersistent>> *)objects useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized complete:(JRDBComplete)complete {
+    return
+    [[self jr_executeSync:synchronized block:^id(FMDatabase *db) {
+        BOOL flag = [db jr_saveOrUpdateObjectsOnly:objects useTransaction:useTransaction];
+        EXE_BLOCK(complete, flag);
+        return @(flag);
+    }] boolValue];
+}
+
 - (BOOL)jr_saveOrUpdateObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction {
     return
     [self jr_execute:^BOOL(FMDatabase * _Nonnull db) {
@@ -370,6 +408,7 @@ static NSString * const queuekey = @"queuekey";
         return !needRollBack;
     } useTransaction:useTransaction];
 }
+
 - (BOOL)jr_saveOrUpdateObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized complete:(JRDBComplete _Nullable)complete {
     return
     [[self jr_executeSync:synchronized block:^id(FMDatabase *db) {
@@ -547,6 +586,13 @@ static NSString * const queuekey = @"queuekey";
 }
 
 - (BOOL)jr_updateOneOnly:(id<JRPersistent>)one columns:(NSArray<NSString *> *)columns useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized complete:(JRDBComplete _Nullable)complete {
+    
+    //清除缓存
+    if ([one ID]) {
+        [self removeObjInRecursiveCache:[one ID]];
+        [self removeObjInUnRecursiveCache:[one ID]];
+    }
+    
     return
     [[self jr_executeSync:synchronized block:^id(FMDatabase *db) {
         BOOL flag = [db jr_updateOneOnly:one columns:columns useTransaction:useTransaction];
@@ -700,6 +746,7 @@ static NSString * const queuekey = @"queuekey";
                                                             limit:nil
                                                            isDesc:NO
                                                      synchronized:NO
+                                                         useCache:NO    
                                                          complete:nil];
                     needRollBack = ![self jr_deleteObjects:children useTransaction:NO];
                 } else {
@@ -820,10 +867,23 @@ static NSString * const queuekey = @"queuekey";
     return [JRFMDBResultSetHandler handleResultSet:ret forClazz:clazz].firstObject;
 }
 
-- (id<JRPersistent>)jr_getByID:(NSString *)ID clazz:(Class<JRPersistent>)clazz synchronized:(BOOL)synchronized complete:(JRDBQueryComplete)complete {
+- (id<JRPersistent>)jr_getByID:(NSString *)ID clazz:(Class<JRPersistent>)clazz synchronized:(BOOL)synchronized useCache:(BOOL)useCache complete:(JRDBQueryComplete)complete {
+    
+    if (useCache) {
+        id<JRPersistent> cacheObj = [self objInUnRecursiveCache:ID];
+        if (cacheObj) {
+            objc_setAssociatedObject(cacheObj, @selector(isCacheHit), @YES, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+            EXE_BLOCK(complete, cacheObj);
+            return cacheObj;
+        }
+    }
+    
     return
     [self jr_executeSync:synchronized block:^id(FMDatabase *db) {
         id<JRPersistent> result = [db jr_getByID:ID clazz:clazz];
+        
+        if (result) {[db saveObjInUnRecursiveCache:result];}
+        
         EXE_BLOCK(complete, result);
         return result;
     }];
@@ -918,7 +978,8 @@ static NSString * const queuekey = @"queuekey";
                                                groupBy:nil
                                                orderBy:nil
                                                  limit:nil
-                                                isDesc:NO];
+                                                isDesc:NO
+                                              useCache:NO];
             [subList addObjectsFromArray:array];
         } else {
             JRMiddleTable *mid = [JRMiddleTable table4Clazz:clazz andClazz:[obj class] db:self];
@@ -938,10 +999,23 @@ static NSString * const queuekey = @"queuekey";
     return obj;
 }
 
-- (id<JRPersistent>)jr_findByID:(NSString *)ID clazz:(Class<JRPersistent>)clazz synchronized:(BOOL)synchronized complete:(JRDBQueryComplete)complete {
+- (id<JRPersistent>)jr_findByID:(NSString *)ID clazz:(Class<JRPersistent>)clazz synchronized:(BOOL)synchronized useCache:(BOOL)useCache complete:(JRDBQueryComplete)complete {
+    
+    if (useCache) {
+        id<JRPersistent> cacheObj = [self objInRecursiveCache:ID];
+        if (cacheObj) {
+            objc_setAssociatedObject(cacheObj, @selector(isCacheHit), @YES, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+            EXE_BLOCK(complete, cacheObj);
+            return cacheObj;
+        }
+    }
+    
     return
     [self jr_executeSync:synchronized block:^id(FMDatabase *db) {
         id<JRPersistent> result = [db jr_findByID:ID clazz:clazz];
+        
+        if (result) {[db saveObjInRecursiveCache:result];}
+        
         EXE_BLOCK(complete, result);
         return result;
     }];
@@ -970,7 +1044,8 @@ static NSString * const queuekey = @"queuekey";
                          groupBy:(NSString *)groupBy
                          orderBy:(NSString *)orderBy
                            limit:(NSString *)limit
-                          isDesc:(BOOL)isDesc {
+                          isDesc:(BOOL)isDesc
+                        useCache:(BOOL)useCache {
 
     NSArray<NSString *> *list = [self jr_getIDsByConditions:conditions
                                                       clazz:clazz
@@ -981,13 +1056,13 @@ static NSString * const queuekey = @"queuekey";
 
     NSMutableArray *result = [NSMutableArray array];
     [list enumerateObjectsUsingBlock:^(NSString * ID, NSUInteger idx, BOOL * _Nonnull stop) {
-        [result addObject:[self jr_findByID:ID clazz:clazz]];
+        [result addObject:[self jr_findByID:ID clazz:clazz synchronized:NO useCache:useCache complete:nil]];
     }];
     
     return result;
 }
 
-- (NSArray<id<JRPersistent>> *)jr_findByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc synchronized:(BOOL)synchronized complete:(JRDBQueryComplete)complete {
+- (NSArray<id<JRPersistent>> *)jr_findByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc synchronized:(BOOL)synchronized useCache:(BOOL)useCache complete:(JRDBQueryComplete)complete {
     return
     [self jr_executeSync:synchronized block:^id(FMDatabase *db) {
         NSArray<id<JRPersistent>> *result = [db jr_findByConditions:conditions
@@ -995,7 +1070,8 @@ static NSString * const queuekey = @"queuekey";
                                                             groupBy:groupBy
                                                             orderBy:orderBy
                                                               limit:limit
-                                                             isDesc:isDesc];
+                                                             isDesc:isDesc
+                                                           useCache:useCache];
         EXE_BLOCK(complete, result);
         return result;
     }];
@@ -1072,5 +1148,43 @@ static NSString * const queuekey = @"queuekey";
 }
 
 @end
+
+#pragma mark - cache
+
+@implementation FMDatabase (JRDBCache)
+
+- (void)saveObjInRecursiveCache:(id<JRPersistent>)obj {
+    NSMutableDictionary *cache = [[JRDBMgr shareInstance] recursiveCacheForDBPath:self.databasePath];
+    cache[[obj ID]] = obj;
+}
+
+- (void)saveObjInUnRecursiveCache:(id<JRPersistent>)obj {
+    NSMutableDictionary *cache = [[JRDBMgr shareInstance] unRecursiveCacheForDBPath:self.databasePath];
+    cache[[obj ID]] = obj;
+}
+
+- (void)removeObjInRecursiveCache:(NSString *)ID {
+    NSMutableDictionary *cache = [[JRDBMgr shareInstance] recursiveCacheForDBPath:self.databasePath];
+    [cache removeObjectForKey:ID];
+}
+
+- (void)removeObjInUnRecursiveCache:(NSString *)ID {
+    NSMutableDictionary *cache = [[JRDBMgr shareInstance] unRecursiveCacheForDBPath:self.databasePath];
+    [cache removeObjectForKey:ID];
+}
+
+- (id<JRPersistent>)objInRecursiveCache:(NSString *)ID {
+    NSMutableDictionary *cache = [[JRDBMgr shareInstance] recursiveCacheForDBPath:self.databasePath];
+    return cache[ID];
+}
+
+- (id<JRPersistent>)objInUnRecursiveCache:(NSString *)ID {
+    NSMutableDictionary *cache = [[JRDBMgr shareInstance] unRecursiveCacheForDBPath:self.databasePath];
+    return cache[ID];
+}
+
+@end
+
+
 
 

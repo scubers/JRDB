@@ -24,7 +24,7 @@
 - (void)setUp {
     [super setUp];
     [JRDBMgr defaultDB];
-    FMDatabase *db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/Jrwong/Desktop/test.sqlite"];
+    FMDatabase *db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/jmacmini/Desktop/test.sqlite"];
     [[JRDBMgr shareInstance] registerClazzes:@[
                                                [Person class],
                                                [Card class],
@@ -46,9 +46,9 @@
 
 #pragma mark - Delete
 - (void)testDeleteAll {
-    [J_DELETEALL([Person class]).Recursive(YES) exe:nil];
-    [J_DELETEALL([Money class]).Recursive(YES) exe:nil];
-    [J_DELETEALL([Card class]).Recursive(YES) exe:nil];
+    [J_DeleteAll([Person class]).Recursive(YES) exe:nil];
+    [J_DeleteAll([Money class]).Recursive(YES) exe:nil];
+    [J_DeleteAll([Card class]).Recursive(YES) exe:nil];
     
 //    [J_DELETEALL([Person class]).Recursive(NO) exe:nil];
 //    [J_DELETEALL([Money class]).Recursive(NO) exe:nil];
@@ -56,14 +56,14 @@
 }
 
 - (void)testDeleteOne {
-    Person *p = [[J_SELECT([Person class]) exe:nil] firstObject];
-    [J_DELETE(p).Recursive(NO) exe:nil];
+    Person *p = [[J_Select([Person class]) exe:nil] firstObject];
+    [J_Delete(p).Recursive(NO) exe:nil];
 //    [J_DELETE(p).Recursive(YES) exe:nil];
 }
 
 - (void)testDeleteMany {
-    NSArray *array = [J_SELECT([Person class]) exe:nil];
-    [J_DELETE(array).Recursive(NO) exe:nil];
+    NSArray *array = [J_Select([Person class]) exe:nil];
+    [J_Delete(array).Recursive(NO) exe:nil];
 //    [J_DELETE(array).Recursive(YES) exe:nil];
 }
 
@@ -72,7 +72,7 @@
 - (void)testSaveOne {
     NSLog(@"default db: %@", [JRDBMgr defaultDB]);
     Person *p = [self createPerson:1 name:nil];
-    [J_INSERT(p).Recursive(NO).NowInMain(YES) exe:nil];
+    [J_Insert(p).Recursive(NO).Sync(YES) exe:nil];
 }
 
 - (void)testSaveOneWithSituation {
@@ -85,7 +85,7 @@
         [p.children addObject:[self createPerson:i+10 name:nil]];
     }
 //    [J_INSERT(p).Recursive(NO) exe:nil];
-    [J_INSERT(p).Recursive(YES) exe:nil];
+    [J_Insert(p).Recursive(YES) exe:nil];
 }
 
 - (void)testSaveCycle {
@@ -93,7 +93,7 @@
     p.son = [self createPerson:2 name:nil];
     p.card = [self createCard:@"1111"];
     p.card.person = p;
-    [J_INSERT(p).Recursive(YES) exe:nil];
+    [J_Insert(p).Recursive(YES) exe:nil];
 //    [J_INSERT(p).Recursive(NO) exe:nil];
 }
 
@@ -105,7 +105,7 @@
     p2.son = p3;
     p3.son = p1;
     
-    [J_INSERT(p1).Recursive(YES) exe:nil];
+    [J_Insert(p1).Recursive(YES) exe:nil];
 //    [J_INSERT(p2).Recursive(YES) exe:nil];
 //    [J_INSERT(p3).Recursive(YES) exe:nil];
     
@@ -120,7 +120,7 @@
         [p.money addObject:[self createMoney:i]];
     }
     //    [J_INSERT(p).Recursive(NO) exe:nil];
-    [J_INSERT(p).Recursive(YES) exe:nil];
+    [J_Insert(p).Recursive(YES) exe:nil];
 }
 
 - (void)testSaveChildren {
@@ -129,7 +129,7 @@
         [p.children addObject:[self createPerson:i+10 name:nil]];
     }
     //    [J_INSERT(p).Recursive(NO) exe:nil];
-    [J_INSERT(p).Recursive(YES) exe:nil];
+    [J_Insert(p).Recursive(YES) exe:nil];
 }
 
 #pragma mark - Update
@@ -137,8 +137,8 @@
 - (void)testUpdateOne {
     Person *p = [Person jr_findAll].firstObject;
     p.a_int = 1212;
-    [J_UPDATE(p).Recursive(YES) exe:nil];
-    [J_UPDATE(p).Recursive(NO) exe:nil];
+    [J_Update(p).Recursive(YES) exe:nil];
+    [J_Update(p).Recursive(NO) exe:nil];
 }
 
 - (void)testUpdateMany {
@@ -146,7 +146,7 @@
     [ps enumerateObjectsUsingBlock:^(Person * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         obj.c_long = 9999;
     }];
-    [J_UPDATE(ps).Recursive(YES) exe:nil];
+    [J_Update(ps).Recursive(YES) exe:nil];
 //    [J_UPDATE(ps).Recursive(NO) exe:nil];
 }
 
@@ -154,7 +154,7 @@
     Person *p = [Person jr_findAll].firstObject;
     p.card = nil;
 //    p.card = [self createCard:@"1123"];
-    [J_UPDATE(p).Recursive(YES) exe:nil];
+    [J_Update(p).Recursive(YES) exe:nil];
 //    [J_UPDATE(p).Recursive(NO) exe:nil];
 }
 
@@ -162,7 +162,7 @@
     Person *p = [Person jr_findAll].firstObject;
     p.son = nil;
 //    p.son = [self createPerson:10 name:nil];
-    [J_UPDATE(p).Recursive(YES) exe:nil];
+    [J_Update(p).Recursive(YES) exe:nil];
 //    [J_UPDATE(p).Recursive(NO) exe:nil];
 }
 
@@ -173,7 +173,7 @@
 //        [p.money addObject:[self createMoney:i]];
 //    }
 //    [p.money removeLastObject];
-    [J_UPDATE(p).Recursive(YES) exe:nil];
+    [J_Update(p).Recursive(YES) exe:nil];
 //    [J_UPDATE(p).Recursive(NO) exe:nil];
 }
 
@@ -186,7 +186,7 @@
         [p.money addObject:[self createMoney:i]];
         [p.children addObject:[self createPerson:i+10 name:nil]];
     }
-    [J_UPDATE(p).Columns(@"_a_int", nil).Recursive(YES) exe:nil];
+    [J_Update(p).Columns(@"_a_int", nil).Recursive(YES) exe:nil];
 }
 
 - (void)testUpdateIgnore {
@@ -198,24 +198,43 @@
         [p.money addObject:[self createMoney:i]];
         [p.children addObject:[self createPerson:i+10 name:nil]];
     }
-    [J_UPDATE(p).Ignore(@"_a_int", nil).Recursive(YES) exe:nil];
+    [J_Update(p).Ignore(@"_a_int", nil).Recursive(YES) exe:nil];
+}
+
+#pragma mark - save or update
+
+- (void)testSaveOrUpdate {
+    Person *p = [Person jr_findAll].firstObject;
+    p.a_int = 1122;
+    [J_SaveOrUpdate(p) exe:^(JRDBChain * _Nonnull chain, id  _Nullable result) {
+        NSLog(@"%@", result);
+    }];
 }
 
 
 #pragma mark - Select
 
+- (void)testSelectByID {
+    Person *p = [[J_Select([Person class]) exe:nil] firstObject];
+    
+    NSLog(@"%d", [Person jr_findByID:p.ID].cacheHit);
+    NSLog(@"%d", [Person jr_findByID:p.ID].cacheHit);
+}
+
 - (void)testSelectAll {
-    NSArray<Person *> *ps = [J_SELECT([Person class]).Recursive(YES) exe:nil];
+    NSArray<Person *> *ps = [J_Select([Person class]).Recursive(YES).Cache(NO) exe:nil];
+    NSArray<Person *> *ps1 = [J_Select([Person class]).Recursive(YES).Cache(NO) exe:nil];
     NSLog(@"%@", ps);
+    NSLog(@"%@", ps1);
 }
 
 - (void)testOtherCondition {
     NSArray<Person *> *ps =
-    [J_SELECT([Person class])
+    [J_Select([Person class])
     .Recursive(YES)
     .From(@"Person")
-    .Order(@"_a_int")
-    .Group(@"_bbbbb")
+    .OrderJ(_a_int)
+    .GroupJ(_bbbbb)
     .Limit(0,3)
     .Desc(YES)
      exe:nil];
@@ -226,7 +245,7 @@
 
 - (void)testSelectCount {
     NSNumber *count =
-    [J_SELECT(JRCount)
+    [J_Select(JRCount)
     .From([Person class])
 //    .From(@"Person")
     .Order(@"_a_int")
@@ -240,7 +259,7 @@
 
 - (void)testSelectColumn {
     NSArray<Person *> *ps =
-    [J_SELECT(@"_a_int", @"_b_unsigned_int", nil)
+    [J_Select(@"_a_int", @"_b_unsigned_int", nil)
     .Recursive(YES) // 自定义查询，即使设置关联查询，也不会进行关联查询
     .From([Person class])
     .Order(@"_a_int")
@@ -259,41 +278,32 @@
     NSMutableArray *ori = [NSMutableArray array];
     int count = 100;
     
+    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        [J_Select(JRCount).From([Person class]) exe:^(JRDBChain * _Nonnull chain, id  _Nullable result) {
+            NSLog(@"%@", result);
+        }];
+    });
+    
+    sleep(10);
+    return;
     for (int i = 0; i<count; i++) {
         [ori addObject:@(i)];
-//        NSArray *result = [[JRDBMgr defaultDB] jr_findByConditions:nil clazz:[Person class] groupBy:nil orderBy:nil limit:nil isDesc:NO];
-//        NSLog(@"%@", @([result count]));
-//        [[JRDBMgr defaultDB] jr_saveOneOnly:[self createPerson:i name:nil] useTransaction:YES complete:nil];
-//        continue;
-
-//        [[self createPerson:i name:nil] jr_save];
-//        continue;
+        
         dispatch_async(dispatch_get_global_queue(0, 0), ^{
-//            [J_INSERT([self createPerson:i name:nil]).NowInMain(NO) exe:^(JRDBChain *chain, id result) {
-//                NSLog(@"%d", i);
-//            }];
-            
-//            [[JRDBMgr defaultDB] jr_findByConditions:nil clazz:[Person class] groupBy:nil orderBy:nil limit:nil isDesc:NO block:^(id result) {
-//                NSLog(@"%@", @([result count]));
-//            }];
-            
-//            [[JRDBMgr defaultDB] jr_saveOneOnly:[self createPerson:i name:nil] useTransaction:YES complete:^(BOOL success) {
-//            }];
-
-            [[self createPerson:i name:nil] jr_saveWithComplete:^(BOOL success) {
-
+            id result = [J_Select([Person class]).Recursive(YES).Sync(YES) exe:^(JRDBChain * _Nonnull chain, id  _Nullable result) {
+                NSLog(@"___complete %@", @([result count]));
             }];
-
+            NSLog(@"=+=+=+=+  %@", @([result count]));
+//            [J_INSERT([self createPerson:i name:nil]).Sync(YES) exe:^(JRDBChain * _Nonnull chain, id  _Nullable result) {
+//                NSLog(@"%@", result);
+//            }];
         });
     }
     
-    sleep(100);
+//    sleep(100);
 }
 
 - (void)testGCD2 {
-    dispatch_sync(dispatch_get_main_queue(), ^{
-//        
-    });
 }
 
 #pragma mark - convenience method

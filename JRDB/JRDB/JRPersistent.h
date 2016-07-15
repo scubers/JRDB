@@ -14,17 +14,20 @@
 #define SingleLinkColumn(property) [NSString stringWithFormat:@"_single_link_%@", property]
 #define ParentLinkColumn(property) [NSString stringWithFormat:@"_parent_link_%@", property]
 
-@class JRActivatedProperty;
+@class JRActivatedProperty, JRDBChain;
 
 @protocol JRPersistent <JRReflectable>
 
 typedef void(^JRDBComplete)(BOOL success);
+typedef void(^JRDBChainComplete)(JRDBChain * _Nonnull chain, id _Nullable result);
 typedef void(^JRDBQueryComplete)(id _Nullable result);
 typedef void(^JRDBDidFinishBlock)(id<JRPersistent> _Nonnull obj);
 
 @required
 - (void)setID:(NSString * _Nullable)ID;
 - (NSString * _Nullable)ID;
+
+@property (nonatomic, getter=isCacheHit, readonly) BOOL cacheHit;
 
 @optional
 

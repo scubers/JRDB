@@ -9,16 +9,17 @@
 #import <FMDB/FMDB.h>
 #import "JRPersistent.h"
 
+
 @class JRDBChain;
 
 @interface FMDatabase (Chain)
 
-- (BOOL)jr_executeUpdateChain:(JRDBChain *)chain;
+//- (BOOL)jr_executeUpdateChain:(JRDBChain *)chain;
+- (BOOL)jr_executeUpdateChain:(JRDBChain *)chain complete:(JRDBChainComplete)complete;
 
-- (id)jr_executeQueryChain:(JRDBChain *)chain;
-- (id)jr_executeCustomizedQueryChain:(JRDBChain *)chain;
+- (id)jr_executeQueryChain:(JRDBChain *)chain complete:(JRDBChainComplete)complete;
+- (id)jr_executeCustomizedQueryChain:(JRDBChain *)chain complete:(JRDBChainComplete)complete;
 
-- (void)jr_executeUpdateChain:(JRDBChain *)chain complete:(JRDBComplete)complete;
 
 
 

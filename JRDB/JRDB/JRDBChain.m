@@ -26,7 +26,7 @@
     };\
 }
 
-#define OperationBlockImpl(_block_, _methodName_, _operation_)\
+#define OperationBlockForArrayImpl(_block_, _methodName_, _operation_)\
 - (_block_)_methodName_ {\
     jr_weak(self);\
     return ^JRDBChain *(NSArray<id<JRPersistent>> *array) {\
@@ -40,16 +40,17 @@
         return self;\
     };\
 }
-//- (_block_)_methodName_ {\
-//    jr_weak(self);\
-//    return ^JRDBChain *(id obj){\
-//        jr_strong(self);\
-//        self->_operation = _operation_;\
-//        self->_target = obj;\
-//        return self;\
-//    };\
-//}
 
+#define OperationBlockForClazzImpl(_block_, _methodName_, _operation_)\
+- (_block_)_methodName_ {\
+    jr_weak(self);\
+    return ^JRDBChain *(Class<JRPersistent> clazz) {\
+        jr_strong(self);\
+        self->_operation = _operation_;\
+        self->_targetClazz = clazz;\
+        return self;\
+    };\
+}
 
 
 #define ArrrayPropertyImpl(_method_,_propName_)                        \
@@ -125,40 +126,41 @@ typedef enum {
 
 - (instancetype)init {
     if (self = [super init]) {
-        _isRecursive = YES;
-        _isNowInMain = YES;
+        _isRecursive    = NO;
         _useTransaction = YES;
-        _db = [JRDBMgr defaultDB];
+        _useCache       = NO;
+        _db             = [JRDBMgr defaultDB];
+        _isSync         = YES;
+        _limitIn        = (JRLimit){-1, -1};
     }
     return self;
 }
 
 - (id)exe:(JRDBChainComplete)complete {
+
+    if (!self.target && !self.targetArray.count && !self.targetClazz) {
+        NSLog(@"chain excute error, target are nil");
+        return nil;
+    }
+    
     _completeBlock = complete;
 
-
-
     if (self.operation == CSelect) {
-        id result = [_db jr_executeQueryChain:self];
-        EXE_BLOCK(_completeBlock, self, result);
+        id result = [_db jr_executeQueryChain:self complete:complete];
         return result;
     }
     else if(self.operation == CSelectCustomized || self.operation == CSelectCount) {
-        id result = [_db jr_executeCustomizedQueryChain:self];
-        EXE_BLOCK(_completeBlock, self, result);
+        id result = [_db jr_executeCustomizedQueryChain:self complete:complete];
         return result;
     }
-    else if(self.isNowInMain) {
-        BOOL ret = [_db jr_executeUpdateChain:self];
-        EXE_BLOCK(_completeBlock, self, @(ret));
-        return @(ret);
-    } else {
-        [_db jr_executeUpdateChain:self complete:^(BOOL success) {
-            EXE_BLOCK(self.completeBlock, self, @(success));
-        }];
-        return nil;
+    else {
+        return @([_db jr_executeUpdateChain:self complete:complete]);
     }
 }
+
+
+
+#pragma mark - Operation
 
 - (SelectBlock)Select {
     jr_weak(self);
@@ -173,37 +175,42 @@ typedef enum {
         }
         else {
             self->_operation = CSelectCustomized;
-            NSMutableArray *args = [NSMutableArray array];
-            va_list ap;
-            va_start(ap, first);
-            id arg;
-            while( (arg = va_arg(ap,id)) )
-            {
-                if ( arg ){
-                    [args addObject:arg];
+            if ([first isKindOfClass:[NSArray class]]) {
+                self->_selectColumns = first;
+            } else {
+                NSMutableArray *args = [NSMutableArray array];
+                va_list ap;
+                va_start(ap, first);
+                id arg;
+                while( (arg = va_arg(ap,id)) )
+                {
+                    if ( arg ){
+                        [args addObject:arg];
+                    }
                 }
+                va_end(ap);
+                [args insertObject:first atIndex:0];
+                self->_selectColumns = args;
             }
-            va_end(ap);
-            [args insertObject:first atIndex:0];
-            self->_selectColumns = args;
         }
         return self;
     };
 }
-- (DeleteAllBlock)DeleteAll {
-    jr_weak(self);
-    return ^JRDBChain *(Class<JRPersistent> clazz) {
-        jr_strong(self);
-        self->_operation = CDeleteAll;
-        self->_targetClazz = clazz;
-        return self;
-    };
-}
 
-OperationBlockImpl(InsertBlock, Insert, CInsert)
-OperationBlockImpl(UpdateBlock, Update, CUpdate)
-OperationBlockImpl(DeleteBlock, Delete, CDelete)
 
+OperationBlockForClazzImpl(CreateTableBlock, CreateTable, CCreateTable)
+OperationBlockForClazzImpl(UpdateTableBlock, UpdateTable, CUpdateTable)
+OperationBlockForClazzImpl(DropTableBlock, DropTable, CDropTable)
+OperationBlockForClazzImpl(TruncateTableBlock, TruncateTable, CTruncateTable)
+
+OperationBlockForClazzImpl(DeleteAllBlock, DeleteAll, CDeleteAll)
+
+OperationBlockForArrayImpl(InsertBlock, Insert, CInsert)
+OperationBlockForArrayImpl(UpdateBlock, Update, CUpdate)
+OperationBlockForArrayImpl(DeleteBlock, Delete, CDelete)
+OperationBlockForArrayImpl(SaveOrUpdateBlock, SaveOrUpdate, CSaveOrUpdate)
+
+#pragma mark - Property
 
 - (JRDBChain *(^)(id))From {
     jr_weak(self);
@@ -223,18 +230,9 @@ OperationBlockImpl(DeleteBlock, Delete, CDelete)
     };
 }
 
-- (NSArray<JRQueryCondition *> *)queryCondition {
-    NSArray *conditions = nil;
-    if (_whereString.length) {
-        conditions = @[[JRQueryCondition condition:_whereString args:_parameters type:JRQueryConditionTypeAnd]];
-    }
-    return conditions;
-}
-
-
-- (JRDBChain *(^)(int, int))Limit {
+- (JRDBChain *(^)(NSUInteger, NSUInteger))Limit {
     jr_weak(self);
-    return ^JRDBChain *(int start, int length){
+    return ^JRDBChain *(NSUInteger start, NSUInteger length){
         jr_strong(self);
         self->_limitIn = (JRLimit){start, length};
         return self;
@@ -246,15 +244,28 @@ BlockPropertyImpl(NSString *, Group, groupBy)
 BlockPropertyImpl(NSString *, Order, orderBy)
 BlockPropertyImpl(NSString *, Where, whereString)
 BlockPropertyImpl(BOOL, Recursive, isRecursive)
-BlockPropertyImpl(BOOL, NowInMain, isNowInMain)
+BlockPropertyImpl(BOOL, Sync, isSync)
 BlockPropertyImpl(BOOL, Trasaction, useTransaction)
 BlockPropertyImpl(BOOL, Desc, isDesc)
+BlockPropertyImpl(BOOL, Cache, useCache)
 BlockPropertyImpl(JRDBChainComplete, Complete, completeBlock)
 
 
 ArrrayPropertyImpl(Params, parameters)
 ArrrayPropertyImpl(Columns, columnsArray)
 ArrrayPropertyImpl(Ignore, ignoreArray)
+
+
+#pragma mark - Other method
+
+- (NSArray<JRQueryCondition *> *)queryCondition {
+    NSArray *conditions = nil;
+    if (_whereString.length) {
+        conditions = @[[JRQueryCondition condition:_whereString args:_parameters type:JRQueryConditionTypeAnd]];
+    }
+    return conditions;
+}
+
 
 - (NSArray *)variableListToArray:(va_list)valist {
     NSMutableArray *args = [NSMutableArray array];
@@ -284,7 +295,10 @@ ArrrayPropertyImpl(Ignore, ignoreArray)
 }
 
 - (NSString *)limitString {
-    return [NSString stringWithFormat:@" limit %d,%d ", _limitIn.start, _limitIn.length];
+    if (_limitIn.start < 0 || _limitIn.length < 0) {
+        return nil;
+    }
+    return [NSString stringWithFormat:@" limit %zd,%zd ", _limitIn.start, _limitIn.length];
 }
 
 - (NSMutableArray<NSNumber *> *)history {
