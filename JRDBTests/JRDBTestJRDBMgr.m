@@ -39,7 +39,7 @@
 }
 
 - (void)testCreateTable {
-    [J_CreateTable([Person class]) exe:^(JRDBChain * _Nonnull chain, id  _Nullable result) {
+    [J_CreateTable(Person) exe:^(JRDBChain * _Nonnull chain, id  _Nullable result) {
         NSLog(@"%@", result);
     }];
 }

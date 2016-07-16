@@ -25,9 +25,7 @@
 #import "JRDBChain.h"
 #import "FMDatabase+Chain.h"
 #import "JRActivatedProperty.h"
-#import "JRSqlGenerator+Chain.h"
 #import "NSObject+JRDB.h"
-#import "NSArray+JRDB.h"
 
 
 #endif /* JRDB_h */

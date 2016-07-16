@@ -15,7 +15,7 @@
 #import <objc/runtime.h>
 
 
-#define Chain 1
+//#define Chain 1
 
 @interface JRDBTests : XCTestCase
 
@@ -26,7 +26,7 @@
 - (void)setUp {
     [super setUp];
     [JRDBMgr defaultDB];
-    FMDatabase *db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/jmacmini/Desktop/test.sqlite"];
+    FMDatabase *db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/Jrwong/Desktop/test.sqlite"];
     [[JRDBMgr shareInstance] registerClazzes:@[
                                                [Person class],
                                                [Card class],
@@ -101,9 +101,7 @@
     }
 #ifndef Chain
 //    [array jr_save];
-    [array jr_saveWithComplete:^(BOOL success) {
-        NSLog(@"success");
-    }];
+    [array jr_save];
 #else
     [J_Insert(array) exe:nil];
 #endif
@@ -149,9 +147,7 @@
     }
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
 #ifndef Chain
-        [p1 jr_saveWithComplete:^(BOOL success) {
-            NSLog(@"===");
-        }];
+        [p1 jr_save];
 #else
 //        [J_INSERT(p).NowInMain(NO) exe:^(JRDBChain *chain, id result) {
 //            NSLog(@"===");
@@ -233,14 +229,7 @@
 #pragma mark - test find 
 - (void)testFindByCondition {
 #ifndef Chain
-    NSArray<Person *> *ps =[Person jr_findByConditions:@[
-                                                         [JRQueryCondition condition:@"_b_unsigned_int > ?" args:@[@6] type:JRQueryConditionTypeAnd],
-                                                         [JRQueryCondition condition:@"_c_long = ?" args:@[@3000] type:JRQueryConditionTypeOr],
-                                                         ]
-                                               groupBy:nil
-                                               orderBy:@"_ID"
-                                                 limit:nil
-                                                isDesc:YES];
+
 #else
     NSArray<Person *> *ps = [J_Select([Person class])
                              .Where(@"_b_unsigned_int > ? or _c_long = ?")
@@ -250,7 +239,6 @@
                              exe:nil];
 #endif
     
-    NSLog(@"%@", ps);
 }
 
 - (void)testFindAll {

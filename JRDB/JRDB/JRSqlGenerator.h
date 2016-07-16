@@ -155,3 +155,11 @@ typedef enum {
                              table:(NSString * _Nullable)table;
 
 @end
+
+
+@interface JRSqlGenerator (Chain)
+
++ (JRSql * _Nonnull)sql4ChainCustomizedSelect:(JRDBChain * _Nonnull)chain;
++ (JRSql * _Nonnull)sql4GetColumns:(NSArray<NSString *> * _Nullable)columns forChain:(JRDBChain * _Nonnull)chain;
+
+@end

@@ -14,6 +14,8 @@
 #import <objc/message.h>
 #import "JRMiddleTable.h"
 
+static NSString * const jrdb_class_registered_key = @"jrdb_class_registered_key";
+
 @interface JRDBMgr()
 {
     FMDatabase *_defaultDB;
@@ -68,6 +70,7 @@ static JRDBMgr *__shareInstance;
     if ([_clazzArray containsObject:clazz]) { return; }
     [_clazzArray addObject:clazz];
     [self _configureRegisteredClazz:clazz];
+    objc_setAssociatedObject(clazz, &jrdb_class_registered_key, @YES, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (void)registerClazzes:(NSArray<Class<JRPersistent>> *)clazzArray {
@@ -92,13 +95,7 @@ static JRDBMgr *__shareInstance;
 }
 
 - (BOOL)isValidateClazz:(Class<JRPersistent>)clazz {
-//    return [_clazzArray containsObject:clazz]; //为什么在cocoapods会报错，其他就不会，神经病 艹
-    for (Class c in _clazzArray) {
-        if ([NSStringFromClass(c) isEqualToString:NSStringFromClass(clazz)]) {
-            return YES;
-        }
-    }
-    return NO;
+    return [objc_getAssociatedObject(clazz, &jrdb_class_registered_key) boolValue];
 }
 
 - (void)clearMidTableRubbishDataForDB:(FMDatabase *)db {

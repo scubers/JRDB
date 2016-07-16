@@ -248,7 +248,10 @@
  *
  *  @return obj
  */
-- (id<JRPersistent> _Nullable)jr_getByID:(NSString * _Nonnull)ID clazz:(Class<JRPersistent> _Nonnull)clazz synchronized:(BOOL)synchronized useCache:(BOOL)useCache complete:(JRDBQueryComplete _Nullable)complete;
+- (id<JRPersistent> _Nullable)jr_getByID:(NSString * _Nonnull)ID
+                                   clazz:(Class<JRPersistent> _Nonnull)clazz
+                            synchronized:(BOOL)synchronized
+                                useCache:(BOOL)useCache complete:(JRDBQueryComplete _Nullable)complete;
 
 
 /**
@@ -259,7 +262,10 @@
  *
  *  @return 结果
  */
-- (id<JRPersistent> _Nullable)jr_getByPrimaryKey:(id _Nonnull)primaryKey clazz:(Class<JRPersistent> _Nonnull)clazz synchronized:(BOOL)synchronized complete:(JRDBQueryComplete _Nullable)complete;
+- (id<JRPersistent> _Nullable)jr_getByPrimaryKey:(id _Nonnull)primaryKey
+                                           clazz:(Class<JRPersistent> _Nonnull)clazz
+                                    synchronized:(BOOL)synchronized
+                                        complete:(JRDBQueryComplete _Nullable)complete;
 
 /**
  *  根据条件查询，不关联查询，只查询一级
@@ -273,7 +279,14 @@
  *
  *  @return 结果
  */
-- (NSArray<id<JRPersistent>> * _Nonnull)jr_getByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions clazz:(Class<JRPersistent> _Nonnull)clazz groupBy:(NSString * _Nullable)groupBy orderBy:(NSString * _Nullable)orderBy limit:(NSString * _Nullable)limit isDesc:(BOOL)isDesc synchronized:(BOOL)synchronized complete:(JRDBQueryComplete _Nullable)complete;
+- (NSArray<id<JRPersistent>> * _Nonnull)jr_getByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions
+                                                     clazz:(Class<JRPersistent> _Nonnull)clazz
+                                                   groupBy:(NSString * _Nullable)groupBy
+                                                   orderBy:(NSString * _Nullable)orderBy
+                                                     limit:(NSString * _Nullable)limit
+                                                    isDesc:(BOOL)isDesc
+                                              synchronized:(BOOL)synchronized
+                                                  complete:(JRDBQueryComplete _Nullable)complete;
 
 #pragma mark - multi level query operation
 
@@ -285,7 +298,11 @@
  *
  *  @return 结果
  */
-- (id<JRPersistent> _Nullable)jr_findByID:(NSString * _Nonnull)ID clazz:(Class<JRPersistent> _Nonnull)clazz synchronized:(BOOL)synchronized useCache:(BOOL)useCache complete:(JRDBQueryComplete _Nullable)complete;
+- (id<JRPersistent> _Nullable)jr_findByID:(NSString * _Nonnull)ID
+                                    clazz:(Class<JRPersistent> _Nonnull)clazz
+                             synchronized:(BOOL)synchronized
+                                 useCache:(BOOL)useCache
+                                 complete:(JRDBQueryComplete _Nullable)complete;
 
 /**
  *  根据指定主键进行查找，若已实现自定义主键，则根据自定义主键，若无，则根据默认主键『_ID』查找 若有关联数据，一并查询
@@ -295,7 +312,10 @@
  *
  *  @return 结果
  */
-- (id<JRPersistent> _Nullable)jr_findByPrimaryKey:(id _Nonnull)primaryKey clazz:(Class<JRPersistent> _Nonnull)clazz synchronized:(BOOL)synchronized complete:(JRDBQueryComplete _Nullable)complete;
+- (id<JRPersistent> _Nullable)jr_findByPrimaryKey:(id _Nonnull)primaryKey
+                                            clazz:(Class<JRPersistent> _Nonnull)clazz
+                                     synchronized:(BOOL)synchronized
+                                         complete:(JRDBQueryComplete _Nullable)complete;
 
 /**
  *  根据条件查询(条件名称需要是属性全称)
@@ -304,12 +324,21 @@
  *
  *  @return 查询结果
  */
-- (NSArray<id<JRPersistent>> * _Nonnull)jr_findByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions clazz:(Class<JRPersistent> _Nonnull)clazz groupBy:(NSString * _Nullable)groupBy orderBy:(NSString * _Nullable)orderBy limit:(NSString * _Nullable)limit isDesc:(BOOL)isDesc synchronized:(BOOL)synchronized useCache:(BOOL)useCache complete:(JRDBQueryComplete _Nullable)complete;
+- (NSArray<id<JRPersistent>> * _Nonnull)jr_findByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions
+                                                      clazz:(Class<JRPersistent> _Nonnull)clazz
+                                                    groupBy:(NSString * _Nullable)groupBy
+                                                    orderBy:(NSString * _Nullable)orderBy
+                                                      limit:(NSString * _Nullable)limit
+                                                     isDesc:(BOOL)isDesc
+                                               synchronized:(BOOL)synchronized
+                                                   useCache:(BOOL)useCache
+                                                   complete:(JRDBQueryComplete _Nullable)complete;
 
 #pragma mark - convenience method
 
 
 - (long)jr_count4PrimaryKey:(id _Nonnull)pk clazz:(Class<JRPersistent> _Nonnull)clazz synchronized:(BOOL)synchronized complete:(JRDBQueryComplete _Nullable)complete;
+
 - (long)jr_count4ID:(NSString * _Nonnull)ID clazz:(Class<JRPersistent> _Nonnull)clazz synchronized:(BOOL)synchronized complete:(JRDBQueryComplete _Nullable)complete;
 
 - (NSArray<NSString *> * _Nonnull)jr_getIDsByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions
@@ -319,7 +348,6 @@
                                                   limit:(NSString * _Nullable)limit
                                                  isDesc:(BOOL)isDesc
                                            synchronized:(BOOL)synchronized
-                                               useCache:(BOOL)useCache
                                                complete:(JRDBQueryComplete _Nullable)complete;
 
 @end

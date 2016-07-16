@@ -13,6 +13,7 @@
 #import "JRFMDBResultSetHandler.h"
 #import "JRReflectUtil.h"
 #import "JRColumnSchema.h"
+#import "JRDBChain.h"
 
 
 const NSString *JRDB_IDKEY                = @"JRDB_IDKEY";
@@ -22,11 +23,8 @@ const NSString *jr_activatedPropertiesKey = @"jr_activatedPropertiesKey";
 @implementation NSObject (JRDB)
 
 + (void)jr_configure {
-    NSAssert(![objc_getAssociatedObject(self, _cmd) boolValue], @"This class's -[jr_configure] has been executed");
-    // TODO: configure something like - jr_activatedProperties
     NSArray *activatedProp = [JRReflectUtil activitedProperties4Clazz:self];
     objc_setAssociatedObject(self, &jr_activatedPropertiesKey, activatedProp, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    objc_setAssociatedObject(self, _cmd, @(YES), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 #pragma mark - protocol method
@@ -123,283 +121,101 @@ const NSString *jr_activatedPropertiesKey = @"jr_activatedPropertiesKey";
 
 #pragma mark - save or update
 
-- (BOOL)jr_saveOrUpdateOnlyToDB:(FMDatabase * _Nonnull)db {
-    return [db jr_saveOrUpdateOneOnly:self useTransaction:YES synchronized:YES complete:nil];
-}
-
-- (BOOL)jr_saveOrUpdateUseTransaction:(BOOL)useTransaction toDB:(FMDatabase * _Nonnull)db {
-    return [db jr_saveOrUpdateOne:self useTransaction:useTransaction synchronized:YES complete:nil];
-}
-- (void)jr_saveOrUpdateUseTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete  toDB:(FMDatabase * _Nonnull)db {
-    [db jr_saveOrUpdateOne:self useTransaction:useTransaction synchronized:YES complete:complete];
-}
-
-- (BOOL)jr_saveOrUpdateToDB:(FMDatabase * _Nonnull)db {
-    return [db jr_saveOrUpdateOne:self useTransaction:YES synchronized:YES complete:nil];
-}
-- (void)jr_saveOrUpdateWithComplete:(JRDBComplete _Nullable)complete toDB:(FMDatabase * _Nonnull)db {
-    [db jr_saveOrUpdateOne:self useTransaction:YES synchronized:YES complete:complete];
-}
-
-#pragma mark - save or update use DefaultDB
-
-- (BOOL)jr_saveOrUpdateUseTransaction:(BOOL)useTransaction {
-    return [self jr_saveOrUpdateUseTransaction:useTransaction toDB:JR_DEFAULTDB];
-}
-- (void)jr_saveOrUpdateUseTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete {
-    [self jr_saveOrUpdateUseTransaction:useTransaction complete:complete toDB:JR_DEFAULTDB];
+- (BOOL)jr_saveOrUpdateOnly {
+    return [J_SaveOrUpdate(self).Recursive(NO) exe:nil];
 }
 
 - (BOOL)jr_saveOrUpdate {
-    return [self jr_saveOrUpdateUseTransaction:YES toDB:JR_DEFAULTDB];
-}
-- (void)jr_saveOrUpdateWithComplete:(JRDBComplete _Nullable)complete {
-    [self jr_saveOrUpdateUseTransaction:YES complete:complete toDB:JR_DEFAULTDB];
+    return [J_SaveOrUpdate(self).Recursive(YES) exe:nil];
 }
 
 #pragma mark - save
 
-- (BOOL)jr_saveOnlyToDB:(FMDatabase *)db {
-    return [db jr_saveOneOnly:self useTransaction:YES synchronized:YES complete:nil];
-}
-
-
-- (BOOL)jr_saveUseTransaction:(BOOL)useTransaction toDB:(FMDatabase *)db {
-    return [db jr_saveOne:self useTransaction:useTransaction synchronized:YES complete:nil];
-}
-
-- (void)jr_saveUseTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete toDB:(FMDatabase *)db {
-    [db jr_saveOne:self useTransaction:useTransaction synchronized:YES complete:complete];
-}
-
-
-- (BOOL)jr_saveToDB:(FMDatabase *)db {
-    return [db jr_saveOne:self useTransaction:YES synchronized:YES complete:nil];
-}
-
-- (void)jr_saveWithComplete:(JRDBComplete)complete toDB:(FMDatabase *)db {
-    [db jr_saveOne:self useTransaction:YES synchronized:YES complete:complete];
-}
-
-#pragma mark - save use defaultDB
-
 - (BOOL)jr_saveOnly {
-    return [self jr_saveOnlyToDB:JR_DEFAULTDB];
+    return [J_Insert(self) exe:nil];
 }
-- (BOOL)jr_saveUseTransaction:(BOOL)useTransaction {
-    return [self jr_saveUseTransaction:useTransaction toDB:JR_DEFAULTDB];
-}
-- (void)jr_saveUseTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete {
-    [self jr_saveUseTransaction:useTransaction complete:complete toDB:JR_DEFAULTDB];
-}
+
 - (BOOL)jr_save {
-    return [self jr_saveToDB:JR_DEFAULTDB];
+    return [J_Insert(self).Recursive(YES) exe:nil];
 }
-- (void)jr_saveWithComplete:(JRDBComplete)complete {
-    [self jr_saveWithComplete:complete toDB:JR_DEFAULTDB];
-}
+
 #pragma mark - update
 
-- (BOOL)jr_updateOnlyColumns:(NSArray<NSString *> *)columns toDB:(FMDatabase *)db {
-    return [db jr_updateOneOnly:self columns:columns useTransaction:YES synchronized:YES complete:nil];
-}
-
-- (BOOL)jr_updateColumns:(NSArray<NSString *> *)columns useTransaction:(BOOL)useTransaction toDB:(FMDatabase *)db{
-    return [db jr_updateOne:self columns:columns useTransaction:useTransaction synchronized:YES complete:nil];
-}
-
-- (void)jr_updateColumns:(NSArray<NSString *> *)columns useTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete toDB:(FMDatabase *)db{
-    [db jr_updateOne:self columns:columns useTransaction:useTransaction synchronized:YES complete:complete];
-}
-
-- (BOOL)jr_updateColumns:(NSArray<NSString *> *)columns toDB:(FMDatabase *)db{
-    return [db jr_updateOne:self columns:columns useTransaction:YES synchronized:YES complete:nil];
-}
-
-- (void)jr_updateColumns:(NSArray<NSString *> *)columns complete:(JRDBComplete)complete toDB:(FMDatabase *)db{
-    [db jr_updateOne:self columns:columns useTransaction:YES synchronized:YES complete:complete];
-}
-
-#pragma mark - update use defaultDB
-
 - (BOOL)jr_updateOnlyColumns:(NSArray<NSString *> *)columns {
-    return [self jr_updateOnlyColumns:columns toDB:JR_DEFAULTDB];
+    return [J_Update(self).Columns(columns) exe:nil];
 }
-- (BOOL)jr_updateColumns:(NSArray<NSString *> *)columns useTransaction:(BOOL)useTransaction {
-    return [self jr_updateColumns:columns useTransaction:useTransaction toDB:JR_DEFAULTDB];
-}
-- (void)jr_updateColumns:(NSArray<NSString *> *)columns useTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete {
-    [self jr_updateColumns:columns useTransaction:useTransaction complete:complete toDB:JR_DEFAULTDB];
-}
+
 - (BOOL)jr_updateColumns:(NSArray<NSString *> *)columns {
-    return [self jr_updateColumns:columns toDB:JR_DEFAULTDB];
+    return [J_Update(self).Columns(columns).Recursive(YES) exe:nil];
 }
-- (void)jr_updateColumns:(NSArray<NSString *> *)columns complete:(JRDBComplete)complete {
-    [self jr_updateColumns:columns complete:complete toDB:JR_DEFAULTDB];
+
+- (BOOL)jr_updateOnlyIgnore:(NSArray<NSString *> *)Ignore {
+    return [J_Update(self).Ignore(Ignore) exe:nil];
+}
+
+- (BOOL)jr_updateIgnore:(NSArray<NSString *> *)Ignore {
+    return [J_Update(self).Ignore(Ignore) exe:nil];
 }
 
 #pragma mark - delete
 
-+ (BOOL)jr_deleteAllOnlyFromDB:(FMDatabase *)db {
-    return [db jr_deleteAllOnly:self useTransaction:YES synchronized:YES complete:nil];
-}
-
-- (BOOL)jr_deleteOnlyFromDB:(FMDatabase *)db {
-    return [db jr_deleteOneOnly:self useTransaction:YES synchronized:YES complete:nil];
-}
-
-- (BOOL)jr_deleteUseTransaction:(BOOL)useTransaction fromDB:(FMDatabase *)db {
-    return [db jr_deleteOne:self useTransaction:useTransaction synchronized:YES complete:nil];
-}
-
-- (void)jr_deleteUseTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete fromDB:(FMDatabase *)db{
-    [db jr_deleteOne:self useTransaction:useTransaction synchronized:YES complete:complete];
-}
-
-- (BOOL)jr_deleteFromDB:(FMDatabase *)db {
-    return [db jr_deleteOne:self useTransaction:YES synchronized:YES complete:nil];
-}
-
-- (void)jr_deleteWithComplete:(JRDBComplete _Nullable)complete fromDB:(FMDatabase *)db{
-    [db jr_deleteOne:self useTransaction:YES synchronized:YES complete:complete];
-}
-
-#pragma mark - delete use DefaultDB
-
 + (BOOL)jr_deleteAllOnly {
-    return [self jr_deleteAllOnlyFromDB:JR_DEFAULTDB];
+    return [J_DeleteAll(self) exe:nil];
+}
+
++ (BOOL)jr_deleteAll {
+    return [J_DeleteAll(self).Recursive(YES) exe:nil];
 }
 
 - (BOOL)jr_deleteOnly {
-    return [self jr_deleteOnlyFromDB:JR_DEFAULTDB];
+    return [J_Delete(self) exe:nil];
 }
-- (BOOL)jr_deleteUseTransaction:(BOOL)useTransaction {
-    return [self jr_deleteUseTransaction:useTransaction fromDB:JR_DEFAULTDB];
-}
-- (void)jr_deleteUseTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete {
-    [self jr_deleteUseTransaction:useTransaction complete:complete fromDB:JR_DEFAULTDB];
-}
+
 - (BOOL)jr_delete {
-    return [self jr_deleteFromDB:JR_DEFAULTDB];
+    return [J_Delete(self).Recursive(YES) exe:nil];
 }
-- (void)jr_deleteWithComplete:(JRDBComplete _Nullable)complete {
-    [self jr_deleteWithComplete:complete fromDB:JR_DEFAULTDB];
-}
+
 #pragma mark - select
 
-+ (instancetype _Nullable)jr_findByID:(NSString * _Nonnull)ID fromDB:(FMDatabase * _Nonnull)db {
-    return (NSObject *)[db jr_findByID:ID clazz:self synchronized:YES useCache:YES complete:nil];
++ (instancetype)jr_findByID:(NSString *)ID {
+    return [J_Select(self).WhereIdIs(ID).Recursive(YES) exe:nil];
 }
 
-+ (instancetype _Nullable)jr_findByID:(NSString * _Nonnull)ID {
-    return [self jr_findByID:ID fromDB:JR_DEFAULTDB];
-}
-
-+ (instancetype)jr_findByPrimaryKey:(id)primaryKey fromDB:(FMDatabase * _Nonnull)db {
-    return (NSObject *)[db jr_findByPrimaryKey:primaryKey clazz:[self class] synchronized:YES complete:nil];
-}
 + (instancetype)jr_findByPrimaryKey:(id)primaryKey {
-    return [self jr_findByPrimaryKey:primaryKey fromDB:JR_DEFAULTDB];
+    return [J_Select(self).WherePKIs(primaryKey).Recursive(YES) exe:nil];
 }
 
-+ (NSArray<id<JRPersistent>> *)jr_findAllFromDB:(FMDatabase *)db {
-    return [db jr_findByConditions:nil clazz:[self class] groupBy:nil orderBy:nil limit:nil isDesc:NO synchronized:YES useCache:YES complete:nil];
-}
 + (NSArray<id<JRPersistent>> *)jr_findAll {
-    return [self jr_findAllFromDB:JR_DEFAULTDB];
+    return [J_Select(self).Recursive(YES) exe:nil];
 }
 
-+ (NSArray<id<JRPersistent>> *)jr_findAllFromDB:(FMDatabase *)db orderBy:(NSString *)orderBy isDesc:(BOOL)isDesc {
-    return [db jr_findByConditions:nil clazz:[self class] groupBy:nil orderBy:orderBy limit:nil isDesc:isDesc synchronized:YES useCache:YES complete:nil];
-}
-+ (NSArray<id<JRPersistent>> *)jr_findAllOrderBy:(NSString *)orderBy isDesc:(BOOL)isDesc {
-    return [self jr_findAllFromDB:JR_DEFAULTDB orderBy:orderBy isDesc:isDesc];
+#pragma mark - table operation
+
++ (BOOL)jr_createTable {
+    return [J_CreateTable(self) exe:nil];
 }
 
-+ (NSArray<id<JRPersistent>> *)jr_findByConditions:(NSArray<JRQueryCondition *> *)conditions groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc fromDB:(FMDatabase *)db {
-    return [db jr_findByConditions:conditions clazz:[self class] groupBy:groupBy orderBy:orderBy limit:limit isDesc:isDesc synchronized:YES useCache:YES complete:nil];
++ (BOOL)jr_updateTable {
+    return [J_UpdateTable(self) exe:nil];
 }
 
-+ (NSArray<id<JRPersistent>> *)jr_findByConditions:(NSArray<JRQueryCondition *> *)conditions groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc {
-    return [self jr_findByConditions:conditions groupBy:groupBy orderBy:orderBy limit:limit isDesc:isDesc fromDB:JR_DEFAULTDB];
++ (BOOL)jr_dropTable {
+    return [J_DropTable(self) exe:nil];
+}
+
++ (BOOL)jr_truncateTable {
+    return [J_TruncateTable(self) exe:nil];
 }
 
 #pragma mark - table message
 
-+ (NSArray<NSString *> * _Nonnull)jr_currentColumnsInDB:(FMDatabase * _Nonnull)db {
-    NSArray<JRColumnSchema *> * arr = [db jr_schemasInClazz:self];
++ (NSArray<NSString *> * _Nonnull)jr_currentColumns {
+    NSArray<JRColumnSchema *> * arr = [[JRDBMgr defaultDB] jr_schemasInClazz:self];
     NSMutableArray *array = [NSMutableArray array];
     [arr enumerateObjectsUsingBlock:^(JRColumnSchema * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         [array addObject:obj.name];
     }];
     return array;
-}
-+ (NSArray<NSString *> * _Nonnull)jr_currentColumns {
-    return [self jr_currentColumnsInDB:JR_DEFAULTDB];
-}
-
-#pragma mark - sql
-+ (NSArray<id<JRPersistent>> *)jr_executeSql:(NSString *)sql args:(NSArray *)args fromDB:(FMDatabase *)db {
-    FMResultSet *ret = [db executeQuery:sql withArgumentsInArray:args];
-    return [JRFMDBResultSetHandler handleResultSet:ret forClazz:[self class]];
-}
-
-+ (NSArray<id<JRPersistent>> *)jr_executeSql:(NSString *)sql args:(NSArray *)args {
-    return [self jr_executeSql:sql args:args fromDB:JR_DEFAULTDB];
-}
-
-+ (NSUInteger)jr_countForSql:(NSString *)sql args:(NSArray *)args fromDB:(FMDatabase *)db {
-    FMResultSet *ret = [db executeQuery:sql withArgumentsInArray:args];
-    while ([ret next]) {
-        return (NSUInteger)[ret unsignedLongLongIntForColumnIndex:0];
-    }
-    return 0;
-}
-
-+ (NSUInteger)jr_countForSql:(NSString *)sql args:(NSArray *)args {
-    return [self jr_countForSql:sql args:args fromDB:JR_DEFAULTDB];
-}
-
-+ (BOOL)jr_executeUpdate:(NSString *)sql args:(NSArray *)args {
-    return [self jr_executeUpdate:sql args:args fromDB:JR_DEFAULTDB];
-}
-
-+ (BOOL)jr_executeUpdate:(NSString *)sql args:(NSArray *)args fromDB:(FMDatabase *)db {
-    return [db executeUpdate:sql withArgumentsInArray:args];
-}
-
-#pragma mark - table operation
-
-+ (BOOL)jr_createTableInDB:(FMDatabase *)db {
-    return [db jr_createTable4Clazz:[self class] synchronized:YES complete:nil];
-}
-
-+ (BOOL)jr_createTable {
-    return [self jr_createTableInDB:JR_DEFAULTDB];
-}
-
-+ (BOOL)jr_updateTableInDB:(FMDatabase *)db {
-    return [db jr_updateTable4Clazz:[self class] synchronized:YES complete:nil];
-}
-
-+ (BOOL)jr_updateTable {
-    return [self jr_updateTableInDB:JR_DEFAULTDB];
-}
-
-+ (BOOL)jr_dropTableInDB:(FMDatabase *)db {
-    return [db jr_dropTable4Clazz:[self class] synchronized:YES complete:nil];
-}
-
-+ (BOOL)jr_dropTable {
-    return [self jr_dropTableInDB:JR_DEFAULTDB];
-}
-
-+ (BOOL)jr_truncateTableInDB:(FMDatabase *)db {
-    return [db jr_truncateTable4Clazz:[self class] synchronized:YES complete:nil];
-}
-
-+ (BOOL)jr_truncateTable {
-    return [self jr_truncateTableInDB:JR_DEFAULTDB];
 }
 
 #pragma mark - method hook   now unavaliable  监听setter 由于swift 不适用，暂停使用
@@ -568,3 +384,5 @@ setMethod(id,id)
 
 
 @end
+
+

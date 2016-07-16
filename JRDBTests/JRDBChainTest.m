@@ -24,7 +24,7 @@
 - (void)setUp {
     [super setUp];
     [JRDBMgr defaultDB];
-    FMDatabase *db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/jmacmini/Desktop/test.sqlite"];
+    FMDatabase *db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/Jrwong/Desktop/test.sqlite"];
     [[JRDBMgr shareInstance] registerClazzes:@[
                                                [Person class],
                                                [Card class],
@@ -75,6 +75,14 @@
     [J_Insert(p).Recursive(NO).Sync(YES) exe:nil];
 }
 
+- (void)testSaveMany {
+    NSMutableArray *array = [NSMutableArray array];
+    for (int i = 0; i < 10; i++) {
+        [array addObject:[self createPerson:i name:nil]];
+    }
+    [array jr_save];
+}
+
 - (void)testSaveOneWithSituation {
     Person *p = [self createPerson:1 name:nil];
     p.son = [self createPerson:2 name:nil];
@@ -86,6 +94,13 @@
     }
 //    [J_INSERT(p).Recursive(NO) exe:nil];
     [J_Insert(p).Recursive(YES) exe:nil];
+
+    [J_Insert(p)
+     .InDB([JRDBMgr defaultDB])
+     .Recursive(YES)
+     .Sync(YES)
+     .Trasaction(YES)
+     exe:nil];
 }
 
 - (void)testSaveCycle {
@@ -137,8 +152,9 @@
 - (void)testUpdateOne {
     Person *p = [Person jr_findAll].firstObject;
     p.a_int = 1212;
-    [J_Update(p).Recursive(YES) exe:nil];
+    [J_Update(p).Recursive(YES).Columns(@"_a_int", @"_name", nil) exe:nil];
     [J_Update(p).Recursive(NO) exe:nil];
+
 }
 
 - (void)testUpdateMany {
@@ -215,10 +231,13 @@
 #pragma mark - Select
 
 - (void)testSelectByID {
-    Person *p = [[J_Select([Person class]) exe:nil] firstObject];
+    Person *p = [[J_SelectJ(Person) exe:nil] firstObject];
     
-    NSLog(@"%d", [Person jr_findByID:p.ID].cacheHit);
-    NSLog(@"%d", [Person jr_findByID:p.ID].cacheHit);
+    Person *p1 = [J_SelectJ(Person).WherePKIs(p.i_string) exe:nil];
+    Person *p2 = [J_SelectJ(Person).WherePKIs(p.i_string).Cache(YES) exe:nil];
+    [p1 isEqual:p2];
+
+
 }
 
 - (void)testSelectAll {
@@ -226,6 +245,21 @@
     NSArray<Person *> *ps1 = [J_Select([Person class]).Recursive(YES).Cache(NO) exe:nil];
     NSLog(@"%@", ps);
     NSLog(@"%@", ps1);
+
+    id result = J_Select(nil)
+                    .FromJ(Person)
+                    .Recursive(YES)
+                    .Sync(YES)
+                    .Cache(YES)
+                    .WhereJ(_name like ? and _height > ?)
+                    .Params(@"a%", @100, nil)
+                    .GroupJ(_class)
+                    .OrderJ(_age)
+                    .Limit(0, 10)
+                    .Desc(YES);
+
+    NSLog(@"%@", result);
+
 }
 
 - (void)testOtherCondition {
@@ -261,9 +295,9 @@
     NSArray<Person *> *ps =
     [J_Select(@"_a_int", @"_b_unsigned_int", nil)
     .Recursive(YES) // 自定义查询，即使设置关联查询，也不会进行关联查询
-    .From([Person class])
-    .Order(@"_a_int")
-    .Group(@"_bbbbb")
+    .FromJ(Person)
+    .OrderJ(_a_int)
+    .GroupJ(_bbbbb)
     .Limit(0, 3)
     .Desc(YES)
      exe:nil];
@@ -279,12 +313,12 @@
     int count = 100;
     
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
-        [J_Select(JRCount).From([Person class]) exe:^(JRDBChain * _Nonnull chain, id  _Nullable result) {
+        [J_Select(JRCount).FromJ(Person) exe:^(JRDBChain * _Nonnull chain, id  _Nullable result) {
             NSLog(@"%@", result);
         }];
     });
     
-    sleep(10);
+    sleep(5);
     return;
     for (int i = 0; i<count; i++) {
         [ori addObject:@(i)];

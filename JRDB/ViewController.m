@@ -61,10 +61,7 @@
         [p1.money addObject:[self createMoney:i]];
     }
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
-        [p1 jr_saveWithComplete:^(BOOL success) {
-            NSLog(@"===");
-            [p jr_save];
-        }];
+        [p1 jr_save];
     });
     NSLog(@"method over");
     

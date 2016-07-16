@@ -8,13 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		5A7AED821D05294B000AD4FE /* JRMiddleTable.m in Sources */ = {isa = PBXBuildFile; fileRef = 5A7AED811D05294B000AD4FE /* JRMiddleTable.m */; };
-		5A7AED851D058AD7000AD4FE /* NSArray+JRDB.m in Sources */ = {isa = PBXBuildFile; fileRef = 5A7AED841D058AD7000AD4FE /* NSArray+JRDB.m */; };
 		5AA3DB331D067DD800795E80 /* JRDBTestJRDBMgr.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AA3DB321D067DD800795E80 /* JRDBTestJRDBMgr.m */; };
 		5AA4877F1D38977000B199AE /* JRDBQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AA4877E1D38977000B199AE /* JRDBQueue.m */; };
 		5AA5B3DE1CE2D46900360DC0 /* JRFMDBResultSetHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AA5B3DD1CE2D46900360DC0 /* JRFMDBResultSetHandler.m */; };
 		5AA5B3E11CE3120B00360DC0 /* JRQueryCondition.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AA5B3E01CE3120B00360DC0 /* JRQueryCondition.m */; };
 		5AB1BFA91D00115F001595D3 /* JRColumnSchema.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AB1BFA81D00115F001595D3 /* JRColumnSchema.m */; };
-		5ABBFEDF1D34DC54008FA656 /* JRFMDBResultSetHandler+Chain.m in Sources */ = {isa = PBXBuildFile; fileRef = 5ABBFEDE1D34DC54008FA656 /* JRFMDBResultSetHandler+Chain.m */; };
 		5AC8B3321CE1DA2500079BC8 /* NSObject+JRDB.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AC8B3311CE1DA2500079BC8 /* NSObject+JRDB.m */; };
 		5AC8B3381CE1EDA700079BC8 /* FMDatabase+JRDB.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AC8B3371CE1EDA700079BC8 /* FMDatabase+JRDB.m */; };
 		5ACBEEB21CE1B3A500371E01 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 5ACBEEB11CE1B3A500371E01 /* main.m */; };
@@ -29,7 +27,6 @@
 		5ACBEEEB1CE1B91F00371E01 /* JRSqlGenerator.m in Sources */ = {isa = PBXBuildFile; fileRef = 5ACBEEEA1CE1B91F00371E01 /* JRSqlGenerator.m */; };
 		5AD17B311D3346E000F2B669 /* FMDatabase+Chain.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AD17B301D3346E000F2B669 /* FMDatabase+Chain.m */; };
 		5AD17B341D3354BC00F2B669 /* JRDBChain.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AD17B331D3354BC00F2B669 /* JRDBChain.m */; };
-		5AD17B371D338CA600F2B669 /* JRSqlGenerator+Chain.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AD17B361D338CA600F2B669 /* JRSqlGenerator+Chain.m */; };
 		5AD63F211CE1BE540044ACE6 /* JRReflectUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AD63F201CE1BE540044ACE6 /* JRReflectUtil.m */; };
 		5AD63F241CE1C2480044ACE6 /* Person.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AD63F231CE1C2480044ACE6 /* Person.m */; };
 		5AD63F271CE1C40F0044ACE6 /* AViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AD63F261CE1C40F0044ACE6 /* AViewController.swift */; };
@@ -63,8 +60,6 @@
 		2C94FB217DD9C61722850B3C /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
 		5A7AED801D05294B000AD4FE /* JRMiddleTable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRMiddleTable.h; sourceTree = "<group>"; };
 		5A7AED811D05294B000AD4FE /* JRMiddleTable.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRMiddleTable.m; sourceTree = "<group>"; };
-		5A7AED831D058AD7000AD4FE /* NSArray+JRDB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSArray+JRDB.h"; sourceTree = "<group>"; };
-		5A7AED841D058AD7000AD4FE /* NSArray+JRDB.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSArray+JRDB.m"; sourceTree = "<group>"; };
 		5AA3DB321D067DD800795E80 /* JRDBTestJRDBMgr.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRDBTestJRDBMgr.m; sourceTree = "<group>"; };
 		5AA4877D1D38977000B199AE /* JRDBQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRDBQueue.h; sourceTree = "<group>"; };
 		5AA4877E1D38977000B199AE /* JRDBQueue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRDBQueue.m; sourceTree = "<group>"; };
@@ -75,8 +70,6 @@
 		5AA7387B1CE430E20020947F /* JRDB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRDB.h; sourceTree = "<group>"; };
 		5AB1BFA71D00115F001595D3 /* JRColumnSchema.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRColumnSchema.h; sourceTree = "<group>"; };
 		5AB1BFA81D00115F001595D3 /* JRColumnSchema.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRColumnSchema.m; sourceTree = "<group>"; };
-		5ABBFEDD1D34DC54008FA656 /* JRFMDBResultSetHandler+Chain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "JRFMDBResultSetHandler+Chain.h"; sourceTree = "<group>"; };
-		5ABBFEDE1D34DC54008FA656 /* JRFMDBResultSetHandler+Chain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "JRFMDBResultSetHandler+Chain.m"; sourceTree = "<group>"; };
 		5AC8B3301CE1DA2500079BC8 /* NSObject+JRDB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+JRDB.h"; sourceTree = "<group>"; };
 		5AC8B3311CE1DA2500079BC8 /* NSObject+JRDB.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+JRDB.m"; sourceTree = "<group>"; };
 		5AC8B3361CE1EDA700079BC8 /* FMDatabase+JRDB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "FMDatabase+JRDB.h"; sourceTree = "<group>"; };
@@ -106,8 +99,6 @@
 		5AD17B301D3346E000F2B669 /* FMDatabase+Chain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "FMDatabase+Chain.m"; sourceTree = "<group>"; };
 		5AD17B321D3354BC00F2B669 /* JRDBChain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRDBChain.h; sourceTree = "<group>"; };
 		5AD17B331D3354BC00F2B669 /* JRDBChain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRDBChain.m; sourceTree = "<group>"; };
-		5AD17B351D338CA600F2B669 /* JRSqlGenerator+Chain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "JRSqlGenerator+Chain.h"; sourceTree = "<group>"; };
-		5AD17B361D338CA600F2B669 /* JRSqlGenerator+Chain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "JRSqlGenerator+Chain.m"; sourceTree = "<group>"; };
 		5AD63F1F1CE1BE540044ACE6 /* JRReflectUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRReflectUtil.h; sourceTree = "<group>"; };
 		5AD63F201CE1BE540044ACE6 /* JRReflectUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRReflectUtil.m; sourceTree = "<group>"; };
 		5AD63F221CE1C2480044ACE6 /* Person.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Person.h; sourceTree = "<group>"; };
@@ -242,8 +233,6 @@
 				5AD63F201CE1BE540044ACE6 /* JRReflectUtil.m */,
 				5ACBEEE91CE1B91F00371E01 /* JRSqlGenerator.h */,
 				5ACBEEEA1CE1B91F00371E01 /* JRSqlGenerator.m */,
-				5AD17B351D338CA600F2B669 /* JRSqlGenerator+Chain.h */,
-				5AD17B361D338CA600F2B669 /* JRSqlGenerator+Chain.m */,
 				5AC8B3301CE1DA2500079BC8 /* NSObject+JRDB.h */,
 				5AC8B3311CE1DA2500079BC8 /* NSObject+JRDB.m */,
 				5AC8B3361CE1EDA700079BC8 /* FMDatabase+JRDB.h */,
@@ -254,8 +243,6 @@
 				5AD17B331D3354BC00F2B669 /* JRDBChain.m */,
 				5AA5B3DC1CE2D46900360DC0 /* JRFMDBResultSetHandler.h */,
 				5AA5B3DD1CE2D46900360DC0 /* JRFMDBResultSetHandler.m */,
-				5ABBFEDD1D34DC54008FA656 /* JRFMDBResultSetHandler+Chain.h */,
-				5ABBFEDE1D34DC54008FA656 /* JRFMDBResultSetHandler+Chain.m */,
 				5AA5B3DF1CE3120B00360DC0 /* JRQueryCondition.h */,
 				5AA5B3E01CE3120B00360DC0 /* JRQueryCondition.m */,
 				5AB1BFA71D00115F001595D3 /* JRColumnSchema.h */,
@@ -264,8 +251,6 @@
 				A8ED7A511D01CCA3009ED474 /* JRUtils.m */,
 				5A7AED801D05294B000AD4FE /* JRMiddleTable.h */,
 				5A7AED811D05294B000AD4FE /* JRMiddleTable.m */,
-				5A7AED831D058AD7000AD4FE /* NSArray+JRDB.h */,
-				5A7AED841D058AD7000AD4FE /* NSArray+JRDB.m */,
 				5AA4877D1D38977000B199AE /* JRDBQueue.h */,
 				5AA4877E1D38977000B199AE /* JRDBQueue.m */,
 			);
@@ -475,10 +460,8 @@
 			files = (
 				5AD63F271CE1C40F0044ACE6 /* AViewController.swift in Sources */,
 				5ACBEEE61CE1B65700371E01 /* JRDBMgr.m in Sources */,
-				5AD17B371D338CA600F2B669 /* JRSqlGenerator+Chain.m in Sources */,
 				5ACBEEB81CE1B3A500371E01 /* ViewController.m in Sources */,
 				5AC8B3381CE1EDA700079BC8 /* FMDatabase+JRDB.m in Sources */,
-				5A7AED851D058AD7000AD4FE /* NSArray+JRDB.m in Sources */,
 				5AD63F241CE1C2480044ACE6 /* Person.m in Sources */,
 				5ACBEEB51CE1B3A500371E01 /* AppDelegate.m in Sources */,
 				5AD17B311D3346E000F2B669 /* FMDatabase+Chain.m in Sources */,
@@ -492,7 +475,6 @@
 				5AC8B3321CE1DA2500079BC8 /* NSObject+JRDB.m in Sources */,
 				A8A1B2281D033CDC00886403 /* OBJCProperty.m in Sources */,
 				A8A1B2251D033C8C00886403 /* NSObject+Reflect.m in Sources */,
-				5ABBFEDF1D34DC54008FA656 /* JRFMDBResultSetHandler+Chain.m in Sources */,
 				5AA5B3E11CE3120B00360DC0 /* JRQueryCondition.m in Sources */,
 				5A7AED821D05294B000AD4FE /* JRMiddleTable.m in Sources */,
 				A80015F71D0EEC29000EA41A /* JRActivatedProperty.m in Sources */,

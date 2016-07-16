@@ -7,13 +7,11 @@
 //
 
 #import "FMDatabase+Chain.h"
-#import "JRSqlGenerator+Chain.h"
 #import "JRSqlGenerator.h"
 #import "JRDBChain.h"
 #import "FMDatabase+JRDB.h"
 #import "JRActivatedProperty.h"
 #import "JRFMDBResultSetHandler.h"
-#import "JRFMDBResultSetHandler+Chain.h"
 
 #define JRDBChainCompleteImpl ^(BOOL success){EXE_BLOCK(complete, chain, @(success));}
 
@@ -99,21 +97,20 @@
 }
 
 - (id)jr_executeQueryChain:(JRDBChain *)chain complete:(JRDBChainComplete)complete {
-    if (!chain.isRecursive || chain.selectColumns.count) {
-        return
-        [self jr_executeSync:chain.isSync block:^id _Nullable(FMDatabase * _Nonnull db) {
-            JRSql *sql = [JRSqlGenerator sql4ChainSelect:chain];
-            FMResultSet *resultset = [self jr_executeQuery:sql];
-            id result = [JRFMDBResultSetHandler handleResultSet:resultset forClazz:chain.targetClazz];
-            EXE_BLOCK(complete, chain, result);
-            return result;
+    NSAssert(!chain.selectColumns.count, @"selectColumns should not has count in normal query");
+    id result;
+    if (!chain.isRecursive) {
+        result = [self jr_getByConditions:chain.queryCondition clazz:chain.targetClazz groupBy:chain.groupBy orderBy:chain.orderBy limit:chain.limitString isDesc:chain.isDesc synchronized:chain.isSync complete:^(id  _Nullable result) {
+            EXE_BLOCK(complete, chain, [self _handleQueryResult:result forChain:chain]);
         }];
     } else {
-        return [self jr_findByConditions:chain.queryCondition clazz:chain.targetClazz groupBy:chain.groupBy orderBy:chain.orderBy limit:chain.limitString isDesc:chain.isDesc synchronized:chain.isSync useCache:chain.useCache complete:^(id  _Nullable result) {
-            EXE_BLOCK(complete, chain, result);
+        result = [self jr_findByConditions:chain.queryCondition clazz:chain.targetClazz groupBy:chain.groupBy orderBy:chain.orderBy limit:chain.limitString isDesc:chain.isDesc synchronized:chain.isSync useCache:chain.useCache complete:^(id  _Nullable result) {
+            EXE_BLOCK(complete, chain, [self _handleQueryResult:result forChain:chain]);
         }];
     }
+    return [self _handleQueryResult:result forChain:chain];
 }
+
 
 - (id)jr_executeCustomizedQueryChain:(JRDBChain *)chain complete:(JRDBChainComplete)complete {
     return
@@ -127,6 +124,7 @@
 }
 
 - (NSArray *)_needUpdateColumnsInChain:(JRDBChain *)chain {
+    NSAssert(!(chain.columnsArray.count && chain.ignoreArray.count), @"colums and ignore should not use at the same chain !!");
     NSMutableArray *columns = [NSMutableArray array];
     if (chain.columnsArray.count) {
         return chain.columnsArray;
@@ -140,6 +138,10 @@
         }];
     }
     return columns.count ? columns : nil;
+}
+
+- (id)_handleQueryResult:(NSArray *)result forChain:(JRDBChain *)chain {
+    return [chain isQuerySingle] ? [result firstObject] : result;
 }
 
 @end

@@ -16,7 +16,6 @@
 @import FMDB;
 
 #define BlockPropertyImpl(_type_, _methodName_, _propName_)\
-@synthesize _propName_ = _##_propName_;\
 - (JRDBChain *(^)(_type_ prop))_methodName_ {\
     jr_weak(self);\
     return ^JRDBChain *(_type_ prop){\
@@ -29,10 +28,10 @@
 #define OperationBlockForArrayImpl(_block_, _methodName_, _operation_)\
 - (_block_)_methodName_ {\
     jr_weak(self);\
-    return ^JRDBChain *(NSArray<id<JRPersistent>> *array) {\
+    return ^JRDBChain *(NSArray *array) {\
         jr_strong(self);\
         self->_operation = _operation_;\
-        if (array.count <= 1) {\
+        if (array.count == 1) {\
             self->_target = array.firstObject;\
         } else {\
             self->_targetArray = array;\
@@ -52,9 +51,20 @@
     };\
 }
 
+#define OperationBlockForObjectImpl(_block_, _methodName_, _operation_)\
+- (_block_)_methodName_ {                       \
+    jr_weak(self);                          \
+    return ^JRDBChain *(id one) {                \
+        jr_strong(self);                        \
+        self->_operation = _operation_;         \
+        self->_target = one;                    \
+        return self;                        \
+    };                                      \
+}
+
+
 
 #define ArrrayPropertyImpl(_method_,_propName_)                        \
-@synthesize _propName_ = _##_propName_;\
 - (JRDBChain *(^)(id, ...))_method_ {                 \
     jr_weak(self);                              \
     return ^JRDBChain *(id obj, ...) {                  \
@@ -62,19 +72,10 @@
         if ([obj isKindOfClass:[NSArray class]]) {\
             self->_##_propName_ = obj;               \
         } else {\
-            NSMutableArray *args = [NSMutableArray array];  \
             va_list ap;                                     \
             va_start(ap, obj);                              \
-            id arg;                                         \
-            while( (arg = va_arg(ap,id)) )                      \
-            {                       \
-                if ( arg ){                 \
-                [args addObject:arg];       \
-                }   \
-            }                   \
-            va_end(ap);                             \
-            [args insertObject:obj atIndex:0];              \
-            self->_##_propName_ = args;               \
+            self->_##_propName_ = [self variableListToArray:ap andFirst:obj];\
+            va_end(ap);\
         }\
         return self;                \
     };              \
@@ -120,17 +121,36 @@ typedef enum {
 
 @implementation JRDBChain
 
-@synthesize target      = _target;
-@synthesize operation   = _operation;
-@synthesize targetClazz = _targetClazz;
+@synthesize target         = _target;
+@synthesize targetArray    = _targetArray;
+@synthesize targetClazz    = _targetClazz;
+@synthesize operation      = _operation;
+@synthesize queryCondition = _queryCondition;
+@synthesize selectColumns  = _selectColumns;
+@synthesize limitIn        = _limitIn;
+@synthesize limitString    = _limitString;
+@synthesize db             = _db;
+@synthesize groupBy        = _groupBy;
+@synthesize orderBy        = _orderBy;
+@synthesize whereString    = _whereString;
+@synthesize isRecursive    = _isRecursive;
+@synthesize isSync         = _isSync;
+@synthesize useTransaction = _useTransaction;
+@synthesize useCache       = _useCache;
+@synthesize isDesc         = _isDesc;
+@synthesize completeBlock  = _completeBlock;
+@synthesize parameters     = _parameters;
+@synthesize columnsArray   = _columnsArray;
+@synthesize ignoreArray    = _ignoreArray;
 
 - (instancetype)init {
     if (self = [super init]) {
         _isRecursive    = NO;
-        _useTransaction = YES;
         _useCache       = NO;
-        _db             = [JRDBMgr defaultDB];
+        _useTransaction = YES;
         _isSync         = YES;
+
+        _db             = [JRDBMgr defaultDB];
         _limitIn        = (JRLimit){-1, -1};
     }
     return self;
@@ -166,11 +186,11 @@ typedef enum {
     jr_weak(self);
     return ^JRDBChain *(id first, ...) {
         jr_strong(self);
-        if (object_isClass(first)) {
+        if (object_isClass(first) || !first) {
             self->_operation = CSelect;
             self->_targetClazz = first;
         }
-        else if([first isEqualToString:JRCount]) {
+        else if ([first isEqualToString:JRCount]) {
             self->_operation = CSelectCount;
         }
         else {
@@ -178,19 +198,10 @@ typedef enum {
             if ([first isKindOfClass:[NSArray class]]) {
                 self->_selectColumns = first;
             } else {
-                NSMutableArray *args = [NSMutableArray array];
                 va_list ap;
                 va_start(ap, first);
-                id arg;
-                while( (arg = va_arg(ap,id)) )
-                {
-                    if ( arg ){
-                        [args addObject:arg];
-                    }
-                }
+                self->_selectColumns = [self variableListToArray:ap andFirst:first];
                 va_end(ap);
-                [args insertObject:first atIndex:0];
-                self->_selectColumns = args;
             }
         }
         return self;
@@ -202,13 +213,17 @@ OperationBlockForClazzImpl(CreateTableBlock, CreateTable, CCreateTable)
 OperationBlockForClazzImpl(UpdateTableBlock, UpdateTable, CUpdateTable)
 OperationBlockForClazzImpl(DropTableBlock, DropTable, CDropTable)
 OperationBlockForClazzImpl(TruncateTableBlock, TruncateTable, CTruncateTable)
-
 OperationBlockForClazzImpl(DeleteAllBlock, DeleteAll, CDeleteAll)
 
 OperationBlockForArrayImpl(InsertBlock, Insert, CInsert)
 OperationBlockForArrayImpl(UpdateBlock, Update, CUpdate)
 OperationBlockForArrayImpl(DeleteBlock, Delete, CDelete)
 OperationBlockForArrayImpl(SaveOrUpdateBlock, SaveOrUpdate, CSaveOrUpdate)
+
+OperationBlockForObjectImpl(InsertOneBlock, InsertOne, CInsert)
+OperationBlockForObjectImpl(UpdateOneBlock, UpdateOne, CUpdate)
+OperationBlockForObjectImpl(DeleteOneBlock, DeleteOne, CDelete)
+OperationBlockForObjectImpl(SaveOrUpdateOneBlock, SaveOrUpdateOne, CSaveOrUpdate)
 
 #pragma mark - Property
 
@@ -243,6 +258,8 @@ BlockPropertyImpl(FMDatabase *, InDB, db)
 BlockPropertyImpl(NSString *, Group, groupBy)
 BlockPropertyImpl(NSString *, Order, orderBy)
 BlockPropertyImpl(NSString *, Where, whereString)
+BlockPropertyImpl(NSString *, WhereIdIs, whereId)
+BlockPropertyImpl(id, WherePKIs, wherePK)
 BlockPropertyImpl(BOOL, Recursive, isRecursive)
 BlockPropertyImpl(BOOL, Sync, isSync)
 BlockPropertyImpl(BOOL, Trasaction, useTransaction)
@@ -259,16 +276,31 @@ ArrrayPropertyImpl(Ignore, ignoreArray)
 #pragma mark - Other method
 
 - (NSArray<JRQueryCondition *> *)queryCondition {
+    
+    NSAssert(!(_whereString.length && _whereId.length), @"where condition should not hold more than one!!!");
+    NSAssert(!(_whereString.length && _wherePK), @"where condition should not hold more than one!!!");
+    NSAssert(!(_whereId.length && _wherePK), @"where condition should not hold more than one!!!");
+
     NSArray *conditions = nil;
     if (_whereString.length) {
         conditions = @[[JRQueryCondition condition:_whereString args:_parameters type:JRQueryConditionTypeAnd]];
+    } else if (_whereId.length) {
+        conditions = @[[JRQueryCondition condition:@"_id = ?" args:@[_whereId] type:JRQueryConditionTypeAnd]];
+    } else if (_wherePK) {
+        NSString *pk = [_targetClazz jr_primaryKey];
+        NSString *condition = [NSString stringWithFormat:@"%@ = ?", pk];
+        conditions = @[[JRQueryCondition condition:condition args:@[_wherePK] type:JRQueryConditionTypeAnd]];
     }
     return conditions;
 }
 
 
-- (NSArray *)variableListToArray:(va_list)valist {
+- (NSArray *)variableListToArray:(va_list)valist andFirst:(id)first {
     NSMutableArray *args = [NSMutableArray array];
+    if (!first) {
+        return args;
+    }
+    [args addObject:first];
     id arg;
     while( (arg = va_arg(valist,id)) )
     {
@@ -278,6 +310,10 @@ ArrrayPropertyImpl(Ignore, ignoreArray)
     }
     self->_selectColumns = args;
     return args;
+}
+
+- (BOOL)isQuerySingle {
+    return _whereId.length || _wherePK;
 }
 
 #pragma mark - Setter Getter

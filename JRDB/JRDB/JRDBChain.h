@@ -4,45 +4,34 @@
 //
 //  Created by JMacMini on 16/7/11.
 //  Copyright © 2016年 Jrwong. All rights reserved.
-//
+//  链式调用的关键类
 
 #import <Foundation/Foundation.h>
 #import "JRPersistent.h"
 
-/**
- 
- c.Insert(p).Into(name).InDB(db).Recursive(YES).NowInMain(NO).Complete(^(BOOL success){})
- 
- c.Update(p).Table(name).InDB(db).Recursive(YES).NowInMain(NO).Columns().Ignore().Complete(^(BOOL success){})
- 
- c.Delete(p).From(name).InDB(db).Recursive(YES).NowInMain(NO).Complete(^(BOOL success){})
- 
- c.DeleteAll(p.class).From(name).InDB(db).Recursive(YES).NowInMain(NO).Complete(^(BOOL success){})
- 
- c.Select(p.class).From(name).InDB(db).Recursive(YES).Where(@"_age = ?").Params().Group().Order().limit().Desc(YES)
- 
- */
 
 #define jr_weak(object) __weak __typeof__(object) weak##_##object = object
 #define jr_strong(object) __typeof__(object) object = weak##_##object
 
-#define J_Select(...)  ([JRDBChain new].Select(__VA_ARGS__))
+#define J_Select(...)           ([JRDBChain new].Select(__VA_ARGS__))
+#define J_SelectJ(_arg_)        (J_Select([_arg_ class]))
 
 #define J_Insert(_arg_)         ([JRDBChain new].Insert(_JRToArray(_arg_)))
 #define J_Update(_arg_)         ([JRDBChain new].Update(_JRToArray(_arg_)))
 #define J_Delete(_arg_)         ([JRDBChain new].Delete(_JRToArray(_arg_)))
 #define J_SaveOrUpdate(_arg_)   ([JRDBChain new].SaveOrUpdate(_JRToArray(_arg_)))
 
-#define J_DeleteAll(_arg_)  ([JRDBChain new].DeleteAll(_arg_))
+#define J_DeleteAll(_arg_)      ([JRDBChain new].DeleteAll([_arg_ class]))
 
-#define J_CreateTable(_arg_)    ([JRDBChain new].CreateTable(_arg_))
-#define J_UpdateTable(_arg_)    ([JRDBChain new].UpdateTable(_arg_))
-#define J_DropTable(_arg_)      ([JRDBChain new].DropTable(_arg_))
-#define J_TruncateTable(_arg_)  ([JRDBChain new].TruncateTable(_arg_))
+#define J_CreateTable(_arg_)    ([JRDBChain new].CreateTable([_arg_ class]))
+#define J_UpdateTable(_arg_)    ([JRDBChain new].UpdateTable([_arg_ class]))
+#define J_DropTable(_arg_)      ([JRDBChain new].DropTable([_arg_ class]))
+#define J_TruncateTable(_arg_)  ([JRDBChain new].TruncateTable([_arg_ class]))
 
-#define WhereJ(_arg_) Where(@#_arg_)
-#define OrderJ(_arg_) Order(@#_arg_)
-#define GroupJ(_arg_) Group(@#_arg_)
+#define FromJ(_arg_)            From([_arg_ class])
+#define WhereJ(_arg_)           Where(@#_arg_)
+#define OrderJ(_arg_)           Order(@#_arg_)
+#define GroupJ(_arg_)           Group(@#_arg_)
 
 typedef enum {
     CInsert = 1,
@@ -51,6 +40,7 @@ typedef enum {
     CSaveOrUpdate,
     CDeleteAll,
     CSelect,
+    CSelectSingle,
     CSelectCustomized,
     CSelectCount,
     
@@ -68,8 +58,12 @@ static NSString * const JRCount = @"_|-JRCount-|_";
 typedef JRDBChain *(^InsertBlock)(NSArray<id<JRPersistent>> *array);
 typedef JRDBChain *(^UpdateBlock)(NSArray<id<JRPersistent>> *array);
 typedef JRDBChain *(^DeleteBlock)(NSArray<id<JRPersistent>> *array);
-
 typedef JRDBChain *(^SaveOrUpdateBlock)(NSArray<id<JRPersistent>> *array);
+
+typedef JRDBChain *(^InsertOneBlock)(id<JRPersistent> one);
+typedef JRDBChain *(^UpdateOneBlock)(id<JRPersistent> one);
+typedef JRDBChain *(^DeleteOneBlock)(id<JRPersistent> one);
+typedef JRDBChain *(^SaveOrUpdateOneBlock)(id<JRPersistent> one);
 
 typedef JRDBChain *(^SelectBlock)(id first, ...);
 
@@ -133,11 +127,13 @@ BlockPropertyDeclare(strong, InDB, FMDatabase *, db);
 BlockPropertyDeclare(strong, Order, NSString *, orderBy);
 BlockPropertyDeclare(strong, Group, NSString *, groupBy);
 BlockPropertyDeclare(strong, Where, NSString *, whereString);
+BlockPropertyDeclare(strong, WhereIdIs, NSString *, whereId);
+BlockPropertyDeclare(strong, WherePKIs, id, wherePK);
 BlockPropertyDeclare(assign, Recursive, BOOL, isRecursive);
 BlockPropertyDeclare(assign, Sync, BOOL, isSync);
-BlockPropertyDeclare(assign, Trasaction, BOOL, useTransaction);
 BlockPropertyDeclare(assign, Desc, BOOL, isDesc);
 BlockPropertyDeclare(assign, Cache, BOOL, useCache);
+BlockPropertyDeclare(assign, Trasaction, BOOL, useTransaction);
 BlockPropertyDeclare(copy, Complete, JRDBChainComplete, completeBlock);
 
 // array param
@@ -151,6 +147,12 @@ OperationBlockDeclare(Insert, InsertBlock);
 OperationBlockDeclare(Update, UpdateBlock);
 OperationBlockDeclare(Delete, DeleteBlock);
 OperationBlockDeclare(SaveOrUpdate, SaveOrUpdateBlock);
+
+OperationBlockDeclare(InsertOne, InsertOneBlock);
+OperationBlockDeclare(UpdateOne, UpdateOneBlock);
+OperationBlockDeclare(DeleteOne, DeleteOneBlock);
+OperationBlockDeclare(SaveOrUpdateOne, SaveOrUpdateOneBlock);
+
 OperationBlockDeclare(DeleteAll, DeleteAllBlock);
 OperationBlockDeclare(Select, SelectBlock);
 
@@ -158,5 +160,7 @@ OperationBlockDeclare(CreateTable, CreateTableBlock);
 OperationBlockDeclare(UpdateTable, UpdateTableBlock);
 OperationBlockDeclare(DropTable, DropTableBlock);
 OperationBlockDeclare(TruncateTable, TruncateTableBlock);
+
+- (BOOL)isQuerySingle;
 
 @end
