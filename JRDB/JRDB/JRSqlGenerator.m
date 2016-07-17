@@ -14,14 +14,13 @@
 #import "JRDBMgr.h"
 #import "JRSql.h"
 #import "JRActivatedProperty.h"
+#import <FMDB/FMDB.h>
 
 void SqlLog(id sql) {
     if ([JRDBMgr shareInstance].debugMode) {
         NSLog(@"%@", sql);
     }
 }
-
-@import FMDB;
 
 @implementation JRSqlGenerator
 

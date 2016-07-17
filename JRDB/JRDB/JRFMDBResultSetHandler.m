@@ -12,7 +12,7 @@
 #import "NSObject+JRDB.h"
 #import "JRActivatedProperty.h"
 
-@import FMDB;
+#import <FMDB/FMDB.h>
 
 typedef enum {
     RetDataTypeInt = 1,

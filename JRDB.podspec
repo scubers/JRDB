@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 
     s.name                  = "JRDB"
-    s.version               = "0.1.16"
+    s.version               = "0.1.17"
     s.summary               = "The light packing of fmdb for my self"
 
     s.homepage              = "https://github.com/scubers/JRDB"
@@ -15,8 +15,6 @@ Pod::Spec.new do |s|
     s.source_files          = "JRDB/JRDB/**/*.{h,m}"
     s.public_header_files   = "JRDB/JRDB/**/*.h"
 
-    s.requires_arc          = true
-
-    s.dependency 'FMDB', '~> 2.6.2'
+    s.dependency 'FMDB'
 
 end
