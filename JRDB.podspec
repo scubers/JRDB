@@ -15,8 +15,6 @@ Pod::Spec.new do |s|
     s.source_files          = "JRDB/JRDB/**/*.{h,m}"
     s.public_header_files   = "JRDB/JRDB/**/*.h"
 
-    s.requires_arc          = true
-
-    s.dependency 'FMDB', '~> 2.6.2'
+    s.dependency 'FMDB'
 
 end

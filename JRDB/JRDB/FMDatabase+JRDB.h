@@ -6,11 +6,9 @@
 //  Copyright © 2016年 Jrwong. All rights reserved.
 //
 
-//#import <FMDB/FMDB.h>
 #import "JRPersistent.h"
 #import "JRColumnSchema.h"
-
-@import FMDB;
+#import <FMDB/FMDB.h>
 
 @class JRQueryCondition, JRSql;
 

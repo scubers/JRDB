@@ -6,16 +6,15 @@
 //  Copyright © 2016年 Jrwong. All rights reserved.
 //
 
-#import "JRSqlGenerator.h"
-#import "JRReflectUtil.h"
+#import "JRDBMgr.h"
+#import "JRDBChain.h"
+#import <FMDB/FMDB.h>
 #import "NSObject+JRDB.h"
+#import "JRReflectUtil.h"
+#import "JRSqlGenerator.h"
 #import "JRQueryCondition.h"
 #import "NSObject+Reflect.h"
-#import "JRDBMgr.h"
 #import "JRActivatedProperty.h"
-#import "JRDBChain.h"
-
-@import FMDB;
 
 
 @implementation JRSql

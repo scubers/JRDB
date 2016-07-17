@@ -12,6 +12,7 @@
 #import "FMDatabase+JRDB.h"
 #import "NSObject+JRDB.h"
 #import <objc/message.h>
+#import <UIKit/UIKit.h>
 #import "JRMiddleTable.h"
 
 static NSString * const jrdb_class_registered_key = @"jrdb_class_registered_key";

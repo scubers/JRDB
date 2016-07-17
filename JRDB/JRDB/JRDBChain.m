@@ -13,7 +13,7 @@
 #import <objc/runtime.h>
 #import "NSObject+Reflect.h"
 #import "JRQueryCondition.h"
-@import FMDB;
+
 
 #define BlockPropertyImpl(_type_, _methodName_, _propName_)\
 - (JRDBChain *(^)(_type_ prop))_methodName_ {\

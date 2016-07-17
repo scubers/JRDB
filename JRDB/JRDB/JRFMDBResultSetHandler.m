@@ -12,8 +12,7 @@
 #import "NSObject+JRDB.h"
 #import "JRActivatedProperty.h"
 #import "JRDBChain.h"
-
-@import FMDB;
+#import <FMDB/FMDB.h>
 
 @implementation JRFMDBResultSetHandler
 
