@@ -111,7 +111,6 @@
     return [self _handleQueryResult:result forChain:chain];
 }
 
-
 - (id)jr_executeCustomizedQueryChain:(JRDBChain *)chain complete:(JRDBChainComplete)complete {
     return
     [self jr_executeSync:chain.isSync block:^id _Nullable(FMDatabase * _Nonnull db) {
@@ -122,6 +121,8 @@
         return result;
     }];
 }
+
+#pragma mark - private method
 
 - (NSArray *)_needUpdateColumnsInChain:(JRDBChain *)chain {
     NSAssert(!(chain.columnsArray.count && chain.ignoreArray.count), @"colums and ignore should not use at the same chain !!");
