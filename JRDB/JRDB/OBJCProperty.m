@@ -21,7 +21,7 @@
 @implementation OBJCProperty
 
 @synthesize name            = _name;
-@synthesize ivarName         = _ivarName;
+@synthesize ivarName        = _ivarName;
 @synthesize typeEncoding    = _typeEncoding;
 @synthesize oldTypeEncoding = _oldTypeEncoding;
 @synthesize ownerShip       = _ownerShip;
@@ -71,7 +71,7 @@
 }
 
 - (NSString *)description {
-    return [NSString stringWithFormat:@"--------\n   name: %@\n   type: %@ \n   ownerShip:%@\n   isNonatomic: %@\n   varName: %@", _name, _typeEncoding, [self ownerShipString], @(_isNonatomic), _ivarName];
+    return [NSString stringWithFormat:@"--------\n   name: %@\n   type: %@ \n   ownerShip:%@\n   isNonatomic: %@\n   ivarName: %@", self.name, self.typeEncoding, [self ownerShipString], @(self.isNonatomic), self.ivarName];
 }
 
 - (NSString *)ownerShipString {
