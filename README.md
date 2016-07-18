@@ -27,12 +27,7 @@ Feedback: [jr-wong@qq.com](mailto:jrwong@qq.com)
 
 # Installation 【安装】
 ```ruby
-use_frameworks!
 pod 'JRDB'
-```
-
-```objc
-@import JRDB;
 ```
 
 ---
