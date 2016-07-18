@@ -1,6 +1,6 @@
 # iOS用对FMDB的超好用封装
 
-**一个对FMDB进行类Hibernate封装的ios库，支持Objective-C 和 Swift。**
+**一个对FMDB进行类Hibernate封装的ios库
 
 [![Build Status](http://img.shields.io/travis/scubers/JRDB/developing.svg?style=flat)](https://travis-ci.org/scubers/JRDB)
 [![Pod Version](http://img.shields.io/cocoapods/v/JRDB.svg?style=flat)](http://cocoadocs.org/docsets/JRDB/)
@@ -69,7 +69,7 @@ id result =[J_Insert(p)
 id result = [J_Insert(p) exe:nil];
 		
 // 数组保存，两种 api 自由使用
-id result = [J_Insert(p1, p2, p3, nil) exe:nil] // 一定要在最后添加nil作为数组的结尾
+id result = [J_Insert(p1, p2, p3) exe:nil]
 
 id result = [J_Insert(@[p1, p2, p3]) exe:nil]
 
@@ -81,7 +81,7 @@ id result = [J_Insert(@[p1, p2, p3]) exe:nil]
 |:-------------:|------------| 
 | InDB				| 配置可以省略，默认使用[JRDBMgr defaultDB]，执行的数据库|
 | Recursive     | 配置可以省略，默认为NO，功能为开关是否进行[关联操作](#linksave)|
-| Sync				|配置可以省略，默认YES：阻塞本线程，线程安全同步执行数据库操作；NO：在本线程执行数据库操作，线程不安全
+| Sync				|配置可以省略，默认YES：阻塞本线程，线程安全同步执行数据库操作，使用FMDatabaseQueue；NO：在本线程执行数据库操作，线程不安全，使用FMDatabase
 |Transaction		|配置可省略，默认为YES：本操作自带事务；NO：本操作不开启事务，需要外部有事务支持
 |exe:nil|执行数据库操作，参数为数据库操作完成的回调block
 
@@ -93,17 +93,17 @@ id result = [J_Insert(@[p1, p2, p3]) exe:nil]
 
 // 更新指定列
 id result = [J_Update(p)
-                 .Columns(@"_age", @"_name",nil)
+                 .ColumnsJ(@"_age", @"_name")
                //.Columns(@[@"_age", @"_name"])
                   exe:nil];
 // 忽略指定列
 id result = [J_Update(p)
-                 .Ignore(@"_phone", nil)
+                 .IgnoreJ(@"_phone")
                //.Ignore(@[@"_phone"])
                   exe:nil];
 
 // 更新数组
-id result = [J_Update(p1, p2, nil) exe:nil];
+id result = [J_Update(p1, p2) exe:nil];
 id result = [J_Update(@[p1, p2, p3]) exe:nil];
 ```
 
@@ -133,43 +133,58 @@ id result = [J_Delete(p) exe:nil];
 
 ```objc
 // 普通查询
-id result = J_Select([Person class])
+id result = [J_Select([Person class])
                     .Recursive(YES)
                     .Sync(YES)
                     .Cache(YES)
                     .Where(@"_name like ? and _height > ?")
-                    .Params(@"L%", @150, nil)
-                    .Group(@"_class")
+                    .Params(@[@"L%", @150])
+                    .Group(@"_level")
                     .Order(@"_age")
                     .Limit(0, 10)
-                    .Desc(YES);
+                    .Desc(YES)
+                    exe:nil];
 
-id result = J_Select(nil)
+id result = [J_Select(nil)
 					.From([Person class]) 
 					.Recursive(YES)
 					.Sync(YES)
 					.Cache(YES)
 					.Where(@"_name like ? and _height > ?")
-					.Params(@"L%", @150, nil)
-					.Group(@"_class")
+					.Params(@[@"L%", @150])
+					.Group(@"_level")
 					.Order(@"_age")
 					.Limit(0, 10)
-					.Desc(YES);
+					.Desc(YES) 
+					exe:nil];
 
 // 自定义查询
-//id result = J_Select(@"_age", @"_name", nil)
-id result = J_Select(@[@"_age", @"_name"])
+//id result = [J_Select(@"_age", @"_name")
+id result = [J_Select(@[@"_age", @"_name"])
 						.From([Person class])
 						.Recursive(YES)   // 自定义查询的时候，不会进行关联查询
 						.Sync(YES)
 						.Cache(YES)
 						.Where(@"_name like ? and _height > ?")
-						.Params(@"L%", @150, nil)
-						.Group(@"_class")
+						.Params(@[@"L%", @150])
+						.Group(@"_level")
 						.Order(@"_age")
 						.Limit(0, 10)
-						.Desc(YES);
-					
+						.Desc(YES)
+						exe:nil];
+
+id result = [J_Select(JRCount)
+						.From([Person class])
+						.Recursive(YES)   // 自定义查询的时候，不会进行关联查询
+						.Sync(YES)
+						.Cache(YES)
+						.Where(@"_name like ? and _height > ?")
+						.Params(@"L%", @150)
+						.Group(@"_level")
+						.Order(@"_age")
+						.Limit(0, 10)
+						.Desc(YES) 
+						exe:nil];			
                     
 ```
 
@@ -219,31 +234,34 @@ id result = J_Select(@[@"_age", @"_name"])
 
 ```objc
 
-id result = J_Select(nil)
-                .FromJ(Person)
+//id result = [J_Select(nil)
+//                .FromJ(Person)
+id result = [J_SelectJ(Person)
                 .Recursive(YES)
                 .Sync(YES)
                 .Cache(YES)
                 .WhereJ(_name like ? and _height > ?)
-                .Params(@"a%", @100, nil)
-                .GroupJ(_class)
+                .Params(@"a%", @100)
+                .GroupJ(_level)
                 .OrderJ(_age)
                 .Limit(0, 10)
-                .Desc(YES);
+                .Desc(YES)
+                exe:nil];
 
 // 自定义查询
-//id result = J_Select(@"_age", @"_name", nil)
-id result = J_Select(@[@"_age", @"_name"])
+//id result = [J_Select(@"_age", @"_name")
+id result = [J_Select(@[@"_age", @"_name"])
 						.FromJ(Person)
 						.Recursive(YES)   // 自定义查询的时候，不会进行关联查询
 						.Sync(YES)
 						.Cache(YES)
 						.WhereJ(_name like ? and _height > ?)
-						.Params(@"L%", @150, nil)
-						.GroupJ(_class)
+						.ParamsJ(@"L%", @150)
+						.GroupJ(_level)
 						.OrderJ(_age)
 						.Limit(0, 10)
-						.Desc(YES);
+						.Desc(YES)
+						exe:nil];
 
 ```
 

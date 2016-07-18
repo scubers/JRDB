@@ -14,7 +14,6 @@
 #import "NSObject+Reflect.h"
 #import "JRQueryCondition.h"
 
-
 #define BlockPropertyImpl(_type_, _methodName_, _propName_)\
 - (JRDBChain *(^)(_type_ prop))_methodName_ {\
     jr_weak(self);\
@@ -30,8 +29,11 @@
     jr_weak(self);\
     return ^JRDBChain *(NSArray *array) {\
         jr_strong(self);\
-        self->_operation = _operation_;\
-        if (array.count == 1) {\
+        self->_operation = _operation_;             \
+        if ([array.firstObject isKindOfClass:[NSArray class]]) {            \
+            self->_targetArray = array.firstObject;                 \
+        }                                                       \
+        else if (array.count == 1) {                    \
             self->_target = array.firstObject;\
         } else {\
             self->_targetArray = array;\
@@ -63,23 +65,6 @@
 }
 
 
-
-#define ArrrayPropertyImpl(_method_,_propName_)                        \
-- (JRDBChain *(^)(id, ...))_method_ {                 \
-    jr_weak(self);                              \
-    return ^JRDBChain *(id obj, ...) {                  \
-        jr_strong(self);                                \
-        if ([obj isKindOfClass:[NSArray class]]) {\
-            self->_##_propName_ = obj;               \
-        } else {\
-            va_list ap;                                     \
-            va_start(ap, obj);                              \
-            self->_##_propName_ = [self variableListToArray:ap andFirst:obj];\
-            va_end(ap);\
-        }\
-        return self;                \
-    };              \
-}
 
 #define HistoryKey(key) \
 static NSString * const key = @#key;
@@ -143,13 +128,13 @@ typedef enum {
 @synthesize columnsArray   = _columnsArray;
 @synthesize ignoreArray    = _ignoreArray;
 
+
 - (instancetype)init {
     if (self = [super init]) {
         _isRecursive    = NO;
         _useCache       = NO;
         _useTransaction = YES;
         _isSync         = YES;
-
         _db             = [JRDBMgr defaultDB];
         _limitIn        = (JRLimit){-1, -1};
     }
@@ -184,25 +169,18 @@ typedef enum {
 
 - (SelectBlock)Select {
     jr_weak(self);
-    return ^JRDBChain *(id first, ...) {
+    return ^JRDBChain *(NSArray *array) {
         jr_strong(self);
-        if (object_isClass(first) || !first) {
-            self->_operation = CSelect;
-            self->_targetClazz = first;
+        self->_operation = CSelect;
+        if (object_isClass(array.firstObject)) {
+            self->_targetClazz = array.firstObject;
         }
-        else if ([first isEqualToString:JRCount]) {
+        else if ([array.firstObject isEqualToString:JRCount]) {
             self->_operation = CSelectCount;
         }
         else {
             self->_operation = CSelectCustomized;
-            if ([first isKindOfClass:[NSArray class]]) {
-                self->_selectColumns = first;
-            } else {
-                va_list ap;
-                va_start(ap, first);
-                self->_selectColumns = [self variableListToArray:ap andFirst:first];
-                va_end(ap);
-            }
+            self->_selectColumns = array;
         }
         return self;
     };
@@ -267,10 +245,9 @@ BlockPropertyImpl(BOOL, Desc, isDesc)
 BlockPropertyImpl(BOOL, Cache, useCache)
 BlockPropertyImpl(JRDBChainComplete, Complete, completeBlock)
 
-
-ArrrayPropertyImpl(Params, parameters)
-ArrrayPropertyImpl(Columns, columnsArray)
-ArrrayPropertyImpl(Ignore, ignoreArray)
+BlockPropertyImpl(NSArray *, Params, parameters)
+BlockPropertyImpl(NSArray *, Columns, columnsArray)
+BlockPropertyImpl(NSArray *, Ignore, ignoreArray)
 
 
 #pragma mark - Other method
@@ -292,24 +269,6 @@ ArrrayPropertyImpl(Ignore, ignoreArray)
         conditions = @[[JRQueryCondition condition:condition args:@[_wherePK] type:JRQueryConditionTypeAnd]];
     }
     return conditions;
-}
-
-
-- (NSArray *)variableListToArray:(va_list)valist andFirst:(id)first {
-    NSMutableArray *args = [NSMutableArray array];
-    if (!first) {
-        return args;
-    }
-    [args addObject:first];
-    id arg;
-    while( (arg = va_arg(valist,id)) )
-    {
-        if ( arg ){
-            [args addObject:arg];
-        }
-    }
-    self->_selectColumns = args;
-    return args;
 }
 
 - (BOOL)isQuerySingle {
@@ -389,5 +348,6 @@ ArrrayPropertyImpl(Ignore, ignoreArray)
     }
     return NO;
 }
+
 
 @end

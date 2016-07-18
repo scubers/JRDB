@@ -63,6 +63,7 @@ static NSString * const jrdb_synchronizing = @"jrdb_synchronizing";
         rollback = NO;
         EXE_BLOCK(block, db, &rollback);
         if (rollback) {
+            NSLog(@"warning: execute error, database will roll back!!");
             [self rollback];
             return @NO;
         } else {
@@ -429,7 +430,11 @@ static NSString * const jrdb_synchronizing = @"jrdb_synchronizing";
         AssertRegisteredClazz([one class]);
         if ([[one class] jr_customPrimarykey]) { // 自定义主键
             NSAssert([one jr_customPrimarykeyValue] != nil, @"custom Primary key should not be nil");
-            NSAssert(![self jr_count4PrimaryKey:[one jr_customPrimarykeyValue] clazz:[one class] synchronized:NO  complete:nil], @"primary key is exists");
+            long count = [self jr_count4PrimaryKey:[one jr_customPrimarykeyValue] clazz:[one class] synchronized:NO  complete:nil];
+            if (count) {
+                NSLog(@"warning: save error, primary key is exists");
+                return NO;
+            }
         } else { // 默认主键
             NSAssert(one.ID == nil, @"The obj:%@ to be saved should not hold a ID", one);
         }

@@ -43,6 +43,7 @@
     return @{
              @"_card" : [Card class],
              @"_card1" : [Card class],
+             @"_cccc" : [Card class],
              @"_son" : [Person class],
              };
 }
@@ -51,16 +52,17 @@
     return @{
              @"_money" : [Money class],
              @"_children" : [Person class],
+             @"_nnnn" : [Person class],
              };
 }
 
-+ (NSString *)jr_primaryKey {
-    return @"_i_string";
-}
-
-- (id)jr_primaryKeyValue {
-    return self.i_string;
-}
+//+ (NSString *)jr_customPrimarykey {
+//    return @"_i_string";
+//}
+//
+//- (id)jr_customPrimarykeyValue {
+//    return self.i_string;
+//}
 
 - (NSMutableArray<Money *> *)money {
     if (!_money) {

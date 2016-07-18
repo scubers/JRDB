@@ -24,7 +24,7 @@
 - (void)setUp {
     [super setUp];
     [JRDBMgr defaultDB];
-    FMDatabase *db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/Jrwong/Desktop/test.sqlite"];
+    FMDatabase *db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/jmacmini/Desktop/test.sqlite"];
     [[JRDBMgr shareInstance] registerClazzes:@[
                                                [Person class],
                                                [Card class],
@@ -56,13 +56,13 @@
 }
 
 - (void)testDeleteOne {
-    Person *p = [[J_Select([Person class]) exe:nil] firstObject];
+    Person *p = [[J_SelectJ(Person) exe:nil] firstObject];
     [J_Delete(p).Recursive(NO) exe:nil];
 //    [J_DELETE(p).Recursive(YES) exe:nil];
 }
 
 - (void)testDeleteMany {
-    NSArray *array = [J_Select([Person class]) exe:nil];
+    NSArray *array = [J_SelectJ(Person) exe:nil];
     [J_Delete(array).Recursive(NO) exe:nil];
 //    [J_DELETE(array).Recursive(YES) exe:nil];
 }
@@ -80,7 +80,8 @@
     for (int i = 0; i < 10; i++) {
         [array addObject:[self createPerson:i name:nil]];
     }
-    [array jr_save];
+//    [array jr_save];
+    [J_Insert(array).Recursive(NO) exe:nil];
 }
 
 - (void)testSaveOneWithSituation {
@@ -152,7 +153,7 @@
 - (void)testUpdateOne {
     Person *p = [Person jr_findAll].firstObject;
     p.a_int = 1212;
-    [J_Update(p).Recursive(YES).Columns(@"_a_int", @"_name", nil) exe:nil];
+    [J_Update(p).Recursive(YES).ColumnsJ(@"_a_int", @"_name") exe:nil];
     [J_Update(p).Recursive(NO) exe:nil];
 
 }
@@ -202,7 +203,7 @@
         [p.money addObject:[self createMoney:i]];
         [p.children addObject:[self createPerson:i+10 name:nil]];
     }
-    [J_Update(p).Columns(@"_a_int", nil).Recursive(YES) exe:nil];
+    [J_Update(p).ColumnsJ(@"_a_int").Recursive(YES) exe:nil];
 }
 
 - (void)testUpdateIgnore {
@@ -214,7 +215,7 @@
         [p.money addObject:[self createMoney:i]];
         [p.children addObject:[self createPerson:i+10 name:nil]];
     }
-    [J_Update(p).Ignore(@"_a_int", nil).Recursive(YES) exe:nil];
+    [J_Update(p).IgnoreJ(@"_a_int").Recursive(YES) exe:nil];
 }
 
 #pragma mark - save or update
@@ -252,7 +253,7 @@
                     .Sync(YES)
                     .Cache(YES)
                     .WhereJ(_name like ? and _height > ?)
-                    .Params(@"a%", @100, nil)
+                    .ParamsJ(@"a%", @100)
                     .GroupJ(_class)
                     .OrderJ(_age)
                     .Limit(0, 10)
@@ -293,7 +294,7 @@
 
 - (void)testSelectColumn {
     NSArray<Person *> *ps =
-    [J_Select(@"_a_int", @"_b_unsigned_int", nil)
+    [J_Select(@"_a_int", @"_b_unsigned_int")
     .Recursive(YES) // 自定义查询，即使设置关联查询，也不会进行关联查询
     .FromJ(Person)
     .OrderJ(_a_int)
@@ -365,7 +366,7 @@
     p.m_date = [NSDate date];
     p.type = [NSString stringWithFormat:@"Person+%d", base];
     p.animal = [Animal new];
-    p.bbbbb = base % 2;
+//    p.bbbbb = base % 2;
     return p;
 }
 

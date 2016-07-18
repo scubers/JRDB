@@ -9,17 +9,18 @@
 #import <Foundation/Foundation.h>
 #import "JRPersistent.h"
 
+#pragma mark - convenience marco
 
 #define jr_weak(object) __weak __typeof__(object) weak##_##object = object
 #define jr_strong(object) __typeof__(object) object = weak##_##object
 
-#define J_Select(...)           ([JRDBChain new].Select(__VA_ARGS__))
+#define J_Select(...)           ([JRDBChain new].Select((_variableListToArray(__VA_ARGS__, 0))))
 #define J_SelectJ(_arg_)        (J_Select([_arg_ class]))
 
-#define J_Insert(_arg_)         ([JRDBChain new].Insert(_JRToArray(_arg_)))
-#define J_Update(_arg_)         ([JRDBChain new].Update(_JRToArray(_arg_)))
-#define J_Delete(_arg_)         ([JRDBChain new].Delete(_JRToArray(_arg_)))
-#define J_SaveOrUpdate(_arg_)   ([JRDBChain new].SaveOrUpdate(_JRToArray(_arg_)))
+#define J_Insert(...)           ([JRDBChain new].Insert(_variableListToArray(__VA_ARGS__, 0)))
+#define J_Update(...)           ([JRDBChain new].Update(_variableListToArray(__VA_ARGS__, 0)))
+#define J_Delete(...)           ([JRDBChain new].Delete(_variableListToArray(__VA_ARGS__, 0)))
+#define J_SaveOrUpdate(...)     ([JRDBChain new].SaveOrUpdate(_variableListToArray(__VA_ARGS__, 0)))
 
 #define J_DeleteAll(_arg_)      ([JRDBChain new].DeleteAll([_arg_ class]))
 
@@ -28,10 +29,39 @@
 #define J_DropTable(_arg_)      ([JRDBChain new].DropTable([_arg_ class]))
 #define J_TruncateTable(_arg_)  ([JRDBChain new].TruncateTable([_arg_ class]))
 
+#define ParamsJ(...)            Params((_variableListToArray(__VA_ARGS__, 0)))
+#define ColumnsJ(...)           Columns((_variableListToArray(__VA_ARGS__, 0)))
+#define IgnoreJ(...)            Ignore((_variableListToArray(__VA_ARGS__, 0)))
+
 #define FromJ(_arg_)            From([_arg_ class])
 #define WhereJ(_arg_)           Where(@#_arg_)
 #define OrderJ(_arg_)           Order(@#_arg_)
 #define GroupJ(_arg_)           Group(@#_arg_)
+
+static inline NSArray * _variableListToArray(id first, ...) {
+    NSMutableArray *args = [NSMutableArray array];
+    if (!first) {
+        return args;
+    }
+    [args addObject:first];
+    va_list valist;
+    va_start(valist, first);
+    id arg;
+    while( (arg = va_arg(valist,id)) )
+    {
+        if ( arg ){
+            [args addObject:arg];
+        }
+    }
+    va_end(valist);
+    return [args copy];
+}
+
+static inline NSArray * _JRToArray(id arg) {
+    if (!arg) NSLog(@"warning: _JRBoxValue should not pass a nil value");
+    return [arg isKindOfClass:[NSArray class]] ? arg : arg ? @[arg] : @[];
+}
+
 
 typedef enum {
     CInsert = 1,
@@ -65,7 +95,7 @@ typedef JRDBChain *(^UpdateOneBlock)(id<JRPersistent> one);
 typedef JRDBChain *(^DeleteOneBlock)(id<JRPersistent> one);
 typedef JRDBChain *(^SaveOrUpdateOneBlock)(id<JRPersistent> one);
 
-typedef JRDBChain *(^SelectBlock)(id first, ...);
+typedef JRDBChain *(^SelectBlock)(NSArray *array);
 
 
 typedef JRDBChain *(^DeleteAllBlock)(Class<JRPersistent> clazz);
@@ -81,18 +111,8 @@ typedef JRDBChain *(^TruncateTableBlock)(Class<JRPersistent> clazz);
 @property(nonatomic,copy,readonly)JRDBChain*(^_name_)(_paramType_ param);
 
 
-#define ArrayPropertyDeclare(_ownership_, _name_, _paramType_, _paramName_) \
-@property(nonatomic,_ownership_,readonly)_paramType_ _paramName_;\
-@property(nonatomic,copy,readonly)JRDBChain*(^_name_)(id param, ...);
-
-
 #define OperationBlockDeclare(_name_, _type_) \
 @property(nonatomic,copy,readonly)_type_ _name_;
-
-static inline NSArray * _JRToArray(id arg) {
-    if (!arg) NSLog(@"warning: _JRBoxValue should not pass a nil value");
-    return [arg isKindOfClass:[NSArray class]] ? arg : arg ? @[arg] : @[];
-}
 
 struct JRLimit {
     long long start;
@@ -113,11 +133,10 @@ typedef struct JRLimit JRLimit;
 @property (nonatomic, strong, readonly) NSArray<JRQueryCondition *> *queryCondition; ///< 根据where语句生成的查询条件
 @property (nonatomic, strong, readonly) NSArray<NSString*> *selectColumns;///< 自定义select时的columns
 
-- (id)exe:(JRDBChainComplete)complete;
-
-@property (nonatomic, copy) JRDBChain *(^From)(id from);///< 接收Class类 或者 NSString表名
 
 // value param
+@property (nonatomic, copy) JRDBChain *(^From)(id from);///< 接收Class类
+
 @property (nonatomic, strong, readonly) JRDBChain *(^Limit)(NSUInteger start, NSUInteger length);
 @property (nonatomic, assign, readonly) JRLimit limitIn;
 @property (nonatomic, strong, readonly) NSString *limitString;
@@ -137,9 +156,9 @@ BlockPropertyDeclare(assign, Trasaction, BOOL, useTransaction);
 BlockPropertyDeclare(copy, Complete, JRDBChainComplete, completeBlock);
 
 // array param
-ArrayPropertyDeclare(strong, Params, NSArray *, parameters);
-ArrayPropertyDeclare(strong, Columns, NSArray *, columnsArray);
-ArrayPropertyDeclare(strong, Ignore, NSArray *, ignoreArray);
+BlockPropertyDeclare(strong, Params, NSArray *, parameters);
+BlockPropertyDeclare(strong, Columns, NSArray *, columnsArray);
+BlockPropertyDeclare(strong, Ignore, NSArray *, ignoreArray);
 
 
 // operation
@@ -162,5 +181,6 @@ OperationBlockDeclare(DropTable, DropTableBlock);
 OperationBlockDeclare(TruncateTable, TruncateTableBlock);
 
 - (BOOL)isQuerySingle;
+- (id)exe:(JRDBChainComplete)complete;
 
 @end
