@@ -51,7 +51,7 @@
 }
 
 - (BOOL)isNonatomic {
-    return _attributeDict[OBJCPropertyNonAtomicAttribute];
+    return [_attributeDict[OBJCPropertyNonAtomicAttribute] boolValue];
 }
 
 - (NSString *)ivarName {
@@ -67,7 +67,7 @@
 }
 
 - (BOOL)isReadOnly {
-    return _attributeDict[OBJCPropertyReadOnlyAttribute];
+    return [_attributeDict[OBJCPropertyReadOnlyAttribute] boolValue];
 }
 
 - (NSString *)description {
