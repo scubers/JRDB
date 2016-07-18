@@ -74,10 +74,10 @@ id result = [J_Insert(@[p1, p2, p3]) exe:nil]
 
 | 配置        	| 功能		|参数类型|
 |:-------------:|------------| --------|
-| InDB				| 配置可以省略，默认使用[JRDBMgr defaultDB]，执行的数据库| InDB(FMDatabase *)|
-| Recursive     | 配置可以省略，默认为NO，功能为开关是否进行[关联操作](#linksave)|YES or NO|
-| Sync				|配置可以省略，默认YES：阻塞本线程，线程安全同步执行数据库操作，使用FMDatabaseQueue；NO：在本线程执行数据库操作，线程不安全，使用FMDatabase|YES or NO|
-|Transaction		|配置可省略，默认为YES：本操作自带事务；NO：本操作不开启事务，需要外部有事务支持|YES or NO|
+| InDB				| 配置可以省略，默认使用[JRDBMgr defaultDB]，<br/>执行的数据库| InDB(FMDatabase *)|
+| Recursive     | 配置可以省略<br/>默认为NO，功能为开关是否进行[关联操作](#linksave)|YES or NO|
+| Sync				|配置可以省略<br/>默认YES：阻塞本线程，线程安全同步执行数据库操作，使用FMDatabaseQueue；<br/>NO：在本线程执行数据库操作，线程不安全，使用FMDatabase|YES or NO|
+|Transaction		|配置可省略<br/>默认为YES：本操作自带事务；<br/>NO：本操作不开启事务，需要外部有事务支持|YES or NO|
 |exe:nil|执行数据库操作，参数为数据库操作完成的回调block|block or nil|
 
 ---
@@ -182,13 +182,13 @@ id result = [J_Select(JRCount)
 						exe:nil];			
                     
 ```
-
+  
 - 相关配置
 
 | 配置        	| 功能		|参数类型|
 |:-------------:|------------| -------- |
 | Recursive		| 配置可省略，默认为NO: 不进行[关联查询](#linkselect)效率高，YES：[关联查询](#linkselect)效率低|YES or NO|
-| Sync     		| 配置可以省略，默认YES：阻塞本线程，线程安全同步执行数据库操作；NO：在本线程执行数据库操作，线程不安全|YES or NO|
+| Sync     		| 配置可以省略<br/>默认YES：阻塞本线程，线程安全同步执行数据库操作；<br/>NO：在本线程执行数据库操作，线程不安全|YES or NO|
 | Cache		| 配置可省略，默认为NO: 不使用缓存；YES：使用缓存|YES or NO|
 | Where		| Where 后面的条件筛选语句，使用 ？作为参数占位符| NSString * |
 | Params		| Where 语句占位符对应的参数| NSArray * | 
@@ -271,9 +271,9 @@ id result = [J_Select(@[@"_age", @"_name"])
 |:-------------:|------------|
 | `J_Select`		| `J_Select([Person class])`, `J_Select(nil)`, `J_Select(@[@"_name", @"_age"])`|
 | `J_SelectJ`		| `J_Select(Person)`|
-| `J_Insert`		| `J_Insert(p1, p2, p3)`, `J_Insert(@[p1, p2, p3])` update，delete， saveOrUpdate 同理|
-| `J_DeleteAll`	| `J_DeleteAll(Person)`, CreateTable, UpdateTable, DropTable, TruncateTable 同理|
-| `ParamsJ`		| `ParamsJ(@1, @3, @4)`, `Params(@[@1, @3, @4])`, ColumnsJ, IgnoreJ, 同理 |
+| `J_Insert`		| `J_Insert(p1, p2, p3)`, `J_Insert(@[p1, p2, p3])` <br/>update，delete， saveOrUpdate 同理|
+| `J_DeleteAll`	| `J_DeleteAll(Person)`, <br/> CreateTable, UpdateTable, DropTable, TruncateTable 同理|
+| `ParamsJ`		| `ParamsJ(@1, @3, @4)`, `ParamsJ(@[@1, @3, @4])`,<br/>  ColumnsJ, IgnoreJ, 同理 |
 | `FromJ`			| `FromJ(Person)`, WhereJ, OrderJ, GroupJ, 同理 |
 
 #### NSObject+JRDB
