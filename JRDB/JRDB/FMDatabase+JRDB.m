@@ -17,16 +17,19 @@
 #import "NSObject+JRDB.h"
 #import "JRUtils.h"
 #import "JRMiddleTable.h"
-#import "JRSql.h"
+#import "JRActivatedProperty.h"
+#import "JRDBQueue.h"
 
 
 #define AssertRegisteredClazz(clazz) NSAssert([[JRDBMgr shareInstance] isValidateClazz:clazz], @"class: %@ should be registered in JRDBMgr", clazz)
 
 static NSString * const queuekey = @"queuekey";
 
+static NSString * const jrdb_synchronizing = @"jrdb_synchronizing";
+
+
 @implementation FMDatabase (JRDB)
 
-#pragma mark - queue action
 - (void)jr_closeQueue {
     [[self jr_databaseQueue] close];
     objc_setAssociatedObject(self, &queuekey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
@@ -35,7 +38,7 @@ static NSString * const queuekey = @"queuekey";
 - (FMDatabaseQueue *)jr_databaseQueue {
     FMDatabaseQueue *q = objc_getAssociatedObject(self, &queuekey);
     if (!q) {
-        q = [FMDatabaseQueue databaseQueueWithPath:self.databasePath];
+        q = [JRDBQueue databaseQueueWithPath:self.databasePath];
         objc_setAssociatedObject(self, &queuekey, q, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
     return q;
@@ -43,24 +46,31 @@ static NSString * const queuekey = @"queuekey";
 
 - (void)jr_inQueue:(void (^)(FMDatabase *))block {
     [[self jr_databaseQueue] inDatabase:^(FMDatabase *db) {
+        objc_setAssociatedObject(db, &jrdb_synchronizing, @(YES), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         EXE_BLOCK(block, db);
+        objc_setAssociatedObject(db, &jrdb_synchronizing, @(NO), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }];
 }
 
 - (BOOL)jr_inTransaction:(void (^)(FMDatabase *, BOOL *))block {
-    BOOL flag = [self beginTransaction];
-    if (!flag) {
-        NSLog(@"begin transaction fail");
-        return NO;
-    }
-    BOOL rollback = NO;
-    EXE_BLOCK(block, self, &rollback);
-    if (rollback) {
-        [self rollback];
-        return NO;
-    } else {
-        return [self commit];
-    }
+    return
+    [[self jr_executeSync:YES block:^id _Nullable(FMDatabase * _Nonnull db) {
+        BOOL rollback = ![db beginTransaction];
+        if (rollback) {
+            NSLog(@"begin transaction fail");
+            return @(!rollback);
+        }
+        rollback = NO;
+        EXE_BLOCK(block, db, &rollback);
+        if (rollback) {
+            NSLog(@"warning: execute error, database will roll back!!");
+            [self rollback];
+            return @NO;
+        } else {
+            rollback = ![db commit];
+        }
+        return @(!rollback);
+    }] boolValue];
 }
 
 - (BOOL)jr_execute:(BOOL (^)(FMDatabase * _Nonnull db))block useTransaction:(BOOL)useTransaction {
@@ -73,50 +83,84 @@ static NSString * const queuekey = @"queuekey";
     }
     BOOL flag = block(self);
     if (useTransaction) {
-        flag ? [self commit] : [self rollback];
+        if (flag) {
+            return [self commit];
+        } else {
+            [self rollback];
+            return NO;
+        }
     }
     return flag;
 }
 
+- (id)jr_executeSync:(BOOL)sync block:(id (^)(FMDatabase *db))block {
+    if (sync && ![objc_getAssociatedObject(self, &jrdb_synchronizing) boolValue]) {
+        __block id result;
+        [self jr_inQueue:^(FMDatabase * _Nonnull db) {
+            result = block(db);
+        }];
+        return result;
+    } else {
+        return block(self);
+    }
+}
+
+- (FMResultSet *)jr_executeQuery:(JRSql *)sql {
+    return [self executeQuery:sql.sqlString withArgumentsInArray:sql.args];
+}
+
+- (BOOL)jr_executeUpdate:(JRSql *)sql {
+    return [self executeUpdate:sql.sqlString withArgumentsInArray:sql.args];
+}
+
+@end
+
 #pragma mark - table operation
+@implementation FMDatabase (JRDBTable)
 
 - (BOOL)jr_createTable4Clazz:(Class<JRPersistent>)clazz {
     
     AssertRegisteredClazz(clazz);
     
     if (![self jr_checkExistsTable4Clazz:clazz]) {
-        return [self jr_executeUpdate:[JRSqlGenerator createTableSql4Clazz:clazz]];
+        return [self jr_executeUpdate:[JRSqlGenerator createTableSql4Clazz:clazz table:nil]];
     }
     return YES;
 }
 
-- (void)jr_createTable4Clazz:(Class<JRPersistent>)clazz complete:(JRDBComplete)complete {
-    [self jr_inTransaction:^(FMDatabase *db, BOOL *rollBack) {
-        BOOL flag = [db jr_createTable4Clazz:clazz];
-        *rollBack = !flag;
-        EXE_BLOCK(complete, flag);
-    }];
+- (BOOL)jr_createTable4Clazz:(Class<JRPersistent>)clazz synchronized:(BOOL)synchronized complete:(JRDBComplete)complete {
+    return
+    [[self jr_executeSync:synchronized block:^id(FMDatabase *db) {
+        return @([db jr_inTransaction:^(FMDatabase *db, BOOL *rollBack) {
+            BOOL flag = [db jr_createTable4Clazz:clazz];
+            *rollBack = !flag;
+            EXE_BLOCK(complete, flag);
+        }]);
+    }] boolValue];
 }
 
 - (BOOL)jr_truncateTable4Clazz:(Class<JRPersistent>)clazz {
     AssertRegisteredClazz(clazz);
     if ([self jr_checkExistsTable4Clazz:clazz]) {
-        [self jr_executeUpdate:[JRSqlGenerator dropTableSql4Clazz:clazz]];
+        [self jr_executeUpdate:[JRSqlGenerator dropTableSql4Clazz:clazz table:nil]];
     }
     return [self jr_createTable4Clazz:clazz];
 }
 
-- (void)jr_truncateTable4Clazz:(Class<JRPersistent>)clazz complete:(JRDBComplete)complete {
-    [self jr_inTransaction:^(FMDatabase *db, BOOL *rollBack) {
-        BOOL flag = [db jr_truncateTable4Clazz:clazz];
-        *rollBack = !flag;
-        EXE_BLOCK(complete, flag);
-    }];
+- (BOOL)jr_truncateTable4Clazz:(Class<JRPersistent>)clazz synchronized:(BOOL)synchronized complete:(JRDBComplete)complete {
+    return
+    [[self jr_executeSync:synchronized block:^id(FMDatabase *db) {
+        return @([db jr_inTransaction:^(FMDatabase *db, BOOL *rollBack) {
+            BOOL flag = [db jr_truncateTable4Clazz:clazz];
+            *rollBack = !flag;
+            EXE_BLOCK(complete, flag);
+        }]);
+    }] boolValue];
 }
 
 - (BOOL)jr_updateTable4Clazz:(Class<JRPersistent>)clazz {
     AssertRegisteredClazz(clazz);
-    NSArray *sqls = [JRSqlGenerator updateTableSql4Clazz:clazz inDB:self];
+    NSArray *sqls = [JRSqlGenerator updateTableSql4Clazz:clazz inDB:self table:nil];
     BOOL flag = YES;
     for (JRSql *sql in sqls) {
         flag = [self jr_executeUpdate:sql];
@@ -127,36 +171,44 @@ static NSString * const queuekey = @"queuekey";
     return flag;
 }
 
-- (void)jr_updateTable4Clazz:(Class<JRPersistent>)clazz complete:(JRDBComplete)complete {
-    [self jr_inTransaction:^(FMDatabase *db, BOOL *rollBack) {
-        BOOL flag = [db jr_updateTable4Clazz:clazz];
-        *rollBack = !flag;
-        EXE_BLOCK(complete, flag);
-    }];
+- (BOOL)jr_updateTable4Clazz:(Class<JRPersistent>)clazz synchronized:(BOOL)synchronized complete:(JRDBComplete)complete {
+    return
+    [[self jr_executeSync:synchronized block:^id(FMDatabase *db) {
+        return @([db jr_inTransaction:^(FMDatabase *db, BOOL *rollBack) {
+            BOOL flag = [db jr_updateTable4Clazz:clazz];
+            *rollBack = !flag;
+            EXE_BLOCK(complete, flag);
+        }]);
+    }] boolValue];
 }
 
 - (BOOL)jr_dropTable4Clazz:(Class<JRPersistent>)clazz {
     AssertRegisteredClazz(clazz);
     if ([self jr_checkExistsTable4Clazz:clazz]) {
-        return [self executeUpdate:[JRSqlGenerator dropTableSql4Clazz:clazz].sqlString];
+        return [self executeUpdate:[JRSqlGenerator dropTableSql4Clazz:clazz table:nil].sqlString];
     }
     return YES;
 }
 
-- (void)jr_dropTable4Clazz:(Class<JRPersistent>)clazz complete:(JRDBComplete)complete {
-    [self jr_inTransaction:^(FMDatabase *db, BOOL *rollBack) {
-        BOOL flag = [db jr_dropTable4Clazz:clazz];
-        *rollBack = !flag;
-        EXE_BLOCK(complete, flag);
-    }];
+- (BOOL)jr_dropTable4Clazz:(Class<JRPersistent>)clazz synchronized:(BOOL)synchronized complete:(JRDBComplete)complete {
+    return
+    [[self jr_executeSync:synchronized block:^id(FMDatabase *db) {
+        return @([db jr_inTransaction:^(FMDatabase *db, BOOL *rollBack) {
+            BOOL flag = [db jr_dropTable4Clazz:clazz];
+            *rollBack = !flag;
+            EXE_BLOCK(complete, flag);
+        }]);
+    }] boolValue];
 }
 
-#pragma mark - table message
+- (BOOL)jr_checkExistsTable4Clazz:(Class<JRPersistent>)clazz {
+    AssertRegisteredClazz(clazz);
+    return [self tableExists:[clazz shortClazzName]];
+}
 
 - (NSArray<JRColumnSchema *> *)jr_schemasInClazz:(Class<JRPersistent>)clazz {
     AssertRegisteredClazz(clazz);
     FMResultSet *ret = [[JRDBMgr defaultDB] getTableSchema:[clazz shortClazzName]];
-//    get table schema: result colums: cid[INTEGER], name,type [STRING], notnull[INTEGER], dflt_value[],pk[INTEGER]
     NSMutableArray *schemas = [NSMutableArray array];
     while ([ret next]) {
         JRColumnSchema *schema = [JRColumnSchema new];
@@ -171,7 +223,11 @@ static NSString * const queuekey = @"queuekey";
     return schemas;
 }
 
-#pragma mark - link operation
+@end
+
+#pragma mark - save or update
+
+@implementation FMDatabase (JRDBSaveOrUpdate)
 
 - (BOOL)jr_handleSave:(id<JRPersistent>)obj stack:(NSMutableArray<id<JRPersistent>> **)stack needRollBack:(BOOL *)needRollBack {
     
@@ -186,7 +242,7 @@ static NSString * const queuekey = @"queuekey";
             if ([*stack containsObject:value]) {
                 [value jr_addDidFinishBlock:^(id<JRPersistent>  _Nonnull object) {
                     [object jr_removeDidFinishBlockForIdentifier:identifier];
-                    [self jr_updateOne:obj columns:nil useTransaction:NO];
+                    [self jr_updateOne:obj columns:@[key] useTransaction:NO synchronized:NO complete:nil];
                 } forIdentifier:identifier];
             } else {
                 if (![*stack containsObject:obj]) {
@@ -213,11 +269,11 @@ static NSString * const queuekey = @"queuekey";
 
     id<JRPersistent> old;
     if ([obj jr_primaryKeyValue]) {
-        old = [self jr_getByPrimaryKey:[obj jr_primaryKeyValue] clazz:[obj class]];
+        old = [self jr_getByPrimaryKey:[obj jr_primaryKeyValue] clazz:[obj class] synchronized:NO complete:nil];
     }
 
     if (!old) {
-        BOOL ret = [self jr_saveOneOnly:obj];
+        BOOL ret = [self jr_saveOneOnly:obj useTransaction:NO synchronized:NO complete:nil];
         *needRollBack = !ret;
         if (!ret) {
             NSLog(@"save obj: %@ error, transaction will be rollback", obj);
@@ -239,71 +295,107 @@ static NSString * const queuekey = @"queuekey";
     // 监测一对多的保存
     [[[obj class] jr_oneToManyLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull clazz, BOOL * _Nonnull stop) {
         
-        if (!columns || [columns containsObject:key]) {
-            NSArray *array = [((NSObject *)obj) valueForKey:key];
-            // 逐个保存
-            [array enumerateObjectsUsingBlock:^(NSObject<JRPersistent> * _Nonnull subObj, NSUInteger idx, BOOL * _Nonnull stop) {
-                if (![subObj ID]) {
-                    // 设置父ID
-                    if ([obj class] == clazz) {
-                        [subObj jr_setParentLinkID:[obj ID] forKey:key];
-                    }
-                    needRollBack = ![self jr_saveOne:subObj useTransaction:NO];
-                    *stop = needRollBack;
-                }
-            }];
-            
-            if ([obj class] != clazz) {// 如果是同一张表则不需要中建表，是父子关系
-                // 保存中建表
-                JRMiddleTable *mid = [JRMiddleTable table4Clazz:clazz andClazz:[obj class] db:self];
-                needRollBack = ![mid saveObjs:array forObj:obj];
-            }
-            *stop = needRollBack;
-        }
+        if (!(!columns || [columns containsObject:key])) { return; }
         
+        NSArray *array = [((NSObject *)obj) valueForKey:key];
+        // 逐个保存
+        [array enumerateObjectsUsingBlock:^(NSObject<JRPersistent> * _Nonnull subObj, NSUInteger idx, BOOL * _Nonnull stop) {
+            if (![subObj ID]) {
+                // 设置父ID
+                if ([obj class] == clazz) {
+                    [subObj jr_setParentLinkID:[obj ID] forKey:key];
+                }
+                needRollBack = ![self jr_saveOne:subObj useTransaction:NO synchronized:NO complete:nil];
+                *stop = needRollBack;
+            }
+        }];
+        
+        if ([obj class] != clazz) {// 如果是同一张表则不需要中间表，是父子关系
+            // 保存中建表
+            JRMiddleTable *mid = [JRMiddleTable table4Clazz:clazz andClazz:[obj class] db:self];
+            needRollBack = ![mid saveObjs:array forObj:obj];
+        }
+        *stop = needRollBack;
     }];
     return !needRollBack;
 }
 
 #pragma mark - save or update
 
-- (BOOL)jr_saveOrUpdateOneOnly:(id<JRPersistent> _Nonnull)one {
+- (BOOL)jr_saveOrUpdateOneOnly:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction {
     AssertRegisteredClazz([one class]);
-    BOOL isSave = YES;
-    if ([[one class] jr_customPrimarykey]) { // 自定义主键
-        NSAssert([one jr_customPrimarykeyValue] != nil, @"custom Primary key should not be nil");
-        isSave = ![self jr_count4PrimaryKey:[one jr_customPrimarykeyValue] clazz:[one class]];
-    } else { // 默认主键
-        isSave = !one.ID;
-    }
-    
-    if (isSave) {
-        return [self jr_saveOneOnly:one];
-    } else {
-        return [self jr_updateOneOnly:one columns:nil];
-    }
+    return
+    [self jr_execute:^BOOL(FMDatabase * _Nonnull db) {
+        BOOL isSave = YES;
+        if ([[one class] jr_customPrimarykey]) { // 自定义主键
+            NSAssert([one jr_customPrimarykeyValue] != nil, @"custom Primary key should not be nil");
+            isSave = ![self jr_count4PrimaryKey:[one jr_customPrimarykeyValue] clazz:[one class] synchronized:NO  complete:nil];
+        } else { // 默认主键
+            isSave = !one.ID;
+        }
+        
+        if (isSave) {
+            return [self jr_saveOneOnly:one useTransaction:NO synchronized:NO complete:nil];
+        } else {
+            return [self jr_updateOneOnly:one columns:nil useTransaction:NO synchronized:NO complete:nil];
+        }
+    } useTransaction:useTransaction];
+}
+
+- (BOOL)jr_saveOrUpdateOneOnly:(id<JRPersistent>)one useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized complete:(JRDBComplete)complete {
+    return
+    [[self jr_executeSync:synchronized block:^id(FMDatabase *db) {
+        BOOL flag = [db jr_saveOrUpdateOneOnly:one useTransaction:useTransaction];
+        EXE_BLOCK(complete, flag);
+        return @(flag);
+    }] boolValue];
 }
 
 - (BOOL)jr_saveOrUpdateOne:(id<JRPersistent>)one useTransaction:(BOOL)useTransaction {
     BOOL isSave = YES;
     if ([[one class] jr_customPrimarykey]) { // 自定义主键
         NSAssert([one jr_customPrimarykeyValue] != nil, @"custom Primary key should not be nil");
-        isSave = ![self jr_count4PrimaryKey:[one jr_customPrimarykeyValue] clazz:[one class]];
+        isSave = ![self jr_count4PrimaryKey:[one jr_customPrimarykeyValue] clazz:[one class] synchronized:NO complete:nil];
     } else { // 默认主键
         isSave = !one.ID;
     }
     if (isSave) {
-        return [self jr_saveOne:one useTransaction:useTransaction];
+        return [self jr_saveOne:one useTransaction:useTransaction synchronized:NO complete:nil];
     } else {
-        return [self jr_updateOne:one columns:nil useTransaction:useTransaction];
+        return [self jr_updateOne:one columns:nil useTransaction:useTransaction synchronized:NO complete:nil];
     }
 }
 
-- (void)jr_saveOrUpdateOne:(id<JRPersistent>)one useTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete {
-    [self jr_inQueue:^(FMDatabase * _Nonnull db) {
-        BOOL ret = [db jr_saveOrUpdateOne:one useTransaction:useTransaction];
-        EXE_BLOCK(complete, ret);
-    }];
+- (BOOL)jr_saveOrUpdateOne:(id<JRPersistent>)one useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized complete:(JRDBComplete)complete {
+    return
+    [[self jr_executeSync:synchronized block:^id(FMDatabase *db) {
+        BOOL flag = [db jr_saveOrUpdateOne:one useTransaction:useTransaction];
+        EXE_BLOCK(complete, flag);
+        return @(flag);
+    }] boolValue];
+}
+
+#pragma mark - save or update array
+
+- (BOOL)jr_saveOrUpdateObjectsOnly:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction {
+    return
+    [self jr_execute:^BOOL(FMDatabase * _Nonnull db) {
+        __block BOOL needRollBack = NO;
+        [objects enumerateObjectsUsingBlock:^(id<JRPersistent>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            needRollBack = ![db jr_saveOrUpdateOneOnly:obj useTransaction:NO];
+            *stop = needRollBack;
+        }];
+        return !needRollBack;
+    } useTransaction:useTransaction];
+}
+
+- (BOOL)jr_saveOrUpdateObjectsOnly:(NSArray<id<JRPersistent>> *)objects useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized complete:(JRDBComplete)complete {
+    return
+    [[self jr_executeSync:synchronized block:^id(FMDatabase *db) {
+        BOOL flag = [db jr_saveOrUpdateObjectsOnly:objects useTransaction:useTransaction];
+        EXE_BLOCK(complete, flag);
+        return @(flag);
+    }] boolValue];
 }
 
 - (BOOL)jr_saveOrUpdateObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction {
@@ -317,38 +409,56 @@ static NSString * const queuekey = @"queuekey";
         return !needRollBack;
     } useTransaction:useTransaction];
 }
-- (void)jr_saveOrUpdateObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete {
-    [self jr_inQueue:^(FMDatabase * _Nonnull db) {
-        BOOL ret = [db jr_saveOrUpdateObjects:objects useTransaction:useTransaction];
-        EXE_BLOCK(complete, ret);
-    }];
+
+- (BOOL)jr_saveOrUpdateObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized complete:(JRDBComplete _Nullable)complete {
+    return
+    [[self jr_executeSync:synchronized block:^id(FMDatabase *db) {
+        BOOL flag = [db jr_saveOrUpdateObjects:objects useTransaction:useTransaction];
+        EXE_BLOCK(complete, flag);
+        return @(flag);
+    }] boolValue];
 }
 
+@end
 
-#pragma mark - save one
+#pragma mark - save
+@implementation FMDatabase (JRDBSave)
 
-/**
- *  保存单条，不关联保存
- */
-- (BOOL)jr_saveOneOnly:(id<JRPersistent>)one {
-    AssertRegisteredClazz([one class]);
-    if ([[one class] jr_customPrimarykey]) { // 自定义主键
-        NSAssert([one jr_customPrimarykeyValue] != nil, @"custom Primary key should not be nil");
-        NSAssert(![self jr_count4PrimaryKey:[one jr_customPrimarykeyValue] clazz:[one class]], @"primary key is exists");
-    } else { // 默认主键
-        NSAssert(one.ID == nil, @"The obj:%@ to be saved should not hold a ID", one);
-    }
-    
-    JRSql *sql = [JRSqlGenerator sql4Insert:one toDB:self];
-    [one setID:[JRUtils uuid]];
-    [sql.args insertObject:one.ID atIndex:0];
-    BOOL ret = [self jr_executeUpdate:sql];
-    
-    if (ret) {
-        // 保存完，执行block
-        [one jr_executeFinishBlocks];
-    }
-    return ret;
+- (BOOL)jr_saveOneOnly:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction {
+    return
+    [self jr_execute:^BOOL(FMDatabase * _Nonnull db) {
+        AssertRegisteredClazz([one class]);
+        if ([[one class] jr_customPrimarykey]) { // 自定义主键
+            NSAssert([one jr_customPrimarykeyValue] != nil, @"custom Primary key should not be nil");
+            long count = [self jr_count4PrimaryKey:[one jr_customPrimarykeyValue] clazz:[one class] synchronized:NO  complete:nil];
+            if (count) {
+                NSLog(@"warning: save error, primary key is exists");
+                return NO;
+            }
+        } else { // 默认主键
+            NSAssert(one.ID == nil, @"The obj:%@ to be saved should not hold a ID", one);
+        }
+        
+        JRSql *sql = [JRSqlGenerator sql4Insert:one toDB:self table:nil];
+        [one setID:[JRUtils uuid]];
+        [sql.args insertObject:one.ID atIndex:0];
+        BOOL ret = [self jr_executeUpdate:sql];
+        
+        if (ret) {
+            // 保存完，执行block
+            [one jr_executeFinishBlocks];
+        }
+        return ret;
+    } useTransaction:useTransaction];
+}
+
+- (BOOL)jr_saveOneOnly:(id<JRPersistent>)one useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized complete:(JRDBComplete)complete {
+    return
+    [[self jr_executeSync:synchronized block:^id(FMDatabase *db) {
+        BOOL flag = [db jr_saveOneOnly:one useTransaction:useTransaction];
+        EXE_BLOCK(complete, flag);
+        return @(flag);
+    }] boolValue];
 }
 
 - (BOOL)jr_saveOne:(id<JRPersistent>)one useTransaction:(BOOL)useTransaction {
@@ -372,22 +482,38 @@ static NSString * const queuekey = @"queuekey";
     
 }
 
-- (void)jr_saveOne:(id<JRPersistent>)one useTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete {
-    [self jr_inQueue:^(FMDatabase * _Nonnull db) {
+- (BOOL)jr_saveOne:(id<JRPersistent>)one useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized complete:(JRDBComplete)complete {
+    return
+    [[self jr_executeSync:synchronized block:^id(FMDatabase *db) {
         BOOL flag = [db jr_saveOne:one useTransaction:useTransaction];
         EXE_BLOCK(complete, flag);
-    }];
+        return @(flag);
+    }] boolValue];
 }
 
-- (BOOL)jr_saveOne:(id<JRPersistent>)one {
-    return [self jr_saveOne:one useTransaction:YES];
-}
-
-- (void)jr_saveOne:(id<JRPersistent>)one complete:(JRDBComplete)complete {
-    [self jr_saveOne:one useTransaction:YES complete:complete];
-}
 
 #pragma mark - save array
+
+- (BOOL)jr_saveObjectsOnly:(NSArray<id<JRPersistent>> *)objects useTransaction:(BOOL)useTransaction {
+    return
+    [self jr_execute:^BOOL(FMDatabase * _Nonnull db) {
+        __block BOOL needRollBack = NO;
+        [objects enumerateObjectsUsingBlock:^(id<JRPersistent>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            needRollBack = ![db jr_saveOneOnly:obj useTransaction:NO];
+            *stop = needRollBack;
+        }];
+        return !needRollBack;
+    } useTransaction:useTransaction];
+}
+
+- (BOOL)jr_saveObjectsOnly:(NSArray<id<JRPersistent>> *)objects useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized complete:(JRDBComplete)complete {
+    return
+    [[self jr_executeSync:synchronized block:^id(FMDatabase *db) {
+        BOOL flag = [db jr_saveObjectsOnly:objects useTransaction:useTransaction];
+        EXE_BLOCK(complete, flag);
+        return @(flag);
+    }] boolValue];
+}
 
 - (BOOL)jr_saveObjects:(NSArray<id<JRPersistent>> *)objects useTransaction:(BOOL)useTransaction {
     return
@@ -401,22 +527,21 @@ static NSString * const queuekey = @"queuekey";
     } useTransaction:useTransaction];
 }
 
-- (void)jr_saveObjects:(NSArray<id<JRPersistent>> *)objects useTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete {
-    [self jr_inQueue:^(FMDatabase * _Nonnull db) {
+- (BOOL)jr_saveObjects:(NSArray<id<JRPersistent>> *)objects useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized complete:(JRDBComplete)complete {
+    return
+    [[self jr_executeSync:synchronized block:^id(FMDatabase *db) {
         BOOL flag = [db jr_saveObjects:objects useTransaction:useTransaction];
         EXE_BLOCK(complete, flag);
-    }];
+        return @(flag);
+    }] boolValue];
 }
 
-- (BOOL)jr_saveObjects:(NSArray<id<JRPersistent>> *)objects {
-    return [self jr_saveObjects:objects useTransaction:YES];
-}
-
-- (void)jr_saveObjects:(NSArray<id<JRPersistent>> *)objects complete:(JRDBComplete)complete {
-    [self jr_saveObjects:objects useTransaction:YES complete:complete];
-}
+@end
 
 #pragma mark - update
+
+
+@implementation FMDatabase (JRDBUpdate)
 
 /**
  *  只更新数据，不进行关联操作
@@ -424,43 +549,61 @@ static NSString * const queuekey = @"queuekey";
  *  @param obj
  *  @param columns
  */
-- (BOOL)jr_updateOneOnly:(id<JRPersistent>)one columns:(NSArray<NSString *> *)columns {
-    
+- (BOOL)jr_updateOneOnly:(id<JRPersistent>)one columns:(NSArray<NSString *> *)columns useTransaction:(BOOL)useTransaction {
     AssertRegisteredClazz([one class]);
-    
     NSAssert([one jr_primaryKeyValue], @"The obj to be updated should hold a primary key");
     
-    // 表不存在
-    if (![self jr_checkExistsTable4Clazz:[one class]]) {
-        NSLog(@"table : %@ doesn't exists", [one class]);
-        return NO;
-    }
-    
-    NSObject<JRPersistent> *old = (NSObject *)[self jr_findByPrimaryKey:[one jr_primaryKeyValue] clazz:[one class]];
-    NSObject<JRPersistent> *updateObj;
-    if (columns.count) {
-        if (!old) {
-            NSLog(@"The object doesn't exists in database");
+    return
+    [self jr_execute:^BOOL(FMDatabase * _Nonnull db) {
+        // 表不存在
+        if (![self jr_checkExistsTable4Clazz:[one class]]) {
+            NSLog(@"table : %@ doesn't exists", [one class]);
             return NO;
         }
-        for (NSString *name in columns) {
-            id value = [((NSObject *)one) valueForKey:name];
-            [((NSObject *)old) setValue:value forKey:name];
+        
+        NSObject<JRPersistent> *old = (NSObject *)[self jr_findByPrimaryKey:[one jr_primaryKeyValue] clazz:[one class] synchronized:NO complete:nil];
+        NSObject<JRPersistent> *updateObj;
+        if (columns.count) {
+            if (!old) {
+                NSLog(@"The object doesn't exists in database");
+                return NO;
+            }
+            for (NSString *name in columns) {
+                id value = [((NSObject *)one) valueForKey:name];
+                [((NSObject *)old) setValue:value forKey:name];
+            }
+            updateObj = old;
+        } else {
+            updateObj = one;
         }
-        updateObj = old;
-    } else {
-        updateObj = one;
+        
+        JRSql *sql = [JRSqlGenerator sql4Update:updateObj columns:columns toDB:self table:nil];
+        [sql.args addObject:[updateObj jr_primaryKeyValue]];
+        
+        BOOL ret = [self jr_executeUpdate:sql];
+        if (ret) {
+            // 保存完，执行block
+            if (ret) [one jr_executeFinishBlocks];
+        }
+        return ret;
+    } useTransaction:useTransaction];
+    
+}
+
+- (BOOL)jr_updateOneOnly:(id<JRPersistent>)one columns:(NSArray<NSString *> *)columns useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized complete:(JRDBComplete _Nullable)complete {
+    
+    //清除缓存
+    if ([one ID]) {
+        [self removeObjInRecursiveCache:[one ID]];
+        [self removeObjInUnRecursiveCache:[one ID]];
     }
     
-    JRSql *sql = [JRSqlGenerator sql4Update:updateObj columns:columns toDB:self];
-    [sql.args addObject:[updateObj jr_primaryKeyValue]];
-
-    BOOL ret = [self jr_executeUpdate:sql];
-    if (ret) {
-        // 保存完，执行block
-        if (ret) [one jr_executeFinishBlocks];
-    }
-    return ret;
+    return
+    [[self jr_executeSync:synchronized block:^id(FMDatabase *db) {
+        BOOL flag = [db jr_updateOneOnly:one columns:columns useTransaction:useTransaction];
+        EXE_BLOCK(complete, flag);
+        return @(flag);
+    }] boolValue];
 }
 
 - (BOOL)jr_updateOne:(id<JRPersistent>)one columns:(NSArray<NSString *> *)columns useTransaction:(BOOL)useTransaction {
@@ -468,12 +611,28 @@ static NSString * const queuekey = @"queuekey";
     return
     
     [self jr_execute:^BOOL(FMDatabase * _Nonnull db) {
-        BOOL needRollBack = ![self jr_updateOneOnly:one columns:columns];
+        __block BOOL needRollBack = ![self jr_updateOneOnly:one columns:columns useTransaction:NO];
+        
+        // 检测一对一是否需要更新持有id
+        if (!needRollBack) {
+            NSObject<JRPersistent> *oneObj = (NSObject<JRPersistent> *)one;
+            [[[one class] jr_singleLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull clazz, BOOL * _Nonnull stop) {
+                if (![columns containsObject:key]) { return;}
+                id<JRPersistent> subObj = [oneObj valueForKey:key];
+                if (subObj && ![subObj ID]) {
+                    needRollBack = ![self jr_saveOne:subObj useTransaction:NO];
+                    *stop = needRollBack;
+                }
+                [oneObj jr_setSingleLinkID:[subObj ID] forKey:key];
+                needRollBack = ![self jr_updateOneOnly:oneObj columns:columns useTransaction:NO];
+                *stop = needRollBack;
+            }];
+        }
         
         // TODO: 更新时，是否保存一对多，需要检讨
         if (!needRollBack) {
             // 监测一对多的保存
-            needRollBack = ![self jr_handleOneToManySaveWithObj:one columns:nil];
+            needRollBack = ![self jr_handleOneToManySaveWithObj:one columns:columns];
         }
         return !needRollBack;
     } useTransaction:useTransaction];
@@ -481,21 +640,38 @@ static NSString * const queuekey = @"queuekey";
 
 }
 
-- (void)jr_updateOne:(id<JRPersistent>)one columns:(NSArray<NSString *> *)columns useTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete {
-    [self jr_inQueue:^(FMDatabase * _Nonnull db) {
+- (BOOL)jr_updateOne:(id<JRPersistent>)one columns:(NSArray<NSString *> *)columns useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized complete:(JRDBComplete)complete {
+    return
+    [[self jr_executeSync:synchronized block:^id(FMDatabase *db) {
         BOOL flag = [db jr_updateOne:one columns:columns useTransaction:useTransaction];
         EXE_BLOCK(complete, flag);
-    }];
+        return @(flag);
+    }] boolValue];
 }
 
-- (BOOL)jr_updateOne:(id<JRPersistent>)one columns:(NSArray<NSString *> *)columns {
-    return [self jr_updateOne:one columns:columns useTransaction:YES];
-}
-- (void)jr_updateOne:(id<JRPersistent>)one columns:(NSArray<NSString *> *)columns complete:(JRDBComplete)complete {
-    [self jr_updateOne:one columns:columns useTransaction:YES complete:complete];
-}
 
 #pragma mark - update array
+
+- (BOOL)jr_updateObjectsOnly:(NSArray<id<JRPersistent>> *)objects columns:(NSArray<NSString *> *)columns useTransaction:(BOOL)useTransaction {
+    return
+    [self jr_execute:^BOOL(FMDatabase * _Nonnull db) {
+        __block BOOL needRollBack = NO;
+        [objects enumerateObjectsUsingBlock:^(id<JRPersistent>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            needRollBack = ![db jr_updateOneOnly:obj columns:columns useTransaction:NO];
+            *stop = needRollBack;
+        }];
+        return !needRollBack;
+    } useTransaction:useTransaction];
+}
+
+- (BOOL)jr_updateObjectsOnly:(NSArray<id<JRPersistent>> *)objects columns:(NSArray<NSString *> *)columns useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized complete:(JRDBComplete)complete {
+    return
+    [[self jr_executeSync:synchronized block:^id(FMDatabase *db) {
+        BOOL flag = [db jr_updateObjectsOnly:objects columns:columns useTransaction:useTransaction];
+        EXE_BLOCK(complete, flag);
+        return @(flag);
+    }] boolValue];
+}
 
 - (BOOL)jr_updateObjects:(NSArray<id<JRPersistent>> *)objects columns:(NSArray<NSString *> *)columns useTransaction:(BOOL)useTransaction {
     return
@@ -509,40 +685,49 @@ static NSString * const queuekey = @"queuekey";
     } useTransaction:useTransaction];
 }
 
-- (void)jr_updateObjects:(NSArray<id<JRPersistent>> *)objects columns:(NSArray<NSString *> *)columns useTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete {
-    [self jr_inQueue:^(FMDatabase * _Nonnull db) {
+- (BOOL)jr_updateObjects:(NSArray<id<JRPersistent>> *)objects columns:(NSArray<NSString *> *)columns useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized complete:(JRDBComplete)complete {
+    return
+    [[self jr_executeSync:synchronized block:^id(FMDatabase *db) {
         BOOL flag = [db jr_updateObjects:objects columns:columns useTransaction:useTransaction];
         EXE_BLOCK(complete, flag);
-    }];
+        return @(flag);
+    }] boolValue];
 }
 
-- (BOOL)jr_updateObjects:(NSArray<id<JRPersistent>> *)objects columns:(NSArray<NSString *> *)columns {
-    return [self jr_updateObjects:objects columns:columns useTransaction:YES];
-}
-
-- (void)jr_updateObjects:(NSArray<id<JRPersistent>> *)objects columns:(NSArray<NSString *> *)columns complete:(JRDBComplete)complete {
-    return [self jr_updateObjects:objects columns:columns useTransaction:YES complete:complete];
-}
+@end
 
 #pragma mark - delete
 
-- (BOOL)jr_deleteOneOnly:(id<JRPersistent>)one {
+@implementation FMDatabase (JRDBDelete)
+
+- (BOOL)jr_deleteOneOnly:(id<JRPersistent>)one useTransaction:(BOOL)useTransaction {
     AssertRegisteredClazz([one class]);
     NSAssert([one jr_primaryKeyValue], @"primary key should not be nil");
-    
-    if (![self jr_checkExistsTable4Clazz:[one class]]) {
-        NSLog(@"table : %@ doesn't exists", [one class]);
-        return NO;
-    }
-    
-    JRSql *sql = [JRSqlGenerator sql4Delete:one];
-    [sql.args addObject:[one jr_primaryKeyValue]];
-    BOOL ret = [self jr_executeUpdate:sql];
-    if (ret) {
-        // 保存完，执行block
-        [one jr_executeFinishBlocks];
-    }
-    return ret;
+    return
+    [self jr_execute:^BOOL(FMDatabase * _Nonnull db) {
+        if (![self jr_checkExistsTable4Clazz:[one class]]) {
+            NSLog(@"table : %@ doesn't exists", [one class]);
+            return NO;
+        }
+        
+        JRSql *sql = [JRSqlGenerator sql4Delete:one table:nil];
+        [sql.args addObject:[one jr_primaryKeyValue]];
+        BOOL ret = [self jr_executeUpdate:sql];
+        if (ret) {
+            // 保存完，执行block
+            [one jr_executeFinishBlocks];
+        }
+        return ret;
+    } useTransaction:useTransaction];
+}
+
+- (BOOL)jr_deleteOneOnly:(id<JRPersistent>)one useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized complete:(JRDBComplete)complete {
+    return
+    [[self jr_executeSync:synchronized block:^id(FMDatabase *db) {
+        BOOL flag = [db jr_deleteOneOnly:one useTransaction:useTransaction];
+        EXE_BLOCK(complete, flag);
+        return @(flag);
+    }] boolValue];
 }
 
 - (BOOL)jr_deleteOne:(id<JRPersistent>)one useTransaction:(BOOL)useTransaction {
@@ -550,7 +735,7 @@ static NSString * const queuekey = @"queuekey";
     return
     
     [self jr_execute:^BOOL(FMDatabase * _Nonnull db) {
-        __block BOOL needRollBack = ![self jr_deleteOneOnly:one];
+        __block BOOL needRollBack = ![self jr_deleteOneOnly:one useTransaction:NO];
         if (!needRollBack) {
             // 监测一对多的 中间表 删除
             [[[one class] jr_oneToManyLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull clazz, BOOL * _Nonnull stop) {
@@ -559,7 +744,15 @@ static NSString * const queuekey = @"queuekey";
                     NSString *condition = [NSString stringWithFormat:@"%@ = ?", ParentLinkColumn(key)];
                     NSArray *children = [self jr_findByConditions:@[
                                                                     [JRQueryCondition condition:condition args:@[[one ID]] type:JRQueryConditionTypeAnd]
-                                                                    ] clazz:clazz isDesc:NO];
+                                                                    ]
+                                                            clazz:clazz
+                                                          groupBy:nil
+                                                          orderBy:nil
+                                                            limit:nil
+                                                           isDesc:NO
+                                                     synchronized:NO
+                                                         useCache:NO    
+                                                         complete:nil];
                     needRollBack = ![self jr_deleteObjects:children useTransaction:NO];
                 } else {
                     JRMiddleTable *mid = [JRMiddleTable table4Clazz:clazz andClazz:[one class] db:self];
@@ -573,22 +766,37 @@ static NSString * const queuekey = @"queuekey";
     
 }
 
-- (void)jr_deleteOne:(id<JRPersistent>)one useTransaction:(BOOL)useTransaction complete:(JRDBComplete)complete {
-    [self jr_inQueue:^(FMDatabase * _Nonnull db) {
+- (BOOL)jr_deleteOne:(id<JRPersistent>)one useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized complete:(JRDBComplete)complete {
+    return
+    [[self jr_executeSync:synchronized block:^id(FMDatabase *db) {
         BOOL flag = [db jr_deleteOne:one useTransaction:useTransaction];
         EXE_BLOCK(complete, flag);
-    }];
-}
-
-- (BOOL)jr_deleteOne:(id<JRPersistent>)one {
-    return [self jr_deleteOne:one useTransaction:YES];
-}
-
-- (void)jr_deleteOne:(id<JRPersistent>)one complete:(JRDBComplete)complete {
-    [self jr_deleteOne:one useTransaction:YES complete:complete];
+        return @(flag);
+    }] boolValue];
 }
 
 #pragma mark - delete array
+
+- (BOOL)jr_deleteObjectsOnly:(NSArray<id<JRPersistent>> *)objects useTransaction:(BOOL)useTransaction {
+    return
+    [self jr_execute:^BOOL(FMDatabase * _Nonnull db) {
+        __block BOOL needRollBack = NO;
+        [objects enumerateObjectsUsingBlock:^(id<JRPersistent>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            needRollBack = ![db jr_deleteOneOnly:obj useTransaction:NO];
+            *stop = needRollBack;
+        }];
+        return !needRollBack;
+    } useTransaction:useTransaction];
+}
+
+- (BOOL)jr_deleteObjectsOnly:(NSArray<id<JRPersistent>> *)objects useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized complete:(JRDBComplete)complete {
+    return
+    [[self jr_executeSync:synchronized block:^id(FMDatabase *db) {
+        BOOL flag = [db jr_deleteObjectsOnly:objects useTransaction:useTransaction];
+        EXE_BLOCK(complete, flag);
+        return @(flag);
+    }] boolValue];
+}
 
 /**
  *  删除array， 同时进行关联保存删除更新，可选择自带事务或者自行在外层包裹事务
@@ -607,69 +815,100 @@ static NSString * const queuekey = @"queuekey";
         return !needRollBack;
     } useTransaction:useTransaction];
 }
-- (void)jr_deleteObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete {
-    [self jr_inQueue:^(FMDatabase * _Nonnull db) {
-        BOOL flag = [self jr_deleteObjects:objects useTransaction:useTransaction];
+- (BOOL)jr_deleteObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized complete:(JRDBComplete _Nullable)complete {
+    return
+    [[self jr_executeSync:synchronized block:^id(FMDatabase *db) {
+        BOOL flag = [db jr_deleteObjects:objects useTransaction:useTransaction];
         EXE_BLOCK(complete, flag);
-    }];
-}
-
-- (BOOL)jr_deleteObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects {
-    return [self jr_deleteObjects:objects useTransaction:YES];
-}
-- (void)jr_deleteObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects complete:(JRDBComplete _Nullable)complete {
-    return [self jr_deleteObjects:objects useTransaction:YES complete:complete];
+        return @(flag);
+    }] boolValue];
 }
 
 #pragma mark - delete all
 
-- (BOOL)jr_deleteAllOnly:(Class<JRPersistent>)clazz {
+- (BOOL)jr_deleteAllOnly:(Class<JRPersistent>)clazz useTransaction:(BOOL)useTransaction {
     AssertRegisteredClazz(clazz);
-    JRSql *sql = [JRSqlGenerator sql4DeleteAll:clazz];
-    return [self jr_executeUpdate:sql];
+    return
+    [self jr_execute:^BOOL(FMDatabase * _Nonnull db) {
+        JRSql *sql = [JRSqlGenerator sql4DeleteAll:clazz table:nil];
+        return [self jr_executeUpdate:sql];
+    } useTransaction:useTransaction];
+}
+
+- (BOOL)jr_deleteAllOnly:(Class<JRPersistent>)clazz useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized complete:(JRDBComplete)complete {
+    return
+    [[self jr_executeSync:synchronized block:^id(FMDatabase *db) {
+        BOOL flag = [db jr_deleteAllOnly:clazz useTransaction:useTransaction];
+        EXE_BLOCK(complete, flag);
+        return @(flag);
+    }] boolValue];
 }
 
 - (BOOL)jr_deleteAll:(Class<JRPersistent> _Nonnull)clazz useTransaction:(BOOL)useTransaction {
-    NSArray<id<JRPersistent>> *objects = [self jr_findAll:clazz];
+    NSArray<id<JRPersistent>> *objects = [self jr_getByConditions:nil clazz:clazz groupBy:nil orderBy:nil limit:nil isDesc:NO synchronized:NO complete:nil];
     return [self jr_deleteObjects:objects useTransaction:useTransaction];
 }
-- (void)jr_deleteAll:(Class<JRPersistent> _Nonnull)clazz useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete {
-    [self jr_inQueue:^(FMDatabase * _Nonnull db) {
-        BOOL ret = [db jr_deleteAll:clazz useTransaction:useTransaction];
-        EXE_BLOCK(complete, ret);
-    }];
+
+- (BOOL)jr_deleteAll:(Class<JRPersistent> _Nonnull)clazz useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized complete:(JRDBComplete _Nullable)complete {
+    return
+    [[self jr_executeSync:synchronized block:^id(FMDatabase *db) {
+        BOOL flag = [db jr_deleteAll:clazz useTransaction:useTransaction];
+        EXE_BLOCK(complete, flag);
+        return @(flag);
+    }] boolValue];
 }
 
+@end
 
-#pragma mark - single level query operation
+#pragma mark - query
+
+@implementation FMDatabase (JRDBQuery)
 
 - (id<JRPersistent>)jr_getByID:(NSString *)ID clazz:(Class<JRPersistent>)clazz {
     AssertRegisteredClazz(clazz);
     NSAssert(ID, @"id should not be nil");
-    JRSql *sql = [JRSqlGenerator sql4GetByIDWithClazz:clazz];
-    [sql.args addObject:ID];
+    JRSql *sql = [JRSqlGenerator sql4GetByIDWithClazz:clazz ID:ID table:nil];
     FMResultSet *ret = [self jr_executeQuery:sql];
     return [JRFMDBResultSetHandler handleResultSet:ret forClazz:clazz].firstObject;
+}
+
+- (id<JRPersistent>)jr_getByID:(NSString *)ID clazz:(Class<JRPersistent>)clazz synchronized:(BOOL)synchronized useCache:(BOOL)useCache complete:(JRDBQueryComplete)complete {
+    
+    if (useCache) {
+        id<JRPersistent> cacheObj = [self objInUnRecursiveCache:ID];
+        if (cacheObj) {
+            objc_setAssociatedObject(cacheObj, @selector(isCacheHit), @YES, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+            EXE_BLOCK(complete, cacheObj);
+            return cacheObj;
+        }
+    }
+    
+    return
+    [self jr_executeSync:synchronized block:^id(FMDatabase *db) {
+        id<JRPersistent> result = [db jr_getByID:ID clazz:clazz];
+        
+        if (result) {[db saveObjInUnRecursiveCache:result];}
+        
+        EXE_BLOCK(complete, result);
+        return result;
+    }];
 }
 
 - (id<JRPersistent>)jr_getByPrimaryKey:(id)primaryKey clazz:(Class<JRPersistent>)clazz {
     AssertRegisteredClazz(clazz);
     NSAssert(primaryKey, @"id should be nil");
-    JRSql *sql = [JRSqlGenerator sql4GetByPrimaryKeyWithClazz:clazz];
-    [sql.args addObject:primaryKey];
+    JRSql *sql = [JRSqlGenerator sql4GetByPrimaryKeyWithClazz:clazz primaryKey:primaryKey table:nil];
     FMResultSet *ret = [self jr_executeQuery:sql];
     return [JRFMDBResultSetHandler handleResultSet:ret forClazz:clazz].firstObject;
 }
 
-- (NSArray *)jr_getAll:(Class<JRPersistent>)clazz orderBy:(NSString *)orderby isDesc:(BOOL)isDesc {
-    AssertRegisteredClazz(clazz);
-    if (![self jr_checkExistsTable4Clazz:clazz]) {
-        NSLog(@"table %@ doesn't exists", clazz);
-        return @[];
-    }
-    JRSql *sql = [JRSqlGenerator sql4FindAll:clazz orderby:orderby isDesc:isDesc];
-    FMResultSet *ret = [self jr_executeQuery:sql];
-    return [JRFMDBResultSetHandler handleResultSet:ret forClazz:clazz];
+- (id<JRPersistent>)jr_getByPrimaryKey:(id)primaryKey clazz:(Class<JRPersistent>)clazz synchronized:(BOOL)synchronized complete:(JRDBQueryComplete)complete {
+    return
+    [self jr_executeSync:synchronized block:^id(FMDatabase *db) {
+        id<JRPersistent> result = [db jr_getByPrimaryKey:primaryKey clazz:clazz];
+        EXE_BLOCK(complete, result);
+        return result;
+    }];
 }
 
 - (NSArray *)jr_getByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc {
@@ -678,10 +917,25 @@ static NSString * const queuekey = @"queuekey";
         NSLog(@"table %@ doesn't exists", clazz);
         return @[];
     }
-    JRSql *sql = [JRSqlGenerator sql4FindByConditions:conditions clazz:clazz groupBy:groupBy orderBy:orderBy limit:limit isDesc:isDesc];
+    JRSql *sql = [JRSqlGenerator sql4FindByConditions:conditions clazz:clazz groupBy:groupBy orderBy:orderBy limit:limit isDesc:isDesc table:nil];
     FMResultSet *ret = [self jr_executeQuery:sql];
     return [JRFMDBResultSetHandler handleResultSet:ret forClazz:clazz];
 }
+
+- (NSArray<id<JRPersistent>> *)jr_getByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc synchronized:(BOOL)synchronized complete:(JRDBQueryComplete)complete {
+    return
+    [self jr_executeSync:synchronized block:^id(FMDatabase *db) {
+        NSArray<id<JRPersistent>> *result = [db jr_getByConditions:conditions
+                                                             clazz:clazz
+                                                           groupBy:groupBy
+                                                           orderBy:orderBy
+                                                             limit:limit
+                                                            isDesc:isDesc];
+        EXE_BLOCK(complete, result);
+        return result;
+    }];
+}
+
 
 #pragma mark - multi level query operation
 
@@ -724,7 +978,13 @@ static NSString * const queuekey = @"queuekey";
             NSString *condition = [NSString stringWithFormat:@"%@ = ?", ParentLinkColumn(key)];
             NSArray *array = [self jr_findByConditions:@[
                                                          [JRQueryCondition condition:condition args:@[[obj ID]] type:JRQueryConditionTypeAnd],
-                                                         ] clazz:clazz isDesc:NO];
+                                                         ]
+                                                 clazz:clazz
+                                               groupBy:nil
+                                               orderBy:nil
+                                                 limit:nil
+                                                isDesc:NO
+                                              useCache:NO];
             [subList addObjectsFromArray:array];
         } else {
             JRMiddleTable *mid = [JRMiddleTable table4Clazz:clazz andClazz:[obj class] db:self];
@@ -744,6 +1004,28 @@ static NSString * const queuekey = @"queuekey";
     return obj;
 }
 
+- (id<JRPersistent>)jr_findByID:(NSString *)ID clazz:(Class<JRPersistent>)clazz synchronized:(BOOL)synchronized useCache:(BOOL)useCache complete:(JRDBQueryComplete)complete {
+    
+    if (useCache) {
+        id<JRPersistent> cacheObj = [self objInRecursiveCache:ID];
+        if (cacheObj) {
+            objc_setAssociatedObject(cacheObj, @selector(isCacheHit), @YES, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+            EXE_BLOCK(complete, cacheObj);
+            return cacheObj;
+        }
+    }
+    
+    return
+    [self jr_executeSync:synchronized block:^id(FMDatabase *db) {
+        id<JRPersistent> result = [db jr_findByID:ID clazz:clazz];
+        
+        if (result) {[db saveObjInRecursiveCache:result];}
+        
+        EXE_BLOCK(complete, result);
+        return result;
+    }];
+}
+
 - (id<JRPersistent>)jr_findByPrimaryKey:(id)primaryKey clazz:(Class<JRPersistent>)clazz {
     if (![self jr_checkExistsTable4Clazz:clazz]) {
         NSLog(@"table %@ doesn't exists", clazz);
@@ -753,75 +1035,59 @@ static NSString * const queuekey = @"queuekey";
     return [self jr_findByID:[obj ID] clazz:[obj class]];
 }
 
-
-- (NSArray *)jr_findAll:(Class<JRPersistent>)clazz {
-    return [self jr_findAll:clazz orderBy:nil isDesc:NO];
-}
-
-- (NSArray *)jr_findAll:(Class<JRPersistent>)clazz orderBy:(NSString *)orderby isDesc:(BOOL)isDesc {
-    NSArray *list = [self jr_getAll:clazz orderBy:orderby isDesc:isDesc];
-    NSMutableArray *result = [NSMutableArray array];
-    
-    [list enumerateObjectsUsingBlock:^(id<JRPersistent>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        [result addObject:[self jr_findByID:[obj ID] clazz:[obj class]]];
+- (id<JRPersistent>)jr_findByPrimaryKey:(id)primaryKey clazz:(Class<JRPersistent>)clazz synchronized:(BOOL)synchronized complete:(JRDBQueryComplete)complete {
+    return
+    [self jr_executeSync:synchronized block:^id(FMDatabase *db) {
+        id<JRPersistent> result = [db jr_findByPrimaryKey:primaryKey clazz:clazz];
+        EXE_BLOCK(complete, result);
+        return result;
     }];
-    
-    return result;
 }
 
 - (NSArray *)jr_findByConditions:(NSArray<JRQueryCondition *> *)conditions
-                        clazz:(Class<JRPersistent>)clazz
-                      groupBy:(NSString *)groupBy
-                      orderBy:(NSString *)orderBy
-                        limit:(NSString *)limit
-                       isDesc:(BOOL)isDesc {
-    
-    NSArray<id<JRPersistent>> *list = [self jr_getByConditions:conditions
+                           clazz:(Class<JRPersistent>)clazz
+                         groupBy:(NSString *)groupBy
+                         orderBy:(NSString *)orderBy
+                           limit:(NSString *)limit
+                          isDesc:(BOOL)isDesc
+                        useCache:(BOOL)useCache {
+
+    NSArray<NSString *> *list = [self jr_getIDsByConditions:conditions
                                                       clazz:clazz
                                                     groupBy:groupBy
                                                     orderBy:orderBy
                                                       limit:limit
                                                      isDesc:isDesc];
-    
+
     NSMutableArray *result = [NSMutableArray array];
-    [list enumerateObjectsUsingBlock:^(id<JRPersistent>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        [result addObject:[self jr_findByID:[obj ID] clazz:[obj class]]];
+    [list enumerateObjectsUsingBlock:^(NSString * ID, NSUInteger idx, BOOL * _Nonnull stop) {
+        [result addObject:[self jr_findByID:ID clazz:clazz synchronized:NO useCache:useCache complete:nil]];
     }];
     
     return result;
 }
 
-- (NSArray *)jr_findByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz isDesc:(BOOL)isDesc {
-    return [self jr_findByConditions:conditions clazz:clazz groupBy:nil orderBy:nil limit:nil isDesc:isDesc];
-}
-
-- (NSArray *)jr_findByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz groupBy:(NSString *)groupBy isDesc:(BOOL)isDesc {
-    return [self jr_findByConditions:conditions clazz:clazz groupBy:groupBy orderBy:nil limit:nil isDesc:isDesc];
-}
-- (NSArray *)jr_findByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz orderBy:(NSString *)orderBy isDesc:(BOOL)isDesc {
-    return [self jr_findByConditions:conditions clazz:clazz groupBy:nil orderBy:orderBy limit:nil isDesc:isDesc];
-}
-- (NSArray *)jr_findByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz limit:(NSString *)limit isDesc:(BOOL)isDesc {
-    return [self jr_findByConditions:conditions clazz:clazz groupBy:nil orderBy:nil limit:limit isDesc:isDesc];
+- (NSArray<id<JRPersistent>> *)jr_findByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc synchronized:(BOOL)synchronized useCache:(BOOL)useCache complete:(JRDBQueryComplete)complete {
+    return
+    [self jr_executeSync:synchronized block:^id(FMDatabase *db) {
+        NSArray<id<JRPersistent>> *result = [db jr_findByConditions:conditions
+                                                              clazz:clazz
+                                                            groupBy:groupBy
+                                                            orderBy:orderBy
+                                                              limit:limit
+                                                             isDesc:isDesc
+                                                           useCache:useCache];
+        EXE_BLOCK(complete, result);
+        return result;
+    }];
 }
 
 #pragma mark - convenience method
-- (BOOL)jr_checkExistsTable4Clazz:(Class<JRPersistent>)clazz {
-    AssertRegisteredClazz(clazz);
-    return [self tableExists:[clazz shortClazzName]];
-}
 
-- (FMResultSet *)jr_executeQuery:(JRSql *)sql {
-    return [self executeQuery:sql.sqlString withArgumentsInArray:sql.args];
-}
-
-- (BOOL)jr_executeUpdate:(JRSql *)sql {
-    return [self executeUpdate:sql.sqlString withArgumentsInArray:sql.args];
-}
 
 - (long)jr_count4PrimaryKey:(id)pk clazz:(Class<JRPersistent>)clazz {
     NSAssert(pk, @"primary key should not be nil");
-    FMResultSet *ret = [self jr_executeQuery:[JRSqlGenerator sql4CountByPrimaryKey:pk clazz:clazz]];
+    FMResultSet *ret = [self jr_executeQuery:[JRSqlGenerator sql4CountByPrimaryKey:pk clazz:clazz table:nil]];
     while ([ret next]) {
         long count = [ret longForColumnIndex:0];
         [ret close];
@@ -830,14 +1096,100 @@ static NSString * const queuekey = @"queuekey";
     return 0;
 }
 
+- (long)jr_count4PrimaryKey:(id)pk clazz:(Class<JRPersistent>)clazz synchronized:(BOOL)synchronized complete:(JRDBQueryComplete)complete {
+    return
+    [[self jr_executeSync:synchronized block:^id(FMDatabase *db) {
+        long result = [db jr_count4PrimaryKey:pk clazz:clazz];
+        EXE_BLOCK(complete, @(result));
+        return @(result);
+    }] longValue];
+}
+
 - (long)jr_count4ID:(NSString *)ID clazz:(Class<JRPersistent>)clazz {
     NSAssert(ID, @"ID should not be nil");
-    FMResultSet *ret = [self jr_executeQuery:[JRSqlGenerator sql4CountByID:ID clazz:clazz]];
+    FMResultSet *ret = [self jr_executeQuery:[JRSqlGenerator sql4CountByID:ID clazz:clazz table:nil]];
     while ([ret next]) {
         return [ret longForColumnIndex:0];
     }
     return 0;
 }
+
+- (long)jr_count4ID:(NSString *)ID clazz:(Class<JRPersistent>)clazz synchronized:(BOOL)synchronized complete:(JRDBQueryComplete)complete {
+    return
+    [[self jr_executeSync:synchronized block:^id(FMDatabase *db) {
+        long result = [db jr_count4ID:ID clazz:clazz];
+        EXE_BLOCK(complete, @(result));
+        return @(result);
+    }] longValue];
+}
+
+- (NSArray<NSString *> * _Nonnull)jr_getIDsByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions
+                                                  clazz:(Class<JRPersistent> _Nonnull)clazz
+                                                groupBy:(NSString * _Nullable)groupBy
+                                                orderBy:(NSString * _Nullable)orderBy
+                                                  limit:(NSString * _Nullable)limit
+                                                 isDesc:(BOOL)isDesc {
+    JRSql *sql = [JRSqlGenerator sql4GetColumns:@[@" _ID "] byConditions:conditions clazz:clazz groupBy:groupBy orderBy:orderBy limit:limit isDesc:isDesc table:nil];
+    FMResultSet *resultset = [self jr_executeQuery:sql];
+    NSMutableArray *array = [NSMutableArray array];
+    while ([resultset next]) {
+        [array addObject:[resultset stringForColumnIndex:0]];
+    }
+    return array;
+}
+
+- (NSArray<NSString *> *)jr_getIDsByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc synchronized:(BOOL)synchronized complete:(JRDBQueryComplete)complete {
+    return
+    [self jr_executeSync:synchronized block:^id(FMDatabase *db) {
+        NSArray<NSString *> *result = [db jr_getIDsByConditions:conditions
+                                                          clazz:clazz
+                                                        groupBy:groupBy
+                                                        orderBy:orderBy
+                                                          limit:limit
+                                                         isDesc:isDesc];
+        EXE_BLOCK(complete, result);
+        return result;
+    }];
+}
+
 @end
+
+#pragma mark - cache
+
+@implementation FMDatabase (JRDBCache)
+
+- (void)saveObjInRecursiveCache:(id<JRPersistent>)obj {
+    NSMutableDictionary *cache = [[JRDBMgr shareInstance] recursiveCacheForDBPath:self.databasePath];
+    cache[[obj ID]] = obj;
+}
+
+- (void)saveObjInUnRecursiveCache:(id<JRPersistent>)obj {
+    NSMutableDictionary *cache = [[JRDBMgr shareInstance] unRecursiveCacheForDBPath:self.databasePath];
+    cache[[obj ID]] = obj;
+}
+
+- (void)removeObjInRecursiveCache:(NSString *)ID {
+    NSMutableDictionary *cache = [[JRDBMgr shareInstance] recursiveCacheForDBPath:self.databasePath];
+    [cache removeObjectForKey:ID];
+}
+
+- (void)removeObjInUnRecursiveCache:(NSString *)ID {
+    NSMutableDictionary *cache = [[JRDBMgr shareInstance] unRecursiveCacheForDBPath:self.databasePath];
+    [cache removeObjectForKey:ID];
+}
+
+- (id<JRPersistent>)objInRecursiveCache:(NSString *)ID {
+    NSMutableDictionary *cache = [[JRDBMgr shareInstance] recursiveCacheForDBPath:self.databasePath];
+    return cache[ID];
+}
+
+- (id<JRPersistent>)objInUnRecursiveCache:(NSString *)ID {
+    NSMutableDictionary *cache = [[JRDBMgr shareInstance] unRecursiveCacheForDBPath:self.databasePath];
+    return cache[ID];
+}
+
+@end
+
+
 
 

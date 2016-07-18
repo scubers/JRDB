@@ -52,4 +52,9 @@
  */
 - (void)clearMidTableRubbishDataForDB:(FMDatabase * _Nonnull)db;
 
+#pragma mark - cache
+
+- (NSMutableDictionary<NSString *, id<JRPersistent>> * _Nonnull)recursiveCacheForDBPath:(NSString * _Nonnull)dbpath;
+- (NSMutableDictionary<NSString *, id<JRPersistent>> * _Nonnull)unRecursiveCacheForDBPath:(NSString * _Nonnull)dbpath;
+
 @end

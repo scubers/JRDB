@@ -12,13 +12,19 @@
 #import "FMDatabase+JRDB.h"
 #import "NSObject+JRDB.h"
 #import <objc/message.h>
+#import <UIKit/UIKit.h>
 #import "JRMiddleTable.h"
+
+static NSString * const jrdb_class_registered_key = @"jrdb_class_registered_key";
 
 @interface JRDBMgr()
 {
     FMDatabase *_defaultDB;
     NSMutableArray<Class<JRPersistent>> *_clazzArray;
 }
+
+@property (nonatomic, strong) NSMutableDictionary<NSString *, NSMutableDictionary<NSString *, id<JRPersistent>> *> *recursiveCache;
+@property (nonatomic, strong) NSMutableDictionary<NSString *, NSMutableDictionary<NSString *, id<JRPersistent>> *> *unRecursiveCache;
 
 @end
 
@@ -28,16 +34,18 @@ static JRDBMgr *__shareInstance;
 + (instancetype)allocWithZone:(struct _NSZone *)zone {
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
+        
         __shareInstance = [super allocWithZone:zone];
         __shareInstance->_clazzArray = [NSMutableArray array];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_clearObjCaches) name:UIApplicationDidReceiveMemoryWarningNotification object:nil];
 #ifdef DEBUG
         __shareInstance->_debugMode = YES;
-#else
-        __shareInstance->_debugMode = NO;
 #endif
     });
     return __shareInstance;
 }
+
 + (instancetype)shareInstance {
     return [[self alloc] init];
 }
@@ -63,6 +71,7 @@ static JRDBMgr *__shareInstance;
     if ([_clazzArray containsObject:clazz]) { return; }
     [_clazzArray addObject:clazz];
     [self _configureRegisteredClazz:clazz];
+    objc_setAssociatedObject(clazz, &jrdb_class_registered_key, @YES, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (void)registerClazzes:(NSArray<Class<JRPersistent>> *)clazzArray {
@@ -81,19 +90,13 @@ static JRDBMgr *__shareInstance;
 
 - (void)updateDB:(FMDatabase *)db {
     for (Class clazz in _clazzArray) {
-        BOOL flag = [db jr_updateTable4Clazz:clazz];
+        BOOL flag = [db jr_updateTable4Clazz:clazz synchronized:YES complete:nil];
         NSLog(@"update table: %@ %@", [clazz description], flag ? @"success" : @"failure");
     }
 }
 
 - (BOOL)isValidateClazz:(Class<JRPersistent>)clazz {
-//    return [_clazzArray containsObject:clazz]; //为什么在cocoapods会报错，其他就不会，神经病 艹
-    for (Class c in _clazzArray) {
-        if ([NSStringFromClass(c) isEqualToString:NSStringFromClass(clazz)]) {
-            return YES;
-        }
-    }
-    return NO;
+    return [objc_getAssociatedObject(clazz, &jrdb_class_registered_key) boolValue];
 }
 
 - (void)clearMidTableRubbishDataForDB:(FMDatabase *)db {
@@ -132,6 +135,20 @@ static JRDBMgr *__shareInstance;
     [_defaultDB open];
 }
 
+- (NSMutableDictionary<NSString *,NSMutableDictionary<NSString *,id<JRPersistent>> *> *)recursiveCache {
+    if (!_recursiveCache) {
+        _recursiveCache = [NSMutableDictionary dictionary];
+    }
+    return _recursiveCache;
+}
+
+- (NSMutableDictionary<NSString *,NSMutableDictionary<NSString *,id<JRPersistent>> *> *)unRecursiveCache {
+    if (!_unRecursiveCache) {
+        _unRecursiveCache = [NSMutableDictionary dictionary];
+    }
+    return _unRecursiveCache;
+}
+
 #pragma mark - private method
 
 - (NSString *)_defaultPath {
@@ -149,5 +166,31 @@ static JRDBMgr *__shareInstance;
 - (void)_configureRegisteredClazz:(Class)clazz {
     [clazz jr_configure];
 }
+
+- (void)_clearObjCaches {
+    self.unRecursiveCache = nil;
+    self.recursiveCache = nil;
+}
+
+#pragma mark - cache
+
+- (NSMutableDictionary<NSString *,id<JRPersistent>> *)recursiveCacheForDBPath:(NSString *)dbpath {
+    NSMutableDictionary *cache = self.recursiveCache[dbpath];
+    if (!cache) {
+        cache = [NSMutableDictionary dictionary];
+        self.recursiveCache[dbpath] = cache;
+    }
+    return cache;
+}
+
+- (NSMutableDictionary<NSString *,id<JRPersistent>> *)unRecursiveCacheForDBPath:(NSString *)dbpath {
+    NSMutableDictionary *cache = self.unRecursiveCache[dbpath];
+    if (!cache) {
+        cache = [NSMutableDictionary dictionary];
+        self.unRecursiveCache[dbpath] = cache;
+    }
+    return cache;
+}
+
 
 @end

@@ -9,6 +9,7 @@
 #import <XCTest/XCTest.h>
 #import "JRDB.h"
 #import "Person.h"
+#import "JRDBChain.h"
 
 @interface JRDBTestJRDBMgr : XCTestCase
 
@@ -36,6 +37,13 @@
     [super tearDown];
     
 }
+
+- (void)testCreateTable {
+    [J_CreateTable(Person) exe:^(JRDBChain * _Nonnull chain, id  _Nullable result) {
+        NSLog(@"%@", result);
+    }];
+}
+
 - (void)testDeleteDB {
     [[JRDBMgr shareInstance] deleteDBWithPath:[JRDBMgr defaultDB].databasePath];
 }

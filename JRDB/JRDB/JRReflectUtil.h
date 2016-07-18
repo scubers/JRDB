@@ -10,7 +10,7 @@
 #import <objc/runtime.h>
 #import "JRPersistent.h"
 
-#define isID(name) ([name isEqualToString:@"ID"] || [name isEqualToString:@"_ID"])
+#define isID(name) ([name.uppercaseString isEqualToString:@"ID"] || [name.uppercaseString isEqualToString:@"_ID"])
 
 @class JRActivatedProperty;
 

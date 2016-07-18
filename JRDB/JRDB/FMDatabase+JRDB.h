@@ -6,16 +6,13 @@
 //  Copyright © 2016年 Jrwong. All rights reserved.
 //
 
-#import <FMDB/FMDB.h>
 #import "JRPersistent.h"
 #import "JRColumnSchema.h"
-
+#import <FMDB/FMDB.h>
 
 @class JRQueryCondition, JRSql;
 
 @interface FMDatabase (JRDB)
-
-#pragma mark - queue operation
 
 - (FMDatabaseQueue * _Nonnull)jr_databaseQueue;
 
@@ -43,15 +40,27 @@
  */
 - (BOOL)jr_execute:(BOOL (^ _Nonnull)(FMDatabase * _Nonnull db))block useTransaction:(BOOL)useTransaction;
 
+
+- (id _Nullable)jr_executeSync:(BOOL)sync block:(id _Nullable (^ _Nonnull)(FMDatabase * _Nonnull db))block;
+
+
+- (BOOL)jr_executeUpdate:(JRSql * _Nonnull)sql;
+- (FMResultSet * _Nonnull)jr_executeQuery:(JRSql * _Nonnull)sql;
+
+
+@end
+
 #pragma mark - table operation
+
+@interface FMDatabase (JRDBTable)
+
 
 /**
  *  建表操作
  *
  *  @param clazz 对应表的类
  */
-- (BOOL)jr_createTable4Clazz:(Class<JRPersistent> _Nonnull)clazz;
-- (void)jr_createTable4Clazz:(Class<JRPersistent> _Nonnull)clazz complete:(JRDBComplete _Nullable)complete;
+- (BOOL)jr_createTable4Clazz:(Class<JRPersistent> _Nonnull)clazz synchronized:(BOOL)synchronized complete:(JRDBComplete _Nullable)complete;
 
 
 /**
@@ -61,8 +70,7 @@
  *
  *  @return 是否成功
  */
-- (BOOL)jr_truncateTable4Clazz:(Class<JRPersistent> _Nonnull)clazz;
-- (void)jr_truncateTable4Clazz:(Class<JRPersistent> _Nonnull)clazz complete:(JRDBComplete _Nullable)complete;
+- (BOOL)jr_truncateTable4Clazz:(Class<JRPersistent> _Nonnull)clazz synchronized:(BOOL)synchronized complete:(JRDBComplete _Nullable)complete;
 
 
 /**
@@ -70,39 +78,58 @@
  *  (只会添加字段，不会删除和更改字段类型)
  *  @param clazz 对应表的类
  */
-- (BOOL)jr_updateTable4Clazz:(Class<JRPersistent> _Nonnull)clazz;
-- (void)jr_updateTable4Clazz:(Class<JRPersistent> _Nonnull)clazz complete:(JRDBComplete _Nullable)complete;
+- (BOOL)jr_updateTable4Clazz:(Class<JRPersistent> _Nonnull)clazz synchronized:(BOOL)synchronized complete:(JRDBComplete _Nullable)complete;
 
 /**
  *  删除表
  *
  *  @param clazz 对应表的类
  */
-- (BOOL)jr_dropTable4Clazz:(Class<JRPersistent> _Nonnull)clazz;
-- (void)jr_dropTable4Clazz:(Class<JRPersistent> _Nonnull)clazz complete:(JRDBComplete _Nullable)complete;
+- (BOOL)jr_dropTable4Clazz:(Class<JRPersistent> _Nonnull)clazz synchronized:(BOOL)synchronized complete:(JRDBComplete _Nullable)complete;
+
+/**
+ *  检查对应类的表是否存在
+ *
+ *  @param clazz 类
+ *
+ *  @return 是否存在
+ */
+- (BOOL)jr_checkExistsTable4Clazz:(Class<JRPersistent> _Nonnull)clazz;
+
 
 #pragma mark - table message 
 
 - (NSArray<JRColumnSchema *> * _Nonnull)jr_schemasInClazz:(Class<JRPersistent> _Nonnull)clazz;
 
+@end
+
 #pragma mark - save or update
 
-- (BOOL)jr_saveOrUpdateOneOnly:(id<JRPersistent> _Nonnull)one;
+@interface FMDatabase (JRDBSaveOrUpdate)
 
-- (BOOL)jr_saveOrUpdateOne:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction;
-- (void)jr_saveOrUpdateOne:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete;
 
-- (BOOL)jr_saveOrUpdateObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction;
-- (void)jr_saveOrUpdateObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete;
+- (BOOL)jr_saveOrUpdateOneOnly:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized complete:(JRDBComplete _Nullable)complete;
 
-#pragma mark - save one
+- (BOOL)jr_saveOrUpdateOne:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized complete:(JRDBComplete _Nullable)complete;
+
+#pragma mark - save or update array
+
+- (BOOL)jr_saveOrUpdateObjectsOnly:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized complete:(JRDBComplete _Nullable)complete;
+
+- (BOOL)jr_saveOrUpdateObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized complete:(JRDBComplete _Nullable)complete;
+
+@end
+
+#pragma mark - save
+@interface FMDatabase (JRDBSave)
 
 /**
- *  只保存one，没事务操作，不进行关联保存和删除更新（不建议使用）
+ *  只保存one，不进行关联保存和删除更新
  *
  *  @param one
  */
-- (BOOL)jr_saveOneOnly:(id<JRPersistent> _Nonnull)one;
+- (BOOL)jr_saveOneOnly:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized complete:(JRDBComplete _Nullable)complete;
+
 
 /**
  *  保存one， 同时进行关联保存删除更新（建议使用），可选择自带事务或者自行在外层包裹事务
@@ -110,18 +137,12 @@
  *  @param one
  *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
  */
-- (BOOL)jr_saveOne:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction;
-- (void)jr_saveOne:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete;
-
-/**
- *  保存one， 同时进行关联保存删除更新（建议使用），自带事务操作，外层不能包裹事务
- *
- *  @param one
- */
-- (BOOL)jr_saveOne:(id<JRPersistent> _Nonnull)one;
-- (void)jr_saveOne:(id<JRPersistent> _Nonnull)one complete:(JRDBComplete _Nullable)complete;
+- (BOOL)jr_saveOne:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized complete:(JRDBComplete _Nullable)complete;
 
 #pragma mark - save array
+
+- (BOOL)jr_saveObjectsOnly:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized complete:(JRDBComplete _Nullable)complete;
+
 
 /**
  *  保存数组， 同时进行关联保存删除更新，可选择自带事务或者自行在外层包裹事务
@@ -129,27 +150,22 @@
  *  @param objects
  *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
  */
-- (BOOL)jr_saveObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction;
-- (void)jr_saveObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete;
+- (BOOL)jr_saveObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized complete:(JRDBComplete _Nullable)complete;
 
-/**
- *  保存objects， 同时进行关联保存删除更新，自带事务操作，外层不能包裹事务
- *
- *  @param objects
- */
-- (BOOL)jr_saveObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects;
-- (void)jr_saveObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects complete:(JRDBComplete _Nullable)complete;
+@end
 
 
 #pragma mark - update
+@interface FMDatabase (JRDBUpdate)
 
 /**
- *  只更新one，不进行关联保存和删除更新（不建议使用）
+ *  只更新one，不进行关联保存和删除更新
  *
  *  @param one
  *  @param columns 需要更新的字段
  */
-- (BOOL)jr_updateOneOnly:(id<JRPersistent> _Nonnull)one columns:(NSArray<NSString *> * _Nullable)columns;
+- (BOOL)jr_updateOneOnly:(id<JRPersistent> _Nonnull)one columns:(NSArray<NSString *> * _Nullable)columns useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized complete:(JRDBComplete _Nullable)complete;
+
 
 /**
  *  更新one， 同时进行关联保存删除更新（建议使用），可选择自带事务或者自行在外层包裹事务
@@ -158,13 +174,12 @@
  *  @param columns 需要更新的字段
  *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
  */
-- (BOOL)jr_updateOne:(id<JRPersistent> _Nonnull)one columns:(NSArray<NSString *> * _Nullable)columns useTransaction:(BOOL)useTransaction;
-- (void)jr_updateOne:(id<JRPersistent> _Nonnull)one columns:(NSArray<NSString *> * _Nullable)columns useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete;
+- (BOOL)jr_updateOne:(id<JRPersistent> _Nonnull)one columns:(NSArray<NSString *> * _Nullable)columns useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized complete:(JRDBComplete _Nullable)complete;
 
-- (BOOL)jr_updateOne:(id<JRPersistent> _Nonnull)one columns:(NSArray<NSString *> * _Nullable)columns;
-- (void)jr_updateOne:(id<JRPersistent> _Nonnull)one columns:(NSArray<NSString *> * _Nullable)columns complete:(JRDBComplete _Nullable)complete;
 
 #pragma mark - update array
+
+- (BOOL)jr_updateObjectsOnly:(NSArray<id<JRPersistent>> * _Nonnull)objects columns:(NSArray<NSString *> * _Nullable)columns useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized complete:(JRDBComplete _Nullable)complete;
 
 
 /**
@@ -174,20 +189,20 @@
  *  @param columns 需要更新的字段
  *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
  */
-- (BOOL)jr_updateObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects columns:(NSArray<NSString *> * _Nullable)columns useTransaction:(BOOL)useTransaction;
-- (void)jr_updateObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects columns:(NSArray<NSString *> * _Nullable)columns useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete;
+- (BOOL)jr_updateObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects columns:(NSArray<NSString *> * _Nullable)columns useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized complete:(JRDBComplete _Nullable)complete;
 
-- (BOOL)jr_updateObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects columns:(NSArray<NSString *> * _Nullable)columns;
-- (void)jr_updateObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects columns:(NSArray<NSString *> * _Nullable)columns complete:(JRDBComplete _Nullable)complete;
+@end
 
 #pragma mark - delete
 
+@interface FMDatabase (JRDBDelete)
+
 /**
- *  只删除one，不进行关联保存和删除更新（不建议使用）
+ *  只删除one，不进行关联保存和删除更新
  *
  *  @param one
  */
-- (BOOL)jr_deleteOneOnly:(id<JRPersistent> _Nonnull)one;
+- (BOOL)jr_deleteOneOnly:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized complete:(JRDBComplete _Nullable)complete;
 
 /**
  *  删除one， 同时进行关联保存删除更新（建议使用），可选择自带事务或者自行在外层包裹事务
@@ -195,13 +210,11 @@
  *  @param one
  *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
  */
-- (BOOL)jr_deleteOne:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction;
-- (void)jr_deleteOne:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete;
-
-- (BOOL)jr_deleteOne:(id<JRPersistent> _Nonnull)one;
-- (void)jr_deleteOne:(id<JRPersistent> _Nonnull)one complete:(JRDBComplete _Nullable)complete;
+- (BOOL)jr_deleteOne:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized complete:(JRDBComplete _Nullable)complete;
 
 #pragma mark - delete array
+
+- (BOOL)jr_deleteObjectsOnly:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized complete:(JRDBComplete _Nullable)complete;
 
 /**
  *  删除array， 同时进行关联保存删除更新，可选择自带事务或者自行在外层包裹事务
@@ -209,20 +222,21 @@
  *  @param objects
  *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
  */
-- (BOOL)jr_deleteObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction;
-- (void)jr_deleteObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete;
+- (BOOL)jr_deleteObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized complete:(JRDBComplete _Nullable)complete;
 
-- (BOOL)jr_deleteObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects;
-- (void)jr_deleteObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects complete:(JRDBComplete _Nullable)complete;
 
 #pragma mark - delete all
 
-- (BOOL)jr_deleteAllOnly:(Class<JRPersistent> _Nonnull)clazz;
+- (BOOL)jr_deleteAllOnly:(Class<JRPersistent> _Nonnull)clazz useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized complete:(JRDBComplete _Nullable)complete;
 
-- (BOOL)jr_deleteAll:(Class<JRPersistent> _Nonnull)clazz useTransaction:(BOOL)useTransaction;
-- (void)jr_deleteAll:(Class<JRPersistent> _Nonnull)clazz useTransaction:(BOOL)useTransaction complete:(JRDBComplete _Nullable)complete;
+- (BOOL)jr_deleteAll:(Class<JRPersistent> _Nonnull)clazz useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized complete:(JRDBComplete _Nullable)complete;
 
-#pragma mark - single level query operation
+
+@end
+
+#pragma mark -  query
+
+@interface FMDatabase (JRDBQuery)
 
 /**
  *  根据ID查询，不关联查询，只查询一级
@@ -232,7 +246,10 @@
  *
  *  @return obj
  */
-- (id<JRPersistent> _Nullable)jr_getByID:(NSString * _Nonnull)ID clazz:(Class<JRPersistent> _Nonnull)clazz;
+- (id<JRPersistent> _Nullable)jr_getByID:(NSString * _Nonnull)ID
+                                   clazz:(Class<JRPersistent> _Nonnull)clazz
+                            synchronized:(BOOL)synchronized
+                                useCache:(BOOL)useCache complete:(JRDBQueryComplete _Nullable)complete;
 
 
 /**
@@ -243,18 +260,10 @@
  *
  *  @return 结果
  */
-- (id<JRPersistent> _Nullable)jr_getByPrimaryKey:(id _Nonnull)primaryKey clazz:(Class<JRPersistent> _Nonnull)clazz;
-
-/**
- *  查找全部，不关联查询，只查询一级
- *
- *  @param clazz   class
- *  @param orderby 排序字段
- *  @param isDesc  是否倒序
- *
- *  @return 结果
- */
-- (NSArray * _Nonnull)jr_getAll:(Class<JRPersistent> _Nonnull)clazz orderBy:(NSString * _Nullable)orderby isDesc:(BOOL)isDesc;
+- (id<JRPersistent> _Nullable)jr_getByPrimaryKey:(id _Nonnull)primaryKey
+                                           clazz:(Class<JRPersistent> _Nonnull)clazz
+                                    synchronized:(BOOL)synchronized
+                                        complete:(JRDBQueryComplete _Nullable)complete;
 
 /**
  *  根据条件查询，不关联查询，只查询一级
@@ -268,7 +277,14 @@
  *
  *  @return 结果
  */
-- (NSArray<id<JRPersistent>> * _Nonnull)jr_getByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions clazz:(Class<JRPersistent> _Nonnull)clazz groupBy:(NSString * _Nullable)groupBy orderBy:(NSString * _Nullable)orderBy limit:(NSString * _Nullable)limit isDesc:(BOOL)isDesc;
+- (NSArray<id<JRPersistent>> * _Nonnull)jr_getByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions
+                                                     clazz:(Class<JRPersistent> _Nonnull)clazz
+                                                   groupBy:(NSString * _Nullable)groupBy
+                                                   orderBy:(NSString * _Nullable)orderBy
+                                                     limit:(NSString * _Nullable)limit
+                                                    isDesc:(BOOL)isDesc
+                                              synchronized:(BOOL)synchronized
+                                                  complete:(JRDBQueryComplete _Nullable)complete;
 
 #pragma mark - multi level query operation
 
@@ -280,7 +296,11 @@
  *
  *  @return 结果
  */
-- (id<JRPersistent> _Nullable)jr_findByID:(NSString * _Nonnull)ID clazz:(Class<JRPersistent> _Nonnull)clazz;
+- (id<JRPersistent> _Nullable)jr_findByID:(NSString * _Nonnull)ID
+                                    clazz:(Class<JRPersistent> _Nonnull)clazz
+                             synchronized:(BOOL)synchronized
+                                 useCache:(BOOL)useCache
+                                 complete:(JRDBQueryComplete _Nullable)complete;
 
 /**
  *  根据指定主键进行查找，若已实现自定义主键，则根据自定义主键，若无，则根据默认主键『_ID』查找 若有关联数据，一并查询
@@ -290,10 +310,10 @@
  *
  *  @return 结果
  */
-- (id<JRPersistent> _Nullable)jr_findByPrimaryKey:(id _Nonnull)primaryKey clazz:(Class<JRPersistent> _Nonnull)clazz;
-
-- (NSArray<id<JRPersistent>> * _Nonnull)jr_findAll:(Class<JRPersistent> _Nonnull)clazz;
-- (NSArray<id<JRPersistent>> * _Nonnull)jr_findAll:(Class<JRPersistent> _Nonnull)clazz orderBy:(NSString * _Nullable)orderby isDesc:(BOOL)isDesc;
+- (id<JRPersistent> _Nullable)jr_findByPrimaryKey:(id _Nonnull)primaryKey
+                                            clazz:(Class<JRPersistent> _Nonnull)clazz
+                                     synchronized:(BOOL)synchronized
+                                         complete:(JRDBQueryComplete _Nullable)complete;
 
 /**
  *  根据条件查询(条件名称需要是属性全称)
@@ -302,45 +322,49 @@
  *
  *  @return 查询结果
  */
-- (NSArray<id<JRPersistent>> * _Nonnull)jr_findByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions clazz:(Class<JRPersistent> _Nonnull)clazz groupBy:(NSString * _Nullable)groupBy orderBy:(NSString * _Nullable)orderBy limit:(NSString * _Nullable)limit isDesc:(BOOL)isDesc;
-
-/**
- *  单纯根据条件查询
- */
-- (NSArray<id<JRPersistent>> * _Nonnull)jr_findByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions clazz:(Class<JRPersistent> _Nonnull)clazz isDesc:(BOOL)isDesc;
-
-/**
- *  单纯根据groupby以及条件
- */
-- (NSArray<id<JRPersistent>> * _Nonnull)jr_findByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions clazz:(Class<JRPersistent> _Nonnull)clazz groupBy:(NSString * _Nullable)groupBy isDesc:(BOOL)isDesc;
-
-/**
- *  单纯根据orderby以及条件
- */
-- (NSArray<id<JRPersistent>> * _Nonnull)jr_findByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions clazz:(Class<JRPersistent> _Nonnull)clazz orderBy:(NSString * _Nullable)orderBy isDesc:(BOOL)isDesc;
-
-/**
- *  单纯根据limit以及条件
- */
-- (NSArray<id<JRPersistent>> * _Nonnull)jr_findByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions clazz:(Class<JRPersistent> _Nonnull)clazz limit:(NSString * _Nullable)limit isDesc:(BOOL)isDesc;
+- (NSArray<id<JRPersistent>> * _Nonnull)jr_findByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions
+                                                      clazz:(Class<JRPersistent> _Nonnull)clazz
+                                                    groupBy:(NSString * _Nullable)groupBy
+                                                    orderBy:(NSString * _Nullable)orderBy
+                                                      limit:(NSString * _Nullable)limit
+                                                     isDesc:(BOOL)isDesc
+                                               synchronized:(BOOL)synchronized
+                                                   useCache:(BOOL)useCache
+                                                   complete:(JRDBQueryComplete _Nullable)complete;
 
 #pragma mark - convenience method
 
-/**
- *  检查对应类的表是否存在
- *
- *  @param clazz 类
- *
- *  @return 是否存在
- */
-- (BOOL)jr_checkExistsTable4Clazz:(Class<JRPersistent> _Nonnull)clazz;
 
+- (long)jr_count4PrimaryKey:(id _Nonnull)pk clazz:(Class<JRPersistent> _Nonnull)clazz synchronized:(BOOL)synchronized complete:(JRDBQueryComplete _Nullable)complete;
 
+- (long)jr_count4ID:(NSString * _Nonnull)ID clazz:(Class<JRPersistent> _Nonnull)clazz synchronized:(BOOL)synchronized complete:(JRDBQueryComplete _Nullable)complete;
 
-- (BOOL)jr_executeUpdate:(JRSql * _Nonnull)sql;
-- (FMResultSet * _Nonnull)jr_executeQuery:(JRSql * _Nonnull)sql;
-
-- (long)jr_count4PrimaryKey:(id _Nonnull)pk clazz:(Class<JRPersistent> _Nonnull)clazz;
-- (long)jr_count4ID:(NSString * _Nonnull)ID clazz:(Class<JRPersistent> _Nonnull)clazz;
+- (NSArray<NSString *> * _Nonnull)jr_getIDsByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions
+                                                  clazz:(Class<JRPersistent> _Nonnull)clazz
+                                                groupBy:(NSString * _Nullable)groupBy
+                                                orderBy:(NSString * _Nullable)orderBy
+                                                  limit:(NSString * _Nullable)limit
+                                                 isDesc:(BOOL)isDesc
+                                           synchronized:(BOOL)synchronized
+                                               complete:(JRDBQueryComplete _Nullable)complete;
 
 @end
+
+#pragma mark - cache
+
+@interface FMDatabase (JRDBCache)
+
+- (void)saveObjInRecursiveCache:(id<JRPersistent> _Nonnull)obj;
+
+- (void)saveObjInUnRecursiveCache:(id<JRPersistent> _Nonnull)obj;
+
+- (void)removeObjInRecursiveCache:(NSString * _Nonnull)ID;
+
+- (void)removeObjInUnRecursiveCache:(NSString * _Nonnull)ID;
+
+- (id<JRPersistent> _Nullable)objInRecursiveCache:(NSString * _Nonnull)ID;
+
+- (id<JRPersistent> _Nullable)objInUnRecursiveCache:(NSString * _Nonnull)ID ;
+
+@end
+

@@ -28,7 +28,7 @@
                                                [Card class],
                                                ]];
     
-    [[JRDBMgr shareInstance] updateDefaultDB];
+//    [[JRDBMgr shareInstance] updateDefaultDB];
     
     return YES;
 }

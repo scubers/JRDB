@@ -25,7 +25,7 @@
 
 @implementation Animal
 - (void)dealloc {
-    NSLog(@"%@, dealloc", self);
+//    NSLog(@"%@, dealloc", self);
 }
 @end
 
@@ -43,6 +43,7 @@
     return @{
              @"_card" : [Card class],
              @"_card1" : [Card class],
+             @"_cccc" : [Card class],
              @"_son" : [Person class],
              };
 }
@@ -51,14 +52,15 @@
     return @{
              @"_money" : [Money class],
              @"_children" : [Person class],
+             @"_nnnn" : [Person class],
              };
 }
 
-//+ (NSString *)jr_primaryKey {
+//+ (NSString *)jr_customPrimarykey {
 //    return @"_i_string";
 //}
 //
-//- (id)jr_primaryKeyValue {
+//- (id)jr_customPrimarykeyValue {
 //    return self.i_string;
 //}
 

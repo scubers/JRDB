@@ -10,20 +10,22 @@
 #define JRDB_h
 
 #import "JRDBMgr.h"
+#import "FMDatabase+JRDB.h"
 #import "JRPersistent.h"
 #import "JRSqlGenerator.h"
 #import "JRReflectUtil.h"
-#import "NSObject+JRDB.h"
-#import "FMDatabase+JRDB.h"
 #import "JRFMDBResultSetHandler.h"
 #import "JRQueryCondition.h"
 #import "JRReflectable.h"
 #import "NSObject+Reflect.h"
 #import "OBJCProperty.h"
-#import "OBJCMethod.h"
 #import "JRColumnSchema.h"
 #import "JRUtils.h"
 #import "JRMiddleTable.h"
-#import "NSArray+JRDB.h"
+#import "JRDBChain.h"
+#import "FMDatabase+Chain.h"
+#import "JRActivatedProperty.h"
+#import "NSObject+JRDB.h"
+
 
 #endif /* JRDB_h */

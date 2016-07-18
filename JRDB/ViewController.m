@@ -16,6 +16,7 @@
 #import "JRQueryCondition.h"
 #import "NSObject+JRDB.h"
 #import <objc/runtime.h>
+#import "JRDBChain.h"
 
 
 @interface ViewController ()
@@ -39,11 +40,6 @@
 }
 
 - (void)test2 {
-    FMDatabase *db = [JRDBMgr defaultDB];
-    NSArray *array = [db jr_findAll:[Person class]];
-    
-    
-    NSLog(@"%@", array);
 }
 
 - (void)testOneToManySave {
@@ -57,20 +53,18 @@
     [JRDBMgr shareInstance].debugMode = NO;
 
     Person *p = [self createPerson:1 name:nil];
-    for (int i = 0; i < 10000; i++) {
+    for (int i = 0; i < 100; i++) {
         [p.money addObject:[self createMoney:i]];
     }
     Person *p1 = [self createPerson:1 name:nil];
-    for (int i = 0; i < 10000; i++) {
+    for (int i = 0; i < 100; i++) {
         [p1.money addObject:[self createMoney:i]];
     }
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
-        [p1 jr_saveWithComplete:^(BOOL success) {
-            NSLog(@"===");
-            [p jr_save];
-        }];
+        [p1 jr_save];
     });
     NSLog(@"method over");
+    
 }
 
 #pragma mark - convenience method
