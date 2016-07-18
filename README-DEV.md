@@ -77,13 +77,13 @@ id result = [J_Insert(@[p1, p2, p3]) exe:nil]
 
 - 相关配置
 
-| 配置        	| 功能		|
-|:-------------:|------------| 
-| InDB				| 配置可以省略，默认使用[JRDBMgr defaultDB]，执行的数据库|
-| Recursive     | 配置可以省略，默认为NO，功能为开关是否进行[关联操作](#linksave)|
-| Sync				|配置可以省略，默认YES：阻塞本线程，线程安全同步执行数据库操作，使用FMDatabaseQueue；NO：在本线程执行数据库操作，线程不安全，使用FMDatabase
-|Transaction		|配置可省略，默认为YES：本操作自带事务；NO：本操作不开启事务，需要外部有事务支持
-|exe:nil|执行数据库操作，参数为数据库操作完成的回调block
+| 配置        	| 功能		|参数类型|
+|:-------------:|------------| --------|
+| InDB				| 配置可以省略，默认使用[JRDBMgr defaultDB]，执行的数据库| InDB(FMDatabase *)|
+| Recursive     | 配置可以省略，默认为NO，功能为开关是否进行[关联操作](#linksave)|YES or NO|
+| Sync				|配置可以省略，默认YES：阻塞本线程，线程安全同步执行数据库操作，使用FMDatabaseQueue；NO：在本线程执行数据库操作，线程不安全，使用FMDatabase|YES or NO|
+|Transaction		|配置可省略，默认为YES：本操作自带事务；NO：本操作不开启事务，需要外部有事务支持|YES or NO|
+|exe:nil|执行数据库操作，参数为数据库操作完成的回调block|block or nil|
 
 ---
 
@@ -109,11 +109,11 @@ id result = [J_Update(@[p1, p2, p3]) exe:nil];
 
 - 相关配置
 
-| 配置        	| 功能		|
-|:-------------:|------------| 
-| Columns			| 配置可省略，默认为nil，更新时的指定列|
-| Ignore     		| 配置可省略，默认为nil，更新时的忽略指定列|
-| Recursive		| 更新的关联操作[详情请看](#linkupdate)|
+| 配置        	| 功能		|参数类型|
+|:-------------:|------------| ----- |
+| Columns			| 配置可省略，默认为nil，更新时的指定列| NSArray *|
+| Ignore     		| 配置可省略，默认为nil，更新时的忽略指定列| NSArray * |
+| Recursive		| 更新的关联操作[详情请看](#linkupdate)| YES or NO |
 ||可以使用Insert的配置	|
 
 ---
@@ -190,17 +190,17 @@ id result = [J_Select(JRCount)
 
 - 相关配置
 
-| 配置        	| 功能		|
-|:-------------:|------------| 
-| Recursive		| 配置可省略，默认为NO: 不进行[关联查询](#linkselect)效率高，YES：[关联查询](#linkselect)效率低|
-| Sync     		| 配置可以省略，默认YES：阻塞本线程，线程安全同步执行数据库操作；NO：在本线程执行数据库操作，线程不安全|
-| Cache		| 配置可省略，默认为NO: 不使用缓存；YES：使用缓存|
-| Where		| Where 后面的条件筛选语句，使用 ？作为参数占位符|
-| Params		| Where 语句占位符对应的参数|
-| Group		| group by 字段|
-| Order		| order by 字段|
-| limit		| 分页字段 （start, length）|
-| Desc			| 是否倒序，默认NO |
+| 配置        	| 功能		|参数类型|
+|:-------------:|------------| -------- |
+| Recursive		| 配置可省略，默认为NO: 不进行[关联查询](#linkselect)效率高，YES：[关联查询](#linkselect)效率低|YES or NO|
+| Sync     		| 配置可以省略，默认YES：阻塞本线程，线程安全同步执行数据库操作；NO：在本线程执行数据库操作，线程不安全|YES or NO|
+| Cache		| 配置可省略，默认为NO: 不使用缓存；YES：使用缓存|YES or NO|
+| Where		| Where 后面的条件筛选语句，使用 ？作为参数占位符| NSString * |
+| Params		| Where 语句占位符对应的参数| NSArray * | 
+| Group		| group by 字段| NSString * |
+| Order		| order by 字段| NSString * |
+| limit		| 分页字段 （start, length）| unsigned long, unsigned long |
+| Desc			| 是否倒序，默认NO | YES or NO|
 
 ---
 
@@ -209,24 +209,31 @@ id result = [J_Select(JRCount)
 在写链式调用的时候，每次写字符串都要写个 @""，实在太烦人，囧，懒惰的我，你懂的
 
 ```objc
-#define J_Select(...)           ([JRDBChain new].Select(__VA_ARGS__))
 
-#define J_Insert(_arg_)         ([JRDBChain new].Insert(_JRToArray(_arg_)))
-#define J_Update(_arg_)         ([JRDBChain new].Update(_JRToArray(_arg_)))
-#define J_Delete(_arg_)         ([JRDBChain new].Delete(_JRToArray(_arg_)))
-#define J_SaveOrUpdate(_arg_)   ([JRDBChain new].SaveOrUpdate(_JRToArray(_arg_)))
+#define J_Select(...)           ([JRDBChain new].Select((_variableListToArray(__VA_ARGS__, 0))))
+#define J_SelectJ(_arg_)        (J_Select([_arg_ class]))
 
-#define J_DeleteAll(_arg_)      ([JRDBChain new].DeleteAll(_arg_))
+#define J_Insert(...)           ([JRDBChain new].Insert(_variableListToArray(__VA_ARGS__, 0)))
+#define J_Update(...)           ([JRDBChain new].Update(_variableListToArray(__VA_ARGS__, 0)))
+#define J_Delete(...)           ([JRDBChain new].Delete(_variableListToArray(__VA_ARGS__, 0)))
+#define J_SaveOrUpdate(...)     ([JRDBChain new].SaveOrUpdate(_variableListToArray(__VA_ARGS__, 0)))
 
-#define J_CreateTable(_arg_)    ([JRDBChain new].CreateTable(_arg_))
-#define J_UpdateTable(_arg_)    ([JRDBChain new].UpdateTable(_arg_))
-#define J_DropTable(_arg_)      ([JRDBChain new].DropTable(_arg_))
-#define J_TruncateTable(_arg_)  ([JRDBChain new].TruncateTable(_arg_))
+#define J_DeleteAll(_arg_)      ([JRDBChain new].DeleteAll([_arg_ class]))
+
+#define J_CreateTable(_arg_)    ([JRDBChain new].CreateTable([_arg_ class]))
+#define J_UpdateTable(_arg_)    ([JRDBChain new].UpdateTable([_arg_ class]))
+#define J_DropTable(_arg_)      ([JRDBChain new].DropTable([_arg_ class]))
+#define J_TruncateTable(_arg_)  ([JRDBChain new].TruncateTable([_arg_ class]))
+
+#define ParamsJ(...)            Params((_variableListToArray(__VA_ARGS__, 0)))
+#define ColumnsJ(...)           Columns((_variableListToArray(__VA_ARGS__, 0)))
+#define IgnoreJ(...)            Ignore((_variableListToArray(__VA_ARGS__, 0)))
 
 #define FromJ(_arg_)            From([_arg_ class])
 #define WhereJ(_arg_)           Where(@#_arg_)
 #define OrderJ(_arg_)           Order(@#_arg_)
 #define GroupJ(_arg_)           Group(@#_arg_)
+
 
 ```
 
@@ -265,7 +272,14 @@ id result = [J_Select(@[@"_age", @"_name"])
 
 ```
 
----
+| 配置        	| 使用类型|
+|:-------------:|------------|
+| `J_Select`		| `J_Select([Person class])`, `J_Select(nil)`, `J_Select(@[@"_name", @"_age"])`|
+| `J_SelectJ`		| `J_Select(Person)`|
+| `J_Insert`		| `J_Insert(p1, p2, p3)`, `J_Insert(@[p1, p2, p3])` update，delete， saveOrUpdate 同理|
+| `J_DeleteAll`	| `J_DeleteAll(Person)`, CreateTable, UpdateTable, DropTable, TruncateTable 同理|
+| `ParamsJ`		| `ParamsJ(@1, @3, @4)`, `Params(@[@1, @3, @4])`, ColumnsJ, IgnoreJ, 同理 |
+| `FromJ`			| `FromJ(Person)`, WhereJ, OrderJ, GroupJ, 同理 |
 
 #### NSObject+JRDB
 
