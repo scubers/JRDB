@@ -1,6 +1,6 @@
 # iOS用对FMDB的超好用封装
 
-**一个对FMDB进行类Hibernate封装的ios库，支持Objective-C 和 Swift。**
+**一个对FMDB进行类Hibernate封装的ios库
 
 [![Build Status](http://img.shields.io/travis/scubers/JRDB/developing.svg?style=flat)](https://travis-ci.org/scubers/JRDB)
 [![Pod Version](http://img.shields.io/cocoapods/v/JRDB.svg?style=flat)](http://cocoadocs.org/docsets/JRDB/)
@@ -39,6 +39,263 @@ pod 'JRDB'
 
 # Latest Update 【最新更新】
 
+## 1.0.0更新内容
+- 简化API数量，提高方法灵活度
+- 添加连接调用，查询更方便，摆脱JRQueryCondition的困扰
+- 新增查询缓存，可配置是否使用缓存，提高查询速度
+- 更灵活的线程调用
+- 修复已知bug
+
+
+## API链式调用
+
+---
+
+#### Insert【插入】
+
+```objc
+
+// 链式调用统一返回 id 类型，update数据库返回是 @YES 或者 @NO
+Person *p = [Person new];
+
+id result =[J_Insert(p)
+				.InDB([JRDBMgr defaultDB])  
+				.Recursive(YES) 		
+				.Sync(YES)			
+				.Trasaction(YES)		
+				exe:nil];		
+
+// 可以省略为
+id result = [J_Insert(p) exe:nil];
+		
+// 数组保存，两种 api 自由使用
+id result = [J_Insert(p1, p2, p3) exe:nil]
+
+id result = [J_Insert(@[p1, p2, p3]) exe:nil]
+
+```
+
+- 相关配置
+
+| 配置        	| 功能		|参数类型|
+|:-------------:|------------| --------|
+| InDB				| 配置可以省略，默认使用[JRDBMgr defaultDB]，执行的数据库| InDB(FMDatabase *)|
+| Recursive     | 配置可以省略，默认为NO，功能为开关是否进行[关联操作](#linksave)|YES or NO|
+| Sync				|配置可以省略，默认YES：阻塞本线程，线程安全同步执行数据库操作，使用FMDatabaseQueue；NO：在本线程执行数据库操作，线程不安全，使用FMDatabase|YES or NO|
+|Transaction		|配置可省略，默认为YES：本操作自带事务；NO：本操作不开启事务，需要外部有事务支持|YES or NO|
+|exe:nil|执行数据库操作，参数为数据库操作完成的回调block|block or nil|
+
+---
+
+#### Update【更新】
+
+```objc
+
+// 更新指定列
+id result = [J_Update(p)
+                 .ColumnsJ(@"_age", @"_name")
+               //.Columns(@[@"_age", @"_name"])
+                  exe:nil];
+// 忽略指定列
+id result = [J_Update(p)
+                 .IgnoreJ(@"_phone")
+               //.Ignore(@[@"_phone"])
+                  exe:nil];
+
+// 更新数组
+id result = [J_Update(p1, p2) exe:nil];
+id result = [J_Update(@[p1, p2, p3]) exe:nil];
+```
+
+- 相关配置
+
+| 配置        	| 功能		|参数类型|
+|:-------------:|------------| ----- |
+| Columns			| 配置可省略，默认为nil，更新时的指定列| NSArray *|
+| Ignore     		| 配置可省略，默认为nil，更新时的忽略指定列| NSArray * |
+| Recursive		| 更新的关联操作[详情请看](#linkupdate)| YES or NO |
+||可以使用Insert的配置	|
+
+---
+
+#### Delete【删除】
+* 相关配置（Insert 和 Update的配置都可以使用）
+* Recursive：[详细请看](#linkdelete)
+
+```objc
+id result = [J_Delete(p) exe:nil];
+```
+
+---
+
+#### Select 【查询】
+
+
+```objc
+// 普通查询
+id result = [J_Select([Person class])
+                    .Recursive(YES)
+                    .Sync(YES)
+                    .Cache(YES)
+                    .Where(@"_name like ? and _height > ?")
+                    .Params(@[@"L%", @150])
+                    .Group(@"_level")
+                    .Order(@"_age")
+                    .Limit(0, 10)
+                    .Desc(YES)
+                    exe:nil];
+
+id result = [J_Select(nil)
+					.From([Person class]) 
+					.Recursive(YES)
+					.Sync(YES)
+					.Cache(YES)
+					.Where(@"_name like ? and _height > ?")
+					.Params(@[@"L%", @150])
+					.Group(@"_level")
+					.Order(@"_age")
+					.Limit(0, 10)
+					.Desc(YES) 
+					exe:nil];
+
+// 自定义查询
+//id result = [J_Select(@"_age", @"_name")
+id result = [J_Select(@[@"_age", @"_name"])
+						.From([Person class])
+						.Recursive(YES)   // 自定义查询的时候，不会进行关联查询
+						.Sync(YES)
+						.Cache(YES)
+						.Where(@"_name like ? and _height > ?")
+						.Params(@[@"L%", @150])
+						.Group(@"_level")
+						.Order(@"_age")
+						.Limit(0, 10)
+						.Desc(YES)
+						exe:nil];
+
+id result = [J_Select(JRCount)
+						.From([Person class])
+						.Recursive(YES)   // 自定义查询的时候，不会进行关联查询
+						.Sync(YES)
+						.Cache(YES)
+						.Where(@"_name like ? and _height > ?")
+						.Params(@"L%", @150)
+						.Group(@"_level")
+						.Order(@"_age")
+						.Limit(0, 10)
+						.Desc(YES) 
+						exe:nil];			
+                    
+```
+
+- 相关配置
+
+| 配置        	| 功能		|参数类型|
+|:-------------:|------------| -------- |
+| Recursive		| 配置可省略，默认为NO: 不进行[关联查询](#linkselect)效率高，YES：[关联查询](#linkselect)效率低|YES or NO|
+| Sync     		| 配置可以省略，默认YES：阻塞本线程，线程安全同步执行数据库操作；NO：在本线程执行数据库操作，线程不安全|YES or NO|
+| Cache		| 配置可省略，默认为NO: 不使用缓存；YES：使用缓存|YES or NO|
+| Where		| Where 后面的条件筛选语句，使用 ？作为参数占位符| NSString * |
+| Params		| Where 语句占位符对应的参数| NSArray * | 
+| Group		| group by 字段| NSString * |
+| Order		| order by 字段| NSString * |
+| limit		| 分页字段 （start, length）| unsigned long, unsigned long |
+| Desc			| 是否倒序，默认NO | YES or NO|
+
+---
+
+#### 宏
+
+在写链式调用的时候，每次写字符串都要写个 @""，实在太烦人，囧，懒惰的我，你懂的
+
+```objc
+
+#define J_Select(...)           ([JRDBChain new].Select((_variableListToArray(__VA_ARGS__, 0))))
+#define J_SelectJ(_arg_)        (J_Select([_arg_ class]))
+
+#define J_Insert(...)           ([JRDBChain new].Insert(_variableListToArray(__VA_ARGS__, 0)))
+#define J_Update(...)           ([JRDBChain new].Update(_variableListToArray(__VA_ARGS__, 0)))
+#define J_Delete(...)           ([JRDBChain new].Delete(_variableListToArray(__VA_ARGS__, 0)))
+#define J_SaveOrUpdate(...)     ([JRDBChain new].SaveOrUpdate(_variableListToArray(__VA_ARGS__, 0)))
+
+#define J_DeleteAll(_arg_)      ([JRDBChain new].DeleteAll([_arg_ class]))
+
+#define J_CreateTable(_arg_)    ([JRDBChain new].CreateTable([_arg_ class]))
+#define J_UpdateTable(_arg_)    ([JRDBChain new].UpdateTable([_arg_ class]))
+#define J_DropTable(_arg_)      ([JRDBChain new].DropTable([_arg_ class]))
+#define J_TruncateTable(_arg_)  ([JRDBChain new].TruncateTable([_arg_ class]))
+
+#define ParamsJ(...)            Params((_variableListToArray(__VA_ARGS__, 0)))
+#define ColumnsJ(...)           Columns((_variableListToArray(__VA_ARGS__, 0)))
+#define IgnoreJ(...)            Ignore((_variableListToArray(__VA_ARGS__, 0)))
+
+#define FromJ(_arg_)            From([_arg_ class])
+#define WhereJ(_arg_)           Where(@#_arg_)
+#define OrderJ(_arg_)           Order(@#_arg_)
+#define GroupJ(_arg_)           Group(@#_arg_)
+
+
+```
+
+有了上面的宏，调用就可以下面这样的
+
+```objc
+
+//id result = [J_Select(nil)
+//                .FromJ(Person)
+id result = [J_SelectJ(Person)
+                .Recursive(YES)
+                .Sync(YES)
+                .Cache(YES)
+                .WhereJ(_name like ? and _height > ?)
+                .Params(@"a%", @100)
+                .GroupJ(_level)
+                .OrderJ(_age)
+                .Limit(0, 10)
+                .Desc(YES)
+                exe:nil];
+
+// 自定义查询
+//id result = [J_Select(@"_age", @"_name")
+id result = [J_Select(@[@"_age", @"_name"])
+						.FromJ(Person)
+						.Recursive(YES)   // 自定义查询的时候，不会进行关联查询
+						.Sync(YES)
+						.Cache(YES)
+						.WhereJ(_name like ? and _height > ?)
+						.ParamsJ(@"L%", @150)
+						.GroupJ(_level)
+						.OrderJ(_age)
+						.Limit(0, 10)
+						.Desc(YES)
+						exe:nil];
+
+```
+
+| 配置        	| 使用类型|
+|:-------------:|------------|
+| `J_Select`		| `J_Select([Person class])`, `J_Select(nil)`, `J_Select(@[@"_name", @"_age"])`|
+| `J_SelectJ`		| `J_Select(Person)`|
+| `J_Insert`		| `J_Insert(p1, p2, p3)`, `J_Insert(@[p1, p2, p3])` update，delete， saveOrUpdate 同理|
+| `J_DeleteAll`	| `J_DeleteAll(Person)`, CreateTable, UpdateTable, DropTable, TruncateTable 同理|
+| `ParamsJ`		| `ParamsJ(@1, @3, @4)`, `Params(@[@1, @3, @4])`, ColumnsJ, IgnoreJ, 同理 |
+| `FromJ`			| `FromJ(Person)`, WhereJ, OrderJ, GroupJ, 同理 |
+
+#### NSObject+JRDB
+
+使用JRDBChain重构NSObject+JRDB类 重新定义该分类的功能。
+
+- 重构，简化API，使用更简单。
+- 该分类的所有方法都是同步方法，线程安全，并且阻塞本线程执行。
+- 该分类中的方法全部使用事务。
+- 该分类方法不能在	`FMDatabase+JRDB.h` 中的各种block中使用，因为分类中的方法使用的是默认数据库，而  `FMDatabase+JRDB.h` 中的block都要使用回调block中提供的 `FMDatabase` 对象。
+
+ 
+
+---
+
+# ----------旧版更新  Old Version-----------
+
 ### Prepare 【准备】
 
 * 相比之前版本，添加一步，所有需要操作入库的类都需要先注册一遍。
@@ -57,7 +314,9 @@ pod 'JRDB'
 [JRDBMgr shareInstance].debugMode = NO;
 ```
 
+<a id='linksave'></a>
 ### 关联操作 （保存）
+
 
 * 一对一关联（model内含有model）；默认是不会进行关联保存的，若有需要关联保存，需要实现一下方法，并且子model也需要注册。
 
@@ -94,6 +353,7 @@ pod 'JRDB'
 
 ---
 
+<a id='linkupdate'></a>
 ### 关联操作（更新）
 
 * 出于更新的操作的随意性比较重，更新时不进行一切关联操作，即更新时，只更新本model相关信息，不更新所有子model的信息。当层级较多的时候，需要从子层级开始一步一步开始更新上来（所以不建议建立太多层级）
@@ -104,12 +364,14 @@ pod 'JRDB'
 
 ---
 
+<a id='linkdelete'></a>
 ### 关联操作（删除）
 * 和更新一样，删除时，只会删除本model的信息，不会进行一切关联操作。
 * 删除时，会删除一对多的中间表无用信息
 
 ---
 
+<a id='linkselect'></a>
 ### 关联操作（查询）
 * jr\_get开头的查询操作，都不会进行关联操作，jr\_find开头的都会进行关联操作，当不需要关联查询的时候，使用get方法效率更高
 	* jr\_find关联查询包括所有存在的一对一和一对多关联对象
