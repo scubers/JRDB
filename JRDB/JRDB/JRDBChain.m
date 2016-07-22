@@ -172,7 +172,7 @@ typedef enum {
     return ^JRDBChain *(NSArray *array) {
         jr_strong(self);
         self->_operation = CSelect;
-        if (object_isClass(array.firstObject)) {
+        if (!array.count || object_isClass(array.firstObject)) {
             self->_targetClazz = array.firstObject;
         }
         else if ([array.firstObject isEqualToString:JRCount]) {
