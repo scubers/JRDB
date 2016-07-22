@@ -242,11 +242,14 @@
 }
 
 - (void)testSelectAll {
+    
+    NSArray<Person *> *ps2 = [J_Select(nil).FromJ(Person).Cache(NO) exe:nil];
     NSArray<Person *> *ps = [J_Select([Person class]).Recursive(YES).Cache(NO) exe:nil];
     NSArray<Person *> *ps1 = [J_Select([Person class]).Recursive(YES).Cache(NO) exe:nil];
     NSLog(@"%@", ps);
     NSLog(@"%@", ps1);
-
+    NSLog(@"%@", ps2);
+    
     id result = J_Select(nil)
                     .FromJ(Person)
                     .Recursive(YES)
