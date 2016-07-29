@@ -72,21 +72,22 @@ class CCC: NSObject {
 class AViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
-//        let db = JRDBMgr.shareInstance().createDBWithPath("/Users/jmacmini/Desktop/test.sqlite")
-//        JRDBMgr.shareInstance().defaultDB = db
-//        
-//        JRDBChain()
-//            .Select(nil)
-//            .From(PPP)
-//            .Where("")
-//            .Params([])
-//            .Columns([])
-//            .Ignore([])
-//            .Order("")
-//            .Group("")
-//            .Limit(0,1)
-//            .WhereIdIs("111")
-//            .WherePKIs("111")
+        let db = JRDBMgr.shareInstance().createDBWithPath("/Users/jmacmini/Desktop/test.sqlite")
+        JRDBMgr.shareInstance().defaultDB = db
+        
+        
+        
+        J_Select(PPP)
+            .From(PPP)
+            .Where("")
+            .ParamJ("")
+            .ColumnsJ("")
+            .IgnoreJ("")
+            .Order("")
+            .Group("")
+            .Limit(0,1)
+            .WhereIdIs("111")
+            .WherePKIs("111")
 //            .exe(nil);
         
 //        test1Cycle()
