@@ -16,12 +16,12 @@
 //    name: N  value:              N: isNonatomic, nil atomic
 //    name: V  value: _name        V: 对应的ivar名
 
-typedef enum {
+typedef NS_ENUM(NSInteger, PropAttrOwnerShip) {
     PropAttrOwnerShipAssign,
     PropAttrOwnerShipCopy,
     PropAttrOwnerShipStrong,
     PropAttrOwnerShipWeak,
-} PropAttrOwnerShip;
+} ;
 
 
 @interface OBJCProperty : NSObject

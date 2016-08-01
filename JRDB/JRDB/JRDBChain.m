@@ -69,15 +69,15 @@
 #define HistoryKey(key) \
 static NSString * const key = @#key;
 
-typedef enum {
+typedef NS_ENUM(NSInteger, OperationHistory) {
     OH_Insert = 1000,
     OH_Update,
     OH_Delete,
     OH_DeleteAll,
     OH_Select,
-} OperationHistory;
+} ;
 
-typedef enum {
+typedef NS_ENUM(NSInteger, PropertyHistory) {
     PH_InDB = 2000,
     PH_From,
     PH_Where,
@@ -94,7 +94,7 @@ typedef enum {
     PH_Params,
     PH_Columns,
     PH_Ignore,
-} PropertyHistory;
+} ;
 
 @interface JRDBChain ()
 

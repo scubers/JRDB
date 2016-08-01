@@ -11,7 +11,7 @@
 
 @class FMResultSet, JRDBChain;
 
-typedef enum {
+typedef NS_ENUM(NSInteger, RetDataType) {
     RetDataTypeInt = 1,
     RetDataTypeUnsignedInt,
     RetDataTypeLong,
@@ -27,7 +27,7 @@ typedef enum {
     RetDataTypeNSDate,
     
     RetDataTypeUnsupport
-} RetDataType;
+} ;
 
 @interface JRFMDBResultSetHandler : NSObject
 

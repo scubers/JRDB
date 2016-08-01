@@ -59,12 +59,12 @@ static inline NSArray * _variableListToArray(id first, ...) {
 }
 
 static inline NSArray * _JRToArray(id arg) {
-    if (!arg) NSLog(@"warning: _JRBoxValue should not pass a nil value");
+    if (!arg) NSLog(@"warning: _JRToArray should not pass a nil value");
     return [arg isKindOfClass:[NSArray class]] ? arg : arg ? @[arg] : @[];
 }
 
 
-typedef enum {
+typedef NS_ENUM(NSInteger, ChainOperation) {
     CInsert = 1,
     CUpdate,
     CDelete,
@@ -80,7 +80,7 @@ typedef enum {
     CDropTable,
     CTruncateTable,
 
-} ChainOperation;
+};
 
 static NSString * const JRCount = @"_|-JRCount-|_";
 

@@ -23,7 +23,7 @@
 
 void SqlLog(id _Nonnull sql);
 
-typedef enum {
+typedef NS_ENUM(NSInteger, DBType) {
     DBTypeNull = 1,
     DBTypeInteger,
     DBTypeReal,
@@ -34,7 +34,7 @@ typedef enum {
 //    l  REAL，值是浮点型值，以8字节IEEE浮点数存放
 //    l  TEXT，值是文本字符串，使用数据库编码（UTF-8，UTF-16BE或者UTF-16LE）存放
 //    l  BLOB
-} DBType;
+} ;
 
 @interface JRSqlGenerator : NSObject
 

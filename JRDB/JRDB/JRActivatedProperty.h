@@ -8,12 +8,12 @@
 
 #import <Foundation/Foundation.h>
 
-typedef enum {
+typedef NS_ENUM(NSInteger, JRRelation) {
     JRRelationNormal = 1,   ///< 普通字段
     JRRelationOneToOne,     ///< 一对一字段
     JRRelationOneToMany,    ///< 一对多字段
     JRRelationChildren,     ///< 子节点字段
-} JRRelation;
+} ;
 
 @interface JRActivatedProperty : NSObject
 
