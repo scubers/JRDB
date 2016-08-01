@@ -42,6 +42,10 @@
     [[JRDBMgr defaultDB] close];
     [super tearDown];
     
+    
+}
+
+- (void)testAAAAA {
 }
 
 #pragma mark - Delete
@@ -153,7 +157,7 @@
 - (void)testUpdateOne {
     Person *p = [Person jr_findAll].firstObject;
     p.a_int = 1212;
-    [J_Update(p).Recursive(YES).ColumnsJ(@"_a_int", @"_name") exe:nil];
+    [J_Update(p).Recursive(YES).ColumnsJ(J(Person, a_int), J(Person, name)) exe:nil];
     [J_Update(p).Recursive(NO) exe:nil];
 
 }
@@ -203,7 +207,7 @@
         [p.money addObject:[self createMoney:i]];
         [p.children addObject:[self createPerson:i+10 name:nil]];
     }
-    [J_Update(p).ColumnsJ(@"_a_int").Recursive(YES) exe:nil];
+    [J_Update(p).ColumnsJ(J(Person, a_int)).Recursive(YES) exe:nil];
 }
 
 - (void)testUpdateIgnore {
@@ -215,7 +219,7 @@
         [p.money addObject:[self createMoney:i]];
         [p.children addObject:[self createPerson:i+10 name:nil]];
     }
-    [J_Update(p).IgnoreJ(@"_a_int").Recursive(YES) exe:nil];
+    [J_Update(p).IgnoreJ(J(Person, a_int)).Recursive(YES) exe:nil];
 }
 
 #pragma mark - save or update
@@ -257,22 +261,26 @@
                     .Cache(YES)
                     .WhereJ(_name like ? and _height > ?)
                     .ParamsJ(@"a%", @100)
-                    .GroupJ(_class)
-                    .OrderJ(_age)
+                    .GroupJ(Person, h_double)
+                    .OrderJ(Person, d_long_long)
                     .Limit(0, 10)
                     .Desc(YES);
 
     NSLog(@"%@", result);
 
+    [J_Update(ps.firstObject)
+     .ColumnsJ(J(Person, a_int),J(Person, b_unsigned_int))
+     
+     exe:nil];
 }
 
 - (void)testOtherCondition {
     NSArray<Person *> *ps =
     [J_Select([Person class])
     .Recursive(YES)
-    .From(@"Person")
-    .OrderJ(_a_int)
-    .GroupJ(_bbbbb)
+    .FromJ(Person)
+    .OrderJ(Person, a_int)
+    .GroupJ(Person, bbbbb)
     .Limit(0,3)
     .Desc(YES)
      exe:nil];
@@ -284,10 +292,9 @@
 - (void)testSelectCount {
     NSNumber *count =
     [J_Select(JRCount)
-    .From([Person class])
-//    .From(@"Person")
-    .Order(@"_a_int")
-    .Group(@"_bbbbb")
+    .FromJ(Person)
+    .OrderJ(Person,a_int)
+    .GroupJ(Person,b_unsigned_int)
     .Limit(0, 3)
     .Desc(YES)
      exe:nil];
@@ -297,11 +304,11 @@
 
 - (void)testSelectColumn {
     NSArray<Person *> *ps =
-    [J_Select(@"_a_int", @"_b_unsigned_int")
+    [J_Select(J(Person, a_int), J(Person, b_unsigned_int))
     .Recursive(YES) // 自定义查询，即使设置关联查询，也不会进行关联查询
     .FromJ(Person)
-    .OrderJ(_a_int)
-    .GroupJ(_bbbbb)
+    .OrderJ(Person, a_int)
+    .GroupJ(Person, j_number)
     .Limit(0, 3)
     .Desc(YES)
      exe:nil];
@@ -328,7 +335,7 @@
         [ori addObject:@(i)];
         
         dispatch_async(dispatch_get_global_queue(0, 0), ^{
-            id result = [J_Select([Person class]).Recursive(YES).Sync(YES) exe:^(JRDBChain * _Nonnull chain, id  _Nullable result) {
+            id result = [J_SelectJ(Person).Recursive(YES).Sync(YES) exe:^(JRDBChain * _Nonnull chain, id  _Nullable result) {
                 NSLog(@"___complete %@", @([result count]));
             }];
             NSLog(@"=+=+=+=+  %@", @([result count]));
@@ -369,7 +376,7 @@
     p.m_date = [NSDate date];
     p.type = [NSString stringWithFormat:@"Person+%d", base];
     p.animal = [Animal new];
-//    p.bbbbb = base % 2;
+    p.bbbbb = base % 2;
     return p;
 }
 

@@ -35,8 +35,10 @@
 
 #define FromJ(_arg_)            From([_arg_ class])
 #define WhereJ(_arg_)           Where(@#_arg_)
-#define OrderJ(_arg_)           Order(@#_arg_)
-#define GroupJ(_arg_)           Group(@#_arg_)
+#define OrderJ(_clazz_, _prop_) Order(J(_clazz_, _prop_))
+#define GroupJ(_clazz_, _prop_) Group(J(_clazz_, _prop_))
+
+#define J(_clazz_, _prop_)      (((void)(NO && ((void)[_clazz_ new]._prop_, NO)), @"_"#_prop_))
 
 static inline NSArray * _variableListToArray(id first, ...) {
     NSMutableArray *args = [NSMutableArray array];
@@ -53,6 +55,8 @@ static inline NSArray * _variableListToArray(id first, ...) {
             [args addObject:arg];
         }
     }
+    int c,b;
+    int a = ((void)c, b);
     va_end(valist);
     return [args copy];
 }

@@ -63,6 +63,7 @@
 
 @property (nonatomic, strong) NSMutableArray<Person *> *children;
 @property (nonatomic, strong) NSMutableArray<Person *> *nnnn;
+@property (nonatomic, strong) NSMutableArray<Person *> *gggg;
 
 
 @end
