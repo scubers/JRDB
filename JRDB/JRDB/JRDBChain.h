@@ -55,9 +55,6 @@ static inline NSArray * _variableListToArray(id first, ...) {
             [args addObject:arg];
         }
     }
-    int c,b;
-    int a = ((void)c, b);
-    va_end(valist);
     return [args copy];
 }
 
