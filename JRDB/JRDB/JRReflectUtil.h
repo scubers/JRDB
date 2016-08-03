@@ -25,9 +25,7 @@
  */
 + (NSDictionary<NSString *, NSString *> * _Nonnull)propNameAndEncode4Clazz:(Class<JRPersistent> _Nonnull)clazz;
 
-
 + (const char * _Nonnull)typeEncoding4InstanceMethod:(SEL _Nonnull)selector inClazz:(Class _Nonnull)clazz;
-
 
 + (void)exchangeClazz:(Class _Nonnull)clazz method:(SEL _Nonnull)selector withMethod:(SEL _Nonnull)aSelector;
 

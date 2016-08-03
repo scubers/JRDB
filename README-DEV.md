@@ -12,7 +12,7 @@ GitHub: [sucbers](https://github.com/scubers)
 
 Feedback: [jr-wong@qq.com](mailto:jrwong@qq.com)
 
----
+--- 
 
 # Description
 
@@ -39,6 +39,80 @@ pod 'JRDB'
 
 # Latest Update 【最新更新】
 
+## 添加宏 J(\_clazz\_, \_prop\_)，并更新某些宏，具体变更如下
+
+在写字段名的时候，总会遇到@"_xxxx" 这种情况，字段名称不记得，要去model类里面找然后再copy，然后再加个下划线。有了这个宏就可以自行联想了;
+
+```objc
+// 使用这个宏则可以使用xcode的方法联想功能，联想出属性，并且返回带 下划线的字段名
+#define J(_clazz_, _prop_)      (((void)(NO && ((void)[_clazz_ new]._prop_, NO)), @"_"#_prop_))
+```
+
+#### 使用方法
+
+```objc
+NSString *name = J(Person, age);// name = @"_age";
+```
+这些都不需要自己写，都可以使用xcode的联想功能
+
+#### 修改宏
+
+```objc
+#define OrderJ(_clazz_, _prop_) Order(J(_clazz_, _prop_))
+#define GroupJ(_clazz_, _prop_) Group(J(_clazz_, _prop_))
+```
+
+- 使用
+
+```objc
+id result = J_SelectJ(Person)
+                .Recursive(YES)
+                .Sync(YES)
+                .Cache(YES)
+                .WhereJ(_name like ? and _height > ?)
+                .ParamsJ(@"a%", @100)
+                .GroupJ(Person, grade)// 可以xcode联想
+                .OrderJ(Person, age)  // 可以xcode联想
+                .Limit(0, 10)
+                .Desc(YES);
+
+//[J_Update(p).ColumnsJ(@"_age", @"_name") exe:nil];
+[J_Update(p).ColumnsJ(J(Person, age), J(Person, name)) exe:nil];
+
+```
+
+
+#### 由于swift不支持宏替换，为了实现和OC一样的API，添加了swift以下全局方法
+
+```swift
+public func J_Insert(objs: JRPersistent...) -> JRDBChain
+public func J_Update(objs: JRPersistent...) -> JRDBChain
+public func J_Delete(objs: JRPersistent...) -> JRDBChain
+public func J_Select(clazz: AnyClass) -> JRDBChain
+public func J_Select(cols: String...) -> JRDBChain
+public func J_SelectCount(clazz: AnyClass) -> JRDBChain
+public extension JRDBChain {
+    public var ParamJ: (String...) -> JRDBChain 
+    public var ColumnsJ: (String...) -> JRDBChain
+    public var IgnoreJ: (String...) -> JRDBChain
+}
+```
+swift 也可以如下调用
+
+```swift
+J_Select(Person)
+		  .Where("xxx")
+        .ParamJ("xx")
+        .ColumnsJ("xx")
+        .IgnoreJ("")
+        .Order("")
+        .Group("")
+        .Limit(0,1)
+        .WhereIdIs("111")
+        .exe(nil);
+```
+
+---
 ## 1.0.0更新内容
 - 简化API数量，提高方法灵活度
 - 添加连接调用，查询更方便，摆脱JRQueryCondition的困扰

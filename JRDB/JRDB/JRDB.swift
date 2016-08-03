@@ -8,47 +8,47 @@
 
 import Foundation
 
-func J_Insert(objs: JRPersistent...) -> JRDBChain {
+public func J_Insert(objs: JRPersistent...) -> JRDBChain {
     return JRDBChain().Insert(objs)
 }
 
-func J_Update(objs: JRPersistent...) -> JRDBChain {
+public func J_Update(objs: JRPersistent...) -> JRDBChain {
     return JRDBChain().Update(objs)
 }
 
-func J_Delete(objs: JRPersistent...) -> JRDBChain {
+public func J_Delete(objs: JRPersistent...) -> JRDBChain {
     return JRDBChain().Delete(objs)
 }
 
-func J_Select(clazz: AnyClass) -> JRDBChain {
+public func J_Select(clazz: AnyClass) -> JRDBChain {
     return JRDBChain().Select([clazz])
 }
 
-func J_Select(cols: String...) -> JRDBChain {
+public func J_Select(cols: String...) -> JRDBChain {
     return JRDBChain().Select(cols)
 }
 
-func J_SelectCount(clazz: AnyClass) -> JRDBChain {
+public func J_SelectCount(clazz: AnyClass) -> JRDBChain {
     return JRDBChain().Select([JRCount]).From(clazz)
 }
 
-extension JRDBChain {
+public extension JRDBChain {
     
-    var ParamJ: (String...) -> JRDBChain {
+    public var ParamJ: (String...) -> JRDBChain {
         return {[weak self] col in
             self?.Params(col)
             return self!;
         };
     }
     
-    var ColumnsJ: (String...) -> JRDBChain {
+    public var ColumnsJ: (String...) -> JRDBChain {
         return {[weak self] col in
             self?.Columns(col)
             return self!;
         };
     }
     
-    var IgnoreJ: (String...) -> JRDBChain {
+    public var IgnoreJ: (String...) -> JRDBChain {
         return {[weak self] col in
             self?.Ignore(col)
             return self!;

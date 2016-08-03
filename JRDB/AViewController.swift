@@ -88,7 +88,7 @@ class AViewController: UIViewController {
             .Limit(0,1)
             .WhereIdIs("111")
             .WherePKIs("111")
-//            .exe(nil);
+            .exe(nil);
         
 //        test1Cycle()
 //        testFindByID()
