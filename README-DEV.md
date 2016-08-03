@@ -37,6 +37,8 @@ pod 'JRDB'
 
 ---
 
+**具体实现可看项目测试用例**
+
 # Latest Update 【最新更新】
 
 ## 添加宏 J(\_clazz\_, \_prop\_)，并更新某些宏，具体变更如下
@@ -284,6 +286,9 @@ id result = [J_Select(JRCount)
 
 ```objc
 
+#define jr_weak(object) __weak __typeof__(object) weak##_##object = object
+#define jr_strong(object) __typeof__(object) object = weak##_##object
+
 #define J_Select(...)           ([JRDBChain new].Select((_variableListToArray(__VA_ARGS__, 0))))
 #define J_SelectJ(_arg_)        (J_Select([_arg_ class]))
 
@@ -305,8 +310,10 @@ id result = [J_Select(JRCount)
 
 #define FromJ(_arg_)            From([_arg_ class])
 #define WhereJ(_arg_)           Where(@#_arg_)
-#define OrderJ(_arg_)           Order(@#_arg_)
-#define GroupJ(_arg_)           Group(@#_arg_)
+#define OrderJ(_clazz_, _prop_) Order(J(_clazz_, _prop_))
+#define GroupJ(_clazz_, _prop_) Group(J(_clazz_, _prop_))
+
+#define J(_clazz_, _prop_)      (((void)(NO && ((void)[_clazz_ new]._prop_, NO)), @"_"#_prop_))
 
 
 ```
@@ -323,8 +330,8 @@ id result = [J_SelectJ(Person)
                 .Cache(YES)
                 .WhereJ(_name like ? and _height > ?)
                 .Params(@"a%", @100)
-                .GroupJ(_level)
-                .OrderJ(_age)
+                .GroupJ(Person, level)
+                .OrderJ(Person, age)
                 .Limit(0, 10)
                 .Desc(YES)
                 exe:nil];
@@ -338,8 +345,8 @@ id result = [J_Select(@[@"_age", @"_name"])
 						.Cache(YES)
 						.WhereJ(_name like ? and _height > ?)
 						.ParamsJ(@"L%", @150)
-						.GroupJ(_level)
-						.OrderJ(_age)
+	                 .GroupJ(Person, level)
+	                 .OrderJ(Person, age)
 						.Limit(0, 10)
 						.Desc(YES)
 						exe:nil];
@@ -353,7 +360,9 @@ id result = [J_Select(@[@"_age", @"_name"])
 | `J_Insert`		| `J_Insert(p1, p2, p3)`, `J_Insert(@[p1, p2, p3])` update，delete， saveOrUpdate 同理|
 | `J_DeleteAll`	| `J_DeleteAll(Person)`, CreateTable, UpdateTable, DropTable, TruncateTable 同理|
 | `ParamsJ`		| `ParamsJ(@1, @3, @4)`, `Params(@[@1, @3, @4])`, ColumnsJ, IgnoreJ, 同理 |
-| `FromJ`			| `FromJ(Person)`, WhereJ, OrderJ, GroupJ, 同理 |
+| `FromJ`			| `FromJ(Person)` |
+| `WhereJ`		| `WhereJ(_name = ?)`|
+| `OrderJ`		| OrderJ(Person, age), GroupJ, 同理 |
 
 #### NSObject+JRDB
 
