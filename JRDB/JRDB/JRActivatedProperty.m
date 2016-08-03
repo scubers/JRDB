@@ -26,7 +26,7 @@
             , self.name
             , self.dataBaseName
             , self.dataBaseType
-            , self.relateionShip
+            , (int)self.relateionShip
             , self.clazz
             ];
 }
