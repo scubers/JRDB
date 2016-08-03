@@ -1,6 +1,6 @@
 # iOS用对FMDB的超好用封装
 
-**一个对FMDB进行类Hibernate封装的ios库
+**一个对FMDB进行类Hibernate封装的ios库**
 
 [![Build Status](http://img.shields.io/travis/scubers/JRDB/developing.svg?style=flat)](https://travis-ci.org/scubers/JRDB)
 [![Pod Version](http://img.shields.io/cocoapods/v/JRDB.svg?style=flat)](http://cocoadocs.org/docsets/JRDB/)
