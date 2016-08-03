@@ -46,6 +46,7 @@
 }
 
 - (void)testAAAAA {
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"abcabc" object:nil];
 }
 
 #pragma mark - Delete

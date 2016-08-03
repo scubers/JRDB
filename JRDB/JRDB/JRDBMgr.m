@@ -38,7 +38,7 @@ static JRDBMgr *__shareInstance;
         __shareInstance = [super allocWithZone:zone];
         __shareInstance->_clazzArray = [NSMutableArray array];
         
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(clearObjCaches) name:UIApplicationDidReceiveMemoryWarningNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:__shareInstance selector:@selector(clearObjCaches) name:UIApplicationDidReceiveMemoryWarningNotification object:nil];
 #ifdef DEBUG
         __shareInstance->_debugMode = YES;
 #endif
