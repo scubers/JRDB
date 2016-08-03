@@ -12,7 +12,7 @@ Pod::Spec.new do |s|
     s.source                = { :git => "https://github.com/scubers/JRDB.git", :tag => "#{s.version}" }
 
 
-    s.source_files          = "JRDB/JRDB/**/*.{h,m}"
+    s.source_files          = "JRDB/JRDB/**/*.{h,m,swift}"
     s.public_header_files   = "JRDB/JRDB/**/*.h"
 
     s.dependency 'FMDB'
