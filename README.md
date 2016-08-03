@@ -1,6 +1,6 @@
 # iOS用对FMDB的超好用封装
 
-**一个对FMDB进行类Hibernate封装的ios库**
+**一个对FMDB进行类Hibernate封装的ios库
 
 [![Build Status](http://img.shields.io/travis/scubers/JRDB/developing.svg?style=flat)](https://travis-ci.org/scubers/JRDB)
 [![Pod Version](http://img.shields.io/cocoapods/v/JRDB.svg?style=flat)](http://cocoadocs.org/docsets/JRDB/)
@@ -12,7 +12,7 @@ GitHub: [sucbers](https://github.com/scubers)
 
 Feedback: [jr-wong@qq.com](mailto:jrwong@qq.com)
 
----
+--- 
 
 # Description
 
@@ -27,13 +27,63 @@ Feedback: [jr-wong@qq.com](mailto:jrwong@qq.com)
 
 # Installation 【安装】
 ```ruby
+use_frameworks!
 pod 'JRDB'
+```
+
+```objc
+@import JRDB;
 ```
 
 ---
 
+**具体实现可看项目测试用例**
+
 # Latest Update 【最新更新】
 
+## 添加宏 J(\_clazz\_, \_prop\_)，并更新某些宏，具体变更如下
+
+在写字段名的时候，总会遇到@"_xxxx" 这种情况，字段名称不记得，要去model类里面找然后再copy，然后再加个下划线。有了这个宏就可以自行联想了;
+
+```objc
+// 使用这个宏则可以使用xcode的方法联想功能，联想出属性，并且返回带 下划线的字段名
+#define J(_clazz_, _prop_)      (((void)(NO && ((void)[_clazz_ new]._prop_, NO)), @"_"#_prop_))
+```
+
+#### 使用方法
+
+```objc
+NSString *name = J(Person, age);// name = @"_age";
+```
+这些都不需要自己写，都可以使用xcode的联想功能
+
+#### 修改宏
+
+```objc
+#define OrderJ(_clazz_, _prop_) Order(J(_clazz_, _prop_))
+#define GroupJ(_clazz_, _prop_) Group(J(_clazz_, _prop_))
+```
+
+- 使用
+
+```objc
+id result = J_SelectJ(Person)
+                .Recursive(YES)
+                .Sync(YES)
+                .Cache(YES)
+                .WhereJ(_name like ? and _height > ?)
+                .ParamsJ(@"a%", @100)
+                .GroupJ(Person, grade)// 可以xcode联想
+                .OrderJ(Person, age)  // 可以xcode联想
+                .Limit(0, 10)
+                .Desc(YES);
+
+//[J_Update(p).ColumnsJ(@"_age", @"_name") exe:nil];
+[J_Update(p).ColumnsJ(J(Person, age), J(Person, name)) exe:nil];
+
+```
+
+---
 ## 1.0.0更新内容
 - 简化API数量，提高方法灵活度
 - 添加连接调用，查询更方便，摆脱JRQueryCondition的困扰
@@ -74,10 +124,10 @@ id result = [J_Insert(@[p1, p2, p3]) exe:nil]
 
 | 配置        	| 功能		|参数类型|
 |:-------------:|------------| --------|
-| InDB				| 配置可以省略，默认使用[JRDBMgr defaultDB]，<br/>执行的数据库| InDB(FMDatabase *)|
-| Recursive     | 配置可以省略<br/>默认为NO，功能为开关是否进行[关联操作](#linksave)|YES or NO|
-| Sync				|配置可以省略<br/>默认YES：阻塞本线程，线程安全同步执行数据库操作，使用FMDatabaseQueue；<br/>NO：在本线程执行数据库操作，线程不安全，使用FMDatabase|YES or NO|
-|Transaction		|配置可省略<br/>默认为YES：本操作自带事务；<br/>NO：本操作不开启事务，需要外部有事务支持|YES or NO|
+| InDB				| 配置可以省略，默认使用[JRDBMgr defaultDB]，执行的数据库| InDB(FMDatabase *)|
+| Recursive     | 配置可以省略，默认为NO，功能为开关是否进行[关联操作](#linksave)|YES or NO|
+| Sync				|配置可以省略，默认YES：阻塞本线程，线程安全同步执行数据库操作，使用FMDatabaseQueue；NO：在本线程执行数据库操作，线程不安全，使用FMDatabase|YES or NO|
+|Transaction		|配置可省略，默认为YES：本操作自带事务；NO：本操作不开启事务，需要外部有事务支持|YES or NO|
 |exe:nil|执行数据库操作，参数为数据库操作完成的回调block|block or nil|
 
 ---
@@ -182,13 +232,13 @@ id result = [J_Select(JRCount)
 						exe:nil];			
                     
 ```
-  
+
 - 相关配置
 
 | 配置        	| 功能		|参数类型|
 |:-------------:|------------| -------- |
 | Recursive		| 配置可省略，默认为NO: 不进行[关联查询](#linkselect)效率高，YES：[关联查询](#linkselect)效率低|YES or NO|
-| Sync     		| 配置可以省略<br/>默认YES：阻塞本线程，线程安全同步执行数据库操作；<br/>NO：在本线程执行数据库操作，线程不安全|YES or NO|
+| Sync     		| 配置可以省略，默认YES：阻塞本线程，线程安全同步执行数据库操作；NO：在本线程执行数据库操作，线程不安全|YES or NO|
 | Cache		| 配置可省略，默认为NO: 不使用缓存；YES：使用缓存|YES or NO|
 | Where		| Where 后面的条件筛选语句，使用 ？作为参数占位符| NSString * |
 | Params		| Where 语句占位符对应的参数| NSArray * | 
@@ -204,6 +254,9 @@ id result = [J_Select(JRCount)
 在写链式调用的时候，每次写字符串都要写个 @""，实在太烦人，囧，懒惰的我，你懂的
 
 ```objc
+
+#define jr_weak(object) __weak __typeof__(object) weak##_##object = object
+#define jr_strong(object) __typeof__(object) object = weak##_##object
 
 #define J_Select(...)           ([JRDBChain new].Select((_variableListToArray(__VA_ARGS__, 0))))
 #define J_SelectJ(_arg_)        (J_Select([_arg_ class]))
@@ -226,8 +279,10 @@ id result = [J_Select(JRCount)
 
 #define FromJ(_arg_)            From([_arg_ class])
 #define WhereJ(_arg_)           Where(@#_arg_)
-#define OrderJ(_arg_)           Order(@#_arg_)
-#define GroupJ(_arg_)           Group(@#_arg_)
+#define OrderJ(_clazz_, _prop_) Order(J(_clazz_, _prop_))
+#define GroupJ(_clazz_, _prop_) Group(J(_clazz_, _prop_))
+
+#define J(_clazz_, _prop_)      (((void)(NO && ((void)[_clazz_ new]._prop_, NO)), @"_"#_prop_))
 
 
 ```
@@ -244,8 +299,8 @@ id result = [J_SelectJ(Person)
                 .Cache(YES)
                 .WhereJ(_name like ? and _height > ?)
                 .Params(@"a%", @100)
-                .GroupJ(_level)
-                .OrderJ(_age)
+                .GroupJ(Person, level)
+                .OrderJ(Person, age)
                 .Limit(0, 10)
                 .Desc(YES)
                 exe:nil];
@@ -259,8 +314,8 @@ id result = [J_Select(@[@"_age", @"_name"])
 						.Cache(YES)
 						.WhereJ(_name like ? and _height > ?)
 						.ParamsJ(@"L%", @150)
-						.GroupJ(_level)
-						.OrderJ(_age)
+	                 .GroupJ(Person, level)
+	                 .OrderJ(Person, age)
 						.Limit(0, 10)
 						.Desc(YES)
 						exe:nil];
@@ -271,10 +326,12 @@ id result = [J_Select(@[@"_age", @"_name"])
 |:-------------:|------------|
 | `J_Select`		| `J_Select([Person class])`, `J_Select(nil)`, `J_Select(@[@"_name", @"_age"])`|
 | `J_SelectJ`		| `J_Select(Person)`|
-| `J_Insert`		| `J_Insert(p1, p2, p3)`, `J_Insert(@[p1, p2, p3])` <br/>update，delete， saveOrUpdate 同理|
-| `J_DeleteAll`	| `J_DeleteAll(Person)`, <br/> CreateTable, UpdateTable, DropTable, TruncateTable 同理|
-| `ParamsJ`		| `ParamsJ(@1, @3, @4)`, `ParamsJ(@[@1, @3, @4])`,<br/>  ColumnsJ, IgnoreJ, 同理 |
-| `FromJ`			| `FromJ(Person)`, WhereJ, OrderJ, GroupJ, 同理 |
+| `J_Insert`		| `J_Insert(p1, p2, p3)`, `J_Insert(@[p1, p2, p3])` update，delete， saveOrUpdate 同理|
+| `J_DeleteAll`	| `J_DeleteAll(Person)`, CreateTable, UpdateTable, DropTable, TruncateTable 同理|
+| `ParamsJ`		| `ParamsJ(@1, @3, @4)`, `Params(@[@1, @3, @4])`, ColumnsJ, IgnoreJ, 同理 |
+| `FromJ`			| `FromJ(Person)` |
+| `WhereJ`		| `WhereJ(_name = ?)`|
+| `OrderJ`		| OrderJ(Person, age), GroupJ, 同理 |
 
 #### NSObject+JRDB
 
