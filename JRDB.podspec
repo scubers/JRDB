@@ -12,10 +12,8 @@ Pod::Spec.new do |s|
     s.source                = { :git => "https://github.com/scubers/JRDB.git", :tag => "#{s.version}" }
 
 
-    s.source_files          = "JRDB/JRDB/**/*.{h,m}", "JRDB/JRDB-Bridging-Header.h"
-    s.xcconfig              = { 'SWIFT_OBJC_BRIDGING_HEADER' => 'JRDB/JRDB-Bridging-Header.h' }
-
-    #s.public_header_files   = "JRDB/JRDB/**/*.h"
+    s.source_files          = "JRDB/JRDB/**/*.{h,m}"
+    s.public_header_files   = "JRDB/JRDB/**/*.h"
 
     s.dependency 'FMDB'
 
