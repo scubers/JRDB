@@ -83,37 +83,6 @@ id result = J_SelectJ(Person)
 
 ```
 
-
-#### 由于swift不支持宏替换，为了实现和OC一样的API，添加了swift以下全局方法
-
-```swift
-public func J_Insert(objs: JRPersistent...) -> JRDBChain
-public func J_Update(objs: JRPersistent...) -> JRDBChain
-public func J_Delete(objs: JRPersistent...) -> JRDBChain
-public func J_Select(clazz: AnyClass) -> JRDBChain
-public func J_Select(cols: String...) -> JRDBChain
-public func J_SelectCount(clazz: AnyClass) -> JRDBChain
-public extension JRDBChain {
-    public var ParamJ: (String...) -> JRDBChain 
-    public var ColumnsJ: (String...) -> JRDBChain
-    public var IgnoreJ: (String...) -> JRDBChain
-}
-```
-swift 也可以如下调用
-
-```swift
-J_Select(Person)
-		  .Where("xxx")
-        .ParamJ("xx")
-        .ColumnsJ("xx")
-        .IgnoreJ("")
-        .Order("")
-        .Group("")
-        .Limit(0,1)
-        .WhereIdIs("111")
-        .exe(nil);
-```
-
 ---
 ## 1.0.0更新内容
 - 简化API数量，提高方法灵活度
