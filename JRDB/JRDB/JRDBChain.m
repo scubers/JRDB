@@ -14,38 +14,7 @@
 #import "NSObject+Reflect.h"
 #import "JRQueryCondition.h"
 
-#define HistoryKey(key) \
-static NSString * const key = @#key;
-
-typedef NS_ENUM(NSInteger, OperationHistory) {
-    OH_Insert = 1000,
-    OH_Update,
-    OH_Delete,
-    OH_DeleteAll,
-    OH_Select,
-} ;
-
-typedef NS_ENUM(NSInteger, PropertyHistory) {
-    PH_InDB = 2000,
-    PH_From,
-    PH_Where,
-    PH_Group,
-    PH_Order,
-    PH_Desc,
-    PH_Limit,
-
-    PH_Recursive,
-    PH_NowInMain,
-    PH_Transaction,
-    PH_Complete,
-
-    PH_Params,
-    PH_Columns,
-    PH_Ignore,
-} ;
-
 @interface JRDBChain ()
-@property (nonatomic, strong) NSMutableArray<NSNumber *> *history;///< 链式调用历史，用于检测
 @end
 
 @implementation JRDBChain
@@ -110,145 +79,118 @@ typedef NS_ENUM(NSInteger, PropertyHistory) {
 
 #pragma mark - Operation
 
-- (CreateTableBlock)CreateTable {
-    return ^(Class<JRPersistent> clazz) {
-        self->_operation = CCreateTable;
-        self->_targetClazz = clazz;
-        return self;
-    };
-}
-
-- (UpdateTableBlock)UpdateTable {
-    return ^(Class<JRPersistent> clazz) {
-        self->_operation = CUpdateTable;
-        self->_targetClazz = clazz;
-        return self;
-    };
-}
-
-- (DropTableBlock)DropTable {
-    return ^(Class<JRPersistent> clazz) {
-        self->_operation = CDropTable;
-        self->_targetClazz = clazz;
-        return self;
-    };
-}
-
-- (TruncateTableBlock)TruncateTable {
-    return ^(Class<JRPersistent> clazz) {
-        self->_operation = CTruncateTable;
-        self->_targetClazz = clazz;
-        return self;
-    };
-}
-
-- (DeleteAllBlock)DeleteAll {
-    return ^(Class<JRPersistent> clazz) {
-        self->_operation = CDeleteAll;
-        self->_targetClazz = clazz;
-        return self;
-    };
-}
-
-static inline JRDBChain * setArrayToSelf(JRDBChain *self, NSArray *array) {
-    if ([array.firstObject isKindOfClass:[NSArray class]]) {
-        self->_targetArray = array.firstObject;
+static inline void __operationCheck(JRDBChain *self) {
+    if (self.operation != COperationNone) {
+        @throw [NSError errorWithDomain:@"multiple Chain operation error" code:0 userInfo:nil];
     }
-    else if (array.count == 1) {
-        self->_target = array.firstObject;
-    } else {
-        self->_targetArray = array;
-    }
-    return self;
 }
 
-- (InsertBlock)Insert {
-    return ^(NSArray *array) {
-        self->_operation = CInsert;
-        setArrayToSelf(self, array);
-        return self;
-    };
-}
-
-- (UpdateBlock)Update {
-    return ^(NSArray *array) {
-        self->_operation = CUpdate;
-        setArrayToSelf(self, array);
-        return self;
-    };
-}
-
-- (DeleteBlock)Delete {
-    return ^(NSArray *array) {
-        self->_operation = CUpdate;
-        setArrayToSelf(self, array);
-        return self;
-    };
-}
-
-- (SaveOrUpdateBlock)SaveOrUpdate {
-    return ^(NSArray *array) {
-        self->_operation = CSaveOrUpdate;
-        setArrayToSelf(self, array);
-        return self;
-    };
-}
-
-- (InsertOneBlock)InsertOne {
-    return ^(id one) {
-        self->_operation = CInsert;
-        self->_target = one;
-        return self;
-    };
-}
-
-- (UpdateOneBlock)UpdateOne {
-    return ^(id one) {
-        self->_operation = CUpdate;
-        self->_target = one;
-        return self;
-    };
-}
-
-- (DeleteOneBlock)DeleteOne {
-    return ^(id one) {
-        self->_operation = CDelete;
-        self->_target = one;
-        return self;
-    };
-}
-
-- (SaveOrUpdateOneBlock)SaveOrUpdateOne {
-    return ^(id one) {
-        self->_operation = CSaveOrUpdate;
-        self->_target = one;
-        return self;
-    };
-}
-
-#pragma mark - query
-
-- (SelectClassBlock)Select {
-    return ^(Class<JRPersistent> clazz) {
-        self->_operation = CSelect;
-        self->_targetClazz = clazz;
-        return self;
-    };
-}
-
-
-- (SelectColumnsBlock)ColumnsSelect {
-    return ^(NSArray *array) {
-        self->_operation = CSelectCustomized;
-        self->_selectColumns = array;
-        return self;
-    };
-}
-
-- (SelectCountBlock)CountSelect {
+static inline ClassBlock __setTargetClassToSelf(JRDBChain *self, ChainOperation operation) {
     return ^(Class clazz) {
+        __operationCheck(self);
+        self->_operation = operation;
+        self->_targetClazz = clazz;
+        return self;
+    };
+}
+
+- (ClassBlock)CreateTable {
+    return __setTargetClassToSelf(self, CCreateTable);
+}
+
+- (ClassBlock)UpdateTable {
+    return __setTargetClassToSelf(self, CUpdateTable);
+}
+
+- (ClassBlock)DropTable {
+    return __setTargetClassToSelf(self, CDropTable);
+}
+
+- (ClassBlock)TruncateTable {
+    return __setTargetClassToSelf(self, CTruncateTable);
+}
+
+- (ClassBlock)DeleteAll {
+    return __setTargetClassToSelf(self, CDeleteAll);
+}
+
+- (ClassBlock)Select {
+    return __setTargetClassToSelf(self, CSelect);
+}
+
+static inline ArrayBlock __setTargetArrayToSelf(JRDBChain *self, ChainOperation operation) {
+    return ^(NSArray *array) {
+        __operationCheck(self);
+        self->_operation = operation;
+        if ([array.firstObject isKindOfClass:[NSArray class]]) {
+            self->_targetArray = array.firstObject;
+        }
+        else if (array.count == 1) {
+            self->_target = array.firstObject;
+        } else {
+            self->_targetArray = array;
+        }
+        return self;
+    };
+}
+
+- (ArrayBlock)Insert {
+    return __setTargetArrayToSelf(self, CInsert);
+}
+
+- (ArrayBlock)Update {
+    return __setTargetArrayToSelf(self, CUpdate);
+}
+
+- (ArrayBlock)Delete {
+    return __setTargetArrayToSelf(self, CDelete);
+}
+
+- (ArrayBlock)SaveOrUpdate {
+    return __setTargetArrayToSelf(self, CSaveOrUpdate);
+}
+
+static inline ObjectBlock __setTargetToSelf(JRDBChain *self, ChainOperation operation) {
+    return ^(id one) {
+        __operationCheck(self);
+        self->_operation = operation;
+        self->_target = one;
+        return self;
+    };
+}
+
+- (ObjectBlock)InsertOne {
+    return __setTargetToSelf(self, CInsert);
+}
+
+- (ObjectBlock)UpdateOne {
+    return __setTargetToSelf(self, CUpdate);
+}
+
+- (ObjectBlock)DeleteOne {
+    return __setTargetToSelf(self, CDelete);
+}
+
+- (ObjectBlock)SaveOrUpdateOne {
+    return __setTargetToSelf(self, CSaveOrUpdate);
+}
+
+#pragma mark - customized query
+
+- (ClassBlock)CountSelect {
+    return ^(Class clazz) {
+        __operationCheck(self);
         self->_operation = CSelectCount;
         self->_targetClazz= clazz;
+        return self;
+    };
+}
+
+- (ArrayBlock)ColumnsSelect {
+    return ^(NSArray *array) {
+        __operationCheck(self);
+        self->_operation = CSelectCustomized;
+        self->_selectColumns = array;
         return self;
     };
 }
@@ -278,107 +220,79 @@ static inline JRDBChain * setArrayToSelf(JRDBChain *self, NSArray *array) {
     };
 }
 
-- (ObjectBlock)InDB {
-    return ^(FMDatabase *db) {
-        self->_db = db;
+static inline ObjectBlock __setObjectPropertyToSelf(JRDBChain *self, NSString *keypath) {
+    return ^(id value) {
+        [self setValue:value forKey:keypath];
         return self;
     };
+}
+
+- (ObjectBlock)InDB {
+    return __setObjectPropertyToSelf(self, J(JRDBChain, db));
 }
 
 - (ObjectBlock)Group {
-    return ^(NSString *groupBy) {
-        self->_groupBy = groupBy;
-        return self;
-    };
+    return __setObjectPropertyToSelf(self, J(JRDBChain, groupBy));
 }
 
 - (ObjectBlock)Order {
-    return ^(NSString *orderBy) {
-        self->_orderBy = orderBy;
-        return self;
-    };
+    return __setObjectPropertyToSelf(self, J(JRDBChain, orderBy));
 }
 
 - (ObjectBlock)Where {
-    return ^(NSString *where) {
-        self->_whereString = where;
-        return self;
-    };
+    return __setObjectPropertyToSelf(self, J(JRDBChain, whereString));
 }
 
 - (ObjectBlock)WhereIdIs {
-    return ^(NSString *ID) {
-        self->_whereId = ID;
-        return self;
-    };
+    return __setObjectPropertyToSelf(self, J(JRDBChain, whereId));
 }
 
 - (ObjectBlock)WherePKIs {
-    return ^(id pk) {
-        self->_wherePK = pk;
+    return __setObjectPropertyToSelf(self, J(JRDBChain, wherePK));
+}
+
+- (ArrayBlock)Params {
+    return __setObjectPropertyToSelf(self, J(JRDBChain, parameters));
+}
+
+- (ArrayBlock)Columns {
+    return __setObjectPropertyToSelf(self, J(JRDBChain, columnsArray));
+}
+
+- (ArrayBlock)Ignore {
+    return __setObjectPropertyToSelf(self, J(JRDBChain, ignoreArray));
+}
+
+static inline BoolBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *keypath) {
+    return ^(BOOL value) {
+        [self setValue:@(value) forKey:keypath];
         return self;
     };
 }
 
 - (BoolBlock)Recursive {
-    return ^(BOOL isRecursive) {
-        self->_isRecursive = isRecursive;
-        return self;
-    };
+    return __setBoolPropertyToSelf(self, J(JRDBChain, isRecursive));
 }
 
 - (BoolBlock)Sync {
-    return ^(BOOL isSync) {
-        self->_isSync = isSync;
-        return self;
-    };
+    return __setBoolPropertyToSelf(self, J(JRDBChain, isSync));
 }
 
 - (BoolBlock)Transaction {
-    return ^(BOOL useTransaction) {
-        self->_useTransaction = useTransaction;
-        return self;
-    };
+    return __setBoolPropertyToSelf(self, J(JRDBChain, useTransaction));
 }
 
 - (BoolBlock)Desc {
-    return ^(BOOL isDesc) {
-        self->_isDesc = isDesc;
-        return self;
-    };
+    return __setBoolPropertyToSelf(self, J(JRDBChain, isDesc));
 }
 
 - (BoolBlock)Cache {
-    return ^(BOOL useCache) {
-        self->_useCache = useCache;
-        return self;
-    };
+    return __setBoolPropertyToSelf(self, J(JRDBChain, useCache));
 }
 
 - (CompleteBlock)Complete {
     return ^(JRDBChainComplete complete) {
         self->_completeBlock = complete;
-        return self;
-    };
-}
-
-- (ObjectBlock)Params {
-    return ^(NSArray *array) {
-        self->_parameters = array;
-        return self;
-    };
-}
-
-- (ObjectBlock)Columns {
-    return ^(NSArray *array) {
-        self->_columnsArray = array;
-        return self;
-    };
-}
-
-- (ObjectBlock)Ignore {
-    return ^(NSArray *array) {
-        self->_ignoreArray = array;
         return self;
     };
 }
@@ -428,60 +342,6 @@ static inline JRDBChain * setArrayToSelf(JRDBChain *self, NSArray *array) {
         return nil;
     }
     return [NSString stringWithFormat:@" limit %zd,%zd ", _limitIn.start, _limitIn.length];
-}
-
-- (NSMutableArray<NSNumber *> *)history {
-    if (!_history) {
-        _history = [NSMutableArray array];
-    }
-    return _history;
-}
-
-#pragma mark - private method
-
-- (BOOL)_checkValid:(NSNumber *)action {
-    if ([self _isOperationBlock:action]) {
-        return [self _validOperation:action];
-    } else {
-        return [self _validOperation:action];
-    }
-}
-
-- (BOOL)_isOperationBlock:(NSNumber *)action {
-    return [action intValue] < 2000;
-}
-
-- (BOOL)_validOperation:(NSNumber *)action {
-    for (NSNumber *historyAction in self.history) {
-        if ([historyAction intValue] > 999 && [historyAction intValue] < 2000) {
-            return NO;
-        }
-    }
-    return YES;
-}
-
-- (BOOL)_validProperty:(NSNumber *)action {
-    switch ([action intValue]) {
-        case PH_Columns:
-            break;
-        case PH_Ignore:
-            break;
-        case PH_Where:break;
-        case PH_Group:break;
-        case PH_Order:break;
-        case PH_InDB:break;
-        case PH_From:break;
-        case PH_Desc:break;
-        case PH_Limit:break;
-        case PH_Params:break;
-        case PH_Recursive:
-        case PH_NowInMain:
-        case PH_Complete:
-        case PH_Transaction:
-            return YES;
-        default:return NO;
-    }
-    return NO;
 }
 
 

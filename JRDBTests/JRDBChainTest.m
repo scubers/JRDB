@@ -46,7 +46,7 @@
 }
 
 - (void)testAAAAA {
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"abcabc" object:nil];
+    [J_Select(Person) exe:nil];
 }
 
 #pragma mark - Delete
@@ -239,11 +239,11 @@
 - (void)testSelectByID {
     Person *p = [[J_Select(Person) exe:nil] firstObject];
     
-    Person *p1 = [J_Select(Person).WherePKIs(p.i_string) exe:nil];
-    Person *p2 = [J_Select(Person).WherePKIs(p.i_string).Cache(YES) exe:nil];
+    Person *p1 = [J_Select(Person).WherePKIs(p.ID) exe:nil];
+    Person *p2 = [J_Select(Person).WherePKIs(p.ID).Cache(YES) exe:nil];
     [p1 isEqual:p2];
 
-
+    
 }
 
 - (void)testSelectAll {
