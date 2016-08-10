@@ -85,7 +85,7 @@ static inline void __operationCheck(JRDBChain *self) {
     }
 }
 
-static inline ClassBlock __setTargetClassToSelf(JRDBChain *self, ChainOperation operation) {
+static inline JRClassBlock __setTargetClassToSelf(JRDBChain *self, ChainOperation operation) {
     return ^(Class clazz) {
         __operationCheck(self);
         self->_operation = operation;
@@ -94,31 +94,31 @@ static inline ClassBlock __setTargetClassToSelf(JRDBChain *self, ChainOperation 
     };
 }
 
-- (ClassBlock)CreateTable {
+- (JRClassBlock)CreateTable {
     return __setTargetClassToSelf(self, CCreateTable);
 }
 
-- (ClassBlock)UpdateTable {
+- (JRClassBlock)UpdateTable {
     return __setTargetClassToSelf(self, CUpdateTable);
 }
 
-- (ClassBlock)DropTable {
+- (JRClassBlock)DropTable {
     return __setTargetClassToSelf(self, CDropTable);
 }
 
-- (ClassBlock)TruncateTable {
+- (JRClassBlock)TruncateTable {
     return __setTargetClassToSelf(self, CTruncateTable);
 }
 
-- (ClassBlock)DeleteAll {
+- (JRClassBlock)DeleteAll {
     return __setTargetClassToSelf(self, CDeleteAll);
 }
 
-- (ClassBlock)Select {
+- (JRClassBlock)Select {
     return __setTargetClassToSelf(self, CSelect);
 }
 
-static inline ArrayBlock __setTargetArrayToSelf(JRDBChain *self, ChainOperation operation) {
+static inline JRArrayBlock __setTargetArrayToSelf(JRDBChain *self, ChainOperation operation) {
     return ^(NSArray *array) {
         __operationCheck(self);
         self->_operation = operation;
@@ -134,23 +134,23 @@ static inline ArrayBlock __setTargetArrayToSelf(JRDBChain *self, ChainOperation 
     };
 }
 
-- (ArrayBlock)Insert {
+- (JRArrayBlock)Insert {
     return __setTargetArrayToSelf(self, CInsert);
 }
 
-- (ArrayBlock)Update {
+- (JRArrayBlock)Update {
     return __setTargetArrayToSelf(self, CUpdate);
 }
 
-- (ArrayBlock)Delete {
+- (JRArrayBlock)Delete {
     return __setTargetArrayToSelf(self, CDelete);
 }
 
-- (ArrayBlock)SaveOrUpdate {
+- (JRArrayBlock)SaveOrUpdate {
     return __setTargetArrayToSelf(self, CSaveOrUpdate);
 }
 
-static inline ObjectBlock __setTargetToSelf(JRDBChain *self, ChainOperation operation) {
+static inline JRObjectBlock __setTargetToSelf(JRDBChain *self, ChainOperation operation) {
     return ^(id one) {
         __operationCheck(self);
         self->_operation = operation;
@@ -159,25 +159,25 @@ static inline ObjectBlock __setTargetToSelf(JRDBChain *self, ChainOperation oper
     };
 }
 
-- (ObjectBlock)InsertOne {
+- (JRObjectBlock)InsertOne {
     return __setTargetToSelf(self, CInsert);
 }
 
-- (ObjectBlock)UpdateOne {
+- (JRObjectBlock)UpdateOne {
     return __setTargetToSelf(self, CUpdate);
 }
 
-- (ObjectBlock)DeleteOne {
+- (JRObjectBlock)DeleteOne {
     return __setTargetToSelf(self, CDelete);
 }
 
-- (ObjectBlock)SaveOrUpdateOne {
+- (JRObjectBlock)SaveOrUpdateOne {
     return __setTargetToSelf(self, CSaveOrUpdate);
 }
 
 #pragma mark - customized query
 
-- (ClassBlock)CountSelect {
+- (JRClassBlock)CountSelect {
     return ^(Class clazz) {
         __operationCheck(self);
         self->_operation = CSelectCount;
@@ -186,7 +186,7 @@ static inline ObjectBlock __setTargetToSelf(JRDBChain *self, ChainOperation oper
     };
 }
 
-- (ArrayBlock)ColumnsSelect {
+- (JRArrayBlock)ColumnsSelect {
     return ^(NSArray *array) {
         __operationCheck(self);
         self->_operation = CSelectCustomized;
@@ -197,7 +197,7 @@ static inline ObjectBlock __setTargetToSelf(JRDBChain *self, ChainOperation oper
 
 #pragma mark - Property
 
-- (ObjectBlock)From {
+- (JRObjectBlock)From {
     return ^(id from) {
         if (object_isClass(from)) {
             self->_targetClazz = from;
@@ -213,84 +213,84 @@ static inline ObjectBlock __setTargetToSelf(JRDBChain *self, ChainOperation oper
     };
 }
 
-- (LimitBlock)Limit {
+- (JRLimitBlock)Limit {
     return ^(NSUInteger start, NSUInteger length){
         self->_limitIn = (JRLimit){start, length};
         return self;
     };
 }
 
-static inline ObjectBlock __setObjectPropertyToSelf(JRDBChain *self, NSString *keypath) {
+static inline JRObjectBlock __setObjectPropertyToSelf(JRDBChain *self, NSString *keypath) {
     return ^(id value) {
         [self setValue:value forKey:keypath];
         return self;
     };
 }
 
-- (ObjectBlock)InDB {
+- (JRObjectBlock)InDB {
     return __setObjectPropertyToSelf(self, J(JRDBChain, db));
 }
 
-- (ObjectBlock)Group {
+- (JRObjectBlock)Group {
     return __setObjectPropertyToSelf(self, J(JRDBChain, groupBy));
 }
 
-- (ObjectBlock)Order {
+- (JRObjectBlock)Order {
     return __setObjectPropertyToSelf(self, J(JRDBChain, orderBy));
 }
 
-- (ObjectBlock)Where {
+- (JRObjectBlock)Where {
     return __setObjectPropertyToSelf(self, J(JRDBChain, whereString));
 }
 
-- (ObjectBlock)WhereIdIs {
+- (JRObjectBlock)WhereIdIs {
     return __setObjectPropertyToSelf(self, J(JRDBChain, whereId));
 }
 
-- (ObjectBlock)WherePKIs {
+- (JRObjectBlock)WherePKIs {
     return __setObjectPropertyToSelf(self, J(JRDBChain, wherePK));
 }
 
-- (ArrayBlock)Params {
+- (JRArrayBlock)Params {
     return __setObjectPropertyToSelf(self, J(JRDBChain, parameters));
 }
 
-- (ArrayBlock)Columns {
+- (JRArrayBlock)Columns {
     return __setObjectPropertyToSelf(self, J(JRDBChain, columnsArray));
 }
 
-- (ArrayBlock)Ignore {
+- (JRArrayBlock)Ignore {
     return __setObjectPropertyToSelf(self, J(JRDBChain, ignoreArray));
 }
 
-static inline BoolBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *keypath) {
-    return ^(BOOL value) {
+static inline JRIntegerBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *keypath) {
+    return ^(NSInteger value) {
         [self setValue:@(value) forKey:keypath];
         return self;
     };
 }
 
-- (BoolBlock)Recursive {
+- (JRIntegerBlock)Recursive {
     return __setBoolPropertyToSelf(self, J(JRDBChain, isRecursive));
 }
 
-- (BoolBlock)Sync {
+- (JRIntegerBlock)Sync {
     return __setBoolPropertyToSelf(self, J(JRDBChain, isSync));
 }
 
-- (BoolBlock)Transaction {
+- (JRIntegerBlock)Transaction {
     return __setBoolPropertyToSelf(self, J(JRDBChain, useTransaction));
 }
 
-- (BoolBlock)Desc {
+- (JRIntegerBlock)Desc {
     return __setBoolPropertyToSelf(self, J(JRDBChain, isDesc));
 }
 
-- (BoolBlock)Cache {
+- (JRIntegerBlock)Cache {
     return __setBoolPropertyToSelf(self, J(JRDBChain, useCache));
 }
 
-- (CompleteBlock)Complete {
+- (JRCompleteBlock)Complete {
     return ^(JRDBChainComplete complete) {
         self->_completeBlock = complete;
         return self;
