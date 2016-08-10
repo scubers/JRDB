@@ -21,7 +21,7 @@
 }
 
 - (NSString *)description {
-    return [NSString stringWithFormat:@"%@: name:%@, databaseName:%@, databaseType:%@, relation:%d, clazz:%@"
+    return [NSString stringWithFormat:@"%@: name:%@, databaseName:%@, databaseType:%@, relation:%zd, clazz:%@"
             , @"JRActivatedProperty"
             , self.name
             , self.dataBaseName

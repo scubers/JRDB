@@ -11,11 +11,9 @@
 
 #pragma mark - convenience marco
 
-#define jr_weak(object) __weak __typeof__(object) weak##_##object = object
-#define jr_strong(object) __typeof__(object) object = weak##_##object
-
-#define J_Select(...)           ([JRDBChain new].Select((_variableListToArray(__VA_ARGS__, 0))))
-#define J_SelectJ(_arg_)        (J_Select([_arg_ class]))
+#define J_Select(_arg_)         ([JRDBChain new].Select([_arg_ class]))
+#define J_SelectCount(_arg_)    ([JRDBChain new].CountSelect([_arg_ class]))
+#define J_SelectColumns(...)    ([JRDBChain new].ColumnsSelect(_variableListToArray(__VA_ARGS__, 0)))
 
 #define J_Insert(...)           ([JRDBChain new].Insert(_variableListToArray(__VA_ARGS__, 0)))
 #define J_Update(...)           ([JRDBChain new].Update(_variableListToArray(__VA_ARGS__, 0)))
@@ -58,10 +56,6 @@ static inline NSArray * _variableListToArray(id first, ...) {
     return [args copy];
 }
 
-static inline NSArray * _JRToArray(id arg) {
-    if (!arg) NSLog(@"warning: _JRToArray should not pass a nil value");
-    return [arg isKindOfClass:[NSArray class]] ? arg : arg ? @[arg] : @[];
-}
 
 
 typedef NS_ENUM(NSInteger, ChainOperation) {
@@ -82,8 +76,6 @@ typedef NS_ENUM(NSInteger, ChainOperation) {
 
 };
 
-static NSString * const JRCount = @"_|-JRCount-|_";
-
 @class FMDatabase, JRDBChain, JRQueryCondition;
 
 typedef JRDBChain *(^InsertBlock)(NSArray<id<JRPersistent>> *array);
@@ -96,7 +88,9 @@ typedef JRDBChain *(^UpdateOneBlock)(id<JRPersistent> one);
 typedef JRDBChain *(^DeleteOneBlock)(id<JRPersistent> one);
 typedef JRDBChain *(^SaveOrUpdateOneBlock)(id<JRPersistent> one);
 
-typedef JRDBChain *(^SelectBlock)(NSArray *array);
+typedef JRDBChain *(^SelectColumnsBlock)(NSArray *array);
+typedef JRDBChain *(^SelectClassBlock)(Class<JRPersistent> clazz);
+typedef JRDBChain *(^SelectCountBlock)(Class<JRPersistent> clazz);
 
 
 typedef JRDBChain *(^DeleteAllBlock)(Class<JRPersistent> clazz);
@@ -106,14 +100,12 @@ typedef JRDBChain *(^UpdateTableBlock)(Class<JRPersistent> clazz);
 typedef JRDBChain *(^DropTableBlock)(Class<JRPersistent> clazz);
 typedef JRDBChain *(^TruncateTableBlock)(Class<JRPersistent> clazz);
 
+typedef JRDBChain *(^BoolBlock)(BOOL value);
+typedef JRDBChain *(^ObjectBlock)(id value);
+typedef JRDBChain *(^CompleteBlock)(JRDBChainComplete complete);
+typedef JRDBChain *(^LimitBlock)(NSUInteger start, NSUInteger length);
 
-#define BlockPropertyDeclare(_ownership_, _name_, _paramType_, _paramName_) \
-@property(nonatomic,_ownership_,readonly)_paramType_ _paramName_;\
-@property(nonatomic,copy,readonly)JRDBChain*(^_name_)(_paramType_ param);
 
-
-#define OperationBlockDeclare(_name_, _type_) \
-@property(nonatomic,copy,readonly)_type_ _name_;
 
 struct JRLimit {
     long long start;
@@ -123,65 +115,104 @@ typedef struct JRLimit JRLimit;
 
 @interface JRDBChain : NSObject
 
-@property (nonatomic, strong, readonly) id<JRPersistent>          target;///< obj对象
-@property (nonatomic, strong, readonly) Class<JRPersistent>       targetClazz; ///< obj array，
-@property (nonatomic, strong, readonly) NSArray<id<JRPersistent>> *targetArray; ///< clazz，
+@property (nonatomic, strong, readonly) id<JRPersistent>          target;///< operation target
+@property (nonatomic, strong, readonly) Class<JRPersistent>       targetClazz; ///< operation class
+@property (nonatomic, strong, readonly) NSArray<id<JRPersistent>> *targetArray; ///< operation target array
 
 
-@property (nonatomic, assign, readonly) ChainOperation   operation;///< 操作类型
-@property (nonatomic, strong, readonly) NSString         *tableName;///< 被指定的表明
+@property (nonatomic, assign, readonly) ChainOperation   operation;///< operation type
+@property (nonatomic, strong, readonly) NSString         *tableName;///< operation table name
 
-@property (nonatomic, strong, readonly) NSArray<JRQueryCondition *> *queryCondition; ///< 根据where语句生成的查询条件
-@property (nonatomic, strong, readonly) NSArray<NSString*> *selectColumns;///< 自定义select时的columns
+@property (nonatomic, strong, readonly) NSArray<JRQueryCondition *> *queryCondition; ///< queryConditions whitch generic by where condition
+@property (nonatomic, strong, readonly) NSArray<NSString*> *selectColumns;///< customizd select columns array
 
 
 // value param
-@property (nonatomic, copy) JRDBChain *(^From)(id from);///< 接收Class类
+@property (nonatomic, copy, readonly  ) ObjectBlock          From;///< sepecific a class for operation
 
-@property (nonatomic, strong, readonly) JRDBChain *(^Limit)(NSUInteger start, NSUInteger length);
-@property (nonatomic, assign, readonly) JRLimit limitIn;
-@property (nonatomic, strong, readonly) NSString *limitString;
+@property (nonatomic, strong, readonly) NSString             *limitString;
+@property (nonatomic, assign, readonly) JRLimit              limitIn;
+@property (nonatomic, strong, readonly) LimitBlock           Limit;///< limit condition: Limit(start, length)
 
 
-BlockPropertyDeclare(strong, InDB, FMDatabase *, db);
-BlockPropertyDeclare(strong, Order, NSString *, orderBy);
-BlockPropertyDeclare(strong, Group, NSString *, groupBy);
-BlockPropertyDeclare(strong, Where, NSString *, whereString);
-BlockPropertyDeclare(strong, WhereIdIs, NSString *, whereId);
-BlockPropertyDeclare(strong, WherePKIs, id, wherePK);
-BlockPropertyDeclare(assign, Recursive, BOOL, isRecursive);
-BlockPropertyDeclare(assign, Sync, BOOL, isSync);
-BlockPropertyDeclare(assign, Desc, BOOL, isDesc);
-BlockPropertyDeclare(assign, Cache, BOOL, useCache);
-BlockPropertyDeclare(assign, Trasaction, BOOL, useTransaction);
-BlockPropertyDeclare(copy, Complete, JRDBChainComplete, completeBlock);
+@property (nonatomic, strong, readonly) FMDatabase           *db;
+@property (nonatomic, copy, readonly  ) ObjectBlock          InDB;///< the database : parameter is FMDatabase: InDB(db)
+
+
+@property (nonatomic, strong, readonly) NSString             *orderBy;
+@property (nonatomic, copy, readonly  ) ObjectBlock          Order;///< orderBy condition: parameter is NSString: Order(@"_age")
+
+@property (nonatomic, strong, readonly) NSString             *groupBy;
+@property (nonatomic, copy, readonly  ) ObjectBlock          Group;///< groupBy condition: parameter is NSString: Group(@"_age")
+
+@property (nonatomic, strong, readonly) NSString             *whereString;
+@property (nonatomic, copy, readonly  ) ObjectBlock          Where;///< where condition: parameter is NSString: Where(@"_age > ? and _name like 'L%'")
+
+@property (nonatomic, strong, readonly) NSString             *whereId;
+@property (nonatomic, copy, readonly  ) ObjectBlock          WhereIdIs;///< whereIdIs condition: parameter is NSString: WhereIdIs(@"xxxxxxxxxx")
+
+@property (nonatomic, strong, readonly) id                   wherePK;
+@property (nonatomic, copy, readonly  ) ObjectBlock          WherePKIs;///< wehrePKIs condition: parameter is id: WherePKIs(obj)
+
+@property (nonatomic, assign, readonly) BOOL                 isRecursive;
+@property (nonatomic, copy, readonly  ) BoolBlock            Recursive;///< recursive condition, if the operation should recursive, NO by default
+
+
+@property (nonatomic, assign, readonly) BOOL                 isSync;
+@property (nonatomic, copy, readonly  ) BoolBlock            Sync;///< sync condition, if the operation should execute on sepecific serial queue and wait on current thread, YES by default
+
+@property (nonatomic, assign, readonly) BOOL                 isDesc;
+@property (nonatomic, copy, readonly  ) BoolBlock            Desc;///< desc condition, NO by default
+
+@property (nonatomic, assign, readonly) BOOL                 useCache;
+@property (nonatomic, copy, readonly  ) BoolBlock            Cache;///< cache condition, NO by default
+
+@property (nonatomic, assign, readonly) BOOL                 useTransaction;
+@property (nonatomic, copy, readonly  ) BoolBlock            Transaction;///< useTransaction , YES by default
+
+@property (nonatomic, copy, readonly  ) JRDBChainComplete    completeBlock;
+@property (nonatomic, copy, readonly  ) CompleteBlock        Complete;
 
 // array param
-BlockPropertyDeclare(strong, Params, NSArray *, parameters);
-BlockPropertyDeclare(strong, Columns, NSArray *, columnsArray);
-BlockPropertyDeclare(strong, Ignore, NSArray *, ignoreArray);
+@property (nonatomic, strong, readonly) NSArray              *parameters;
+@property (nonatomic, copy, readonly  ) ObjectBlock          Params;
+
+@property (nonatomic, strong, readonly) NSArray              *columnsArray;
+@property (nonatomic, copy, readonly  ) ObjectBlock          Columns;
+
+@property (nonatomic, strong, readonly) NSArray              *ignoreArray;
+@property (nonatomic, copy, readonly  ) ObjectBlock          Ignore;
 
 
 // operation
-OperationBlockDeclare(Insert, InsertBlock);
-OperationBlockDeclare(Update, UpdateBlock);
-OperationBlockDeclare(Delete, DeleteBlock);
-OperationBlockDeclare(SaveOrUpdate, SaveOrUpdateBlock);
+@property (nonatomic, copy, readonly  ) InsertBlock          Insert;///< InsertBlock parameter is NSArray: Insert(@[obj, obj1])
+@property (nonatomic, copy, readonly  ) UpdateBlock          Update;///< UpdateBlock parameter is NSArray: Update(@[obj, obj1])
+@property (nonatomic, copy, readonly  ) DeleteBlock          Delete;///< DeleteBlock parameter is NSArray: Delete(@[obj, obj1])
+@property (nonatomic, copy, readonly  ) SaveOrUpdateBlock    SaveOrUpdate;///< SaveOrUpdateBlock parameter is NSArray: SaveOrUpdate(@[obj, obj1])
 
-OperationBlockDeclare(InsertOne, InsertOneBlock);
-OperationBlockDeclare(UpdateOne, UpdateOneBlock);
-OperationBlockDeclare(DeleteOne, DeleteOneBlock);
-OperationBlockDeclare(SaveOrUpdateOne, SaveOrUpdateOneBlock);
+@property (nonatomic, copy, readonly  ) InsertOneBlock       InsertOne;///< InsertOneBlock parameter is id<JRPersistent>: InsertOne(obj)
+@property (nonatomic, copy, readonly  ) UpdateOneBlock       UpdateOne;///< UpdateOneBlock parameter is id<JRPersistent>: UpdateOne(obj)
+@property (nonatomic, copy, readonly  ) DeleteOneBlock       DeleteOne;///< DeleteOneBlock parameter is id<JRPersistent>: DeleteOne(obj)
+@property (nonatomic, copy, readonly  ) SaveOrUpdateOneBlock SaveOrUpdateOne;///< SaveOrUpdateOneBlock parameter is id<JRPersistent>: SaveOrUpdateOne(obj)
 
-OperationBlockDeclare(DeleteAll, DeleteAllBlock);
-OperationBlockDeclare(Select, SelectBlock);
+@property (nonatomic, copy, readonly  ) DeleteAllBlock       DeleteAll;///< DeleteAllBlock parameter is Class<JRPersistent>: DeleteAll([Person class])
+@property (nonatomic, copy, readonly  ) SelectColumnsBlock   ColumnsSelect;///< SelectBlock parameter is NSArray; <br/> Usage:<br/> (ColumnsSelect(@[@"_name", @"_age"]))
+@property (nonatomic, copy, readonly  ) SelectCountBlock     CountSelect;///< SelectBlock parameter is NSArray; <br/> Usage:<br/>     1-(CountSelect(@[[Person class]]))
+@property (nonatomic, copy, readonly  ) SelectClassBlock     Select;///< SelectBlock parameter is NSArray; <br/> Usage:<br/>     1-(Select(@[[Person class]]))
 
-OperationBlockDeclare(CreateTable, CreateTableBlock);
-OperationBlockDeclare(UpdateTable, UpdateTableBlock);
-OperationBlockDeclare(DropTable, DropTableBlock);
-OperationBlockDeclare(TruncateTable, TruncateTableBlock);
+@property (nonatomic, copy, readonly  ) CreateTableBlock     CreateTable;///< CreateTableBlock parameter is Class<JRPersistent>: CreateTable([Person class])
+@property (nonatomic, copy, readonly  ) UpdateTableBlock     UpdateTable;///< UpdateTableBlock parameter is Class<JRPersistent>: UpdateTable([Person class])
+@property (nonatomic, copy, readonly  ) DropTableBlock       DropTable;///< DropTableBlock parameter is Class<JRPersistent>: DropTable([Person class])
+@property (nonatomic, copy, readonly  ) TruncateTableBlock   TruncateTable;///< TruncateTableBlock parameter is Class<JRPersistent>: TruncateTable([Person class])
+
+
+/**
+ *  the method that execute the operation
+ *
+ *  @param complete
+ */
+- (id)exe:(JRDBChainComplete)complete;
 
 - (BOOL)isQuerySingle;
-- (id)exe:(JRDBChainComplete)complete;
 
 @end

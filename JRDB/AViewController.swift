@@ -75,21 +75,6 @@ class AViewController: UIViewController {
         let db = JRDBMgr.shareInstance().createDBWithPath("/Users/jmacmini/Desktop/test.sqlite")
         JRDBMgr.shareInstance().defaultDB = db
         
-        
-        
-        J_Select(PPP)
-            .From(PPP)
-            .Where("")
-            .ParamJ("")
-            .ColumnsJ("")
-            .IgnoreJ("")
-            .Order("")
-            .Group("")
-            .Limit(0,1)
-            .WhereIdIs("111")
-            .WherePKIs("111")
-//            .exe(nil);
-        
 //        test1Cycle()
 //        testFindByID()
 //        testThreeNodeCycle()

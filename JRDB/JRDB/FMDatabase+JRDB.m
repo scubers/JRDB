@@ -428,6 +428,15 @@ static NSString * const jrdb_synchronizing = @"jrdb_synchronizing";
     return
     [self jr_execute:^BOOL(FMDatabase * _Nonnull db) {
         AssertRegisteredClazz([one class]);
+        
+        if (![self jr_checkExistsTable4Clazz:[one class]]) {
+            BOOL result = [self jr_createTable4Clazz:[one class]];
+            if (!result) {
+                NSLog(@"create table error");
+                return NO;
+            }
+        }
+        
         if ([[one class] jr_customPrimarykey]) { // 自定义主键
             NSAssert([one jr_customPrimarykeyValue] != nil, @"custom Primary key should not be nil");
             long count = [self jr_count4PrimaryKey:[one jr_customPrimarykeyValue] clazz:[one class] synchronized:NO  complete:nil];
