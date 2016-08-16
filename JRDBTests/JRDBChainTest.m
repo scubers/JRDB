@@ -32,7 +32,7 @@
                                                ]];
     [JRDBMgr shareInstance].defaultDB = db;
     
-    //    [JRDBMgr shareInstance].debugMode = NO;
+//    [JRDBMgr shareInstance].debugMode = NO;
     NSLog(@"%@", [[JRDBMgr shareInstance] registeredClazz]);
 }
 
@@ -46,7 +46,7 @@
 }
 
 - (void)testAAAAA {
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"abcabc" object:nil];
+    [J_Select(Person) exe:nil];
 }
 
 #pragma mark - Delete
@@ -61,13 +61,13 @@
 }
 
 - (void)testDeleteOne {
-    Person *p = [[J_SelectJ(Person) exe:nil] firstObject];
+    Person *p = [[J_Select(Person) exe:nil] firstObject];
     [J_Delete(p).Recursive(NO) exe:nil];
 //    [J_DELETE(p).Recursive(YES) exe:nil];
 }
 
 - (void)testDeleteMany {
-    NSArray *array = [J_SelectJ(Person) exe:nil];
+    NSArray *array = [J_Select(Person) exe:nil];
     [J_Delete(array).Recursive(NO) exe:nil];
 //    [J_DELETE(array).Recursive(YES) exe:nil];
 }
@@ -105,7 +105,7 @@
      .InDB([JRDBMgr defaultDB])
      .Recursive(YES)
      .Sync(YES)
-     .Trasaction(YES)
+     .Transaction(YES)
      exe:nil];
 }
 
@@ -237,26 +237,25 @@
 #pragma mark - Select
 
 - (void)testSelectByID {
-    Person *p = [[J_SelectJ(Person) exe:nil] firstObject];
+    Person *p = [[J_Select(Person) exe:nil] firstObject];
     
-    Person *p1 = [J_SelectJ(Person).WherePKIs(p.i_string) exe:nil];
-    Person *p2 = [J_SelectJ(Person).WherePKIs(p.i_string).Cache(YES) exe:nil];
+    Person *p1 = [J_Select(Person).WherePKIs(p.ID) exe:nil];
+    Person *p2 = [J_Select(Person).WherePKIs(p.ID).Cache(YES) exe:nil];
     [p1 isEqual:p2];
 
-
+    
 }
 
 - (void)testSelectAll {
     
-    NSArray<Person *> *ps2 = [J_Select(nil).FromJ(Person).Cache(NO) exe:nil];
+    NSArray<Person *> *ps2 = [J_Select(Person).Cache(NO) exe:nil];
     NSArray<Person *> *ps = [J_Select([Person class]).Recursive(YES).Cache(NO) exe:nil];
     NSArray<Person *> *ps1 = [J_Select([Person class]).Recursive(YES).Cache(NO) exe:nil];
     NSLog(@"%@", ps);
     NSLog(@"%@", ps1);
     NSLog(@"%@", ps2);
     
-    id result = J_Select(nil)
-                    .FromJ(Person)
+    id result = J_Select(Person)
                     .Recursive(YES)
                     .Sync(YES)
                     .Cache(YES)
@@ -277,7 +276,7 @@
 
 - (void)testOtherCondition {
     NSArray<Person *> *ps =
-    [J_Select([Person class])
+    [J_Select(Person)
     .Recursive(YES)
     .FromJ(Person)
     .OrderJ(Person, a_int)
@@ -292,8 +291,7 @@
 
 - (void)testSelectCount {
     NSNumber *count =
-    [J_Select(JRCount)
-    .FromJ(Person)
+    [J_SelectCount(Person)
     .OrderJ(Person,a_int)
     .GroupJ(Person,b_unsigned_int)
     .Limit(0, 3)
@@ -305,7 +303,7 @@
 
 - (void)testSelectColumn {
     NSArray<Person *> *ps =
-    [J_Select(J(Person, a_int), J(Person, b_unsigned_int))
+    [J_SelectColumns(J(Person, a_int), J(Person, b_unsigned_int))
     .Recursive(YES) // 自定义查询，即使设置关联查询，也不会进行关联查询
     .FromJ(Person)
     .OrderJ(Person, a_int)
@@ -325,7 +323,7 @@
     int count = 100;
     
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
-        [J_Select(JRCount).FromJ(Person) exe:^(JRDBChain * _Nonnull chain, id  _Nullable result) {
+        [J_Select(Person) exe:^(JRDBChain * _Nonnull chain, id  _Nullable result) {
             NSLog(@"%@", result);
         }];
     });
@@ -336,7 +334,7 @@
         [ori addObject:@(i)];
         
         dispatch_async(dispatch_get_global_queue(0, 0), ^{
-            id result = [J_SelectJ(Person).Recursive(YES).Sync(YES) exe:^(JRDBChain * _Nonnull chain, id  _Nullable result) {
+            id result = [J_Select(Person).Recursive(YES).Sync(YES) exe:^(JRDBChain * _Nonnull chain, id  _Nullable result) {
                 NSLog(@"___complete %@", @([result count]));
             }];
             NSLog(@"=+=+=+=+  %@", @([result count]));

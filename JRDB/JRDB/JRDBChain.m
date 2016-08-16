@@ -14,94 +14,7 @@
 #import "NSObject+Reflect.h"
 #import "JRQueryCondition.h"
 
-#define BlockPropertyImpl(_type_, _methodName_, _propName_)\
-- (JRDBChain *(^)(_type_ prop))_methodName_ {\
-    jr_weak(self);\
-    return ^JRDBChain *(_type_ prop){\
-        jr_strong(self);\
-        self->_##_propName_ = prop;\
-        return self;\
-    };\
-}
-
-#define OperationBlockForArrayImpl(_block_, _methodName_, _operation_)\
-- (_block_)_methodName_ {\
-    jr_weak(self);\
-    return ^JRDBChain *(NSArray *array) {\
-        jr_strong(self);\
-        self->_operation = _operation_;             \
-        if ([array.firstObject isKindOfClass:[NSArray class]]) {            \
-            self->_targetArray = array.firstObject;                 \
-        }                                                       \
-        else if (array.count == 1) {                    \
-            self->_target = array.firstObject;\
-        } else {\
-            self->_targetArray = array;\
-        }\
-        return self;\
-    };\
-}
-
-#define OperationBlockForClazzImpl(_block_, _methodName_, _operation_)\
-- (_block_)_methodName_ {\
-    jr_weak(self);\
-    return ^JRDBChain *(Class<JRPersistent> clazz) {\
-        jr_strong(self);\
-        self->_operation = _operation_;\
-        self->_targetClazz = clazz;\
-        return self;\
-    };\
-}
-
-#define OperationBlockForObjectImpl(_block_, _methodName_, _operation_)\
-- (_block_)_methodName_ {                       \
-    jr_weak(self);                          \
-    return ^JRDBChain *(id one) {                \
-        jr_strong(self);                        \
-        self->_operation = _operation_;         \
-        self->_target = one;                    \
-        return self;                        \
-    };                                      \
-}
-
-
-
-#define HistoryKey(key) \
-static NSString * const key = @#key;
-
-typedef NS_ENUM(NSInteger, OperationHistory) {
-    OH_Insert = 1000,
-    OH_Update,
-    OH_Delete,
-    OH_DeleteAll,
-    OH_Select,
-} ;
-
-typedef NS_ENUM(NSInteger, PropertyHistory) {
-    PH_InDB = 2000,
-    PH_From,
-    PH_Where,
-    PH_Group,
-    PH_Order,
-    PH_Desc,
-    PH_Limit,
-
-    PH_Recursive,
-    PH_NowInMain,
-    PH_Transaction,
-    PH_Complete,
-
-    PH_Params,
-    PH_Columns,
-    PH_Ignore,
-} ;
-
 @interface JRDBChain ()
-
-@property (nonatomic, strong) NSMutableArray<NSNumber *> *history;///< 链式调用历史，用于检测
-
-@property (nonatomic, strong) id result;///< 存储执行结果
-
 @end
 
 @implementation JRDBChain
@@ -128,7 +41,6 @@ typedef NS_ENUM(NSInteger, PropertyHistory) {
 @synthesize columnsArray   = _columnsArray;
 @synthesize ignoreArray    = _ignoreArray;
 
-
 - (instancetype)init {
     if (self = [super init]) {
         _isRecursive    = NO;
@@ -148,7 +60,9 @@ typedef NS_ENUM(NSInteger, PropertyHistory) {
         return nil;
     }
     
-    _completeBlock = complete;
+    if (complete) {
+        _completeBlock = complete;
+    }
 
     if (self.operation == CSelect) {
         id result = [_db jr_executeQueryChain:self complete:complete];
@@ -163,52 +77,128 @@ typedef NS_ENUM(NSInteger, PropertyHistory) {
     }
 }
 
-
-
 #pragma mark - Operation
 
-- (SelectBlock)Select {
-    jr_weak(self);
-    return ^JRDBChain *(NSArray *array) {
-        jr_strong(self);
-        self->_operation = CSelect;
-        if (!array.count || object_isClass(array.firstObject)) {
-            self->_targetClazz = array.firstObject;
+static inline void __operationCheck(JRDBChain *self) {
+    if (self.operation != COperationNone) {
+        @throw [NSError errorWithDomain:@"multiple Chain operation error" code:0 userInfo:nil];
+    }
+}
+
+static inline JRClassBlock __setTargetClassToSelf(JRDBChain *self, ChainOperation operation) {
+    return ^(Class clazz) {
+        __operationCheck(self);
+        self->_operation = operation;
+        self->_targetClazz = clazz;
+        return self;
+    };
+}
+
+- (JRClassBlock)CreateTable {
+    return __setTargetClassToSelf(self, CCreateTable);
+}
+
+- (JRClassBlock)UpdateTable {
+    return __setTargetClassToSelf(self, CUpdateTable);
+}
+
+- (JRClassBlock)DropTable {
+    return __setTargetClassToSelf(self, CDropTable);
+}
+
+- (JRClassBlock)TruncateTable {
+    return __setTargetClassToSelf(self, CTruncateTable);
+}
+
+- (JRClassBlock)DeleteAll {
+    return __setTargetClassToSelf(self, CDeleteAll);
+}
+
+- (JRClassBlock)Select {
+    return __setTargetClassToSelf(self, CSelect);
+}
+
+static inline JRArrayBlock __setTargetArrayToSelf(JRDBChain *self, ChainOperation operation) {
+    return ^(NSArray *array) {
+        __operationCheck(self);
+        self->_operation = operation;
+        if ([array.firstObject isKindOfClass:[NSArray class]]) {
+            self->_targetArray = array.firstObject;
         }
-        else if ([array.firstObject isEqualToString:JRCount]) {
-            self->_operation = CSelectCount;
-        }
-        else {
-            self->_operation = CSelectCustomized;
-            self->_selectColumns = array;
+        else if (array.count == 1) {
+            self->_target = array.firstObject;
+        } else {
+            self->_targetArray = array;
         }
         return self;
     };
 }
 
+- (JRArrayBlock)Insert {
+    return __setTargetArrayToSelf(self, CInsert);
+}
 
-OperationBlockForClazzImpl(CreateTableBlock, CreateTable, CCreateTable)
-OperationBlockForClazzImpl(UpdateTableBlock, UpdateTable, CUpdateTable)
-OperationBlockForClazzImpl(DropTableBlock, DropTable, CDropTable)
-OperationBlockForClazzImpl(TruncateTableBlock, TruncateTable, CTruncateTable)
-OperationBlockForClazzImpl(DeleteAllBlock, DeleteAll, CDeleteAll)
+- (JRArrayBlock)Update {
+    return __setTargetArrayToSelf(self, CUpdate);
+}
 
-OperationBlockForArrayImpl(InsertBlock, Insert, CInsert)
-OperationBlockForArrayImpl(UpdateBlock, Update, CUpdate)
-OperationBlockForArrayImpl(DeleteBlock, Delete, CDelete)
-OperationBlockForArrayImpl(SaveOrUpdateBlock, SaveOrUpdate, CSaveOrUpdate)
+- (JRArrayBlock)Delete {
+    return __setTargetArrayToSelf(self, CDelete);
+}
 
-OperationBlockForObjectImpl(InsertOneBlock, InsertOne, CInsert)
-OperationBlockForObjectImpl(UpdateOneBlock, UpdateOne, CUpdate)
-OperationBlockForObjectImpl(DeleteOneBlock, DeleteOne, CDelete)
-OperationBlockForObjectImpl(SaveOrUpdateOneBlock, SaveOrUpdateOne, CSaveOrUpdate)
+- (JRArrayBlock)SaveOrUpdate {
+    return __setTargetArrayToSelf(self, CSaveOrUpdate);
+}
+
+static inline JRObjectBlock __setTargetToSelf(JRDBChain *self, ChainOperation operation) {
+    return ^(id one) {
+        __operationCheck(self);
+        self->_operation = operation;
+        self->_target = one;
+        return self;
+    };
+}
+
+- (JRObjectBlock)InsertOne {
+    return __setTargetToSelf(self, CInsert);
+}
+
+- (JRObjectBlock)UpdateOne {
+    return __setTargetToSelf(self, CUpdate);
+}
+
+- (JRObjectBlock)DeleteOne {
+    return __setTargetToSelf(self, CDelete);
+}
+
+- (JRObjectBlock)SaveOrUpdateOne {
+    return __setTargetToSelf(self, CSaveOrUpdate);
+}
+
+#pragma mark - customized query
+
+- (JRClassBlock)CountSelect {
+    return ^(Class clazz) {
+        __operationCheck(self);
+        self->_operation = CSelectCount;
+        self->_targetClazz= clazz;
+        return self;
+    };
+}
+
+- (JRArrayBlock)ColumnsSelect {
+    return ^(NSArray *array) {
+        __operationCheck(self);
+        self->_operation = CSelectCustomized;
+        self->_selectColumns = array;
+        return self;
+    };
+}
 
 #pragma mark - Property
 
-- (JRDBChain *(^)(id))From {
-    jr_weak(self);
-    return ^JRDBChain *(id from) {
-        jr_strong(self);
+- (JRObjectBlock)From {
+    return ^(id from) {
         if (object_isClass(from)) {
             self->_targetClazz = from;
             self->_tableName = [((Class)from) shortClazzName];
@@ -223,32 +213,89 @@ OperationBlockForObjectImpl(SaveOrUpdateOneBlock, SaveOrUpdateOne, CSaveOrUpdate
     };
 }
 
-- (JRDBChain *(^)(NSUInteger, NSUInteger))Limit {
-    jr_weak(self);
-    return ^JRDBChain *(NSUInteger start, NSUInteger length){
-        jr_strong(self);
+- (JRLimitBlock)Limit {
+    return ^(NSUInteger start, NSUInteger length){
         self->_limitIn = (JRLimit){start, length};
         return self;
     };
 }
 
-BlockPropertyImpl(FMDatabase *, InDB, db)
-BlockPropertyImpl(NSString *, Group, groupBy)
-BlockPropertyImpl(NSString *, Order, orderBy)
-BlockPropertyImpl(NSString *, Where, whereString)
-BlockPropertyImpl(NSString *, WhereIdIs, whereId)
-BlockPropertyImpl(id, WherePKIs, wherePK)
-BlockPropertyImpl(BOOL, Recursive, isRecursive)
-BlockPropertyImpl(BOOL, Sync, isSync)
-BlockPropertyImpl(BOOL, Trasaction, useTransaction)
-BlockPropertyImpl(BOOL, Desc, isDesc)
-BlockPropertyImpl(BOOL, Cache, useCache)
-BlockPropertyImpl(JRDBChainComplete, Complete, completeBlock)
+static inline JRObjectBlock __setObjectPropertyToSelf(JRDBChain *self, NSString *keypath) {
+    return ^(id value) {
+        [self setValue:value forKey:keypath];
+        return self;
+    };
+}
 
-BlockPropertyImpl(NSArray *, Params, parameters)
-BlockPropertyImpl(NSArray *, Columns, columnsArray)
-BlockPropertyImpl(NSArray *, Ignore, ignoreArray)
+- (JRObjectBlock)InDB {
+    return __setObjectPropertyToSelf(self, J(JRDBChain, db));
+}
 
+- (JRObjectBlock)Group {
+    return __setObjectPropertyToSelf(self, J(JRDBChain, groupBy));
+}
+
+- (JRObjectBlock)Order {
+    return __setObjectPropertyToSelf(self, J(JRDBChain, orderBy));
+}
+
+- (JRObjectBlock)Where {
+    return __setObjectPropertyToSelf(self, J(JRDBChain, whereString));
+}
+
+- (JRObjectBlock)WhereIdIs {
+    return __setObjectPropertyToSelf(self, J(JRDBChain, whereId));
+}
+
+- (JRObjectBlock)WherePKIs {
+    return __setObjectPropertyToSelf(self, J(JRDBChain, wherePK));
+}
+
+- (JRArrayBlock)Params {
+    return __setObjectPropertyToSelf(self, J(JRDBChain, parameters));
+}
+
+- (JRArrayBlock)Columns {
+    return __setObjectPropertyToSelf(self, J(JRDBChain, columnsArray));
+}
+
+- (JRArrayBlock)Ignore {
+    return __setObjectPropertyToSelf(self, J(JRDBChain, ignoreArray));
+}
+
+static inline JRIntegerBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *keypath) {
+    return ^(NSInteger value) {
+        [self setValue:@(value) forKey:keypath];
+        return self;
+    };
+}
+
+- (JRIntegerBlock)Recursive {
+    return __setBoolPropertyToSelf(self, J(JRDBChain, isRecursive));
+}
+
+- (JRIntegerBlock)Sync {
+    return __setBoolPropertyToSelf(self, J(JRDBChain, isSync));
+}
+
+- (JRIntegerBlock)Transaction {
+    return __setBoolPropertyToSelf(self, J(JRDBChain, useTransaction));
+}
+
+- (JRIntegerBlock)Desc {
+    return __setBoolPropertyToSelf(self, J(JRDBChain, isDesc));
+}
+
+- (JRIntegerBlock)Cache {
+    return __setBoolPropertyToSelf(self, J(JRDBChain, useCache));
+}
+
+- (JRCompleteBlock)Complete {
+    return ^(JRDBChainComplete complete) {
+        self->_completeBlock = complete;
+        return self;
+    };
+}
 
 #pragma mark - Other method
 
@@ -276,6 +323,7 @@ BlockPropertyImpl(NSArray *, Ignore, ignoreArray)
 }
 
 #pragma mark - Setter Getter
+
 - (Class<JRPersistent>)targetClazz {
     if (_targetClazz) {
         return _targetClazz;
@@ -294,59 +342,6 @@ BlockPropertyImpl(NSArray *, Ignore, ignoreArray)
         return nil;
     }
     return [NSString stringWithFormat:@" limit %zd,%zd ", _limitIn.start, _limitIn.length];
-}
-
-- (NSMutableArray<NSNumber *> *)history {
-    if (!_history) {
-        _history = [NSMutableArray array];
-    }
-    return _history;
-}
-
-#pragma mark - private method
-- (BOOL)_checkValid:(NSNumber *)action {
-    if ([self _isOperationBlock:action]) {
-        return [self _validOperation:action];
-    } else {
-        return [self _validOperation:action];
-    }
-}
-
-- (BOOL)_isOperationBlock:(NSNumber *)action {
-    return [action intValue] < 2000;
-}
-
-- (BOOL)_validOperation:(NSNumber *)action {
-    for (NSNumber *historyAction in self.history) {
-        if ([historyAction intValue] > 999 && [historyAction intValue] < 2000) {
-            return NO;
-        }
-    }
-    return YES;
-}
-
-- (BOOL)_validProperty:(NSNumber *)action {
-    switch ([action intValue]) {
-        case PH_Columns:
-            break;
-        case PH_Ignore:
-            break;
-        case PH_Where:break;
-        case PH_Group:break;
-        case PH_Order:break;
-        case PH_InDB:break;
-        case PH_From:break;
-        case PH_Desc:break;
-        case PH_Limit:break;
-        case PH_Params:break;
-        case PH_Recursive:
-        case PH_NowInMain:
-        case PH_Complete:
-        case PH_Transaction:
-            return YES;
-        default:return NO;
-    }
-    return NO;
 }
 
 
