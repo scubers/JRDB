@@ -30,6 +30,8 @@ static NSString * const jrdb_class_registered_key = @"jrdb_class_registered_key"
 
 @implementation JRDBMgr
 
+@synthesize queues = _queues;
+
 static JRDBMgr *__shareInstance;
 + (instancetype)allocWithZone:(struct _NSZone *)zone {
     static dispatch_once_t onceToken;
@@ -114,6 +116,15 @@ static JRDBMgr *__shareInstance;
     }];
 }
 
+- (JRDBQueue *)queueWithPath:(NSString *)path {
+    JRDBQueue *queue = self.queues[path];
+    if (!queue) {
+        queue = [JRDBQueue databaseQueueWithPath:path];
+        if (queue) [self.queues setObject:queue forKey:path];
+    }
+    return queue;
+}
+
 #pragma mark - lazy load
 
 - (FMDatabase *)defaultDB {
@@ -133,6 +144,13 @@ static JRDBMgr *__shareInstance;
     
     _defaultDB = defaultDB;
     [_defaultDB open];
+}
+
+- (NSMutableDictionary<NSString *,JRDBQueue *> *)queues {
+    if (!_queues) {
+        _queues = [NSMutableDictionary dictionary];
+    }
+    return _queues;
 }
 
 - (NSMutableDictionary<NSString *,NSMutableDictionary<NSString *,id<JRPersistent>> *> *)recursiveCache {

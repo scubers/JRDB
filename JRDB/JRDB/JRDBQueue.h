@@ -12,4 +12,6 @@ static const void * const kJRDBQueueSpecificKey = &kJRDBQueueSpecificKey;
 
 @interface JRDBQueue : FMDatabaseQueue
 
+- (BOOL)isInCurrentQueue;
+
 @end

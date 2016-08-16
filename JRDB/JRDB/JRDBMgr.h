@@ -8,10 +8,14 @@
 
 #import <Foundation/Foundation.h>
 #import "JRPersistent.h"
+#import "JRDBQueue.h"
 
 @class FMDatabase;
 
 @interface JRDBMgr : NSObject
+
+
+@property (nonatomic, strong, readonly) NSMutableDictionary<NSString *, JRDBQueue *> * _Nonnull queues;
 
 @property (nonatomic, strong) FMDatabase * _Nullable defaultDB;
 @property (nonatomic, assign) BOOL debugMode;
@@ -57,6 +61,11 @@
  *  清楚缓存
  */
 - (void)clearObjCaches;
+
+/**
+ *  获取每个数据库的同步队列
+ */
+- (JRDBQueue * _Nullable)queueWithPath:(NSString * _Nonnull)path;
 
 #pragma mark - cache
 

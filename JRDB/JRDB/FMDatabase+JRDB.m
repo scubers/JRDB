@@ -35,20 +35,18 @@ static NSString * const jrdb_synchronizing = @"jrdb_synchronizing";
     objc_setAssociatedObject(self, &queuekey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-- (FMDatabaseQueue *)jr_databaseQueue {
-    FMDatabaseQueue *q = objc_getAssociatedObject(self, &queuekey);
+- (JRDBQueue *)jr_databaseQueue {
+    JRDBQueue *q = objc_getAssociatedObject(self, &queuekey);
     if (!q) {
-        q = [JRDBQueue databaseQueueWithPath:self.databasePath];
+        q = [[JRDBQueue alloc] initWithPath:self.databasePath];
         objc_setAssociatedObject(self, &queuekey, q, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
     return q;
 }
 
 - (void)jr_inQueue:(void (^)(FMDatabase *))block {
-    [[self jr_databaseQueue] inDatabase:^(FMDatabase *db) {
-        objc_setAssociatedObject(db, &jrdb_synchronizing, @(YES), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    [[JRDBMgr shareInstance].queues[self.databasePath] inDatabase:^(FMDatabase *db) {
         EXE_BLOCK(block, db);
-        objc_setAssociatedObject(db, &jrdb_synchronizing, @(NO), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }];
 }
 
@@ -56,10 +54,10 @@ static NSString * const jrdb_synchronizing = @"jrdb_synchronizing";
     return
     [[self jr_executeSync:YES block:^id _Nullable(FMDatabase * _Nonnull db) {
         BOOL rollback = ![db beginTransaction];
-        if (rollback) {
-            NSLog(@"begin transaction fail");
-            return @(!rollback);
-        }
+//        if (rollback) {
+//            NSLog(@"begin transaction fail");
+//            return @(!rollback);
+//        }
         rollback = NO;
         EXE_BLOCK(block, db, &rollback);
         if (rollback) {
@@ -75,10 +73,15 @@ static NSString * const jrdb_synchronizing = @"jrdb_synchronizing";
 
 - (BOOL)jr_execute:(BOOL (^)(FMDatabase * _Nonnull db))block useTransaction:(BOOL)useTransaction {
     if (useTransaction) {
-        NSAssert(![self inTransaction], @"database has been open a transaction");
-        if (![self beginTransaction]) {
-            NSLog(@"begin a transaction error!!!");
-            return NO;
+//        NSAssert(![self inTransaction], @"database has been open a transaction");
+//        if (![self beginTransaction]) {
+//            NSLog(@"begin a transaction error!!!");
+//            return NO;
+//        }
+        if ([self inTransaction]) {
+            NSLog(@"operation has open a transaction already, will not open again");
+        } else {
+            [self beginTransaction];
         }
     }
     BOOL flag = block(self);
@@ -94,7 +97,8 @@ static NSString * const jrdb_synchronizing = @"jrdb_synchronizing";
 }
 
 - (id)jr_executeSync:(BOOL)sync block:(id (^)(FMDatabase *db))block {
-    if (sync && ![objc_getAssociatedObject(self, &jrdb_synchronizing) boolValue]) {
+//    if (sync && ![objc_getAssociatedObject(self, &jrdb_synchronizing) boolValue]) {
+    if (sync && ![[[JRDBMgr shareInstance] queueWithPath:self.databasePath] isInCurrentQueue]) {
         __block id result;
         [self jr_inQueue:^(FMDatabase * _Nonnull db) {
             result = block(db);

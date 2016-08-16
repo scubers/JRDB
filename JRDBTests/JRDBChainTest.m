@@ -24,7 +24,7 @@
 - (void)setUp {
     [super setUp];
     [JRDBMgr defaultDB];
-    FMDatabase *db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/jmacmini/Desktop/test.sqlite"];
+    FMDatabase *db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/mac/Desktop/test.sqlite"];
     [[JRDBMgr shareInstance] registerClazzes:@[
                                                [Person class],
                                                [Card class],
@@ -348,6 +348,12 @@
 }
 
 - (void)testGCD2 {
+    Person *p = [self createPerson:0 name:nil];
+    [[JRDBMgr defaultDB] jr_inTransaction:^(FMDatabase * _Nonnull db, BOOL * _Nonnull rollBack) {
+//        id a = [J_Select(Person).InDB(db).Sync(YES) exe:nil];
+        id a = [J_Insert(p).InDB(db) exe:nil];
+        NSLog(@"%@", a);
+    }];
 }
 
 #pragma mark - convenience method

@@ -9,12 +9,13 @@
 #import "JRPersistent.h"
 #import "JRColumnSchema.h"
 #import <FMDB/FMDB.h>
+#import "JRDBQueue.h"
 
 @class JRQueryCondition, JRSql;
 
 @interface FMDatabase (JRDB)
 
-- (FMDatabaseQueue * _Nonnull)jr_databaseQueue;
+- (JRDBQueue * _Nonnull)jr_databaseQueue;
 
 - (void)jr_closeQueue;
 
