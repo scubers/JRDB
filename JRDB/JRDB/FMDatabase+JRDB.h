@@ -15,10 +15,6 @@
 
 @interface FMDatabase (JRDB)
 
-- (JRDBQueue * _Nonnull)jr_databaseQueue;
-
-- (void)jr_closeQueue;
-
 /**
  *  使用block来进行队列操作，后台操作，线程安全
  *

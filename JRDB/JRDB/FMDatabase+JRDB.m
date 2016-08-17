@@ -23,26 +23,9 @@
 
 #define AssertRegisteredClazz(clazz) NSAssert([[JRDBMgr shareInstance] isValidClazz:clazz], @"class: %@ should be registered in JRDBMgr", clazz)
 
-static NSString * const queuekey = @"queuekey";
-
 static NSString * const jrdb_synchronizing = @"jrdb_synchronizing";
 
-
 @implementation FMDatabase (JRDB)
-
-- (void)jr_closeQueue {
-    [[self jr_databaseQueue] close];
-    objc_setAssociatedObject(self, &queuekey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
-
-- (JRDBQueue *)jr_databaseQueue {
-    JRDBQueue *q = objc_getAssociatedObject(self, &queuekey);
-    if (!q) {
-        q = [[JRDBQueue alloc] initWithPath:self.databasePath];
-        objc_setAssociatedObject(self, &queuekey, q, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    }
-    return q;
-}
 
 - (void)jr_inQueue:(void (^)(FMDatabase *))block {
     [[JRDBMgr shareInstance].queues[self.databasePath] inDatabase:^(FMDatabase *db) {

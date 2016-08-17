@@ -164,9 +164,7 @@ static JRDBMgr *__shareInstance;
     if (_defaultDB == defaultDB) {
         return;
     }
-    [_defaultDB jr_closeQueue];
-    [_defaultDB close];
-    
+    [self closeDatabase:_defaultDB];
     _defaultDB = defaultDB;
     [_defaultDB open];
 }
