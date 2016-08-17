@@ -370,30 +370,29 @@
 
 - (void)testSelectAll {
     
-    NSArray<Person *> *ps2 = [J_Select(Person).Cache(NO) exe:nil];
-    NSArray<Person *> *ps = [J_Select([Person class]).Recursive(YES).Cache(NO) exe:nil];
-    NSArray<Person *> *ps1 = [J_Select([Person class]).Recursive(YES).Cache(NO) exe:nil];
+    NSArray<Person *> *ps2 = [J_Select(Person).NoCached exe:nil];
+    NSArray<Person *> *ps = [J_Select(Person).Recursively.NoCached exe:nil];
+    NSArray<Person *> *ps1 = [J_Select(Person).Recursively.NoCached exe:nil];
     NSLog(@"%@", ps);
     NSLog(@"%@", ps1);
     NSLog(@"%@", ps2);
     
     id result = J_Select(Person)
-                    .Recursive(YES)
-                    .Sync(YES)
-                    .Cache(YES)
                     .WhereJ(_name like ? and _height > ?)
                     .ParamsJ(@"a%", @100)
                     .GroupJ(Person, h_double)
                     .OrderJ(Person, d_long_long)
                     .Limit(0, 10)
-                    .Desc(YES);
+                    .Descend
+                    .Recursively
+                    .Safely
+                    .Cached
+                    .Transactional
+    ;
 
     NSLog(@"%@", result);
 
-    [J_Update(ps.firstObject)
-     .ColumnsJ(J(Person, a_int),J(Person, b_unsigned_int))
-     
-     exe:nil];
+    [J_Update(ps.firstObject).ColumnsJ(J(Person, a_int),J(Person, b_unsigned_int)) exe:nil];
 }
 
 - (void)testOtherCondition {

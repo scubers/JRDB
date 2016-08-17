@@ -273,21 +273,51 @@ static inline JRIntegerBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *
 - (JRIntegerBlock)Recursive {
     return __setBoolPropertyToSelf(self, J(JRDBChain, isRecursive));
 }
+- (instancetype)Recursively {
+    return self.Recursive(YES);
+}
+- (instancetype)UnRecursively {
+    return self.Recursive(NO);
+}
 
 - (JRIntegerBlock)Sync {
     return __setBoolPropertyToSelf(self, J(JRDBChain, isSync));
+}
+- (instancetype)UnSafely {
+    return self.Sync(NO);
+}
+- (instancetype)Safely {
+    return self.Sync(YES);
 }
 
 - (JRIntegerBlock)Transaction {
     return __setBoolPropertyToSelf(self, J(JRDBChain, useTransaction));
 }
+- (instancetype)NoTransaction {
+    return self.Transaction(NO);
+}
+- (instancetype)Transactional {
+    return self.Transaction(YES);
+}
 
 - (JRIntegerBlock)Desc {
     return __setBoolPropertyToSelf(self, J(JRDBChain, isDesc));
 }
+- (instancetype)Descend {
+    return self.Desc(YES);
+}
+- (instancetype)Ascend {
+    return self.Desc(NO);
+}
 
 - (JRIntegerBlock)Cache {
     return __setBoolPropertyToSelf(self, J(JRDBChain, useCache));
+}
+- (instancetype)Cached {
+    return self.Cache(YES);
+}
+- (instancetype)NoCached {
+    return self.Cache(NO);
 }
 
 - (JRCompleteBlock)Complete {
