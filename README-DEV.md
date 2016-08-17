@@ -1,4 +1,4 @@
-# iOS用对FMDB的超好用封装
+# iOS用对FMDB封装
 
 **一个对FMDB进行类Hibernate封装的ios库**
 
@@ -25,82 +25,36 @@ Feedback: [jr-wong@qq.com](mailto:jrwong@qq.com)
 
 ---
 
-# Installation 【安装】
-```ruby
+# Installation
+```
 pod 'JRDB'
 ```
 
----
+# Latest Update
 
-# Latest Update 【最新更新】
+> - 优化线程操作
+> - 修复一直bug
+> - 完善测试用例（完善测试代码覆盖率）
+> - 优化代码，去除宏代码编写
 
-## 添加宏 J(\_clazz\_, \_prop\_)，并更新某些宏，具体变更如下
-
-在写字段名的时候，总会遇到@"_xxxx" 这种情况，字段名称不记得，要去model类里面找然后再copy，然后再加个下划线。有了这个宏就可以自行联想了;
-
-```objc
-// 使用这个宏则可以使用xcode的方法联想功能，联想出属性，并且返回带 下划线的字段名
-#define J(_clazz_, _prop_)      (((void)(NO && ((void)[_clazz_ new]._prop_, NO)), @"_"#_prop_))
-```
-
-#### 使用方法
-
-```objc
-NSString *name = J(Person, age);// name = @"_age";
-```
-这些都不需要自己写，都可以使用xcode的联想功能
-
-#### 修改宏
-
-```objc
-#define OrderJ(_clazz_, _prop_) Order(J(_clazz_, _prop_))
-#define GroupJ(_clazz_, _prop_) Group(J(_clazz_, _prop_))
-```
-
-- 使用
-
-```objc
-id result = J_SelectJ(Person)
-                .Recursive(YES)
-                .Sync(YES)
-                .Cache(YES)
-                .WhereJ(_name like ? and _height > ?)
-                .ParamsJ(@"a%", @100)
-                .GroupJ(Person, grade)// 可以xcode联想
-                .OrderJ(Person, age)  // 可以xcode联想
-                .Limit(0, 10)
-                .Desc(YES);
-
-//[J_Update(p).ColumnsJ(@"_age", @"_name") exe:nil];
-[J_Update(p).ColumnsJ(J(Person, age), J(Person, name)) exe:nil];
-
-```
-
----
-## 1.0.0更新内容
-- 简化API数量，提高方法灵活度
-- 添加连接调用，查询更方便，摆脱JRQueryCondition的困扰
-- 新增查询缓存，可配置是否使用缓存，提高查询速度
-- 更灵活的线程调用
-- 修复已知bug
-
-
-## API链式调用
 
 ---
 
-#### Insert【插入】
+# API链式调用
+
+
+Insert
+---
 
 ```objc
-
 // 链式调用统一返回 id 类型，update数据库返回是 @YES 或者 @NO
 Person *p = [Person new];
 
 id result =[J_Insert(p)
-				.InDB([JRDBMgr defaultDB])  
-				.Recursive(YES) 		
-				.Sync(YES)			
-				.Trasaction(YES)		
+				.InDB([JRDBMgr defaultDB]) // by Default 
+				.Recursive(NO)			// by default 
+				.Sync(YES)				// by default
+				.Trasaction(YES)			// by default
 				exe:nil];		
 
 // 可以省略为
@@ -113,50 +67,25 @@ id result = [J_Insert(@[p1, p2, p3]) exe:nil]
 
 ```
 
-- 相关配置
 
-| 配置        	| 功能		|参数类型|
-|:-------------:|------------| --------|
-| InDB				| 配置可以省略，默认使用[JRDBMgr defaultDB]，<br/>执行的数据库| InDB(FMDatabase *)|
-| Recursive     | 配置可以省略<br/>默认为NO，功能为开关是否进行[关联操作](#linksave)|YES or NO|
-| Sync				|配置可以省略<br/>默认YES：阻塞本线程，线程安全同步执行数据库操作，使用FMDatabaseQueue；<br/>NO：在本线程执行数据库操作，线程不安全，使用FMDatabase|YES or NO|
-|Transaction		|配置可省略<br/>默认为YES：本操作自带事务；<br/>NO：本操作不开启事务，需要外部有事务支持|YES or NO|
-|exe:nil|执行数据库操作，参数为数据库操作完成的回调block|block or nil|
-
+Update
 ---
 
-#### Update【更新】
-
 ```objc
-
 // 更新指定列
-id result = [J_Update(p)
-                 .ColumnsJ(@"_age", @"_name")
-               //.Columns(@[@"_age", @"_name"])
-                  exe:nil];
+id result = [J_Update(p).Columns(@[@"_age", @"_name"]) exe:nil];
 // 忽略指定列
-id result = [J_Update(p)
-                 .IgnoreJ(@"_phone")
-               //.Ignore(@[@"_phone"])
-                  exe:nil];
+id result = [J_Update(p).Ignore(@[@"_phone"]) exe:nil];
 
 // 更新数组
 id result = [J_Update(p1, p2) exe:nil];
 id result = [J_Update(@[p1, p2, p3]) exe:nil];
 ```
 
-- 相关配置
 
-| 配置        	| 功能		|参数类型|
-|:-------------:|------------| ----- |
-| Columns			| 配置可省略，默认为nil，更新时的指定列| NSArray *|
-| Ignore     		| 配置可省略，默认为nil，更新时的忽略指定列| NSArray * |
-| Recursive		| 更新的关联操作[详情请看](#linkupdate)| YES or NO |
-||可以使用Insert的配置	|
-
+Delete
 ---
 
-#### Delete【删除】
 * 相关配置（Insert 和 Update的配置都可以使用）
 * Recursive：[详细请看](#linkdelete)
 
@@ -164,43 +93,43 @@ id result = [J_Update(@[p1, p2, p3]) exe:nil];
 id result = [J_Delete(p) exe:nil];
 ```
 
----
 
-#### Select 【查询】
+Select
+---
 
 
 ```objc
 // 普通查询
 id result = [J_Select(Person)
-                    .Recursive(YES)
-                    .Sync(YES)
-                    .Cache(YES)
+                    .Recursive(YES)		// by default
+                    .Sync(YES)			// by default
+                    .Cache(NO)			// by default
+                    .Desc(NO)				// by default
                     .Where(@"_name like ? and _height > ?")
                     .Params(@[@"L%", @150])
                     .Group(@"_level")
                     .Order(@"_age")
-                    .Limit(0, 10)
-                    .Desc(YES)
+                    .Limit(0, 10)			
                     exe:nil];
 
 // 自定义查询
 id result = [J_SelectColumns(@[@"_age", @"_name"])
-						.From([Person class])
-						.Recursive(YES)   // 自定义查询的时候，不会进行关联查询
-						.Sync(YES)
-						.Cache(YES)
+						.FromJ([Person class])
+						.Recursive(YES)   // this will not function in customize query
+						.Sync(YES)		 // by default
+						.Cache(NO)		 // this will not function in customize query
 						.Where(@"_name like ? and _height > ?")
 						.Params(@[@"L%", @150])
 						.Group(@"_level")
 						.Order(@"_age")
 						.Limit(0, 10)
-						.Desc(YES)
+						.Desc(NO)			// by default
 						exe:nil];
 
 id result = [J_SelectCount(Person)
-						.Recursive(YES)   // 自定义查询的时候，不会进行关联查询
+						.Recursive(YES)   // this will not function in customize 
 						.Sync(YES)
-						.Cache(YES)
+						.Cache(NO)		 // this will not function in customize 
 						.Where(@"_name like ? and _height > ?")
 						.Params(@"L%", @150)
 						.Group(@"_level")
@@ -211,98 +140,57 @@ id result = [J_SelectCount(Person)
                     
 ```
   
-- 相关配置
+- Configuration
 
-| 配置        	| 功能		|参数类型|
+| 配置        	| 功能		|参数类型| 
 |:-------------:|------------| -------- |
-| Recursive		| 配置可省略，默认为NO: 不进行[关联查询](#linkselect)效率高，YES：[关联查询](#linkselect)效率低|YES or NO|
-| Sync     		| 配置可以省略<br/>默认YES：阻塞本线程，线程安全同步执行数据库操作；<br/>NO：在本线程执行数据库操作，线程不安全|YES or NO|
-| Cache		| 配置可省略，默认为NO: 不使用缓存；YES：使用缓存|YES or NO|
+| InDB		| [JRDBMgr defaultDB] by default;|FMDatabase * |
+| From		| 自定义查询时指定的类名|Class |
+| Recursive		| NO by default;<br/> NO:效率高，<br/>YES：[关联操作](#linksave)效率低|YES or NO|
+| Transaction		| YES by default;<br/> NO:本操作不包含事务，外界需要事务支持<br/>YES：包含事务|YES or NO|
+| Sync     		| YES by default;<br/>YES:阻塞本线程，线程安全同步执行数据库操作；<br/>NO：在本线程执行数据库操作，线程不安全	|YES or NO|
+| Cache		| NO by default	|YES or NO|
 | Where		| Where 后面的条件筛选语句，使用 ？作为参数占位符| NSString * |
+| WhereIdIs	| 等同于 Where(@" _id = ?")| NSString * |
+| WherePKIs	| 等同于 Where(@"<#primary key#> = ?")| id |
 | Params		| Where 语句占位符对应的参数| NSArray * | 
+| Columns		| 更新时候指定更新的列| NSArray * | 
+| Ignore		| 更新时指定忽略的列| NSArray * | 
 | Group		| group by 字段| NSString * |
 | Order		| order by 字段| NSString * |
-| limit		| 分页字段 （start, length）| unsigned long, unsigned long |
-| Desc			| 是否倒序，默认NO | YES or NO|
+| Limit		| 分页字段 （start, length）| unsigned long, unsigned long |
+| Desc			| NO by default; 是否根据orderby 进行降序 | YES or NO|
 
+
+Macro
 ---
 
-#### 宏
-
-在写链式调用的时候，每次写字符串都要写个 @""，实在太烦人，囧，懒惰的我，你懂的
-
-```objc
-
-#define J_Select(_arg_)         ([JRDBChain new].Select([_arg_ class]))
-#define J_SelectCount(_arg_)    ([JRDBChain new].CountSelect([_arg_ class]))
-#define J_SelectColumns(...)    ([JRDBChain new].ColumnsSelect(_variableListToArray(__VA_ARGS__, 0)))
-
-#define J_Insert(...)           ([JRDBChain new].Insert(_variableListToArray(__VA_ARGS__, 0)))
-#define J_Update(...)           ([JRDBChain new].Update(_variableListToArray(__VA_ARGS__, 0)))
-#define J_Delete(...)           ([JRDBChain new].Delete(_variableListToArray(__VA_ARGS__, 0)))
-#define J_SaveOrUpdate(...)     ([JRDBChain new].SaveOrUpdate(_variableListToArray(__VA_ARGS__, 0)))
-
-#define J_DeleteAll(_arg_)      ([JRDBChain new].DeleteAll([_arg_ class]))
-
-#define J_CreateTable(_arg_)    ([JRDBChain new].CreateTable([_arg_ class]))
-#define J_UpdateTable(_arg_)    ([JRDBChain new].UpdateTable([_arg_ class]))
-#define J_DropTable(_arg_)      ([JRDBChain new].DropTable([_arg_ class]))
-#define J_TruncateTable(_arg_)  ([JRDBChain new].TruncateTable([_arg_ class]))
-
-#define ParamsJ(...)            Params((_variableListToArray(__VA_ARGS__, 0)))
-#define ColumnsJ(...)           Columns((_variableListToArray(__VA_ARGS__, 0)))
-#define IgnoreJ(...)            Ignore((_variableListToArray(__VA_ARGS__, 0)))
-
-#define FromJ(_arg_)            From([_arg_ class])
-#define WhereJ(_arg_)           Where(@#_arg_)
-#define OrderJ(_clazz_, _prop_) Order(J(_clazz_, _prop_))
-#define GroupJ(_clazz_, _prop_) Group(J(_clazz_, _prop_))
-
-#define J(_clazz_, _prop_)      (((void)(NO && ((void)[_clazz_ new]._prop_, NO)), @"_"#_prop_))
-
+- 使用宏，让调用变成更智能
+ 	- `From([Person class]) --> FromJ(Person)`
+	- `Where(@"_name = ?") --> WhereJ(_name = ?)`
+	- `Order(@"_name") --> OrderJ(Person, name)`
+	- `Group(@"_name") --> GroupJ(Person, name)`
+	- `Params(@[@"jack", @"mark"]) --> ParamsJ(@"jack", @"mark")`
+	- `Ignore(@[@"_name", @"_age"]) --> IgnoreJ(@"_name", @"_age")`
+	- `Columns(@[@"_name", @"_age"]) --> ColumnsJ(@"_name", @"_age")`
 
 ```
-
-有了上面的宏，调用就可以下面这样的
-
-```objc
-
-id result = [J_Select(Person)
-                .Recursive(YES)
-                .Sync(YES)
-                .Cache(YES)
-                .WhereJ(_name like ? and _height > ?)
-                .ParamsJ(@"a%", @100)
-                .GroupJ(_level)
-                .OrderJ(_age)
-                .Limit(0, 10)
-                .Desc(YES)
-                exe:nil];
-
-// 自定义查询
-id result = [J_SelectColumns(@"_age", @"_name")
-						.FromJ(Person)
-						.Recursive(YES)   // 自定义查询的时候，不会进行关联查询
-						.Sync(YES)
-						.Cache(YES)
-						.WhereJ(_name like ? and _height > ?)
-						.ParamsJ(@"L%", @150)
-						.GroupJ(_level)
-						.OrderJ(_age)
-						.Limit(0, 10)
-						.Desc(YES)
-						exe:nil];
-
+// example
+id result = J_Select(Person)
+                    .WhereJ(_name like ? and _height > ?)
+                    .ParamsJ(@"a%", @100)
+                    .GroupJ(Person, h_double)
+                    .OrderJ(Person, d_long_long)
+                    .Limit(0, 10)
+                    .Descend
+                    .Recursively
+                    .Safely
+                    .Cached
+                    .Transactional;
 ```
 
-| 配置        	| 使用类型|
-|:-------------:|------------|
-| `J_Select`		| `J_Select(Person)`|
-| `J_SelectColumns`		| `J_SelectColumns(@"_name", @"_age")`|
-| `J_Insert`		| `J_Insert(p1, p2, p3)`, `J_Insert(@[p1, p2, p3])` <br/>update，delete， saveOrUpdate 同理|
-| `J_DeleteAll`	| `J_DeleteAll(Person)`, <br/> CreateTable, UpdateTable, DropTable, TruncateTable 同理|
-| `ParamsJ`		| `ParamsJ(@1, @3, @4)`, `ParamsJ(@[@1, @3, @4])`,<br/>  ColumnsJ, IgnoreJ, 同理 |
-| `FromJ`			| `FromJ(Person)`, WhereJ, OrderJ, GroupJ, 同理 |
+
+# --------------------Old Version---------------------
 
 #### NSObject+JRDB
 
@@ -313,11 +201,6 @@ id result = [J_SelectColumns(@"_age", @"_name")
 - 该分类中的方法全部使用事务。
 - 该分类方法不能在	`FMDatabase+JRDB.h` 中的各种block中使用，因为分类中的方法使用的是默认数据库，而  `FMDatabase+JRDB.h` 中的block都要使用回调block中提供的 `FMDatabase` 对象。
 
- 
-
----
-
-# ----------旧版更新  Old Version-----------
 
 ### Prepare 【准备】
 

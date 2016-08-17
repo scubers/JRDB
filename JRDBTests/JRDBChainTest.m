@@ -387,8 +387,7 @@
                     .Recursively
                     .Safely
                     .Cached
-                    .Transactional
-    ;
+                    .Transactional;
 
     NSLog(@"%@", result);
 
