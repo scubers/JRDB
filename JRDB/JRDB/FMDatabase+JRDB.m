@@ -21,7 +21,7 @@
 #import "JRDBQueue.h"
 
 
-#define AssertRegisteredClazz(clazz) NSAssert([[JRDBMgr shareInstance] isValidateClazz:clazz], @"class: %@ should be registered in JRDBMgr", clazz)
+#define AssertRegisteredClazz(clazz) NSAssert([[JRDBMgr shareInstance] isValidClazz:clazz], @"class: %@ should be registered in JRDBMgr", clazz)
 
 static NSString * const queuekey = @"queuekey";
 
@@ -53,11 +53,12 @@ static NSString * const jrdb_synchronizing = @"jrdb_synchronizing";
 - (BOOL)jr_inTransaction:(void (^)(FMDatabase *, BOOL *))block {
     return
     [[self jr_executeSync:YES block:^id _Nullable(FMDatabase * _Nonnull db) {
+        
         BOOL rollback = ![db beginTransaction];
-//        if (rollback) {
-//            NSLog(@"begin transaction fail");
-//            return @(!rollback);
-//        }
+        if (rollback) {
+            NSLog(@"begin transaction fail");
+            return @(!rollback);
+        }
         rollback = NO;
         EXE_BLOCK(block, db, &rollback);
         if (rollback) {
@@ -73,15 +74,12 @@ static NSString * const jrdb_synchronizing = @"jrdb_synchronizing";
 
 - (BOOL)jr_execute:(BOOL (^)(FMDatabase * _Nonnull db))block useTransaction:(BOOL)useTransaction {
     if (useTransaction) {
-//        NSAssert(![self inTransaction], @"database has been open a transaction");
-//        if (![self beginTransaction]) {
-//            NSLog(@"begin a transaction error!!!");
-//            return NO;
-//        }
         if ([self inTransaction]) {
             NSLog(@"operation has open a transaction already, will not open again");
-        } else {
-            [self beginTransaction];
+            return block(self);
+        } else if (![self beginTransaction]) {
+            NSLog(@"begin a transaction error");
+            return NO;
         }
     }
     BOOL flag = block(self);
@@ -97,7 +95,6 @@ static NSString * const jrdb_synchronizing = @"jrdb_synchronizing";
 }
 
 - (id)jr_executeSync:(BOOL)sync block:(id (^)(FMDatabase *db))block {
-//    if (sync && ![objc_getAssociatedObject(self, &jrdb_synchronizing) boolValue]) {
     if (sync && ![[[JRDBMgr shareInstance] queueWithPath:self.databasePath] isInCurrentQueue]) {
         __block id result;
         [self jr_inQueue:^(FMDatabase * _Nonnull db) {

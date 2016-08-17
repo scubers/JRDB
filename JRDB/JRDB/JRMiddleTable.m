@@ -105,16 +105,13 @@
 }
 
 - (BOOL)cleanRubbishData {
-    if ([_db inTransaction]) {
-        NSLog(@"can not clean rubbish data due to the database is in transaction now");
-        return NO;
-    }
-//delete from Person_money_mid_table where (person_ids not in (select _id from Person)) or (money_ids not in (select _id from Money))
+    //delete from Person_money_mid_table where (person_ids not in (select _id from Person)) or (money_ids not in (select _id from Money))
     return
-    [_db jr_execute:^BOOL(FMDatabase * _Nonnull db) {
+    
+    [_db jr_inTransaction:^(FMDatabase * _Nonnull db, BOOL * _Nonnull rollBack) {
         NSString *sql = [NSString stringWithFormat:@"delete from %@ where (%@ not in (select _id from %@)) or (%@ not in (select _id from %@))", [self tableName], MiddleColumn4Clazz(_clazz1), [_clazz1 shortClazzName], MiddleColumn4Clazz(_clazz2), [_clazz2 shortClazzName]];
-        return [_db executeUpdate:sql];
-    } useTransaction:YES];
+        *rollBack = ![db executeUpdate:sql];
+    }];
     
 }
 

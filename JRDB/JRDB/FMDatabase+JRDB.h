@@ -34,6 +34,7 @@
 
 
 /**
+ *  您不会用到此方法, 擅自使用会造成数据库lock @see jr_inTransaction
  *  当前线程执行某个block, block 执行是必须有事务，useTransaction可以使用默认事务
  *
  *  @param block

@@ -58,7 +58,7 @@
 - (BOOL)saveIDs:(NSArray<NSString *> * _Nonnull)IDs withClazz:(Class<JRPersistent> _Nonnull)withClazz forID:(NSString * _Nonnull)ID withIDClazz:(Class<JRPersistent> _Nonnull)IDClazz;
 
 /**
- *  对JRPersistent的封装
+ *   对JRPersistent的封装
  *  （把之前的关系全删了，重新保存）
  *
  *  @param objs
@@ -71,7 +71,11 @@
 
 - (BOOL)deleteID:(NSString * _Nonnull)ID forClazz:(Class<JRPersistent> _Nonnull)clazz;
 
-
+/**
+ *  自身自带事务
+ *
+ *  @return 
+ */
 - (BOOL)cleanRubbishData;
 
 @end

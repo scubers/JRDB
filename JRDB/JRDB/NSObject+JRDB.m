@@ -16,9 +16,9 @@
 #import "JRDBChain.h"
 
 
-const NSString *JRDB_IDKEY                = @"JRDB_IDKEY";
-const NSString *jr_configureKey           = @"jr_configureKey";
-const NSString *jr_activatedPropertiesKey = @"jr_activatedPropertiesKey";
+static const NSString *JRDB_IDKEY                = @"JRDB_IDKEY";
+static const NSString *jr_configureKey           = @"jr_configureKey";
+static const NSString *jr_activatedPropertiesKey = @"jr_activatedPropertiesKey";
 
 @implementation NSObject (JRDB)
 
