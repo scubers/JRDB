@@ -34,42 +34,66 @@
 
 #pragma mark - save or update
 
-
+/**
+ *  非关联
+ */
 - (BOOL)jr_saveOrUpdateOnly;
+/**
+ *  关联
+ */
 - (BOOL)jr_saveOrUpdate;
 
 #pragma mark - save
 
 /**
- *  仅保存自身，不进行关联保存（不建议使用）:使用默认数据库
+ *  非关联
  */
 - (BOOL)jr_saveOnly;
+/**
+ *  关联
+ */
 - (BOOL)jr_save;
 
 
 #pragma mark - update
 
 /**
- *  仅更新自身，不进行关联保存（不建议使用）
- *
- *  @param columns 要更新的字段
+ *  非关联
  */
 - (BOOL)jr_updateOnlyColumns:(NSArray<NSString *> * _Nullable)columns;
+/**
+ *  关联
+ */
 - (BOOL)jr_updateColumns:(NSArray<NSString *> * _Nullable)columns;
 
+/**
+ *  非关联
+ */
 - (BOOL)jr_updateOnlyIgnore:(NSArray<NSString *> * _Nullable)Ignore;
+/**
+ *  关联
+ */
 - (BOOL)jr_updateIgnore:(NSArray<NSString *> * _Nullable)Ignore;
 
 
 #pragma mark - delete
 
+/**
+ *  非关联
+ */
 + (BOOL)jr_deleteAllOnly;
+/**
+ *  关联
+ */
 + (BOOL)jr_deleteAll;
 
 /**
- *  仅删除自身，不进行关联保存（不建议使用）
+ *  非关联
  */
 - (BOOL)jr_deleteOnly;
+/**
+ *  关联
+ */
 - (BOOL)jr_delete;
 
 #pragma mark - select
