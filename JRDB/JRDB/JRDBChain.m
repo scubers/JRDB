@@ -53,7 +53,7 @@
     return self;
 }
 
-- (id)exe:(JRDBChainComplete)complete {
+- (JRDBResult *)exe:(JRDBChainComplete)complete {
 
     if (!self.target && !self.targetArray.count && !self.targetClazz) {
         NSLog(@"chain excute error, target are nil");
@@ -68,19 +68,66 @@
         _completeBlock = complete;
     }
 
+    id result;
     switch (_operation) {
         case CSelect:
         case CSelectSingle:
-            return [_db jr_executeQueryChain:self complete:complete];
+            result = [_db jr_executeQueryChain:self complete:complete];break;
             
         case CSelectCustomized:
         case CSelectCount:
-            return [_db jr_executeCustomizedQueryChain:self complete:complete];
+            result = [_db jr_executeCustomizedQueryChain:self complete:complete];break;
             
         default:
-            return @([_db jr_executeUpdateChain:self complete:complete]);
+            result = @([_db jr_executeUpdateChain:self complete:complete]);
     }
     
+    switch (self.operation) {
+        case CCreateTable:
+        case CUpdateTable:
+        case CDropTable:
+        case CTruncateTable:
+        case CInsert:
+        case CUpdate:
+        case CDeleteAll:
+        case CDelete:
+        case CSaveOrUpdate:
+            return [JRDBResult resultWithBool:[result boolValue]];
+            
+        case CSelectCount:
+            return [JRDBResult resultWithCount:[result unsignedIntegerValue]];
+            
+        case CSelect:
+        case CSelectCustomized:
+            return [JRDBResult resultWithArray:[result copy]];
+        case CSelectSingle:
+            return [JRDBResult resultWithObject:result];
+            
+        case COperationNone:
+        default:
+            return [JRDBResult resultWithBool:NO];
+    }
+    
+}
+
+- (JRDBResult *)exe {
+    return [self exe:nil];
+}
+
+- (BOOL)flag {
+    return self.exe.flag;
+}
+
+- (NSUInteger)count {
+    return self.exe.count;
+}
+
+- (id<JRPersistent>)object {
+    return self.exe.object;
+}
+
+- (NSArray<JRPersistent> *)list {
+    return self.exe.list;
 }
 
 #pragma mark - Operation
@@ -234,39 +281,39 @@ static inline JRObjectBlock __setObjectPropertyToSelf(JRDBChain *self, NSString 
 }
 
 - (JRObjectBlock)InDB {
-    return __setObjectPropertyToSelf(self, J(JRDBChain, db));
+    return __setObjectPropertyToSelf(self, J(db));
 }
 
 - (JRObjectBlock)Group {
-    return __setObjectPropertyToSelf(self, J(JRDBChain, groupBy));
+    return __setObjectPropertyToSelf(self, J(groupBy));
 }
 
 - (JRObjectBlock)Order {
-    return __setObjectPropertyToSelf(self, J(JRDBChain, orderBy));
+    return __setObjectPropertyToSelf(self, J(orderBy));
 }
 
 - (JRObjectBlock)Where {
-    return __setObjectPropertyToSelf(self, J(JRDBChain, whereString));
+    return __setObjectPropertyToSelf(self, J(whereString));
 }
 
 - (JRObjectBlock)WhereIdIs {
-    return __setObjectPropertyToSelf(self, J(JRDBChain, whereId));
+    return __setObjectPropertyToSelf(self, J(whereId));
 }
 
 - (JRObjectBlock)WherePKIs {
-    return __setObjectPropertyToSelf(self, J(JRDBChain, wherePK));
+    return __setObjectPropertyToSelf(self, J(wherePK));
 }
 
 - (JRArrayBlock)Params {
-    return __setObjectPropertyToSelf(self, J(JRDBChain, parameters));
+    return __setObjectPropertyToSelf(self, J(parameters));
 }
 
 - (JRArrayBlock)Columns {
-    return __setObjectPropertyToSelf(self, J(JRDBChain, columnsArray));
+    return __setObjectPropertyToSelf(self, J(columnsArray));
 }
 
 - (JRArrayBlock)Ignore {
-    return __setObjectPropertyToSelf(self, J(JRDBChain, ignoreArray));
+    return __setObjectPropertyToSelf(self, J(ignoreArray));
 }
 
 static inline JRIntegerBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *keypath) {
@@ -277,7 +324,7 @@ static inline JRIntegerBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *
 }
 
 - (JRIntegerBlock)Recursive {
-    return __setBoolPropertyToSelf(self, J(JRDBChain, isRecursive));
+    return __setBoolPropertyToSelf(self, J(isRecursive));
 }
 - (instancetype)Recursively {
     return self.Recursive(YES);
@@ -287,7 +334,7 @@ static inline JRIntegerBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *
 }
 
 - (JRIntegerBlock)Sync {
-    return __setBoolPropertyToSelf(self, J(JRDBChain, isSync));
+    return __setBoolPropertyToSelf(self, J(isSync));
 }
 - (instancetype)UnSafely {
     return self.Sync(NO);
@@ -297,7 +344,7 @@ static inline JRIntegerBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *
 }
 
 - (JRIntegerBlock)Transaction {
-    return __setBoolPropertyToSelf(self, J(JRDBChain, useTransaction));
+    return __setBoolPropertyToSelf(self, J(useTransaction));
 }
 - (instancetype)NoTransaction {
     return self.Transaction(NO);
@@ -307,7 +354,7 @@ static inline JRIntegerBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *
 }
 
 - (JRIntegerBlock)Desc {
-    return __setBoolPropertyToSelf(self, J(JRDBChain, isDesc));
+    return __setBoolPropertyToSelf(self, J(isDesc));
 }
 - (instancetype)Descend {
     return self.Desc(YES);
@@ -317,7 +364,7 @@ static inline JRIntegerBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *
 }
 
 - (JRIntegerBlock)Cache {
-    return __setBoolPropertyToSelf(self, J(JRDBChain, useCache));
+    return __setBoolPropertyToSelf(self, J(useCache));
 }
 - (instancetype)Cached {
     return self.Cache(YES);
@@ -379,6 +426,16 @@ static inline JRIntegerBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *
     }
     return [NSString stringWithFormat:@" limit %zd,%zd ", _limitIn.start, _limitIn.length];
 }
+
+#pragma mark - macro method will not execute
+- (JRObjectBlock)FromJ {return nil;}
+- (JRArrayBlock)ParamsJ {return nil;}
+- (JRArrayBlock)IgnoreJ {return nil;}
+- (JRArrayBlock)ColumnsJ {return nil;}
+- (JRObjectBlock)WhereJ {return nil;}
+- (JRObjectBlock)OrderJ {return nil;}
+- (JRObjectBlock)GroupJ {return nil;}
+
 
 
 @end

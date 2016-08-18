@@ -32,7 +32,7 @@
                                                ]];
     [JRDBMgr shareInstance].defaultDB = db;
     
-    [JRDBMgr shareInstance].debugMode = NO;
+//    [JRDBMgr shareInstance].debugMode = NO;
     NSLog(@"%@", [[JRDBMgr shareInstance] registeredClazz]);
 }
 
@@ -45,23 +45,23 @@
 #pragma mark - table
 
 - (void)testAAAAACreateTable {
-    id a = [J_CreateTable(Person) exe:nil];
-    NSAssert([a boolValue], @"~~ error: %s", __FUNCTION__);
+    id a = J_CreateTable(Person).exe;
+    NSAssert(a, @"~~ error: %s", __FUNCTION__);
 }
 
 - (void)testAAAAUpdateTable {
-    id a = [J_UpdateTable(Person) exe:nil];
-    NSAssert([a boolValue], @"~~ error: %s", __FUNCTION__);
+    id a = J_UpdateTable(Person).exe;
+    NSAssert(a, @"~~ error: %s", __FUNCTION__);
 }
 
 - (void)testAAAATruncateTable {
-    id a = [J_TruncateTable(Person) exe:nil];
-    NSAssert([a boolValue], @"~~ error: %s", __FUNCTION__);
+    BOOL a = J_TruncateTable(Person).flag;
+    NSAssert(a, @"~~ error: %s", __FUNCTION__);
 }
 
 - (void)testAAADropTable {
-    id a = [J_DropTable(Person) exe:nil];
-    NSAssert([a boolValue], @"~~ error: %s", __FUNCTION__);
+    BOOL a = J_DropTable(Person).flag;
+    NSAssert(a, @"~~ error: %s", __FUNCTION__);
 }
 
 #pragma mark - table schema
@@ -73,22 +73,22 @@
 #pragma mark - Delete
 - (void)testZZZDeleteAll {
     [self testSaveMany];
-    id a = [J_DeleteAll(Person).Recursive(YES) exe:nil];
-    id b = [J_DeleteAll(Money).Recursive(YES) exe:nil];
-    id c = [J_DeleteAll(Card).Recursive(YES) exe:nil];
+    BOOL a = J_DeleteAll(Person).Recursive(YES).flag;
+    BOOL b = J_DeleteAll(Money).Recursive(YES).flag;
+    BOOL c = J_DeleteAll(Card).Recursive(YES).flag;
     
-    NSAssert([a boolValue] && [b boolValue] && [c boolValue], @"~~ error: %s", __FUNCTION__);
+    NSAssert(a && b && c, @"~~ error: %s", __FUNCTION__);
 //    [J_DELETEALL([Person class]).Recursive(NO) exe:nil];
 //    [J_DELETEALL([Money class]).Recursive(NO) exe:nil];
 //    [J_DELETEALL([Card class]).Recursive(NO) exe:nil];
 }
 - (void)testZZZDeleteAll1 {
     [self testSaveMany];
-    id a = [J_DeleteAll(Person).Recursive(NO) exe:nil];
-    id b = [J_DeleteAll(Money).Recursive(NO) exe:nil];
-    id c = [J_DeleteAll(Card).Recursive(NO) exe:nil];
+    BOOL a = J_DeleteAll(Person).Recursive(NO).flag;
+    BOOL b = J_DeleteAll(Money).Recursive(NO).flag;
+    BOOL c = J_DeleteAll(Card).Recursive(NO).flag;
     
-    NSAssert([a boolValue] && [b boolValue] && [c boolValue], @"~~ error: %s", __FUNCTION__);
+    NSAssert(a && b && c, @"~~ error: %s", __FUNCTION__);
 //    [J_DELETEALL([Person class]).Recursive(NO) exe:nil];
 //    [J_DELETEALL([Money class]).Recursive(NO) exe:nil];
 //    [J_DELETEALL([Card class]).Recursive(NO) exe:nil];
@@ -96,32 +96,32 @@
 
 - (void)testZDeleteOne {
     [self testSaveMany];
-    Person *p = [[J_Select(Person) exe:nil] firstObject];
-    id a = [J_Delete(p).Recursive(NO) exe:nil];
-    NSAssert([a boolValue], @"~~ error: %s", __FUNCTION__);
+    Person *p = J_Select(Person).list.firstObject;
+    BOOL a = J_Delete(p).Recursive(NO).flag;
+    NSAssert(a, @"~~ error: %s", __FUNCTION__);
 //    [J_DELETE(p).Recursive(YES) exe:nil];
 }
 
 - (void)testZDeleteOne1 {
     [self testSaveMany];
-    Person *p = [[J_Select(Person) exe:nil] firstObject];
-    id a = [J_Delete(p).Recursive(YES) exe:nil];
-    NSAssert([a boolValue], @"~~ error: %s", __FUNCTION__);
+    Person *p = J_Select(Person).list.firstObject;
+    BOOL a = J_Delete(p).Recursive(YES).flag;
+    NSAssert(a, @"~~ error: %s", __FUNCTION__);
     //    [J_DELETE(p).Recursive(YES) exe:nil];
 }
 
 - (void)testZZDeleteMany {
     [self testSaveMany];
-    NSArray *array = [J_Select(Person) exe:nil];
-    id a = [J_Delete(array).Recursive(NO) exe:nil];
-    NSAssert([a boolValue], @"~~ error: %s", __FUNCTION__);
+    NSArray *array = J_Select(Person).list;
+    BOOL a = J_Delete(array).Recursive(NO).flag;
+    NSAssert(a, @"~~ error: %s", __FUNCTION__);
 //    [J_DELETE(array).Recursive(YES) exe:nil];
 }
 - (void)testZZDeleteMany1 {
     [self testSaveMany];
-    NSArray *array = [J_Select(Person) exe:nil];
-    id a = [J_Delete(array).Recursive(YES) exe:nil];
-    NSAssert([a boolValue], @"~~ error: %s", __FUNCTION__);
+    NSArray *array = J_Select(Person).list;
+    BOOL a = J_Delete(array).Recursive(YES).flag;
+    NSAssert(a, @"~~ error: %s", __FUNCTION__);
 //    [J_DELETE(array).Recursive(YES) exe:nil];
 }
 
@@ -132,8 +132,8 @@
 - (void)testSaveOne {
     NSLog(@"default db: %@", [JRDBMgr defaultDB]);
     Person *p = [self createPerson:1 name:nil];
-    id a = [J_Insert(p).Recursive(NO).Sync(YES) exe:nil];
-    NSAssert([a boolValue], @"~~ error: %s", __FUNCTION__);
+    BOOL a = J_Insert(p).Recursive(NO).Sync(YES).flag;
+    NSAssert(a, @"~~ error: %s", __FUNCTION__);
 }
 
 - (void)testSaveMany {
@@ -142,8 +142,8 @@
         [array addObject:[self createPerson:i name:nil]];
     }
 //    [array jr_save];
-    id a = [J_Insert(array).Recursive(NO) exe:nil];
-    NSAssert([a boolValue], @"~~ error: %s", __FUNCTION__);
+    BOOL a = J_Insert(array).Recursive(NO).flag;
+    NSAssert(a, @"~~ error: %s", __FUNCTION__);
 }
 
 - (void)testSaveMany1 {
@@ -152,8 +152,8 @@
         [array addObject:[self createPerson:i name:nil]];
     }
     //    [array jr_save];
-    id a = [J_Insert(array).Recursive(YES) exe:nil];
-    NSAssert([a boolValue], @"~~ error: %s", __FUNCTION__);
+    BOOL a = J_Insert(array).Recursive(YES).flag;
+    NSAssert(a, @"~~ error: %s", __FUNCTION__);
 }
 
 - (void)testSaveOneWithSituation {
@@ -166,8 +166,8 @@
         [p.children addObject:[self createPerson:i+10 name:nil]];
     }
 //    [J_INSERT(p).Recursive(NO) exe:nil];
-    id a = [J_Insert(p).Recursive(YES) exe:nil];
-    NSAssert([a boolValue], @"~~ error: %s", __FUNCTION__);
+    BOOL a = J_Insert(p).Recursive(YES).flag;
+    NSAssert(a, @"~~ error: %s", __FUNCTION__);
 }
 
 - (void)testSaveCycle {
@@ -175,8 +175,8 @@
     p.son = [self createPerson:2 name:nil];
     p.card = [self createCard:@"1111"];
     p.card.person = p;
-    id a = [J_Insert(p).Recursive(YES) exe:nil];
-    NSAssert([a boolValue], @"~~ error: %s", __FUNCTION__);
+    BOOL a = J_Insert(p).Recursive(YES).flag;
+    NSAssert(a, @"~~ error: %s", __FUNCTION__);
 //    [J_INSERT(p).Recursive(NO) exe:nil];
 }
 
@@ -188,8 +188,8 @@
     p2.son = p3;
     p3.son = p1;
     
-    id a = [J_Insert(p1).Recursive(YES) exe:nil];
-    NSAssert([a boolValue], @"~~ error: %s", __FUNCTION__);
+    BOOL a = J_Insert(p1).Recursive(YES).flag;
+    NSAssert(a, @"~~ error: %s", __FUNCTION__);
 //    [J_INSERT(p2).Recursive(YES) exe:nil];
 //    [J_INSERT(p3).Recursive(YES) exe:nil];
     
@@ -204,8 +204,8 @@
         [p.money addObject:[self createMoney:i]];
     }
     //    [J_INSERT(p).Recursive(NO) exe:nil];
-    id a = [J_Insert(p).Recursive(YES) exe:nil];
-    NSAssert([a boolValue], @"~~ error: %s", __FUNCTION__);
+    BOOL a = J_Insert(p).Recursive(YES).flag;
+    NSAssert(a, @"~~ error: %s", __FUNCTION__);
 }
 
 - (void)testSaveChildren {
@@ -214,8 +214,8 @@
         [p.children addObject:[self createPerson:i+10 name:nil]];
     }
     //    [J_INSERT(p).Recursive(NO) exe:nil];
-    id a = [J_Insert(p).Recursive(YES) exe:nil];
-    NSAssert([a boolValue], @"~~ error: %s", __FUNCTION__);
+    BOOL a = J_Insert(p).Recursive(YES).flag;
+    NSAssert(a, @"~~ error: %s", __FUNCTION__);
 }
 
 #pragma mark - Update
@@ -223,8 +223,8 @@
 - (void)testUpdateOne {
     Person *p = [Person jr_findAll].firstObject;
     p.a_int = 1212;
-    id a = [J_Update(p).Recursive(YES).ColumnsJ(J(Person, a_int), J(Person, name)) exe:nil];
-    NSAssert([a boolValue], @"~~ error: %s", __FUNCTION__);
+    BOOL a = J_Update(p).Recursive(YES).ColumnsJ(J(a_int), J(name)).flag;
+    NSAssert(a, @"~~ error: %s", __FUNCTION__);
 }
 
 - (void)testUpdateMany {
@@ -232,8 +232,8 @@
     [ps enumerateObjectsUsingBlock:^(Person * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         obj.c_long = 9999;
     }];
-    id a = [J_Update(ps).Recursive(YES) exe:nil];
-    NSAssert([a boolValue], @"~~ error: %s", __FUNCTION__);
+    BOOL a = J_Update(ps).Recursive(YES).flag;
+    NSAssert(a, @"~~ error: %s", __FUNCTION__);
 //    [J_UPDATE(ps).Recursive(NO) exe:nil];
 }
 
@@ -242,8 +242,8 @@
     [ps enumerateObjectsUsingBlock:^(Person * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         obj.c_long = 9999;
     }];
-    id a = [J_Update(ps).Recursive(NO) exe:nil];
-    NSAssert([a boolValue], @"~~ error: %s", __FUNCTION__);
+    BOOL a = J_Update(ps).Recursive(NO).flag;
+    NSAssert(a, @"~~ error: %s", __FUNCTION__);
 //    [J_UPDATE(ps).Recursive(NO) exe:nil];
 }
 
@@ -251,8 +251,8 @@
     Person *p = [Person jr_findAll].firstObject;
     p.card = nil;
 //    p.card = [self createCard:@"1123"];
-    id a = [J_Update(p).Recursive(YES) exe:nil];
-    NSAssert([a boolValue], @"~~ error: %s", __FUNCTION__);
+    BOOL a = J_Update(p).Recursive(YES).flag;
+    NSAssert(a, @"~~ error: %s", __FUNCTION__);
 //    [J_UPDATE(p).Recursive(NO) exe:nil];
 }
 
@@ -260,8 +260,8 @@
     Person *p = [Person jr_findAll].firstObject;
     p.son = nil;
 //    p.son = [self createPerson:10 name:nil];
-    id a = [J_Update(p).Recursive(YES) exe:nil];
-    NSAssert([a boolValue], @"~~ error: %s", __FUNCTION__);
+    BOOL a = J_Update(p).Recursive(YES).flag;
+    NSAssert(a, @"~~ error: %s", __FUNCTION__);
 //    [J_UPDATE(p).Recursive(NO) exe:nil];
 }
 
@@ -272,8 +272,8 @@
 //        [p.money addObject:[self createMoney:i]];
 //    }
 //    [p.money removeLastObject];
-    id a = [J_Update(p).Recursive(YES) exe:nil];
-    NSAssert([a boolValue], @"~~ error: %s", __FUNCTION__);
+    BOOL a = J_Update(p).Recursive(YES).flag;
+    NSAssert(a, @"~~ error: %s", __FUNCTION__);
 //    [J_UPDATE(p).Recursive(NO) exe:nil];
 }
 
@@ -286,8 +286,8 @@
         [p.money addObject:[self createMoney:i]];
         [p.children addObject:[self createPerson:i+10 name:nil]];
     }
-    id a = [J_Update(p).ColumnsJ(J(Person, a_int)).Recursive(YES) exe:nil];
-    NSAssert([a boolValue], @"~~ error: %s", __FUNCTION__);
+    BOOL a = J_Update(p).ColumnsJ(J(a_int)).Recursive(YES).flag;
+    NSAssert(a, @"~~ error: %s", __FUNCTION__);
 }
 
 - (void)testUpdateIgnore {
@@ -299,8 +299,8 @@
         [p.money addObject:[self createMoney:i]];
         [p.children addObject:[self createPerson:i+10 name:nil]];
     }
-    id a = [J_Update(p).IgnoreJ(J(Person, a_int)).Recursive(YES) exe:nil];
-    NSAssert([a boolValue], @"~~ error: %s", __FUNCTION__);
+    BOOL a = J_Update(p).IgnoreJ(J(a_int)).Recursive(YES).flag;
+    NSAssert(a, @"~~ error: %s", __FUNCTION__);
 }
 
 #pragma mark - save or update
@@ -308,24 +308,24 @@
 - (void)testSaveOrUpdate {
     Person *p = [Person jr_findAll].firstObject;
     p.a_int = 1122;
-    id a = [J_SaveOrUpdate(p) exe:^(JRDBChain * _Nonnull chain, id  _Nullable result) {
+    JRDBResult *a = [J_SaveOrUpdate(p) exe:^(JRDBChain * _Nonnull chain, id  _Nullable result) {
         NSLog(@"%@", result);
     }];
-    NSAssert([a boolValue], @"~~ error: %s", __FUNCTION__);
+    NSAssert(a.flag, @"~~ error: %s", __FUNCTION__);
 }
 
 - (void)testSaveOrUpdate1 {
     Person *p = [self createPerson:1 name:nil];
     p.a_int = 1122;
-    id a = [J_SaveOrUpdate(p) exe:nil];
-    NSAssert([a boolValue], @"~~ error: %s", __FUNCTION__);
+    BOOL a = J_SaveOrUpdate(p).flag;
+    NSAssert(a, @"~~ error: %s", __FUNCTION__);
 }
 
 - (void)testSaveOrUpdate2 {
     Person *p = [self createPerson:1 name:nil];
     p.a_int = 1122;
-    id a = [[JRDBChain new].SaveOrUpdateOne(p).Recursive(YES) exe:nil];
-    NSAssert([a boolValue], @"~~ error: %s", __FUNCTION__);
+    BOOL a = [JRDBChain new].SaveOrUpdateOne(p).Recursive(YES).flag;
+    NSAssert(a, @"~~ error: %s", __FUNCTION__);
 }
 
 - (void)testSaveOrUpdate3 {
@@ -333,8 +333,8 @@
     for (int i = 0; i < 10; i++) {
         [array addObject:[self createPerson:100 name:nil]];
     }
-    id a = [[JRDBChain new].SaveOrUpdate(array) exe:nil];
-    NSAssert([a boolValue], @"~~ error: %s", __FUNCTION__);
+    BOOL a = [JRDBChain new].SaveOrUpdate(array).flag;
+    NSAssert(a, @"~~ error: %s", __FUNCTION__);
 }
 
 - (void)testSaveOrUpdate4 {
@@ -342,8 +342,8 @@
     for (int i = 0; i < 10; i++) {
         [array addObject:[self createPerson:100 name:nil]];
     }
-    id a = [[JRDBChain new].SaveOrUpdate(array).Recursive(YES) exe:nil];
-    NSAssert([a boolValue], @"~~ error: %s", __FUNCTION__);
+    BOOL a = [JRDBChain new].SaveOrUpdate(array).Recursive(YES).flag;
+    NSAssert(a, @"~~ error: %s", __FUNCTION__);
 }
 
 
@@ -351,18 +351,18 @@
 #pragma mark - Select
 
 - (void)testSelectByID {
-    Person *p = [[J_Select(Person) exe:nil] firstObject];
-    Person *p1 = [J_Select(Person).WherePKIs(p.ID) exe:nil];
-    Person *p2 = [J_Select(Person).WherePKIs(p.ID).Cache(YES) exe:nil];
+    Person *p = J_Select(Person).list.firstObject;
+    Person *p1 = J_Select(Person).WherePKIs(p.ID).object;
+    Person *p2 = J_Select(Person).WherePKIs(p.ID).Cache(YES).object;
     [p1 isEqual:p2];
     
     [[JRDBMgr defaultDB] jr_getByID:p.ID clazz:[Person class] synchronized:YES useCache:NO complete:^(id  _Nullable result) {
     }];
     
 
-    p = [[J_Select(Person) exe:nil] firstObject];
-    p1 = [J_Select(Person).WhereIdIs(p.ID) exe:nil];
-    p2 = [J_Select(Person).WhereIdIs(p.ID).Cache(YES) exe:nil];
+    p = J_Select(Person).list.firstObject;
+    p1 = J_Select(Person).WherePKIs(p.ID).object;
+    p2 = J_Select(Person).WherePKIs(p.ID).Cache(YES).object;
     [p1 isEqual:p2];
     
 
@@ -370,9 +370,9 @@
 
 - (void)testSelectAll {
     
-    NSArray<Person *> *ps2 = [J_Select(Person).NoCached exe:nil];
-    NSArray<Person *> *ps = [J_Select(Person).Recursively.NoCached exe:nil];
-    NSArray<Person *> *ps1 = [J_Select(Person).Recursively.NoCached exe:nil];
+    NSArray<Person *> *ps2 = J_Select(Person).NoCached.list;
+    NSArray<Person *> *ps = J_Select(Person).Recursively.NoCached.list;
+    NSArray<Person *> *ps1 = J_Select(Person).Recursively.NoCached.list;
     NSLog(@"%@", ps);
     NSLog(@"%@", ps1);
     NSLog(@"%@", ps2);
@@ -380,8 +380,8 @@
     id result = J_Select(Person)
                     .WhereJ(_name like ? and _height > ?)
                     .ParamsJ(@"a%", @100)
-                    .GroupJ(Person, h_double)
-                    .OrderJ(Person, d_long_long)
+                    .GroupJ(h_double)
+                    .OrderJ(d_long_long)
                     .Limit(0, 10)
                     .Descend
                     .Recursively
@@ -391,32 +391,32 @@
 
     NSLog(@"%@", result);
 
-    [J_Update(ps.firstObject).ColumnsJ(J(Person, a_int),J(Person, b_unsigned_int)) exe:nil];
+    [J_Update(ps.firstObject).ColumnsJ(J(a_int),J(b_unsigned_int)) exe:nil];
 }
 
 - (void)testOtherCondition {
     NSArray<Person *> *ps =
-    [J_Select(Person)
+    J_Select(Person)
     .Recursive(YES)
     .FromJ(Person)
-    .OrderJ(Person, a_int)
-    .GroupJ(Person, bbbbb)
+    .OrderJ(a_int)
+    .GroupJ(bbbbb)
     .Limit(0,3)
     .Desc(YES)
-     exe:nil];
+    .list;
     ;
 
     NSLog(@"%@", ps);
 }
 
 - (void)testSelectCount {
-    NSNumber *count =
-    [J_SelectCount(Person)
-    .OrderJ(Person,a_int)
-    .GroupJ(Person,b_unsigned_int)
+    NSUInteger count =
+    J_SelectCount(Person)
+    .OrderJ(a_int)
+    .GroupJ(b_unsigned_int)
     .Limit(0, 3)
     .Desc(YES)
-     exe:nil];
+    .count;
     
     Person *p = [Person jr_findAll].firstObject;
     
@@ -426,19 +426,19 @@
     [[JRDBMgr defaultDB] jr_count4PrimaryKey:[p jr_primaryKeyValue] clazz:[Person class] synchronized:YES complete:^(id  _Nullable result) {
     }];
 
-    NSLog(@"%@", count);
+    NSLog(@"%zd", count);
 }
 
 - (void)testSelectColumn {
     NSArray<Person *> *ps =
-    [J_SelectColumns(J(Person, a_int), J(Person, b_unsigned_int))
+    J_SelectColumns(J(a_int), J(b_unsigned_int))
     .Recursive(YES) // 自定义查询，即使设置关联查询，也不会进行关联查询
     .FromJ(Person)
-    .OrderJ(Person, a_int)
-    .GroupJ(Person, j_number)
+    .OrderJ(a_int)
+    .GroupJ(j_number)
     .Limit(0, 3)
     .Desc(YES)
-     exe:nil];
+    .list;
 
 
     NSLog(@"%@", ps);
@@ -462,7 +462,7 @@
         [ori addObject:@(i)];
         
         dispatch_async(dispatch_get_global_queue(0, 0), ^{
-            id result = [J_Select(Person).Recursive(YES).Sync(YES) exe:^(JRDBChain * _Nonnull chain, id  _Nullable result) {
+            JRDBResult *result = [J_Select(Person).Recursive(YES).Sync(YES) exe:^(JRDBChain * _Nonnull chain, id  _Nullable result) {
                 NSLog(@"___complete %@", @([result count]));
             }];
             NSLog(@"=+=+=+=+  %@", @([result count]));
@@ -482,13 +482,18 @@
         [p addObject:[self createPerson:i name:nil]];
         dispatch_async(dispatch_get_global_queue(0, 0), ^{
             [[JRDBMgr defaultDB] jr_inTransaction:^(FMDatabase * _Nonnull db, BOOL * _Nonnull rollBack) {
-                id a = [J_Insert(p[i]).InDB(db).Sync(NO) exe:nil];
-                NSLog(@"%@", a);
+                BOOL a = J_Insert(p[i]).InDB(db).Sync(NO).flag;
+                NSLog(@"%d", a);
             }];
         });
     }
     
 //    sleep(5);
+}
+
+- (void)testTemp {
+    Person *p = J_Select(Person).WhereIdIs(@"01A02C81-56A8-447A-8041-5ED2205BAEDC").object;
+    NSLog(@"%@", p);
 }
 
 #pragma mark - database operation

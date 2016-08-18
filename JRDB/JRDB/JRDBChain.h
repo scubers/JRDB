@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "JRPersistent.h"
+#import "JRDBResult.h"
 
 #pragma mark - convenience marco
 
@@ -33,10 +34,10 @@
 
 #define FromJ(_arg_)            From([_arg_ class])
 #define WhereJ(_arg_)           Where(@#_arg_)
-#define OrderJ(_clazz_, _prop_) Order(J(_clazz_, _prop_))
-#define GroupJ(_clazz_, _prop_) Group(J(_clazz_, _prop_))
+#define OrderJ(_prop_)          Order(J(_prop_))
+#define GroupJ(_prop_)          Group(J(_prop_))
 
-#define J(_clazz_, _prop_)      (((void)(NO && ((void)[_clazz_ new]._prop_, NO)), @"_"#_prop_))
+#define J(_prop_)               (((void)(NO && ((void)[((id)[NSObject new]) _prop_], NO)), @"_"#_prop_))
 
 static inline NSArray * _Nonnull _variableListToArray(id _Nullable first, ...) {
     NSMutableArray *args = [NSMutableArray array];
@@ -203,6 +204,22 @@ typedef struct {
  *
  *  @param complete
  */
-- (id _Nullable)exe:(JRDBChainComplete _Nullable)complete;
+- (JRDBResult * _Nonnull)exe:(JRDBChainComplete _Nullable)complete;
+- (JRDBResult * _Nonnull)exe;
+
+- (BOOL)flag;
+- (NSUInteger)count;
+- (id<JRPersistent> _Nullable)object;
+- (NSArray<JRPersistent> * _Nonnull)list;
+
+#pragma mark - macro method will not execute
+- (JRObjectBlock _Nonnull)FromJ NS_SWIFT_UNAVAILABLE("macro method");///< will not execute cause the macro
+- (JRArrayBlock _Nonnull)ParamsJ NS_SWIFT_UNAVAILABLE("macro method");///< will not execute cause the macro
+- (JRArrayBlock _Nonnull)ColumnsJ NS_SWIFT_UNAVAILABLE("macro method");///< will not execute cause the macro
+- (JRArrayBlock _Nonnull)IgnoreJ NS_SWIFT_UNAVAILABLE("macro method");///< will not execute cause the macro
+- (JRObjectBlock _Nonnull)WhereJ NS_SWIFT_UNAVAILABLE("macro method");///< will not execute cause the macro
+- (JRObjectBlock _Nonnull)OrderJ NS_SWIFT_UNAVAILABLE("macro method");///< will not execute cause the macro
+- (JRObjectBlock _Nonnull)GroupJ NS_SWIFT_UNAVAILABLE("macro method");///< will not execute cause the macro
+
 
 @end

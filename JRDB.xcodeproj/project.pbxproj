@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		093FBC6D1D658D04002667CD /* JRDBResult.m in Sources */ = {isa = PBXBuildFile; fileRef = 093FBC6C1D658D04002667CD /* JRDBResult.m */; };
 		09943EB51D630FB000C7164D /* JRDBMgrContextTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 09943EB41D630FB000C7164D /* JRDBMgrContextTests.m */; };
 		5A7AED821D05294B000AD4FE /* JRMiddleTable.m in Sources */ = {isa = PBXBuildFile; fileRef = 5A7AED811D05294B000AD4FE /* JRMiddleTable.m */; };
 		5AA3DB331D067DD800795E80 /* JRDBTestJRDBMgr.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AA3DB321D067DD800795E80 /* JRDBTestJRDBMgr.m */; };
@@ -58,6 +59,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		093FBC6B1D658D04002667CD /* JRDBResult.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRDBResult.h; sourceTree = "<group>"; };
+		093FBC6C1D658D04002667CD /* JRDBResult.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRDBResult.m; sourceTree = "<group>"; };
 		09943EB41D630FB000C7164D /* JRDBMgrContextTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRDBMgrContextTests.m; sourceTree = "<group>"; };
 		16D9BC35A452ABED0FB7879A /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
 		2C94FB217DD9C61722850B3C /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
@@ -258,6 +261,8 @@
 				5A7AED811D05294B000AD4FE /* JRMiddleTable.m */,
 				5AA4877D1D38977000B199AE /* JRDBQueue.h */,
 				5AA4877E1D38977000B199AE /* JRDBQueue.m */,
+				093FBC6B1D658D04002667CD /* JRDBResult.h */,
+				093FBC6C1D658D04002667CD /* JRDBResult.m */,
 			);
 			path = JRDB;
 			sourceTree = "<group>";
@@ -523,6 +528,7 @@
 				5ACBEEB21CE1B3A500371E01 /* main.m in Sources */,
 				5AB1BFA91D00115F001595D3 /* JRColumnSchema.m in Sources */,
 				5AA4877F1D38977000B199AE /* JRDBQueue.m in Sources */,
+				093FBC6D1D658D04002667CD /* JRDBResult.m in Sources */,
 				5AD17B341D3354BC00F2B669 /* JRDBChain.m in Sources */,
 				5ACBEEEB1CE1B91F00371E01 /* JRSqlGenerator.m in Sources */,
 				5AC8B3321CE1DA2500079BC8 /* NSObject+JRDB.m in Sources */,

@@ -122,89 +122,89 @@ static const NSString *jr_activatedPropertiesKey = @"jr_activatedPropertiesKey";
 #pragma mark - save or update
 
 - (BOOL)jr_saveOrUpdateOnly {
-    return [[J_SaveOrUpdate(self).Recursive(NO) exe:nil] boolValue];
+    return J_SaveOrUpdate(self).UnRecursively.flag;
 }
 
 - (BOOL)jr_saveOrUpdate {
-    return [[J_SaveOrUpdate(self).Recursive(YES) exe:nil] boolValue];
+    return J_SaveOrUpdate(self).Recursively.flag;
 }
 
 #pragma mark - save
 
 - (BOOL)jr_saveOnly {
-    return [[J_Insert(self) exe:nil] boolValue];
+    return J_Insert(self).flag;
 }
 
 - (BOOL)jr_save {
-    return [[J_Insert(self).Recursive(YES) exe:nil] boolValue];
+    return J_Insert(self).Recursively.flag;
 }
 
 #pragma mark - update
 
 - (BOOL)jr_updateOnlyColumns:(NSArray<NSString *> *)columns {
-    return [[J_Update(self).Columns(columns) exe:nil] boolValue];
+    return J_Update(self).Columns(columns).flag;
 }
 
 - (BOOL)jr_updateColumns:(NSArray<NSString *> *)columns {
-    return [[J_Update(self).Columns(columns).Recursive(YES) exe:nil] boolValue];
+    return J_Update(self).Columns(columns).Recursively.flag;
 }
 
 - (BOOL)jr_updateOnlyIgnore:(NSArray<NSString *> *)Ignore {
-    return [[J_Update(self).Ignore(Ignore) exe:nil] boolValue];
+    return J_Update(self).Ignore(Ignore).flag;
 }
 
 - (BOOL)jr_updateIgnore:(NSArray<NSString *> *)Ignore {
-    return [[J_Update(self).Ignore(Ignore) exe:nil] boolValue];
+    return J_Update(self).Ignore(Ignore).flag;
 }
 
 #pragma mark - delete
 
 + (BOOL)jr_deleteAllOnly {
-    return [[J_DeleteAll(self) exe:nil] boolValue];
+    return J_DeleteAll(self).flag;
 }
 
 + (BOOL)jr_deleteAll {
-    return [[J_DeleteAll(self).Recursive(YES) exe:nil] boolValue];
+    return J_DeleteAll(self).Recursively.flag;
 }
 
 - (BOOL)jr_deleteOnly {
-    return [[J_Delete(self) exe:nil] boolValue];
+    return J_Delete(self).flag;
 }
 
 - (BOOL)jr_delete {
-    return [[J_Delete(self).Recursive(YES) exe:nil] boolValue];
+    return J_Delete(self).Recursively.flag;
 }
 
 #pragma mark - select
 
 + (instancetype)jr_findByID:(NSString *)ID {
-    return [J_Select(self).WhereIdIs(ID).Recursive(YES) exe:nil];
+    return J_Select(self).WhereIdIs(ID).Recursively.object;
 }
 
 + (instancetype)jr_findByPrimaryKey:(id)primaryKey {
-    return [J_Select(self).WherePKIs(primaryKey).Recursive(YES) exe:nil];
+    return J_Select(self).WherePKIs(primaryKey).Recursively.object;
 }
 
 + (NSArray<id<JRPersistent>> *)jr_findAll {
-    return [J_Select(self).Recursive(YES) exe:nil];
+    return J_Select(self).Recursively.list;
 }
 
 #pragma mark - table operation
 
 + (BOOL)jr_createTable {
-    return [[J_CreateTable(self) exe:nil] boolValue];
+    return J_CreateTable(self).flag;
 }
 
 + (BOOL)jr_updateTable {
-    return [[J_UpdateTable(self) exe:nil] boolValue];
+    return J_UpdateTable(self).flag;
 }
 
 + (BOOL)jr_dropTable {
-    return [[J_DropTable(self) exe:nil] boolValue];
+    return J_DropTable(self).flag;
 }
 
 + (BOOL)jr_truncateTable {
-    return [[J_TruncateTable(self) exe:nil] boolValue];
+    return J_TruncateTable(self).flag;
 }
 
 #pragma mark - table message
