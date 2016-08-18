@@ -42,28 +42,27 @@ pod 'JRDB'
 
 # API链式调用
 
-
 Insert
 ---
 
 ```objc
-// 链式调用统一返回 id 类型，update数据库返回是 @YES 或者 @NO
+
 Person *p = [Person new];
 
-id result =[J_Insert(p)
-				.InDB([JRDBMgr defaultDB]) // by Default 
-				.Recursive(NO)			// by default 
-				.Sync(YES)				// by default
-				.Trasaction(YES)			// by default
-				exe:nil];		
+BOOL result = J_Insert(p)
+					.InDB([JRDBMgr defaultDB]) // by Default 
+					.Recursive(NO)			// by default 
+					.Sync(YES)				// by default
+					.Trasaction(YES)			// by default
+					.updateResult;		
 
 // 可以省略为
-id result = [J_Insert(p) exe:nil];
+BOOL result = J_Insert(p).updateResult;
 		
 // 数组保存，两种 api 自由使用
-id result = [J_Insert(p1, p2, p3) exe:nil]
+BOOL result = J_Insert(p1, p2, p3).updateResult;
 
-id result = [J_Insert(@[p1, p2, p3]) exe:nil]
+BOOL result = J_Insert(@[p1, p2, p3]).updateResult;
 
 ```
 
@@ -73,13 +72,13 @@ Update
 
 ```objc
 // 更新指定列
-id result = [J_Update(p).Columns(@[@"_age", @"_name"]) exe:nil];
+BOOL result = J_Update(p).Columns(@[@"_age", @"_name"]).updateResult;
 // 忽略指定列
-id result = [J_Update(p).Ignore(@[@"_phone"]) exe:nil];
+BOOL result = J_Update(p).Ignore(@[@"_phone"]).updateResult;
 
 // 更新数组
-id result = [J_Update(p1, p2) exe:nil];
-id result = [J_Update(@[p1, p2, p3]) exe:nil];
+BOOL result = J_Update(p1, p2).updateResult;
+BOOL result = J_Update(@[p1, p2, p3]).updateResult;
 ```
 
 
@@ -90,7 +89,7 @@ Delete
 * Recursive：[详细请看](#linkdelete)
 
 ```objc
-id result = [J_Delete(p) exe:nil];
+BOOL result = J_Delete(p).updateResult;
 ```
 
 
@@ -100,7 +99,7 @@ Select
 
 ```objc
 // 普通查询
-id result = [J_Select(Person)
+NSArray *result = J_Select(Person)
                     .Recursive(YES)		// by default
                     .Sync(YES)			// by default
                     .Cache(NO)			// by default
@@ -110,10 +109,10 @@ id result = [J_Select(Person)
                     .Group(@"_level")
                     .Order(@"_age")
                     .Limit(0, 10)			
-                    exe:nil];
+                    .list;
 
 // 自定义查询
-id result = [J_SelectColumns(@[@"_age", @"_name"])
+NSArray *result = J_SelectColumns(@[@"_age", @"_name"])
 						.FromJ([Person class])
 						.Recursive(YES)   // this will not function in customize query
 						.Sync(YES)		 // by default
@@ -124,9 +123,9 @@ id result = [J_SelectColumns(@[@"_age", @"_name"])
 						.Order(@"_age")
 						.Limit(0, 10)
 						.Desc(NO)			// by default
-						exe:nil];
+						.list;
 
-id result = [J_SelectCount(Person)
+NSUInteger count = J_SelectCount(Person)
 						.Recursive(YES)   // this will not function in customize 
 						.Sync(YES)
 						.Cache(NO)		 // this will not function in customize 
@@ -136,7 +135,7 @@ id result = [J_SelectCount(Person)
 						.Order(@"_age")
 						.Limit(0, 10)
 						.Desc(YES) 
-						exe:nil];			
+						.count;
                     
 ```
   
@@ -168,25 +167,25 @@ Macro
 - 使用宏，让调用变成更智能
  	- `From([Person class]) --> FromJ(Person)`
 	- `Where(@"_name = ?") --> WhereJ(_name = ?)`
-	- `Order(@"_name") --> OrderJ(Person, name)`
-	- `Group(@"_name") --> GroupJ(Person, name)`
+	- `Order(@"_name") --> OrderJ(name)`
+	- `Group(@"_name") --> GroupJ(name)`
 	- `Params(@[@"jack", @"mark"]) --> ParamsJ(@"jack", @"mark")`
 	- `Ignore(@[@"_name", @"_age"]) --> IgnoreJ(@"_name", @"_age")`
 	- `Columns(@[@"_name", @"_age"]) --> ColumnsJ(@"_name", @"_age")`
-
+	
 ```
 // example
-id result = J_Select(Person)
+NSArray *result = J_Select(Person)
                     .WhereJ(_name like ? and _height > ?)
                     .ParamsJ(@"a%", @100)
-                    .GroupJ(Person, h_double)
-                    .OrderJ(Person, d_long_long)
-                    .Limit(0, 10)
-                    .Descend
-                    .Recursively
-                    .Safely
-                    .Cached
-                    .Transactional;
+                    .GroupJ(h_double)
+                    .OrderJ(d_long_long)
+                    .list;
+                    
+BOOL result = J_Update(person)
+						.ColumnsJ(J(name), J(age))
+					//	.IgnoreJ(J(name), J(age))
+                    .updateResult;
 ```
 
 

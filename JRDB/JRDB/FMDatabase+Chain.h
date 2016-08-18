@@ -15,10 +15,10 @@
 @interface FMDatabase (Chain)
 
 //- (BOOL)jr_executeUpdateChain:(JRDBChain *)chain;
-- (BOOL)jr_executeUpdateChain:(JRDBChain *)chain complete:(JRDBChainComplete)complete;
+- (BOOL)jr_executeUpdateChain:(JRDBChain *)chain;
 
-- (id)jr_executeQueryChain:(JRDBChain *)chain complete:(JRDBChainComplete)complete;
-- (id)jr_executeCustomizedQueryChain:(JRDBChain *)chain complete:(JRDBChainComplete)complete;
+- (id)jr_executeQueryChain:(JRDBChain *)chain;
+- (id)jr_executeCustomizedQueryChain:(JRDBChain *)chain;
 
 
 
