@@ -45,12 +45,12 @@
 #pragma mark - table
 
 - (void)testAAAAACreateTable {
-    id a = J_CreateTable(Person).exe;
+    BOOL a = J_CreateTable(Person).updateResult;
     NSAssert(a, @"~~ error: %s", __FUNCTION__);
 }
 
 - (void)testAAAAUpdateTable {
-    id a = J_UpdateTable(Person).exe;
+    BOOL a = J_UpdateTable(Person).updateResult;
     NSAssert(a, @"~~ error: %s", __FUNCTION__);
 }
 
