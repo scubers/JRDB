@@ -74,14 +74,51 @@
 
 #pragma mark - select
 
+/**
+ *  关联查询
+ *
+ *  @param ID
+ */
 + (instancetype _Nullable)jr_findByID:(NSString * _Nonnull)ID;
 
+/**
+ *  关联查询
+ *
+ *  @param primaryKey
+ */
 + (instancetype _Nullable)jr_findByPrimaryKey:(id _Nonnull)primaryKey;
 
-
+/**
+ *  关联查询
+ *
+ *  @return
+ */
 + (NSArray<id<JRPersistent>> * _Nonnull)jr_findAll;
 
+/**
+ *  非关联查询
+ *
+ *  @param ID
+ *
+ */
++ (instancetype _Nullable)jr_getByID:(NSString * _Nonnull)ID;
+
+/**
+ *  非关联查询
+ *
+ *  @param primaryKey
+ */
++ (instancetype _Nullable)jr_getByPrimaryKey:(id _Nonnull)primaryKey;
+
+/**
+ *  非关联查询
+ */
++ (NSArray<id<JRPersistent>> * _Nonnull)jr_getAll;
+
+
+
 #pragma mark - table operation
+
 + (BOOL)jr_createTable;
 
 + (BOOL)jr_updateTable;

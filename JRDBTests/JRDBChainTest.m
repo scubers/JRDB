@@ -32,7 +32,7 @@
                                                ]];
     [JRDBMgr shareInstance].defaultDB = db;
     
-    [JRDBMgr shareInstance].debugMode = NO;
+//    [JRDBMgr shareInstance].debugMode = NO;
     NSLog(@"%@", [[JRDBMgr shareInstance] registeredClazz]);
 }
 
@@ -206,6 +206,9 @@
     //    [J_INSERT(p).Recursive(NO) exe:nil];
     BOOL a = J_Insert(p).Recursive(YES).updateResult;
     NSAssert(a, @"~~ error: %s", __FUNCTION__);
+    
+    p = J_Select(Person).WhereIdIs(p.ID).Recursively.object;
+    NSLog(@"%@", p);
 }
 
 - (void)testSaveChildren {
@@ -216,14 +219,16 @@
     //    [J_INSERT(p).Recursive(NO) exe:nil];
     BOOL a = J_Insert(p).Recursive(YES).updateResult;
     NSAssert(a, @"~~ error: %s", __FUNCTION__);
+    p = [Person jr_findByID:p.ID];
+    NSLog(@"%@", p);
 }
 
 #pragma mark - Update
 
 - (void)testUpdateOne {
-    Person *p = [Person jr_findAll].firstObject;
-    p.a_int = 1212;
-    BOOL a = J_Update(p).Recursive(YES).ColumnsJ(J(a_int), J(name)).updateResult;
+    Person *p = J_Select(Person).Recursively.list.firstObject;
+    p.a_int = 1111;
+    BOOL a = J_Update(p).ColumnsJ(J(a_int), J(name)).Recursively.updateResult;
     NSAssert(a, @"~~ error: %s", __FUNCTION__);
 }
 
@@ -442,6 +447,11 @@
 
 
     NSLog(@"%@", ps);
+}
+
+- (void)testFindById {
+    Person *p = J_Select(Person).Recursively.WhereIdIs(@"400AF7F3-ADFC-4E6A-B46A-A53EDDA39AEB").object;
+    NSLog(@"%@", p);
 }
 
 - (void)testGCD {

@@ -189,6 +189,18 @@ static const NSString *jr_activatedPropertiesKey = @"jr_activatedPropertiesKey";
     return J_Select(self).Recursively.list;
 }
 
++ (instancetype)jr_getByID:(NSString *)ID {
+    return J_Select(self).WhereIdIs(ID).object;
+}
+
++ (instancetype)jr_getByPrimaryKey:(id)primaryKey {
+    return J_Select(self).WherePKIs(primaryKey).object;
+}
+
++ (NSArray<id<JRPersistent>> *)jr_getAll {
+    return J_Select(self).list;
+}
+
 #pragma mark - table operation
 
 + (BOOL)jr_createTable {

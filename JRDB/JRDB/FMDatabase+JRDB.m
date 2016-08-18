@@ -1122,12 +1122,13 @@ static NSString * const jrdb_synchronizing = @"jrdb_synchronizing";
                                                 orderBy:(NSString * _Nullable)orderBy
                                                   limit:(NSString * _Nullable)limit
                                                  isDesc:(BOOL)isDesc {
-    JRSql *sql = [JRSqlGenerator sql4GetColumns:@[@" _ID "] byConditions:conditions clazz:clazz groupBy:groupBy orderBy:orderBy limit:limit isDesc:isDesc table:nil];
+    JRSql *sql = [JRSqlGenerator sql4GetColumns:nil byConditions:conditions clazz:clazz groupBy:groupBy orderBy:orderBy limit:limit isDesc:isDesc table:nil];
     FMResultSet *resultset = [self jr_executeQuery:sql];
     NSMutableArray *array = [NSMutableArray array];
     while ([resultset next]) {
-        [array addObject:[resultset stringForColumnIndex:0]];
+        [array addObject:[resultset stringForColumn:@"_id"]];
     }
+    [resultset close];
     return array;
 }
 
