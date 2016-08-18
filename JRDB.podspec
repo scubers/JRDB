@@ -1,8 +1,8 @@
 Pod::Spec.new do |s|
 
     s.name                  = "JRDB"
-    s.version               = "1.1.0"
-    s.summary               = "The light packing of fmdb for my self"
+    s.version               = "1.1.1"
+    s.summary               = "iOS database lib depend on FMDB, whitch use like hibernate"
 
     s.homepage              = "https://github.com/scubers/JRDB"
     s.license               = { :type => "MIT", :file => "LICENSE" }
