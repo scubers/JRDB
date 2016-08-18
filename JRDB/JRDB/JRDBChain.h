@@ -207,7 +207,7 @@ typedef struct {
 - (JRDBResult * _Nonnull)exe:(JRDBChainComplete _Nullable)complete;
 - (JRDBResult * _Nonnull)exe;
 
-- (BOOL)flag;
+- (BOOL)updateResult;
 - (NSUInteger)count;
 - (id<JRPersistent> _Nullable)object;
 - (NSArray<JRPersistent> * _Nonnull)list;

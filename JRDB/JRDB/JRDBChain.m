@@ -72,16 +72,17 @@
     switch (_operation) {
         case CSelect:
         case CSelectSingle:
-            result = [_db jr_executeQueryChain:self complete:complete];break;
+            result = [_db jr_executeQueryChain:self];break;
             
         case CSelectCustomized:
         case CSelectCount:
-            result = [_db jr_executeCustomizedQueryChain:self complete:complete];break;
+            result = [_db jr_executeCustomizedQueryChain:self];break;
             
         default:
-            result = @([_db jr_executeUpdateChain:self complete:complete]);
+            result = @([_db jr_executeUpdateChain:self]);
     }
     
+    JRDBResult *finalResult;
     switch (self.operation) {
         case CCreateTable:
         case CUpdateTable:
@@ -92,21 +93,25 @@
         case CDeleteAll:
         case CDelete:
         case CSaveOrUpdate:
-            return [JRDBResult resultWithBool:[result boolValue]];
+            finalResult = [JRDBResult resultWithBool:[result boolValue]];break;
             
         case CSelectCount:
-            return [JRDBResult resultWithCount:[result unsignedIntegerValue]];
+            finalResult = [JRDBResult resultWithCount:[result unsignedIntegerValue]];break;
             
         case CSelect:
         case CSelectCustomized:
-            return [JRDBResult resultWithArray:[result copy]];
+            finalResult = [JRDBResult resultWithArray:[result copy]];break;
         case CSelectSingle:
-            return [JRDBResult resultWithObject:result];
+            finalResult = [JRDBResult resultWithObject:result];break;
             
         case COperationNone:
         default:
-            return [JRDBResult resultWithBool:NO];
+            finalResult = [JRDBResult resultWithBool:NO];
     }
+    
+    EXE_BLOCK(_completeBlock, self, finalResult);
+    
+    return finalResult;
     
 }
 
@@ -114,7 +119,7 @@
     return [self exe:nil];
 }
 
-- (BOOL)flag {
+- (BOOL)updateResult {
     return self.exe.flag;
 }
 

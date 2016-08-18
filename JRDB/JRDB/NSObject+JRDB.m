@@ -122,57 +122,57 @@ static const NSString *jr_activatedPropertiesKey = @"jr_activatedPropertiesKey";
 #pragma mark - save or update
 
 - (BOOL)jr_saveOrUpdateOnly {
-    return J_SaveOrUpdate(self).UnRecursively.flag;
+    return J_SaveOrUpdate(self).UnRecursively.updateResult;
 }
 
 - (BOOL)jr_saveOrUpdate {
-    return J_SaveOrUpdate(self).Recursively.flag;
+    return J_SaveOrUpdate(self).Recursively.updateResult;
 }
 
 #pragma mark - save
 
 - (BOOL)jr_saveOnly {
-    return J_Insert(self).flag;
+    return J_Insert(self).updateResult;
 }
 
 - (BOOL)jr_save {
-    return J_Insert(self).Recursively.flag;
+    return J_Insert(self).Recursively.updateResult;
 }
 
 #pragma mark - update
 
 - (BOOL)jr_updateOnlyColumns:(NSArray<NSString *> *)columns {
-    return J_Update(self).Columns(columns).flag;
+    return J_Update(self).Columns(columns).updateResult;
 }
 
 - (BOOL)jr_updateColumns:(NSArray<NSString *> *)columns {
-    return J_Update(self).Columns(columns).Recursively.flag;
+    return J_Update(self).Columns(columns).Recursively.updateResult;
 }
 
 - (BOOL)jr_updateOnlyIgnore:(NSArray<NSString *> *)Ignore {
-    return J_Update(self).Ignore(Ignore).flag;
+    return J_Update(self).Ignore(Ignore).updateResult;
 }
 
 - (BOOL)jr_updateIgnore:(NSArray<NSString *> *)Ignore {
-    return J_Update(self).Ignore(Ignore).flag;
+    return J_Update(self).Ignore(Ignore).updateResult;
 }
 
 #pragma mark - delete
 
 + (BOOL)jr_deleteAllOnly {
-    return J_DeleteAll(self).flag;
+    return J_DeleteAll(self).updateResult;
 }
 
 + (BOOL)jr_deleteAll {
-    return J_DeleteAll(self).Recursively.flag;
+    return J_DeleteAll(self).Recursively.updateResult;
 }
 
 - (BOOL)jr_deleteOnly {
-    return J_Delete(self).flag;
+    return J_Delete(self).updateResult;
 }
 
 - (BOOL)jr_delete {
-    return J_Delete(self).Recursively.flag;
+    return J_Delete(self).Recursively.updateResult;
 }
 
 #pragma mark - select
@@ -192,19 +192,19 @@ static const NSString *jr_activatedPropertiesKey = @"jr_activatedPropertiesKey";
 #pragma mark - table operation
 
 + (BOOL)jr_createTable {
-    return J_CreateTable(self).flag;
+    return J_CreateTable(self).updateResult;
 }
 
 + (BOOL)jr_updateTable {
-    return J_UpdateTable(self).flag;
+    return J_UpdateTable(self).updateResult;
 }
 
 + (BOOL)jr_dropTable {
-    return J_DropTable(self).flag;
+    return J_DropTable(self).updateResult;
 }
 
 + (BOOL)jr_truncateTable {
-    return J_TruncateTable(self).flag;
+    return J_TruncateTable(self).updateResult;
 }
 
 #pragma mark - table message
