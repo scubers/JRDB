@@ -142,7 +142,7 @@
 }
 
 - (id)_handleQueryResult:(NSArray *)result forChain:(JRDBChain *)chain {
-    return [chain isQuerySingle] ? [result firstObject] : result;
+    return chain.operation == CSelectSingle ? [result firstObject] : result;
 }
 
 @end

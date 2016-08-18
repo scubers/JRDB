@@ -60,21 +60,27 @@
         return nil;
     }
     
+    if ([self isQuerySingle]) {
+        _operation = CSelectSingle;
+    }
+    
     if (complete) {
         _completeBlock = complete;
     }
 
-    if (self.operation == CSelect) {
-        id result = [_db jr_executeQueryChain:self complete:complete];
-        return result;
+    switch (_operation) {
+        case CSelect:
+        case CSelectSingle:
+            return [_db jr_executeQueryChain:self complete:complete];
+            
+        case CSelectCustomized:
+        case CSelectCount:
+            return [_db jr_executeCustomizedQueryChain:self complete:complete];
+            
+        default:
+            return @([_db jr_executeUpdateChain:self complete:complete]);
     }
-    else if(self.operation == CSelectCustomized || self.operation == CSelectCount) {
-        id result = [_db jr_executeCustomizedQueryChain:self complete:complete];
-        return result;
-    }
-    else {
-        return @([_db jr_executeUpdateChain:self complete:complete]);
-    }
+    
 }
 
 #pragma mark - Operation

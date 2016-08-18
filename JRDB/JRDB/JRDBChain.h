@@ -205,6 +205,4 @@ typedef struct {
  */
 - (id _Nullable)exe:(JRDBChainComplete _Nullable)complete;
 
-- (BOOL)isQuerySingle;
-
 @end
