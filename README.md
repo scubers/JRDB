@@ -16,7 +16,7 @@ Feedback: [jr-wong@qq.com](mailto:jrwong@qq.com)
 
 # Description
 
-- 使用分类的模式，模仿Hibernate，对FMDB进行简易封装
+- 使用分类的模式，模仿Hibernate，对FMDB进行简易封装 
 - 支持pod 安装 『pod 'JRDB'』，Podfile需要添加  use_framework! 
 - 使用协议，不用继承基类，对任意NSObject可以进行入库操作
 - 支持swift 和 Objective-C
