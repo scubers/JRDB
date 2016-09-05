@@ -507,6 +507,13 @@
         NSLog(@"%@", result);
     }];
     NSLog(@"end");
+    
+    J_SelectColumns(nil);
+    
+    [Person jr_findAll]
+    
+//    NSLog(@"%@", pppp);
+    
 }
 
 #pragma mark - database operation

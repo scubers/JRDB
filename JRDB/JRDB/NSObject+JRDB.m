@@ -178,27 +178,27 @@ static const NSString *jr_activatedPropertiesKey = @"jr_activatedPropertiesKey";
 #pragma mark - select
 
 + (instancetype)jr_findByID:(NSString *)ID {
-    return J_Select(self).WhereIdIs(ID).Recursively.object;
+    return [JRDBChain new].Select(self).WhereIdIs(ID).Recursively.object;
 }
 
 + (instancetype)jr_findByPrimaryKey:(id)primaryKey {
-    return J_Select(self).WherePKIs(primaryKey).Recursively.object;
+    return [JRDBChain new].Select(self).WherePKIs(primaryKey).Recursively.object;
 }
 
 + (NSArray<id<JRPersistent>> *)jr_findAll {
-    return J_Select(self).Recursively.list;
+    return [JRDBChain new].Select(self).Recursively.list;
 }
 
 + (instancetype)jr_getByID:(NSString *)ID {
-    return J_Select(self).WhereIdIs(ID).object;
+    return [JRDBChain new].Select(self).WhereIdIs(ID).object;
 }
 
 + (instancetype)jr_getByPrimaryKey:(id)primaryKey {
-    return J_Select(self).WherePKIs(primaryKey).object;
+    return [JRDBChain new].Select(self).WherePKIs(primaryKey).object;
 }
 
 + (NSArray<id<JRPersistent>> *)jr_getAll {
-    return J_Select(self).list;
+    return [JRDBChain new].Select(self).list;
 }
 
 #pragma mark - table operation

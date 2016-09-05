@@ -255,17 +255,11 @@ static inline JRObjectBlock __setTargetToSelf(JRDBChain *self, ChainOperation op
 
 #pragma mark - Property
 
-- (JRObjectBlock)From {
+- (JRClassBlock)From {
     return ^(id from) {
         if (object_isClass(from)) {
             self->_targetClazz = from;
             self->_tableName = [((Class)from) shortClazzName];
-        } else {
-            self->_tableName = from;
-            Class clazz = NSClassFromString(from);
-            if (clazz) {
-                self->_targetClazz = clazz;
-            }
         }
         return self;
     };

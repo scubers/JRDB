@@ -12,7 +12,7 @@
 
 #pragma mark - convenience marco
 
-#define J_Select(_arg_)         ([JRDBChain new].Select([_arg_ class]))
+#define J_Select(_arg_)         ({JRDBChain<_arg_ *> *c = [JRDBChain new].Select([_arg_ class]);c;})
 #define J_SelectCount(_arg_)    ([JRDBChain new].CountSelect([_arg_ class]))
 #define J_SelectColumns(...)    ([JRDBChain new].ColumnsSelect(_variableListToArray(__VA_ARGS__, 0)))
 
@@ -96,11 +96,11 @@ typedef struct {
 } JRLimit;
 //typedef struct JRLimit JRLimit;
 
-@interface JRDBChain : NSObject
+@interface JRDBChain<T:id<JRPersistent>> : NSObject
 
-@property (nonatomic, strong, readonly, nullable) id<JRPersistent>          target;///< operation target
+@property (nonatomic, strong, readonly, nullable) T target;///< operation target
 @property (nonatomic, strong, readonly, nullable) Class<JRPersistent>       targetClazz; ///< operation class
-@property (nonatomic, strong, readonly, nullable) NSArray<id<JRPersistent>> *targetArray; ///< operation target array
+@property (nonatomic, strong, readonly, nullable) NSArray<T> *targetArray; ///< operation target array
 
 
 @property (nonatomic, assign, readonly) ChainOperation   operation;///< operation type
@@ -111,7 +111,7 @@ typedef struct {
 
 
 // value param
-@property (nonatomic, copy, readonly, nonnull   ) JRObjectBlock     From;///< sepecific a class for operation
+@property (nonatomic, copy, readonly, nonnull   ) JRClassBlock     From;///< sepecific a class for operation
 
 @property (nonatomic, strong, readonly, nullable) NSString          *limitString;
 @property (nonatomic, assign, readonly          ) JRLimit           limitIn;
@@ -209,8 +209,8 @@ typedef struct {
 
 - (BOOL)updateResult;
 - (NSUInteger)count;
-- (id<JRPersistent> _Nullable)object;
-- (NSArray<JRPersistent> * _Nonnull)list;
+- (T _Nullable)object;
+- (NSArray<T> * _Nonnull)list;
 
 #pragma mark - macro method will not execute
 - (JRObjectBlock _Nonnull)FromJ NS_SWIFT_UNAVAILABLE("macro method");///< will not execute cause the macro
