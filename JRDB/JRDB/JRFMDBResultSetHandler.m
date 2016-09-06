@@ -16,7 +16,7 @@
 
 @implementation JRFMDBResultSetHandler
 
-+ (NSArray<id<JRPersistent>> *)handleResultSet:(FMResultSet *)resultSet forClazz:(Class<JRPersistent>)clazz {
++ (NSArray<id<JRPersistent>> *)handleResultSet:(FMResultSet *)resultSet forClazz:(Class<JRPersistent>)clazz columns:(NSArray * _Nullable)columns {
     NSMutableArray *list = [NSMutableArray array];
     
     NSArray<JRActivatedProperty *> *props = [clazz jr_activatedProperties];
@@ -30,6 +30,8 @@
         
         [props enumerateObjectsUsingBlock:^(JRActivatedProperty * _Nonnull prop, NSUInteger idx, BOOL * _Nonnull stop) {
             if (isID(prop.name)) { return; }
+            if (columns && ![columns containsObject:prop.name]) { return; }
+            
             RetDataType type = [self typeWithEncode:prop.typeEncode];
             switch (type) {
                 case RetDataTypeNSData: {

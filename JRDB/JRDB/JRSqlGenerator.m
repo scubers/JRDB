@@ -351,7 +351,7 @@ void SqlLog(id sql) {
     } else {
         [sqlString appendString:@" select * "];
     }
-
+    
     [sqlString appendFormat:@" from %@ where 1=1 ", tableName];
 
     for (JRQueryCondition *condition in conditions) {
@@ -451,6 +451,61 @@ void SqlLog(id sql) {
                          isDesc:chain.isDesc
                           table:chain.tableName];
 }
+
++ (JRSql *)sql4Chain:(JRDBChain *)chain {
+    
+    NSMutableString *sqlString = [NSMutableString string];
+    NSMutableArray *argList = [NSMutableArray array];
+    
+    [sqlString appendString:@" select "];
+    
+    if (chain.operation == CSelectCount) {
+        [sqlString appendString:@" count(1) "];
+    } else if (chain.selectColumns.count) {
+        [chain.selectColumns enumerateObjectsUsingBlock:^(NSString * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            idx ? [sqlString appendFormat:@", %@ ", obj] : [sqlString appendFormat:@"%@", obj];
+        }];
+    } else {
+        [sqlString appendString:@" * "];
+    }
+    
+    [sqlString appendString:@" from "];
+    
+    if (chain.subChain) {
+        JRSql *sql = [self sql4Chain:chain.subChain];
+        [sqlString appendFormat:@" (%@) ", sql.sqlString];
+        [argList addObjectsFromArray:sql.args];
+    } else {
+        [sqlString appendString:chain.tableName ?: [chain.targetClazz shortClazzName]];
+    }
+    
+    [sqlString appendString:@" where 1=1 "];
+    
+    for (JRQueryCondition *condition in chain.queryCondition) {
+        
+        [sqlString appendFormat:@" %@ (%@)", condition.type == JRQueryConditionTypeAnd ? @"and" : @"or", condition.condition];
+        
+        if (condition.args.count) {
+            [argList addObjectsFromArray:condition.args];
+        }
+    }
+    
+    // group
+    if (chain.groupBy.length) { [sqlString appendFormat:@" group by %@ ", chain.groupBy]; }
+    // orderby
+    if (chain.orderBy.length) { [sqlString appendFormat:@" order by %@ ", chain.orderBy]; }
+    // desc asc
+    if (chain.isDesc && chain.orderBy.length) {[sqlString appendString:@" desc "];}
+    // limit
+    if (chain.limitString.length) { [sqlString appendFormat:@" %@ ", chain.limitString]; }
+    
+//    [sqlString appendString:@";"];
+    
+    JRSql *jrsql = [JRSql sql:sqlString args:argList];
+    SqlLog(jrsql);
+    return jrsql;
+}
+
 @end
 
 
