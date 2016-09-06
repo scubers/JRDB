@@ -3,7 +3,7 @@ platform:ios, ‘7.0’
 
 #link_with ['JRDB', 'JRDBTests']
 
-pod 'FMDB'
+
 
 target:JRDB do
 end
