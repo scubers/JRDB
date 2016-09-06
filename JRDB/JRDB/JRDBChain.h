@@ -101,7 +101,7 @@ JRDBChain<_generictype_> * _Nonnull(^_name_)(NSInteger value)
 JRDBChain<_generictype_> * _Nonnull(^_name_)(Class<JRPersistent> _Nonnull clazz)
 
 #define JRArrayBlockDefine(_generictype_, _name_)\
-JRDBChain<_generictype_> * _Nonnull(^_name_)(NSArray<_generictype_> * _Nonnull array)
+JRDBChain<_generictype_> * _Nonnull(^_name_)(NSArray * _Nonnull array)
 
 #define JRLimitBlockDefine(_generictype_, _name_)\
 JRDBChain<_generictype_> * _Nonnull(^_name_)(NSUInteger start, NSUInteger length)
