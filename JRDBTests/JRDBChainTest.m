@@ -470,7 +470,8 @@
     .OrderJ(e_unsigned_long).Recursively.Descend.count;
     NSLog(@"%@", @(count));
     
-    J_Select(Person).FromJ(Person).Cached;
+    J_Select(Person).WhereJ(a_int = ?).ParamsJ(@10).list;
+    
     
     
 }
@@ -531,8 +532,33 @@
     
     J_SelectColumns(nil);
     
+    NSArray<Person *> *result =
+    J_Select(Person)    // 指定查询对象
+    .Recursive(YES)		// 默认 可省略
+    .Sync(YES)			// 默认 可省略
+    .Cache(NO)			// 默认 可省略
+    .Desc(NO)           // 默认 可省略
+    .Where(@"_name like ? and _height > ?")// 条件语句 可省略
+    .Params(@[@"L%", @150])                // 对应条件语句的 ? 可省略
+    .Group(@"_level")                      // Group 语句对应的字段 可省略
+    .Order(@"_age")                        // Order 语句对应的字段 可省略
+    .Limit(0, 10)                          // 分页 start, length 可省略
+    .list;
     
-//    NSLog(@"%@", pppp);
+    NSArray<Person *> *result1 =
+    J_SelectColumns(@[@"_age", @"_name"])
+    .From([Person class]) // 查询哪个类
+    .Recursive(YES)   // 在自定义查询中不会起作用
+    .Sync(YES)		  //  默认 可省略
+    .Cache(NO)		  // 在自定义查询中不会起作用
+    .Where(@"_name like ? and _height > ?")
+    .Params(@[@"L%", @150])
+    .Group(@"_level")
+    .Order(@"_age")
+    .Limit(0, 10)
+    .Desc(NO)
+    .list;
+
     
 }
 
