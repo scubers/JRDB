@@ -417,7 +417,7 @@ static inline JRIntegerBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *
     return _whereId.length || _wherePK;
 }
 
-- (JRSql *)jrSql {
+- (JRSql *)querySql {
     return [JRSqlGenerator sql4Chain:self];
 }
 

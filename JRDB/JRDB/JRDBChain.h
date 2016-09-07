@@ -128,7 +128,7 @@ typedef struct {
 @property (nonatomic, strong, readonly, nullable) NSString         *tableName;///< operation table name
 
 @property (nonatomic, strong, readonly, nullable) NSArray<JRQueryCondition *> *queryCondition; ///< queryConditions which generic by where condition
-@property (nonatomic, strong, readonly, nullable) JRSql *jrSql; ///< jrSql which generic by Self
+@property (nonatomic, strong, readonly, nullable) JRSql *querySql; ///< jrSql which generic by Self when execute query
 @property (nonatomic, strong, readonly, nullable) NSArray<NSString*> *selectColumns;///< customizd select columns array
 
 

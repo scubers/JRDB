@@ -99,9 +99,9 @@
     NSAssert(!chain.selectColumns.count, @"selectColumns should not has count in normal query");
     id result;
     if (!chain.isRecursive) {
-        result = [self jr_getByJRSql:chain.jrSql sync:chain.isSync resultClazz:chain.targetClazz columns:chain.selectColumns];
+        result = [self jr_getByJRSql:chain.querySql sync:chain.isSync resultClazz:chain.targetClazz columns:chain.selectColumns];
     } else {
-        result = [self jr_findByJRSql:chain.jrSql sync:chain.isSync resultClazz:chain.targetClazz columns:chain.selectColumns];
+        result = [self jr_findByJRSql:chain.querySql sync:chain.isSync resultClazz:chain.targetClazz columns:chain.selectColumns];
     }
     return [self _handleQueryResult:result forChain:chain];
 }
@@ -109,7 +109,7 @@
 - (id)jr_executeCustomizedQueryChain:(JRDBChain *)chain {
     return
     [self jr_executeSync:chain.isSync block:^id _Nullable(FMDatabase * _Nonnull db) {
-        FMResultSet *resultSet = [self jr_executeQuery:chain.jrSql];
+        FMResultSet *resultSet = [self jr_executeQuery:chain.querySql];
         id result = [JRFMDBResultSetHandler handleResultSet:resultSet forChain:chain];
         return result;
     }];
