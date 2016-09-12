@@ -45,22 +45,22 @@
 #pragma mark - table
 
 - (void)testAAAAACreateTable {
-    BOOL a = J_CreateTable(Person).updateResult;
+    BOOL a = J_CreateTable(Person);
     NSAssert(a, @"~~ error: %s", __FUNCTION__);
 }
 
 - (void)testAAAAUpdateTable {
-    BOOL a = J_UpdateTable(Person).updateResult;
+    BOOL a = J_UpdateTable(Person);
     NSAssert(a, @"~~ error: %s", __FUNCTION__);
 }
 
 - (void)testAAAATruncateTable {
-    BOOL a = J_TruncateTable(Person).updateResult;
+    BOOL a = J_TruncateTable(Person);
     NSAssert(a, @"~~ error: %s", __FUNCTION__);
 }
 
 - (void)testAAADropTable {
-    BOOL a = J_DropTable(Person).updateResult;
+    BOOL a = J_DropTable(Person);
     NSAssert(a, @"~~ error: %s", __FUNCTION__);
 }
 
@@ -523,7 +523,6 @@
 //    sleep(5);
 }
 
-#define J_Chain(_arg_) ([JRDBChain<_arg_ *> new])
 
 - (void)testTemp {
     
@@ -532,13 +531,6 @@
     }];
     
     
-    [[JRDBChain new] inTransaction:^(FMDatabase * _Nonnull $0, BOOL * _Nonnull $1) {
-        
-    }];
-    
-    [J_Chain(Person) inTransaction:^(FMDatabase * _Nonnull db, BOOL * _Nonnull rollback) {
-        
-    }];
     
     [[JRDBChain new].db jr_inTransaction:^(FMDatabase * _Nonnull db, BOOL * _Nonnull rollBack) {
         
