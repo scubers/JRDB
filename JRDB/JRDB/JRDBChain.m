@@ -328,14 +328,14 @@ static inline JRObjectBlock __setObjectPropertyToSelf(JRDBChain *self, NSString 
     return __setObjectPropertyToSelf(self, J(ignoreArray));
 }
 
-static inline JRIntegerBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *keypath) {
-    return ^(NSInteger value) {
+static inline JRBoolBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *keypath) {
+    return ^(BOOL value) {
         [self setValue:@(value) forKey:keypath];
         return self;
     };
 }
 
-- (JRIntegerBlock)Recursive {
+- (JRBoolBlock)Recursive {
     return __setBoolPropertyToSelf(self, J(isRecursive));
 }
 - (instancetype)Recursively {
@@ -345,7 +345,7 @@ static inline JRIntegerBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *
     return self.Recursive(NO);
 }
 
-- (JRIntegerBlock)Sync {
+- (JRBoolBlock)Sync {
     return __setBoolPropertyToSelf(self, J(isSync));
 }
 - (instancetype)UnSafely {
@@ -355,7 +355,7 @@ static inline JRIntegerBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *
     return self.Sync(YES);
 }
 
-- (JRIntegerBlock)Transaction {
+- (JRBoolBlock)Transaction {
     return __setBoolPropertyToSelf(self, J(useTransaction));
 }
 - (instancetype)NoTransaction {
@@ -365,7 +365,7 @@ static inline JRIntegerBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *
     return self.Transaction(YES);
 }
 
-- (JRIntegerBlock)Desc {
+- (JRBoolBlock)Desc {
     return __setBoolPropertyToSelf(self, J(isDesc));
 }
 - (instancetype)Descend {
@@ -375,7 +375,7 @@ static inline JRIntegerBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *
     return self.Desc(NO);
 }
 
-- (JRIntegerBlock)Cache {
+- (JRBoolBlock)Cache {
     return __setBoolPropertyToSelf(self, J(useCache));
 }
 - (instancetype)Cached {

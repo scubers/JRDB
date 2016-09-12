@@ -85,7 +85,8 @@ typedef NS_ENUM(NSInteger, ChainOperation) {
 
 
 typedef JRDBChain * _Nonnull (^JRObjectBlock)(id _Nonnull value);
-typedef JRDBChain * _Nonnull (^JRIntegerBlock)(NSInteger value);
+typedef JRDBChain * _Nonnull (^JRBoolBlock)(BOOL flag);
+//typedef JRDBChain * _Nonnull (^JRIntegerBlock)(NSInteger value);
 typedef JRDBChain * _Nonnull (^JRClassBlock)(Class<JRPersistent> _Nonnull clazz);
 typedef JRDBChain * _Nonnull (^JRArrayBlock)(NSArray * _Nonnull array);
 typedef JRDBChain * _Nonnull (^JRLimitBlock)(NSUInteger start, NSUInteger length);
@@ -94,8 +95,8 @@ typedef JRDBChain * _Nonnull (^JRCompleteBlock)(JRDBChainComplete _Nonnull compl
 #define JRObjectBlockDefine(_generictype_, _name_)\
 JRDBChain<_generictype_> * _Nonnull(^_name_)(id _Nonnull obj)
 
-#define JRIntegerBlockDefine(_generictype_, _name_) \
-JRDBChain<_generictype_> * _Nonnull(^_name_)(NSInteger value)
+#define JRBoolBlockDefine(_generictype_, _name_) \
+JRDBChain<_generictype_> * _Nonnull(^_name_)(BOOL value)
 
 #define JRClassBlockDefine(_generictype_, _name_)\
 JRDBChain<_generictype_> * _Nonnull(^_name_)(Class<JRPersistent> _Nonnull clazz)
@@ -160,28 +161,28 @@ typedef struct {
 @property (nonatomic, copy, readonly, nonnull   ) JRObjectBlockDefine(T, WherePKIs);///< wehrePKIs condition: parameter is id: WherePKIs(obj)
 
 @property (nonatomic, assign, readonly          ) BOOL              isRecursive;
-@property (nonatomic, copy, readonly, nonnull   ) JRIntegerBlockDefine(T, Recursive);///< recursive condition, if the operation should recursive, NO by default
+@property (nonatomic, copy, readonly, nonnull   ) JRBoolBlockDefine(T, Recursive);///< recursive condition, if the operation should recursive, NO by default
 - (instancetype _Nonnull)Recursively;///< equal to Recursive(YES)
 - (instancetype _Nonnull)UnRecursively;///< equal to Recursive(NO)
 
 @property (nonatomic, assign, readonly          ) BOOL              isSync;
-@property (nonatomic, copy, readonly, nonnull   ) JRIntegerBlockDefine(T, Sync);///< sync condition, if the operation should execute on sepecific serial queue and wait on current thread, YES by default
+@property (nonatomic, copy, readonly, nonnull   ) JRBoolBlockDefine(T, Sync);///< sync condition, if the operation should execute on sepecific serial queue and wait on current thread, YES by default
 - (instancetype _Nonnull)UnSafely;///< equal to Sync(NO)
 - (instancetype _Nonnull)Safely;///< equal to Sync(YES)
 
 
 @property (nonatomic, assign, readonly          ) BOOL              isDesc;
-@property (nonatomic, copy, readonly, nonnull   ) JRIntegerBlockDefine(T, Desc);///< desc condition, NO by default
+@property (nonatomic, copy, readonly, nonnull   ) JRBoolBlockDefine(T, Desc);///< desc condition, NO by default
 - (instancetype _Nonnull)Descend;///< equal to Desc(YES)
 - (instancetype _Nonnull)Ascend;///< equal to Desc(NO)
 
 @property (nonatomic, assign, readonly          ) BOOL              useCache;
-@property (nonatomic, copy, readonly, nonnull   ) JRIntegerBlockDefine(T, Cache);///< cache condition, NO by default
+@property (nonatomic, copy, readonly, nonnull   ) JRBoolBlockDefine(T, Cache);///< cache condition, NO by default
 - (instancetype _Nonnull)Cached;///< equal to Cache(YES)
 - (instancetype _Nonnull)NoCached;///< equal to Cache(NO)
 
 @property (nonatomic, assign, readonly          ) BOOL              useTransaction;
-@property (nonatomic, copy, readonly, nonnull   ) JRIntegerBlockDefine(T, Transaction);///< useTransaction , YES by default
+@property (nonatomic, copy, readonly, nonnull   ) JRBoolBlockDefine(T, Transaction);///< useTransaction , YES by default
 - (instancetype _Nonnull)NoTransaction;///< equal to Transaction(NO)
 - (instancetype _Nonnull)Transactional;///< equal to Transaction(YES)
 
