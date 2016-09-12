@@ -204,19 +204,19 @@ static const NSString *jr_activatedPropertiesKey = @"jr_activatedPropertiesKey";
 #pragma mark - table operation
 
 + (BOOL)jr_createTable {
-    return J_CreateTable(self).updateResult;
+    return J_CreateTable(self);
 }
 
 + (BOOL)jr_updateTable {
-    return J_UpdateTable(self).updateResult;
+    return J_UpdateTable(self);
 }
 
 + (BOOL)jr_dropTable {
-    return J_DropTable(self).updateResult;
+    return J_DropTable(self);
 }
 
 + (BOOL)jr_truncateTable {
-    return J_TruncateTable(self).updateResult;
+    return J_TruncateTable(self);
 }
 
 #pragma mark - table message

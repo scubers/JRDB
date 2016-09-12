@@ -26,10 +26,10 @@
 
 #define J_DeleteAll(_arg_)      ([JRDBChain new].DeleteAll([_arg_ class]))
 
-#define J_CreateTable(_arg_)    ([JRDBChain new].CreateTable([_arg_ class]))
-#define J_UpdateTable(_arg_)    ([JRDBChain new].UpdateTable([_arg_ class]))
-#define J_DropTable(_arg_)      ([JRDBChain new].DropTable([_arg_ class]))
-#define J_TruncateTable(_arg_)  ([JRDBChain new].TruncateTable([_arg_ class]))
+#define J_CreateTable(_arg_)    ([JRDBChain new].CreateTable([_arg_ class])).updateResult
+#define J_UpdateTable(_arg_)    ([JRDBChain new].UpdateTable([_arg_ class])).updateResult
+#define J_DropTable(_arg_)      ([JRDBChain new].DropTable([_arg_ class])).updateResult
+#define J_TruncateTable(_arg_)  ([JRDBChain new].TruncateTable([_arg_ class])).updateResult
 
 #define ParamsJ(...)            Params((_variableListToArray(__VA_ARGS__, 0)))
 #define ColumnsJ(...)           Columns((_variableListToArray(__VA_ARGS__, 0)))
