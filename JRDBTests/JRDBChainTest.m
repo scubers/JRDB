@@ -523,12 +523,27 @@
 //    sleep(5);
 }
 
+#define J_Chain(_arg_) ([JRDBChain<_arg_ *> new])
+
 - (void)testTemp {
     
     [[JRDBChain new] exe:^(JRDBChain * _Nonnull chain, id  _Nullable result) {
         
     }];
     
+    
+    [[JRDBChain new] inTransaction:^(FMDatabase * _Nonnull $0, BOOL * _Nonnull $1) {
+        
+    }];
+    
+    [J_Chain(Person) inTransaction:^(FMDatabase * _Nonnull db, BOOL * _Nonnull rollback) {
+        
+    }];
+    
+    [[JRDBChain new].db jr_inTransaction:^(FMDatabase * _Nonnull db, BOOL * _Nonnull rollBack) {
+        
+    }];
+
 }
 
 #pragma mark - database operation
