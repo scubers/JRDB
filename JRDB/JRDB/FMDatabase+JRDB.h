@@ -364,5 +364,16 @@
 
 - (id<JRPersistent> _Nullable)objInUnRecursiveCache:(NSString * _Nonnull)ID ;
 
+
+
+
 @end
 
+#pragma mark - JRSql
+
+@interface FMDatabase (JRSql)
+
+- (NSArray<id<JRPersistent>> * _Nonnull)jr_getByJRSql:(JRSql * _Nonnull)sql sync:(BOOL)sync resultClazz:(Class<JRPersistent> _Nonnull)clazz columns:(NSArray * _Nullable)columns;
+- (NSArray<id<JRPersistent>> * _Nonnull)jr_findByJRSql:(JRSql * _Nonnull)sql sync:(BOOL)sync resultClazz:(Class<JRPersistent> _Nonnull)clazz columns:(NSArray * _Nullable)columns;
+
+@end

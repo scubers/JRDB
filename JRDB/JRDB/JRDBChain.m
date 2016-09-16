@@ -13,8 +13,18 @@
 #import <objc/runtime.h>
 #import "NSObject+Reflect.h"
 #import "JRQueryCondition.h"
+#import "JRSqlGenerator.h"
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Woverriding-method-mismatch"
+#pragma clang diagnostic ignored "-Wmismatched-return-types"
+
 
 @interface JRDBChain ()
+{
+    JRSql *_subSql;
+}
+
 @end
 
 @implementation JRDBChain
@@ -40,6 +50,7 @@
 @synthesize parameters     = _parameters;
 @synthesize columnsArray   = _columnsArray;
 @synthesize ignoreArray    = _ignoreArray;
+@synthesize tableName      = _tableName;
 
 - (instancetype)init {
     if (self = [super init]) {
@@ -56,7 +67,7 @@
 - (JRDBResult *)exe:(JRDBChainComplete)complete {
 
     if (!self.target && !self.targetArray.count && !self.targetClazz) {
-        NSLog(@"chain excute error, target are nil");
+        NSLog(@"chain excute error, target or targetArray or targetClazz is nil");
         return nil;
     }
     
@@ -257,15 +268,11 @@ static inline JRObjectBlock __setTargetToSelf(JRDBChain *self, ChainOperation op
 
 - (JRObjectBlock)From {
     return ^(id from) {
-        if (object_isClass(from)) {
+        if ([from isKindOfClass:[JRDBChain class]]) {
+            self->_subChain = from;
+        } else if (object_isClass(from)) {
             self->_targetClazz = from;
             self->_tableName = [((Class)from) shortClazzName];
-        } else {
-            self->_tableName = from;
-            Class clazz = NSClassFromString(from);
-            if (clazz) {
-                self->_targetClazz = clazz;
-            }
         }
         return self;
     };
@@ -321,14 +328,14 @@ static inline JRObjectBlock __setObjectPropertyToSelf(JRDBChain *self, NSString 
     return __setObjectPropertyToSelf(self, J(ignoreArray));
 }
 
-static inline JRIntegerBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *keypath) {
-    return ^(NSInteger value) {
+static inline JRBoolBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *keypath) {
+    return ^(BOOL value) {
         [self setValue:@(value) forKey:keypath];
         return self;
     };
 }
 
-- (JRIntegerBlock)Recursive {
+- (JRBoolBlock)Recursive {
     return __setBoolPropertyToSelf(self, J(isRecursive));
 }
 - (instancetype)Recursively {
@@ -338,7 +345,7 @@ static inline JRIntegerBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *
     return self.Recursive(NO);
 }
 
-- (JRIntegerBlock)Sync {
+- (JRBoolBlock)Sync {
     return __setBoolPropertyToSelf(self, J(isSync));
 }
 - (instancetype)UnSafely {
@@ -348,7 +355,7 @@ static inline JRIntegerBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *
     return self.Sync(YES);
 }
 
-- (JRIntegerBlock)Transaction {
+- (JRBoolBlock)Transaction {
     return __setBoolPropertyToSelf(self, J(useTransaction));
 }
 - (instancetype)NoTransaction {
@@ -358,7 +365,7 @@ static inline JRIntegerBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *
     return self.Transaction(YES);
 }
 
-- (JRIntegerBlock)Desc {
+- (JRBoolBlock)Desc {
     return __setBoolPropertyToSelf(self, J(isDesc));
 }
 - (instancetype)Descend {
@@ -368,7 +375,7 @@ static inline JRIntegerBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *
     return self.Desc(NO);
 }
 
-- (JRIntegerBlock)Cache {
+- (JRBoolBlock)Cache {
     return __setBoolPropertyToSelf(self, J(useCache));
 }
 - (instancetype)Cached {
@@ -410,6 +417,10 @@ static inline JRIntegerBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *
     return _whereId.length || _wherePK;
 }
 
+- (JRSql *)querySql {
+    return [JRSqlGenerator sql4Chain:self];
+}
+
 #pragma mark - Setter Getter
 
 - (Class<JRPersistent>)targetClazz {
@@ -422,6 +433,10 @@ static inline JRIntegerBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *
     if ([_targetArray count]) {
         return [[_targetArray firstObject] class];
     }
+    
+    if (self.subChain) {
+        return self.subChain.targetClazz;
+    }
     return nil;
 }
 
@@ -430,6 +445,24 @@ static inline JRIntegerBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *
         return nil;
     }
     return [NSString stringWithFormat:@" limit %zd,%zd ", _limitIn.start, _limitIn.length];
+}
+
+- (NSArray<NSString *> *)selectColumns {
+    if (!_selectColumns) {
+        return nil;
+    }
+    
+    NSMutableArray *arr = [_selectColumns mutableCopy];
+    if (![arr containsObject:@"_ID"]) {
+        [arr addObject:@"_ID"];
+    }
+    
+    NSString *primaryKey = [((Class<JRPersistent>)self.targetClazz) jr_customPrimarykey];
+    if (primaryKey.length && ![arr containsObject:primaryKey]) {
+        [arr addObject:primaryKey];
+    }
+    _selectColumns = [arr copy];
+    return _selectColumns;
 }
 
 #pragma mark - macro method will not execute
@@ -442,5 +475,6 @@ static inline JRIntegerBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *
 - (JRObjectBlock)GroupJ {return nil;}
 
 
-
 @end
+
+#pragma clang diagnostic pop

@@ -31,7 +31,7 @@ typedef NS_ENUM(NSInteger, RetDataType) {
 
 @interface JRFMDBResultSetHandler : NSObject
 
-+ (NSArray<id<JRPersistent>> * _Nonnull)handleResultSet:(FMResultSet * _Nonnull)resultSet forClazz:(Class<JRPersistent> _Nonnull)clazz;
++ (NSArray<id<JRPersistent>> * _Nonnull)handleResultSet:(FMResultSet * _Nonnull)resultSet forClazz:(Class<JRPersistent> _Nonnull)clazz columns:(NSArray * _Nullable)columns;
 
 + (RetDataType)typeWithEncode:(NSString * _Nonnull)encode;
 
@@ -42,6 +42,5 @@ typedef NS_ENUM(NSInteger, RetDataType) {
 @interface JRFMDBResultSetHandler (Chain)
 
 + (id _Nonnull)handleResultSet:(FMResultSet * _Nonnull)resultSet forChain:(JRDBChain * _Nonnull)chain;
-
 
 @end

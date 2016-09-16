@@ -45,22 +45,22 @@
 #pragma mark - table
 
 - (void)testAAAAACreateTable {
-    BOOL a = J_CreateTable(Person).updateResult;
+    BOOL a = J_CreateTable(Person);
     NSAssert(a, @"~~ error: %s", __FUNCTION__);
 }
 
 - (void)testAAAAUpdateTable {
-    BOOL a = J_UpdateTable(Person).updateResult;
+    BOOL a = J_UpdateTable(Person);
     NSAssert(a, @"~~ error: %s", __FUNCTION__);
 }
 
 - (void)testAAAATruncateTable {
-    BOOL a = J_TruncateTable(Person).updateResult;
+    BOOL a = J_TruncateTable(Person);
     NSAssert(a, @"~~ error: %s", __FUNCTION__);
 }
 
 - (void)testAAADropTable {
-    BOOL a = J_DropTable(Person).updateResult;
+    BOOL a = J_DropTable(Person);
     NSAssert(a, @"~~ error: %s", __FUNCTION__);
 }
 
@@ -71,6 +71,8 @@
 }
 
 #pragma mark - Delete
+
+#ifdef aaa
 - (void)testZZZDeleteAll {
     [self testSaveMany];
     BOOL a = J_DeleteAll(Person).Recursive(YES).updateResult;
@@ -125,7 +127,12 @@
 //    [J_DELETE(array).Recursive(YES) exe:nil];
 }
 
+- (void)testZZZZZDeleteDatabase {
+    [[JRDBMgr shareInstance] deleteDatabaseWithPath:[JRDBMgr defaultDB].databasePath];
+}
 
+
+#endif /* aaa */
 
 #pragma mark - Insert
 
@@ -243,11 +250,11 @@
 }
 
 - (void)testUpdateMany1 {
-    NSArray<Person *> *ps = [Person jr_findAll];
+    NSArray<Person *> *ps = [Person jr_getAll];
     [ps enumerateObjectsUsingBlock:^(Person * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         obj.c_long = 9999;
     }];
-    BOOL a = J_Update(ps).Recursive(NO).updateResult;
+    BOOL a = J_Update(ps).updateResult;
     NSAssert(a, @"~~ error: %s", __FUNCTION__);
 //    [J_UPDATE(ps).Recursive(NO) exe:nil];
 }
@@ -454,6 +461,21 @@
     NSLog(@"%@", p);
 }
 
+- (void)testSubQuery {
+    NSUInteger count =
+//    J_SelectColumns(J(a_int), J(e_unsigned_long))
+//    J_Select(Person)
+    J_SelectCount(Person)
+    .From(J_Select(Person).Limit(0,5))
+    .OrderJ(e_unsigned_long).Recursively.Descend.count;
+    NSLog(@"%@", @(count));
+    
+    J_Select(Person).WhereJ(a_int = ?).ParamsJ(@10).list;
+    
+    
+    
+}
+
 - (void)testGCD {
 //    [JRDBMgr shareInstance].debugMode = NO;
     
@@ -501,19 +523,22 @@
 //    sleep(5);
 }
 
+
 - (void)testTemp {
-    Person *p = [self createPerson:1 name:nil];
-    [J_Insert(p) exe:^(JRDBChain * _Nonnull chain, id  _Nullable result) {
-        NSLog(@"%@", result);
+    
+    [[JRDBChain new] exe:^(JRDBChain * _Nonnull chain, id  _Nullable result) {
+        
     }];
-    NSLog(@"end");
+    
+    
+    
+    [[JRDBChain new].db jr_inTransaction:^(FMDatabase * _Nonnull db, BOOL * _Nonnull rollBack) {
+        
+    }];
+
 }
 
 #pragma mark - database operation
-
-- (void)testZZZZZDeleteDatabase {
-    [[JRDBMgr shareInstance] deleteDatabaseWithPath:[JRDBMgr defaultDB].databasePath];
-}
 
 #pragma mark - convenience method
 

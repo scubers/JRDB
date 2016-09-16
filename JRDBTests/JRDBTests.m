@@ -261,7 +261,7 @@
  [J_SELECT([Person class]).count().From(@"table").Where(@"_age = ?").Params(@[@1]) exe:nil];
  */
 - (void)testSelectChain {
-    id re = [J_Select([Person class]).Desc(YES) exe:nil];
+    id re = [J_Select(Person).Desc(YES) exe:nil];
     NSLog(@"%@", re);
 }
 

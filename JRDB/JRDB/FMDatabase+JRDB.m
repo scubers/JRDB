@@ -862,7 +862,7 @@ static NSString * const jrdb_synchronizing = @"jrdb_synchronizing";
     NSAssert(ID, @"id should not be nil");
     JRSql *sql = [JRSqlGenerator sql4GetByIDWithClazz:clazz ID:ID table:nil];
     FMResultSet *ret = [self jr_executeQuery:sql];
-    return [JRFMDBResultSetHandler handleResultSet:ret forClazz:clazz].firstObject;
+    return [JRFMDBResultSetHandler handleResultSet:ret forClazz:clazz columns:nil].firstObject;
 }
 
 - (id<JRPersistent>)jr_getByID:(NSString *)ID clazz:(Class<JRPersistent>)clazz synchronized:(BOOL)synchronized useCache:(BOOL)useCache complete:(JRDBQueryComplete)complete {
@@ -892,7 +892,7 @@ static NSString * const jrdb_synchronizing = @"jrdb_synchronizing";
     NSAssert(primaryKey, @"id should be nil");
     JRSql *sql = [JRSqlGenerator sql4GetByPrimaryKeyWithClazz:clazz primaryKey:primaryKey table:nil];
     FMResultSet *ret = [self jr_executeQuery:sql];
-    return [JRFMDBResultSetHandler handleResultSet:ret forClazz:clazz].firstObject;
+    return [JRFMDBResultSetHandler handleResultSet:ret forClazz:clazz columns:nil].firstObject;
 }
 
 - (id<JRPersistent>)jr_getByPrimaryKey:(id)primaryKey clazz:(Class<JRPersistent>)clazz synchronized:(BOOL)synchronized complete:(JRDBQueryComplete)complete {
@@ -912,7 +912,7 @@ static NSString * const jrdb_synchronizing = @"jrdb_synchronizing";
     }
     JRSql *sql = [JRSqlGenerator sql4FindByConditions:conditions clazz:clazz groupBy:groupBy orderBy:orderBy limit:limit isDesc:isDesc table:nil];
     FMResultSet *ret = [self jr_executeQuery:sql];
-    return [JRFMDBResultSetHandler handleResultSet:ret forClazz:clazz];
+    return [JRFMDBResultSetHandler handleResultSet:ret forClazz:clazz columns:nil];
 }
 
 - (NSArray<id<JRPersistent>> *)jr_getByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc synchronized:(BOOL)synchronized complete:(JRDBQueryComplete)complete {
@@ -1184,6 +1184,33 @@ static NSString * const jrdb_synchronizing = @"jrdb_synchronizing";
 
 @end
 
+
+@implementation FMDatabase (JRSql)
+
+- (NSArray<id<JRPersistent>> *)jr_getByJRSql:(JRSql *)sql sync:(BOOL)sync resultClazz:(Class<JRPersistent>)clazz columns:(NSArray *)columns {
+    return [self jr_executeSync:sync block:^id _Nullable(FMDatabase * _Nonnull db) {
+        FMResultSet *restultSet = [db jr_executeQuery:sql];
+        NSArray *array = [JRFMDBResultSetHandler handleResultSet:restultSet forClazz:clazz columns:columns];
+        return array;
+    }];
+}
+
+- (NSArray<id<JRPersistent>> *)jr_findByJRSql:(JRSql *)sql sync:(BOOL)sync resultClazz:(Class<JRPersistent>)clazz columns:(NSArray *)columns {
+    return [self jr_executeSync:sync block:^id _Nullable(FMDatabase * _Nonnull db) {
+        FMResultSet *restultSet = [db jr_executeQuery:sql];
+        NSArray *array = [JRFMDBResultSetHandler handleResultSet:restultSet forClazz:clazz columns:columns];
+        if (!columns.count) {
+            NSMutableArray *arr = [NSMutableArray array];
+            [array enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                [arr addObject:[db jr_findByID:[obj ID] clazz:clazz]];
+            }];
+            array = [arr copy];
+        }
+        return array;
+    }];
+}
+
+@end
 
 
 
