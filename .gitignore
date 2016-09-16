@@ -8,3 +8,11 @@ JRDB.xcworkspace/xcuserdata/jmacmini.xcuserdatad/UserInterfaceState.xcuserstate
 *.xcuserstate
 
 *.xcscheme
+
+Pods/**
+
+JRDB.xcworkspace/contents.xcworkspacedata
+
+Podfile.lock
+
+.DS_Store
