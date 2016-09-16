@@ -9,8 +9,8 @@
 import UIKit
 
 enum Sex : Int {
-    case Man
-    case Woman
+    case man
+    case woman
 }
 
 class AAA: NSObject {
@@ -22,7 +22,7 @@ class AAA: NSObject {
 
 class PPP: AAA {
     
-    var sss : Sex = .Man
+    var sss : Sex = .man
     
     var a_int: Int = 0
     var a_int1: Int? = nil
@@ -37,32 +37,32 @@ class PPP: AAA {
     var e_float: Float = 8
     var f_cgfloat: CGFloat = 9
     
-    var g_nsData: NSData = NSData()
-    var h_nsDate: NSDate = NSDate()
+    var g_nsData: Data = Data()
+    var h_nsDate: Date = Date()
     
     var ccc: CCC?
     var ccc1: CCC?
     
     var ppp: PPP?
     
-    override static func jr_singleLinkedPropertyNames() -> [String : AnyObject.Type]? {
-        return [
-            "ccc" : CCC.self,
-            "ccc1" : CCC.self,
-            "ppp" : PPP.self,
-        ]
-    }
+//    override static func jr_singleLinkedPropertyNames() -> [String : AnyObject.Type]? {
+//        return [
+//            "ccc" : CCC.self,
+//            "ccc1" : CCC.self,
+//            "ppp" : PPP.self,
+//        ]
+//    }
 }
 
 class CCC: NSObject {
     var serialNumber: String = ""
     weak var ppp: PPP?
     
-    override static func jr_singleLinkedPropertyNames() -> [String : AnyObject.Type]? {
-        return [
-            "ppp" : PPP.self,
-        ]
-    }
+//    override static func jr_singleLinkedPropertyNames() -> [String : AnyObject.Type]? {
+//        return [
+//            "ppp" : PPP.self,
+//        ]
+//    }
     
     deinit {
         print("\(self) deinit")
@@ -72,7 +72,7 @@ class CCC: NSObject {
 class AViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
-        let db = JRDBMgr.shareInstance().createDBWithPath("/Users/mac/Desktop/test.sqlite")
+        let db = JRDBMgr.shareInstance().createDB(withPath: "/Users/mac/Desktop/test.sqlite")
         JRDBMgr.shareInstance().defaultDB = db
         
 //        test1Cycle()
@@ -117,7 +117,7 @@ class AViewController: UIViewController {
     }
     
     func testFindByID() {
-        let p = PPP.jr_findByID("FBE5701E-ECBB-494A-BE62-7C7114C780A1")
+        let p = PPP.jr_find(byID: "FBE5701E-ECBB-494A-BE62-7C7114C780A1")
         p?.isEqual(nil);
     }
 
