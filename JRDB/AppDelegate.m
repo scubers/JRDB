@@ -27,6 +27,7 @@
                                                [Money class],
                                                [Card class],
                                                ]];
+    NSLog(@"领囧扥😁");
     
 //    [[JRDBMgr shareInstance] updateDefaultDB];
     

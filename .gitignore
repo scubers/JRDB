@@ -1,9 +1,10 @@
 
 *.xcuserstate
 
-JRDB.xcworkspace/xcuserdata/jmacmini.xcuserdatad/UserInterfaceState.xcuserstate
+JRDB.xcworkspace/xcuserdata
+JRDB.xcodeproj/xcuserdata
 
-JRDB.xcworkspace/xcuserdata/jmacmini.xcuserdatad/UserInterfaceState.xcuserstate
+
 
 *.xcuserstate
 
@@ -16,3 +17,6 @@ JRDB.xcworkspace/contents.xcworkspacedata
 Podfile.lock
 
 .DS_Store
+
+
+

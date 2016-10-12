@@ -34,10 +34,10 @@
 		5AD63F271CE1C40F0044ACE6 /* AViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AD63F261CE1C40F0044ACE6 /* AViewController.swift */; };
 		5AE115421D364ED400886657 /* JRDBChainTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AE115411D364ED400886657 /* JRDBChainTest.m */; };
 		A80015F71D0EEC29000EA41A /* JRActivatedProperty.m in Sources */ = {isa = PBXBuildFile; fileRef = A80015F61D0EEC29000EA41A /* JRActivatedProperty.m */; };
+		A876AB9ABC8BE60FC4881BA5 /* libPods-JRDB.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 632830974E0244C0E00157B4 /* libPods-JRDB.a */; };
 		A8A1B2251D033C8C00886403 /* NSObject+Reflect.m in Sources */ = {isa = PBXBuildFile; fileRef = A8A1B2241D033C8C00886403 /* NSObject+Reflect.m */; };
 		A8A1B2281D033CDC00886403 /* OBJCProperty.m in Sources */ = {isa = PBXBuildFile; fileRef = A8A1B2271D033CDC00886403 /* OBJCProperty.m */; };
 		A8ED7A521D01CCA3009ED474 /* JRUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = A8ED7A511D01CCA3009ED474 /* JRUtils.m */; };
-		D08DB2BE4F6217D4FBE7447F /* libPods-JRDB.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0DAEA1952EBEC3E9F3154E55 /* libPods-JRDB.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -128,7 +128,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D50FE3F1033B52FF2A9E5C7F /* libPods-JRDB.a in Frameworks */,
+				A876AB9ABC8BE60FC4881BA5 /* libPods-JRDB.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -442,7 +442,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 		DC887D4D0B32D846A3E2C57C /* [CP] Copy Pods Resources */ = {

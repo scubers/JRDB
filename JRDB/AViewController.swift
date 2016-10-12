@@ -70,6 +70,7 @@ class CCC: NSObject {
 }
 
 class AViewController: UIViewController {
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         let db = JRDBMgr.shareInstance().createDB(withPath: "/Users/mac/Desktop/test.sqlite")
