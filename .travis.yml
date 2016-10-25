@@ -1,5 +1,2 @@
 language: objective-c
 osx_image: xcode8
-
-xcode_workspace: JRDB.xcworkspace
-xcode_scheme: JRDB
