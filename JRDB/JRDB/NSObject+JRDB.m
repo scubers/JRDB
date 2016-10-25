@@ -20,7 +20,7 @@
 
 + (void)jr_configure {
     NSArray *activatedProp = [JRReflectUtil activitedProperties4Clazz:self];
-    objc_setAssociatedObject(self, @selector(jr_configure), activatedProp, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, @selector(jr_activatedProperties), activatedProp, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 #pragma mark - protocol method

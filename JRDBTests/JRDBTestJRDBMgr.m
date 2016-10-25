@@ -39,9 +39,7 @@
 }
 
 - (void)testCreateTable {
-    [J_CreateTable(Person) exe:^(JRDBChain * _Nonnull chain, id  _Nullable result) {
-        NSLog(@"%@", result);
-    }];
+    J_CreateTable(Person);
 }
 
 - (void)testDeleteDB {

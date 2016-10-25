@@ -58,6 +58,7 @@
 @property (nonatomic, strong) Card *card1;
 
 @property (nonatomic, strong) Card *cccc;
+@property (nonatomic, strong) NSString *aaaccc;
 
 @property (nonatomic, strong) NSMutableArray<Money *> *money;
 

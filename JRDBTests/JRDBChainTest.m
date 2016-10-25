@@ -32,7 +32,7 @@
                                                ]];
     [JRDBMgr shareInstance].defaultDB = db;
     
-//    [JRDBMgr shareInstance].debugMode = NO;
+    [JRDBMgr shareInstance].debugMode = YES;
     NSLog(@"%@", [[JRDBMgr shareInstance] registeredClazz]);
 }
 
@@ -234,8 +234,9 @@
 
 - (void)testUpdateOne {
     Person *p = J_Select(Person).Recursively.list.firstObject;
-    p.a_int = 1111;
-    BOOL a = J_Update(p).ColumnsJ(J(a_int), J(name)).Recursively.updateResult;
+    p.a_int = 1112;
+    p.children = nil;
+    BOOL a = J_Update(p).ColumnsJ(J(a_int), J(name), J(children)).Recursively.updateResult;
     NSAssert(a, @"~~ error: %s", __FUNCTION__);
 }
 

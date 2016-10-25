@@ -38,6 +38,7 @@
 		5AD63F241CE1C2480044ACE6 /* Person.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AD63F231CE1C2480044ACE6 /* Person.m */; };
 		5AD63F271CE1C40F0044ACE6 /* AViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AD63F261CE1C40F0044ACE6 /* AViewController.swift */; };
 		5AE115421D364ED400886657 /* JRDBChainTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AE115411D364ED400886657 /* JRDBChainTest.m */; };
+		A2C82B9403DEE809067FDA4B /* libPods-JRDBTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2CE99294CEA1A2C1C484D937 /* libPods-JRDBTests.a */; };
 		A80015F71D0EEC29000EA41A /* JRActivatedProperty.m in Sources */ = {isa = PBXBuildFile; fileRef = A80015F61D0EEC29000EA41A /* JRActivatedProperty.m */; };
 		A876AB9ABC8BE60FC4881BA5 /* libPods-JRDB.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 632830974E0244C0E00157B4 /* libPods-JRDB.a */; };
 		A8A1B2251D033C8C00886403 /* NSObject+Reflect.m in Sources */ = {isa = PBXBuildFile; fileRef = A8A1B2241D033C8C00886403 /* NSObject+Reflect.m */; };
@@ -71,6 +72,8 @@
 		09822BB91DBF045F00662F49 /* JRQueueMgr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRQueueMgr.h; sourceTree = "<group>"; };
 		09822BBA1DBF045F00662F49 /* JRQueueMgr.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRQueueMgr.m; sourceTree = "<group>"; };
 		09943EB41D630FB000C7164D /* JRDBMgrContextTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRDBMgrContextTests.m; sourceTree = "<group>"; };
+		2CE99294CEA1A2C1C484D937 /* libPods-JRDBTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-JRDBTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		3BBEAE96B975D059BCF0F9A0 /* Pods-JRDBTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-JRDBTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-JRDBTests/Pods-JRDBTests.debug.xcconfig"; sourceTree = "<group>"; };
 		4C07B4AAB655E10433E17527 /* Pods-JRDB.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-JRDB.release.xcconfig"; path = "Pods/Target Support Files/Pods-JRDB/Pods-JRDB.release.xcconfig"; sourceTree = "<group>"; };
 		5A7AED801D05294B000AD4FE /* JRMiddleTable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRMiddleTable.h; sourceTree = "<group>"; };
 		5A7AED811D05294B000AD4FE /* JRMiddleTable.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRMiddleTable.m; sourceTree = "<group>"; };
@@ -118,6 +121,7 @@
 		5AD63F251CE1C40F0044ACE6 /* JRDB-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "JRDB-Bridging-Header.h"; sourceTree = "<group>"; };
 		5AD63F261CE1C40F0044ACE6 /* AViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AViewController.swift; sourceTree = "<group>"; };
 		5AE115411D364ED400886657 /* JRDBChainTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRDBChainTest.m; sourceTree = "<group>"; };
+		5E4E442B13FB7BB2D2561AFE /* Pods-JRDBTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-JRDBTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-JRDBTests/Pods-JRDBTests.release.xcconfig"; sourceTree = "<group>"; };
 		632830974E0244C0E00157B4 /* libPods-JRDB.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-JRDB.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A80015F51D0EEC29000EA41A /* JRActivatedProperty.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRActivatedProperty.h; sourceTree = "<group>"; };
 		A80015F61D0EEC29000EA41A /* JRActivatedProperty.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRActivatedProperty.m; sourceTree = "<group>"; };
@@ -144,6 +148,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A2C82B9403DEE809067FDA4B /* libPods-JRDBTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -161,6 +166,7 @@
 			isa = PBXGroup;
 			children = (
 				632830974E0244C0E00157B4 /* libPods-JRDB.a */,
+				2CE99294CEA1A2C1C484D937 /* libPods-JRDBTests.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -170,6 +176,8 @@
 			children = (
 				F7813F0D5EFC5533FB83B8BB /* Pods-JRDB.debug.xcconfig */,
 				4C07B4AAB655E10433E17527 /* Pods-JRDB.release.xcconfig */,
+				3BBEAE96B975D059BCF0F9A0 /* Pods-JRDBTests.debug.xcconfig */,
+				5E4E442B13FB7BB2D2561AFE /* Pods-JRDBTests.release.xcconfig */,
 			);
 			name = Pods;
 			sourceTree = "<group>";
@@ -320,9 +328,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 5ACBEEDD1CE1B3A500371E01 /* Build configuration list for PBXNativeTarget "JRDBTests" */;
 			buildPhases = (
+				DD17FF33DB6AFB8EE2BD0F4F /* [CP] Check Pods Manifest.lock */,
 				5ACBEEC21CE1B3A500371E01 /* Sources */,
 				5ACBEEC31CE1B3A500371E01 /* Frameworks */,
 				5ACBEEC41CE1B3A500371E01 /* Resources */,
+				E21E737E6F79938E7A667ABA /* [CP] Embed Pods Frameworks */,
+				765889B2FB1A21910A358FE3 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -456,6 +467,21 @@
 			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
 			showEnvVarsInLog = 0;
 		};
+		765889B2FB1A21910A358FE3 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-JRDBTests/Pods-JRDBTests-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 		DC887D4D0B32D846A3E2C57C /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -469,6 +495,36 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-JRDB/Pods-JRDB-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		DD17FF33DB6AFB8EE2BD0F4F /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		E21E737E6F79938E7A667ABA /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-JRDBTests/Pods-JRDBTests-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -692,6 +748,7 @@
 		};
 		5ACBEEDE1CE1B3A500371E01 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 3BBEAE96B975D059BCF0F9A0 /* Pods-JRDBTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ENABLE_MODULES = YES;
@@ -714,6 +771,7 @@
 		};
 		5ACBEEDF1CE1B3A500371E01 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 5E4E442B13FB7BB2D2561AFE /* Pods-JRDBTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ENABLE_MODULES = YES;

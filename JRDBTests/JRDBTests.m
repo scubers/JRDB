@@ -222,7 +222,7 @@
 
 - (void)testSaveOrUpdateOne {
     Person *p = [self createPerson:100 name:nil];
-    [[JRDBMgr defaultDB] jr_saveOrUpdateOne:p useTransaction:YES synchronized:YES complete:nil];
+    [[JRDBMgr defaultDB] jr_saveOrUpdateOne:p useTransaction:YES synchronized:YES];
 }
 
 #pragma mark - test find 
@@ -261,7 +261,7 @@
  [J_SELECT([Person class]).count().From(@"table").Where(@"_age = ?").Params(@[@1]) exe:nil];
  */
 - (void)testSelectChain {
-    id re = [J_Select(Person).Desc(YES) exe:nil];
+    id re = [J_Select(Person).Desc(YES) exe];
     NSLog(@"%@", re);
 }
 
@@ -269,7 +269,7 @@
     Person *p = [Person jr_findAll].firstObject;
     p.a_int = 2;
     p.money = [[Money jr_findAll] mutableCopy];
-    [J_Update(p).Recursive(YES) exe:nil];
+    [J_Update(p).Recursive(YES) exe];
 }
 
 #pragma mark - convenience method

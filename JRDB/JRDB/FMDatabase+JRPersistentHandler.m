@@ -25,9 +25,12 @@
 }
 
 - (void)jr_inQueue:(void (^)(id<JRPersistentHandler> _Nonnull))block {
-    [[[JRQueueMgr shared] queueWithIdentifier:self.handlerIdentifier] addOperationWithBlock:^{
+    NSOperationQueue *queue = [[JRQueueMgr shared] queueWithIdentifier:self.handlerIdentifier];
+    NSBlockOperation *operation = [NSBlockOperation blockOperationWithBlock:^{
         block(self);
     }];
+    [queue addOperation:operation];
+    [operation waitUntilFinished];
 }
 
 - (BOOL)jr_inTransaction:(void (^)(id<JRPersistentHandler> _Nonnull, BOOL * _Nonnull))block {
@@ -532,6 +535,8 @@
         if (!(!columns || [columns containsObject:key])) { return; }
         
         NSArray *array = [((NSObject *)obj) valueForKey:key];
+        
+        NSMutableArray *subids = [NSMutableArray array];
         // 逐个保存
         [array enumerateObjectsUsingBlock:^(NSObject<JRPersistent> * _Nonnull subObj, NSUInteger idx, BOOL * _Nonnull stop) {
             if (![subObj ID]) {
@@ -540,15 +545,41 @@
                     [subObj jr_setParentLinkID:[obj ID] forKey:key];
                 }
                 needRollBack = ![self jr_saveOneRecursively:subObj useTransaction:NO synchronized:NO];
+                if (!needRollBack) {
+                    [subids addObject:[subObj ID]];
+                }
                 *stop = needRollBack;
             }
         }];
         
-        if ([obj class] != clazz) {// 如果是同一张表则不需要中间表，是父子关系
+        // 维护关系
+        if ([obj class] != clazz) {
+            // 如果是同一张表则不需要中间表
             // 保存中建表
             JRMiddleTable *mid = [JRMiddleTable table4Clazz:clazz andClazz:[obj class] db:self];
             needRollBack = ![mid saveObjs:array forObj:obj];
+        } else {
+            // 是父子关系
+            // update obj.class set _parent_link_var = null where _parent_link_var = ? and _id not in (xx,xx)
+            
+            NSMutableString *ids = [NSMutableString string];
+            [ids appendFormat:@"("];
+            [subids enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                [ids appendFormat:@"%@ %@", obj, idx == subids.count - 1 ? @")" : @","];
+            }];
+            
+            NSString *sqlString =
+            [NSString stringWithFormat:@"update %@ set %@ = null where %@ = ? and _id not in %@ ;"
+             , [clazz shortClazzName], ParentLinkColumn(key), ParentLinkColumn(key), ids];
+            
+            JRSql *sql = [JRSql sql:sqlString args:@[[obj ID]]];
+            
+            needRollBack = ![self jr_executeUpdate:sql];
+            
         }
+        
+        
+        
         *stop = needRollBack;
     }];
     return !needRollBack;
@@ -639,33 +670,33 @@
     
     return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentHandler>  _Nonnull handler) {
         return @([handler jr_executeUseTransaction:useTransaction block:^BOOL(id<JRPersistentHandler>  _Nonnull handler) {
-            __block BOOL needRollBack = ![self jr_deleteOne:one useTransaction:NO synchronized:NO];
+            
+            __block BOOL needRollBack = ![handler jr_updateOne:one columns:columns useTransaction:NO synchronized:synchronized];
+            
+            // 检测一对一是否需要更新持有id
             if (!needRollBack) {
-                // 监测一对多的 中间表 删除
-                [[[one class] jr_oneToManyLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull clazz, BOOL * _Nonnull stop) {
-                    
-                    if ([one class] == clazz) {// 同类父子关系
-                        NSString *condition = [NSString stringWithFormat:@"%@ = ?", ParentLinkColumn(key)];
-                        JRSql *sql = [JRSqlGenerator sql4GetColumns:nil
-                                                       byConditions:@[
-                                                                      [JRQueryCondition condition:condition args:@[[one ID]] type:JRQueryConditionTypeAnd]
-                                                                      ]
-                                                              clazz:clazz
-                                                            groupBy:nil
-                                                            orderBy:nil
-                                                              limit:nil
-                                                             isDesc:NO
-                                                              table:nil];
-                        NSArray *children = [((FMDatabase *)handler) jr_findByJRSql:sql sync:synchronized resultClazz:clazz columns:nil];
-                        needRollBack = ![self jr_deleteObjectsRecursively:children useTransaction:NO synchronized:synchronized];
-                    } else {
-                        JRMiddleTable *mid = [JRMiddleTable table4Clazz:clazz andClazz:[one class] db:self];
-                        needRollBack = ![mid deleteID:[one ID] forClazz:[one class]];
+                NSObject<JRPersistent> *oneObj = (NSObject<JRPersistent> *)one;
+                [[[one class] jr_singleLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull clazz, BOOL * _Nonnull stop) {
+                    if (![columns containsObject:key]) { return;}
+                    id<JRPersistent> subObj = [oneObj valueForKey:key];
+                    if (subObj && ![subObj ID]) {
+                        needRollBack = ![self jr_saveOneRecursively:subObj useTransaction:NO synchronized:synchronized];
+                        *stop = needRollBack;
                     }
+                    [oneObj jr_setSingleLinkID:[subObj ID] forKey:key];
+                    needRollBack = ![self jr_updateOne:oneObj columns:columns useTransaction:NO synchronized:synchronized];
                     *stop = needRollBack;
                 }];
             }
+            
+            // TODO: 更新时，是否保存一对多，需要检讨
+            if (!needRollBack) {
+                // 监测一对多的保存
+                needRollBack = ![self jr_handleOneToManySaveWithObj:one columns:columns];
+            }
+            
             return !needRollBack;
+
         }]);
     }] boolValue];
 }
