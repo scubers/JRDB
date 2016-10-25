@@ -12,6 +12,8 @@ GitHub: [sucbers](https://github.com/scubers)
 
 Feedback: [jr-wong@qq.com](mailto:jrwong@qq.com)
 
+有问题或者bug欢迎随时issues我，或者邮件。感谢使用
+
 ---
 
 # 描述（Description）

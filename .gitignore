@@ -1,18 +1,13 @@
 
 *.xcuserstate
 
-JRDB.xcworkspace/xcuserdata
-JRDB.xcodeproj/xcuserdata
-
-
-
-*.xcuserstate
+*/xcuserdata
 
 *.xcscheme
 
 Pods/**
 
-JRDB.xcworkspace/contents.xcworkspacedata
+*.xcworkspace/contents.xcworkspacedata
 
 Podfile.lock
 
