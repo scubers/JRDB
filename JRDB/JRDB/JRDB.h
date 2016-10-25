@@ -10,8 +10,10 @@
 #define JRDB_h
 
 #import "JRDBMgr.h"
-#import "FMDatabase+JRDB.h"
+//#import "FMDatabase+JRDB.h"
+#import "FMDatabase+JRPersistentHandler.h"
 #import "JRPersistent.h"
+#import "JRPersistentHandler.h"
 #import "JRSqlGenerator.h"
 #import "JRReflectUtil.h"
 #import "JRFMDBResultSetHandler.h"

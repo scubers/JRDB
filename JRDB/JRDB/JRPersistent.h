@@ -27,7 +27,10 @@ typedef void(^JRDBDidFinishBlock)(id<JRPersistent> _Nonnull obj);
 - (void)setID:(NSString * _Nullable)ID;
 - (NSString * _Nullable)ID;
 
-@property (nonatomic, getter=isCacheHit, readonly) BOOL cacheHit;
++ (void)setRegistered:(BOOL)registered;
++ (BOOL)isRegistered;
+
+@property (nonatomic, getter=isCacheHit, readonly) BOOL cacheHit NS_DEPRECATED_IOS(1_0, 10_0, "no cached in version 2.0.0");
 
 @optional
 

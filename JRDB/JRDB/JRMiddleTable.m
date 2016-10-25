@@ -7,8 +7,9 @@
 //
 
 #import "JRMiddleTable.h"
-#import "FMDatabase+JRDB.h"
+//#import "FMDatabase+JRDB.h"
 #import "NSObject+Reflect.h"
+#import "FMDatabase+JRPersistentHandler.h"
 
 #define MiddleTableName(clazz1,clazz2) [NSString stringWithFormat:@"%@_%@_Mid_Table", [clazz1 shortClazzName],[clazz2 shortClazzName]]
 #define MiddleColumn4Clazz(clazz) [NSString stringWithFormat:@"%@_ids", [clazz shortClazzName]]

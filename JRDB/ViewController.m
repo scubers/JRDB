@@ -12,7 +12,7 @@
 #import "Person.h"
 #import "JRDBMgr.h"
 #import "FMDB.h"
-#import "FMDatabase+JRDB.h"
+//#import "FMDatabase+JRDB.h"
 #import "JRQueryCondition.h"
 #import "NSObject+JRDB.h"
 #import <objc/runtime.h>

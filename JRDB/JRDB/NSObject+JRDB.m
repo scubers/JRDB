@@ -8,7 +8,7 @@
 
 #import "NSObject+JRDB.h"
 #import <objc/runtime.h>
-#import "FMDatabase+JRDB.h"
+//#import "FMDatabase+JRDB.h"
 #import "JRDBMgr.h"
 #import "JRFMDBResultSetHandler.h"
 #import "JRReflectUtil.h"
@@ -16,23 +16,29 @@
 #import "JRDBChain.h"
 
 
-static const NSString *JRDB_IDKEY                = @"JRDB_IDKEY";
-static const NSString *jr_configureKey           = @"jr_configureKey";
-static const NSString *jr_activatedPropertiesKey = @"jr_activatedPropertiesKey";
-
 @implementation NSObject (JRDB)
 
 + (void)jr_configure {
     NSArray *activatedProp = [JRReflectUtil activitedProperties4Clazz:self];
-    objc_setAssociatedObject(self, &jr_activatedPropertiesKey, activatedProp, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, @selector(jr_configure), activatedProp, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 #pragma mark - protocol method
+
 - (void)setID:(NSString *)ID {
-    objc_setAssociatedObject(self, &JRDB_IDKEY, ID, OBJC_ASSOCIATION_COPY_NONATOMIC);
+    objc_setAssociatedObject(self, @selector(setID:), ID, OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
+
 - (NSString *)ID {
-    return objc_getAssociatedObject(self, &JRDB_IDKEY);
+    return objc_getAssociatedObject(self, @selector(setID:));
+}
+
++ (void)setRegistered:(BOOL)registered {
+    objc_setAssociatedObject(self, @selector(setRegistered:), @(registered), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
++ (BOOL)isRegistered {
+    return [objc_getAssociatedObject(self, @selector(setRegistered:)) boolValue];
 }
 
 - (BOOL)isCacheHit {
@@ -98,7 +104,7 @@ static const NSString *jr_activatedPropertiesKey = @"jr_activatedPropertiesKey";
 }
 
 + (NSArray<JRActivatedProperty *> *)jr_activatedProperties {
-    return objc_getAssociatedObject(self, &jr_activatedPropertiesKey);
+    return objc_getAssociatedObject(self, _cmd);
 }
 
 #pragma mark - convinence method
@@ -222,12 +228,13 @@ static const NSString *jr_activatedPropertiesKey = @"jr_activatedPropertiesKey";
 #pragma mark - table message
 
 + (NSArray<NSString *> * _Nonnull)jr_currentColumns {
-    NSArray<JRColumnSchema *> * arr = [[JRDBMgr defaultDB] jr_schemasInClazz:self];
-    NSMutableArray *array = [NSMutableArray array];
-    [arr enumerateObjectsUsingBlock:^(JRColumnSchema * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        [array addObject:obj.name];
-    }];
-    return array;
+    return @[];
+//    NSArray<JRColumnSchema *> * arr = [[JRDBMgr defaultDB] jr_schemasInClazz:self];
+//    NSMutableArray *array = [NSMutableArray array];
+//    [arr enumerateObjectsUsingBlock:^(JRColumnSchema * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+//        [array addObject:obj.name];
+//    }];
+//    return array;
 }
 
 #pragma mark - method hook   now unavaliable  监听setter 由于swift 不适用，暂停使用

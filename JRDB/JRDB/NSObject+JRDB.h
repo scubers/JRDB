@@ -153,7 +153,7 @@
 
 #pragma mark - table message
 
-+ (NSArray<NSString *> * _Nonnull)jr_currentColumns;
++ (NSArray<NSString *> * _Nonnull)jr_currentColumns NS_DEPRECATED_IOS(1_0, 10_0, "- unusable");
 
 #pragma mark - hooking
 + (void)jr_swizzleSetters4Clazz;

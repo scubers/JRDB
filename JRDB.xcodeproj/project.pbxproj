@@ -8,6 +8,12 @@
 
 /* Begin PBXBuildFile section */
 		093FBC6D1D658D04002667CD /* JRDBResult.m in Sources */ = {isa = PBXBuildFile; fileRef = 093FBC6C1D658D04002667CD /* JRDBResult.m */; };
+		09822BB61DBF00D400662F49 /* FMDatabase+JRPersistentHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 09822BB51DBF00D400662F49 /* FMDatabase+JRPersistentHandler.m */; };
+		09822BB71DBF00D400662F49 /* FMDatabase+JRPersistentHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 09822BB51DBF00D400662F49 /* FMDatabase+JRPersistentHandler.m */; };
+		09822BB81DBF00D400662F49 /* FMDatabase+JRPersistentHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 09822BB51DBF00D400662F49 /* FMDatabase+JRPersistentHandler.m */; };
+		09822BBB1DBF045F00662F49 /* JRQueueMgr.m in Sources */ = {isa = PBXBuildFile; fileRef = 09822BBA1DBF045F00662F49 /* JRQueueMgr.m */; };
+		09822BBC1DBF045F00662F49 /* JRQueueMgr.m in Sources */ = {isa = PBXBuildFile; fileRef = 09822BBA1DBF045F00662F49 /* JRQueueMgr.m */; };
+		09822BBD1DBF045F00662F49 /* JRQueueMgr.m in Sources */ = {isa = PBXBuildFile; fileRef = 09822BBA1DBF045F00662F49 /* JRQueueMgr.m */; };
 		09943EB51D630FB000C7164D /* JRDBMgrContextTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 09943EB41D630FB000C7164D /* JRDBMgrContextTests.m */; };
 		5A7AED821D05294B000AD4FE /* JRMiddleTable.m in Sources */ = {isa = PBXBuildFile; fileRef = 5A7AED811D05294B000AD4FE /* JRMiddleTable.m */; };
 		5AA3DB331D067DD800795E80 /* JRDBTestJRDBMgr.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AA3DB321D067DD800795E80 /* JRDBTestJRDBMgr.m */; };
@@ -16,7 +22,6 @@
 		5AA5B3E11CE3120B00360DC0 /* JRQueryCondition.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AA5B3E01CE3120B00360DC0 /* JRQueryCondition.m */; };
 		5AB1BFA91D00115F001595D3 /* JRColumnSchema.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AB1BFA81D00115F001595D3 /* JRColumnSchema.m */; };
 		5AC8B3321CE1DA2500079BC8 /* NSObject+JRDB.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AC8B3311CE1DA2500079BC8 /* NSObject+JRDB.m */; };
-		5AC8B3381CE1EDA700079BC8 /* FMDatabase+JRDB.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AC8B3371CE1EDA700079BC8 /* FMDatabase+JRDB.m */; };
 		5ACBEEB21CE1B3A500371E01 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 5ACBEEB11CE1B3A500371E01 /* main.m */; };
 		5ACBEEB51CE1B3A500371E01 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 5ACBEEB41CE1B3A500371E01 /* AppDelegate.m */; };
 		5ACBEEB81CE1B3A500371E01 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5ACBEEB71CE1B3A500371E01 /* ViewController.m */; };
@@ -60,6 +65,11 @@
 /* Begin PBXFileReference section */
 		093FBC6B1D658D04002667CD /* JRDBResult.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRDBResult.h; sourceTree = "<group>"; };
 		093FBC6C1D658D04002667CD /* JRDBResult.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRDBResult.m; sourceTree = "<group>"; };
+		09822BB31DBEF58600662F49 /* JRPersistentHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRPersistentHandler.h; sourceTree = "<group>"; };
+		09822BB41DBF00D400662F49 /* FMDatabase+JRPersistentHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "FMDatabase+JRPersistentHandler.h"; sourceTree = "<group>"; };
+		09822BB51DBF00D400662F49 /* FMDatabase+JRPersistentHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "FMDatabase+JRPersistentHandler.m"; sourceTree = "<group>"; };
+		09822BB91DBF045F00662F49 /* JRQueueMgr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRQueueMgr.h; sourceTree = "<group>"; };
+		09822BBA1DBF045F00662F49 /* JRQueueMgr.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRQueueMgr.m; sourceTree = "<group>"; };
 		09943EB41D630FB000C7164D /* JRDBMgrContextTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRDBMgrContextTests.m; sourceTree = "<group>"; };
 		4C07B4AAB655E10433E17527 /* Pods-JRDB.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-JRDB.release.xcconfig"; path = "Pods/Target Support Files/Pods-JRDB/Pods-JRDB.release.xcconfig"; sourceTree = "<group>"; };
 		5A7AED801D05294B000AD4FE /* JRMiddleTable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRMiddleTable.h; sourceTree = "<group>"; };
@@ -76,8 +86,6 @@
 		5AB1BFA81D00115F001595D3 /* JRColumnSchema.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRColumnSchema.m; sourceTree = "<group>"; };
 		5AC8B3301CE1DA2500079BC8 /* NSObject+JRDB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+JRDB.h"; sourceTree = "<group>"; };
 		5AC8B3311CE1DA2500079BC8 /* NSObject+JRDB.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+JRDB.m"; sourceTree = "<group>"; };
-		5AC8B3361CE1EDA700079BC8 /* FMDatabase+JRDB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "FMDatabase+JRDB.h"; sourceTree = "<group>"; };
-		5AC8B3371CE1EDA700079BC8 /* FMDatabase+JRDB.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "FMDatabase+JRDB.m"; sourceTree = "<group>"; };
 		5ACBEEAD1CE1B3A500371E01 /* JRDB.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JRDB.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5ACBEEB11CE1B3A500371E01 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		5ACBEEB31CE1B3A500371E01 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -258,8 +266,11 @@
 				5ACBEEEA1CE1B91F00371E01 /* JRSqlGenerator.m */,
 				5AC8B3301CE1DA2500079BC8 /* NSObject+JRDB.h */,
 				5AC8B3311CE1DA2500079BC8 /* NSObject+JRDB.m */,
-				5AC8B3361CE1EDA700079BC8 /* FMDatabase+JRDB.h */,
-				5AC8B3371CE1EDA700079BC8 /* FMDatabase+JRDB.m */,
+				09822BB91DBF045F00662F49 /* JRQueueMgr.h */,
+				09822BBA1DBF045F00662F49 /* JRQueueMgr.m */,
+				09822BB31DBEF58600662F49 /* JRPersistentHandler.h */,
+				09822BB41DBF00D400662F49 /* FMDatabase+JRPersistentHandler.h */,
+				09822BB51DBF00D400662F49 /* FMDatabase+JRPersistentHandler.m */,
 				5AD17B2F1D3346E000F2B669 /* FMDatabase+Chain.h */,
 				5AD17B301D3346E000F2B669 /* FMDatabase+Chain.m */,
 				5AD17B321D3354BC00F2B669 /* JRDBChain.h */,
@@ -469,8 +480,8 @@
 			files = (
 				5AD63F271CE1C40F0044ACE6 /* AViewController.swift in Sources */,
 				5ACBEEE61CE1B65700371E01 /* JRDBMgr.m in Sources */,
+				09822BB61DBF00D400662F49 /* FMDatabase+JRPersistentHandler.m in Sources */,
 				5ACBEEB81CE1B3A500371E01 /* ViewController.m in Sources */,
-				5AC8B3381CE1EDA700079BC8 /* FMDatabase+JRDB.m in Sources */,
 				5AD63F241CE1C2480044ACE6 /* Person.m in Sources */,
 				5ACBEEB51CE1B3A500371E01 /* AppDelegate.m in Sources */,
 				5AD17B311D3346E000F2B669 /* FMDatabase+Chain.m in Sources */,
@@ -488,6 +499,7 @@
 				5AA5B3E11CE3120B00360DC0 /* JRQueryCondition.m in Sources */,
 				5A7AED821D05294B000AD4FE /* JRMiddleTable.m in Sources */,
 				A80015F71D0EEC29000EA41A /* JRActivatedProperty.m in Sources */,
+				09822BBB1DBF045F00662F49 /* JRQueueMgr.m in Sources */,
 				5AD63F211CE1BE540044ACE6 /* JRReflectUtil.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -500,6 +512,8 @@
 				5AA3DB331D067DD800795E80 /* JRDBTestJRDBMgr.m in Sources */,
 				5ACBEECB1CE1B3A500371E01 /* JRDBTests.m in Sources */,
 				5AE115421D364ED400886657 /* JRDBChainTest.m in Sources */,
+				09822BBC1DBF045F00662F49 /* JRQueueMgr.m in Sources */,
+				09822BB71DBF00D400662F49 /* FMDatabase+JRPersistentHandler.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -507,6 +521,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				09822BB81DBF00D400662F49 /* FMDatabase+JRPersistentHandler.m in Sources */,
+				09822BBD1DBF045F00662F49 /* JRQueueMgr.m in Sources */,
 				5ACBEED61CE1B3A500371E01 /* JRDBUITests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

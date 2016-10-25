@@ -53,14 +53,6 @@
 
 
 /**
- *  检查是否注册
- *
- *  @param clazz 类
- *  @return 结果
- */
-- (BOOL)isValidClazz:(Class<JRPersistent> _Nonnull)clazz;
-
-/**
  *  关闭所有的数据库以及队列, 一般使用在app退出
  */
 - (void)close;

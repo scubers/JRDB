@@ -66,9 +66,9 @@
 
 #pragma mark - table schema
 
-- (void)testTableSchema {
-    [[JRDBMgr defaultDB] jr_schemasInClazz:[Person class]];
-}
+//- (void)testTableSchema {
+//    [[JRDBMgr defaultDB] jr_schemasInClazz:[Person class]];
+//}
 
 #pragma mark - Delete
 
@@ -320,9 +320,7 @@
 - (void)testSaveOrUpdate {
     Person *p = [Person jr_findAll].firstObject;
     p.a_int = 1122;
-    JRDBResult *a = [J_SaveOrUpdate(p) exe:^(JRDBChain * _Nonnull chain, id  _Nullable result) {
-        NSLog(@"%@", result);
-    }];
+    JRDBResult *a = [J_SaveOrUpdate(p) exe];
     NSAssert(a.flag, @"~~ error: %s", __FUNCTION__);
 }
 
@@ -368,8 +366,7 @@
     Person *p2 = J_Select(Person).WherePKIs(p.ID).Cache(YES).object;
     [p1 isEqual:p2];
     
-    [[JRDBMgr defaultDB] jr_getByID:p.ID clazz:[Person class] synchronized:YES useCache:NO complete:^(id  _Nullable result) {
-    }];
+    [[JRDBMgr defaultDB] jr_getByID:p.ID clazz:[Person class] synchronized:YES];
     
 
     p = J_Select(Person).list.firstObject;
@@ -403,7 +400,7 @@
 
     NSLog(@"%@", result);
 
-    [J_Update(ps.firstObject).ColumnsJ(J(a_int),J(b_unsigned_int)) exe:nil];
+    [J_Update(ps.firstObject).ColumnsJ(J(a_int),J(b_unsigned_int)) exe];
 }
 
 - (void)testOtherCondition {
@@ -432,11 +429,9 @@
     
     Person *p = [Person jr_findAll].firstObject;
     
-    [[JRDBMgr defaultDB] jr_count4ID:p.ID clazz:[Person class] synchronized:YES complete:^(id  _Nullable result) {
-    }];
+//    [[JRDBMgr defaultDB] jr_count4ID:p.ID clazz:[Person class] synchronized:YES];
     
-    [[JRDBMgr defaultDB] jr_count4PrimaryKey:[p jr_primaryKeyValue] clazz:[Person class] synchronized:YES complete:^(id  _Nullable result) {
-    }];
+    [[JRDBMgr defaultDB] jr_count4PrimaryKey:[p jr_primaryKeyValue] clazz:[Person class] synchronized:YES];
 
     NSLog(@"%zd", count);
 }
@@ -483,9 +478,7 @@
     int count = 100;
     
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
-        [J_Select(Person) exe:^(JRDBChain * _Nonnull chain, id  _Nullable result) {
-            NSLog(@"%@", result);
-        }];
+        [J_Select(Person) exe];
     });
     
 //    sleep(5);
@@ -494,9 +487,7 @@
         [ori addObject:@(i)];
         
         dispatch_async(dispatch_get_global_queue(0, 0), ^{
-            JRDBResult *result = [J_Select(Person).Recursive(YES).Sync(YES) exe:^(JRDBChain * _Nonnull chain, id  _Nullable result) {
-                NSLog(@"___complete %@", @([result count]));
-            }];
+            JRDBResult *result = [J_Select(Person).Recursive(YES).Sync(YES) exe];
             NSLog(@"=+=+=+=+  %@", @([result count]));
 //            [J_INSERT([self createPerson:i name:nil]).Sync(YES) exe:^(JRDBChain * _Nonnull chain, id  _Nullable result) {
 //                NSLog(@"%@", result);
@@ -526,9 +517,7 @@
 
 - (void)testTemp {
     
-    [[JRDBChain new] exe:^(JRDBChain * _Nonnull chain, id  _Nullable result) {
-        
-    }];
+    [[JRDBChain new] exe];
     
     
     

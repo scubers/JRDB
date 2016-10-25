@@ -86,11 +86,10 @@ typedef NS_ENUM(NSInteger, ChainOperation) {
 
 typedef JRDBChain * _Nonnull (^JRObjectBlock)(id _Nonnull value);
 typedef JRDBChain * _Nonnull (^JRBoolBlock)(BOOL flag);
-//typedef JRDBChain * _Nonnull (^JRIntegerBlock)(NSInteger value);
 typedef JRDBChain * _Nonnull (^JRClassBlock)(Class<JRPersistent> _Nonnull clazz);
 typedef JRDBChain * _Nonnull (^JRArrayBlock)(NSArray * _Nonnull array);
 typedef JRDBChain * _Nonnull (^JRLimitBlock)(NSUInteger start, NSUInteger length);
-typedef JRDBChain * _Nonnull (^JRCompleteBlock)(JRDBChainComplete _Nonnull complete);
+//typedef JRDBChain * _Nonnull (^JRCompleteBlock)(JRDBChainComplete _Nonnull complete);
 
 #define JRObjectBlockDefine(_generictype_, _name_)\
 JRDBChain<_generictype_> * _Nonnull(^_name_)(id _Nonnull obj)
@@ -107,8 +106,8 @@ JRDBChain<_generictype_> * _Nonnull(^_name_)(NSArray * _Nonnull array)
 #define JRLimitBlockDefine(_generictype_, _name_)\
 JRDBChain<_generictype_> * _Nonnull(^_name_)(NSUInteger start, NSUInteger length)
 
-#define JRCompleteBlockDefine(_generictype_, _name_)\
-JRDBChain<_generictype_> * _Nonnull(^_name_)(JRDBChainComplete _Nonnull complete)
+//#define JRCompleteBlockDefine(_generictype_, _name_)\
+//JRDBChain<_generictype_> * _Nonnull(^_name_)(JRDBChainComplete _Nonnull complete)
 
 typedef struct {
     long long start;
@@ -186,8 +185,8 @@ typedef struct {
 - (instancetype _Nonnull)NoTransaction;///< equal to Transaction(NO)
 - (instancetype _Nonnull)Transactional;///< equal to Transaction(YES)
 
-@property (nonatomic, copy, readonly, nullable  ) JRDBChainComplete completeBlock;
-@property (nonatomic, copy, readonly, nonnull   ) JRCompleteBlockDefine(T, Complete);
+//@property (nonatomic, copy, readonly, nullable  ) JRDBChainComplete completeBlock;
+//@property (nonatomic, copy, readonly, nonnull   ) JRCompleteBlockDefine(T, Complete);
 
 // array param
 @property (nonatomic, strong, readonly, nullable) NSArray           *parameters;
@@ -224,10 +223,7 @@ typedef struct {
 
 /**
  *  the method that execute the operation
- *
- *  @param complete
  */
-- (JRDBResult * _Nonnull)exe:(JRDBChainComplete _Nullable)complete;
 - (JRDBResult * _Nonnull)exe;
 
 - (BOOL)updateResult;

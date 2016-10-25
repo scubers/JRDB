@@ -7,7 +7,7 @@
 //
 
 #import "JRDBChain.h"
-#import "FMDatabase+JRDB.h"
+//#import "FMDatabase+JRDB.h"
 #import "FMDatabase+Chain.h"
 #import "JRDBMgr.h"
 #import <objc/runtime.h>
@@ -22,7 +22,6 @@
 
 @interface JRDBChain ()
 {
-    JRSql *_subSql;
 }
 
 @end
@@ -46,7 +45,7 @@
 @synthesize useTransaction = _useTransaction;
 @synthesize useCache       = _useCache;
 @synthesize isDesc         = _isDesc;
-@synthesize completeBlock  = _completeBlock;
+//@synthesize completeBlock  = _completeBlock;
 @synthesize parameters     = _parameters;
 @synthesize columnsArray   = _columnsArray;
 @synthesize ignoreArray    = _ignoreArray;
@@ -64,8 +63,8 @@
     return self;
 }
 
-- (JRDBResult *)exe:(JRDBChainComplete)complete {
 
+- (JRDBResult *)exe {
     if (!self.target && !self.targetArray.count && !self.targetClazz) {
         NSLog(@"chain excute error, target or targetArray or targetClazz is nil");
         return nil;
@@ -75,10 +74,6 @@
         _operation = CSelectSingle;
     }
     
-    if (complete) {
-        _completeBlock = complete;
-    }
-
     id result;
     switch (_operation) {
         case CSelect:
@@ -120,14 +115,9 @@
             finalResult = [JRDBResult resultWithBool:NO];
     }
     
-    EXE_BLOCK(_completeBlock, self, finalResult);
+//    EXE_BLOCK(_completeBlock, self, finalResult);
     
     return finalResult;
-    
-}
-
-- (JRDBResult *)exe {
-    return [self exe:nil];
 }
 
 - (BOOL)updateResult {
@@ -385,12 +375,12 @@ static inline JRBoolBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *key
     return self.Cache(NO);
 }
 
-- (JRCompleteBlock)Complete {
-    return ^(JRDBChainComplete complete) {
-        self->_completeBlock = complete;
-        return self;
-    };
-}
+//- (JRCompleteBlock)Complete {
+//    return ^(JRDBChainComplete complete) {
+//        self->_completeBlock = complete;
+//        return self;
+//    };
+//}
 
 #pragma mark - Other method
 

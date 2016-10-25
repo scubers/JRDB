@@ -9,7 +9,8 @@
 #import "JRDBMgr.h"
 #import "JRReflectUtil.h"
 #import "JRSqlGenerator.h"
-#import "FMDatabase+JRDB.h"
+//#import "FMDatabase+JRDB.h"
+#import "FMDatabase+JRPersistentHandler.h"
 #import "NSObject+JRDB.h"
 #import <objc/message.h>
 #import <UIKit/UIKit.h>
@@ -108,7 +109,8 @@ static JRDBMgr *__shareInstance;
     if ([_clazzArray containsObject:clazz]) { return; }
     [_clazzArray addObject:clazz];
     [self _configureRegisteredClazz:clazz];
-    objc_setAssociatedObject(clazz, &jrdb_class_registered_key, @YES, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    [clazz setRegistered:YES];
+//    objc_setAssociatedObject(clazz, &jrdb_class_registered_key, @YES, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (void)registerClazzes:(NSArray<Class<JRPersistent>> *)clazzArray {
@@ -127,14 +129,14 @@ static JRDBMgr *__shareInstance;
 
 - (void)updateDB:(FMDatabase *)db {
     for (Class clazz in _clazzArray) {
-        BOOL flag = [db jr_updateTable4Clazz:clazz synchronized:YES complete:nil];
+        BOOL flag = [db jr_updateTable4Clazz:clazz synchronized:YES];
         NSLog(@"update table: %@ %@", [clazz description], flag ? @"success" : @"failure");
     }
 }
 
-- (BOOL)isValidClazz:(Class<JRPersistent>)clazz {
-    return [objc_getAssociatedObject(clazz, &jrdb_class_registered_key) boolValue];
-}
+//- (BOOL)isValidClazz:(Class<JRPersistent>)clazz {
+//    return [objc_getAssociatedObject(clazz, &jrdb_class_registered_key) boolValue];
+//}
 
 - (void)closeDatabase:(FMDatabase *)database {
     [self closeDatabaseWithPath:database.databasePath];

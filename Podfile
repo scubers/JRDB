@@ -7,3 +7,6 @@ pod 'FMDB'
 
 target:JRDB do
 end
+
+target:JRDBTests do
+end
