@@ -10,6 +10,16 @@
 #import "JRDBMgr.h"
 #import "Person.h"
 
+
+@interface AC : NSMutableArray
+
+@end
+
+@implementation AC
+
+@end
+
+
 @interface AppDelegate ()
 
 @end
