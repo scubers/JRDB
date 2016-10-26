@@ -6,80 +6,77 @@
 //  Copyright © 2016年 Jrwong. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
 #import "JRPersistent.h"
-#import "JRDBQueue.h"
+#import "JRPersistentHandler.h"
+#import <Foundation/Foundation.h>
 
-@class FMDatabase;
+@class JRDBQueue;
 
 @interface JRDBMgr : NSObject
 
+@property (nonatomic, strong, readonly, nonnull)
+    NSMutableDictionary<NSString *, id<JRPersistentHandler>> * dbs;///< managered dbs
 
-@property (nonatomic, strong, readonly) NSMutableDictionary<NSString *, JRDBQueue *> * _Nonnull queues;
-@property (nonatomic, strong, readonly) NSMutableDictionary<NSString *, FMDatabase *> * _Nonnull dbs;
+@property (nonatomic, strong, nullable) id<JRPersistentHandler> defaultDB;///< default db
 
-@property (nonatomic, strong) FMDatabase * _Nullable defaultDB;
-@property (nonatomic, assign) BOOL debugMode;
+@property (nonatomic, assign) BOOL debugMode;///< print sql if YES;
 
 + (instancetype _Nonnull)shareInstance;
 
 #pragma mark - database operation
 
-+ (FMDatabase * _Nonnull)defaultDB;
-- (FMDatabase * _Nullable)databaseWithPath:(NSString * _Nullable)path;
++ (id<JRPersistentHandler> _Nonnull)defaultDB;
+- (id<JRPersistentHandler> _Nullable)databaseWithPath:(NSString * _Nullable)path;
 - (void)deleteDatabaseWithPath:(NSString * _Nullable)path;
 
-/**
- *  获取每个数据库的同步队列
- */
-- (JRDBQueue * _Nullable)queueWithPath:(NSString * _Nonnull)path;
-
-
 #pragma mark - logic operation
+
 /**
- *  在这里注册的类，使用本框架的只能操作已注册的类
- *  @param clazz 类名
+ 在这里注册的类，使用本框架的只能操作已注册的类
+ @param clazz 类名
  */
 - (void)registerClazz:(Class<JRPersistent> _Nonnull)clazz;
 - (void)registerClazzes:(NSArray<Class<JRPersistent>> * _Nonnull)clazzArray;
 - (NSArray<Class> * _Nonnull)registeredClazz;
 
-/**
- * 更新默认数据库的表（或者新建没有的表）
- * 更新的表需要在本类先注册
- */
-- (void)updateDefaultDB;
-- (void)updateDB:(FMDatabase * _Nonnull)db;
-
 
 /**
- *  关闭所有的数据库以及队列, 一般使用在app退出
+ 关闭所有的数据库以及队列, 一般使用在app退出
  */
 - (void)close;
 - (void)closeDatabaseWithPath:(NSString * _Nonnull)path;
-- (void)closeDatabase:(FMDatabase * _Nonnull)database;
-
-#pragma mark - cache
-
-/**
- *  清理中间表的缓存垃圾
- *
- *  @param db
- */
-- (void)clearMidTableRubbishDataForDB:(FMDatabase * _Nonnull)db;
+- (void)closeDatabase:(id<JRPersistentHandler> _Nonnull)database;
 
 
 /**
- *  清楚缓存
+ 清理中间表的缓存垃圾
+
+ @param db
  */
-- (void)clearObjCaches;
+- (void)clearMidTableRubbishDataForDB:(id<JRPersistentHandler> _Nonnull)db;
 
-- (NSMutableDictionary<NSString *, id<JRPersistent>> * _Nonnull)recursiveCacheForDBPath:(NSString * _Nonnull)dbpath;
-- (NSMutableDictionary<NSString *, id<JRPersistent>> * _Nonnull)unRecursiveCacheForDBPath:(NSString * _Nonnull)dbpath;
 
-#pragma mark - DEPRECATED
+#pragma mark - Cache DEPRECATED
 
-- (FMDatabase * _Nullable)createDBWithPath:(NSString * _Nullable)path NS_DEPRECATED_IOS(1_0, 10_0, "use -[databaseWithPath:]");
+@property (nonatomic, strong, readonly) NSMutableDictionary<NSString *, JRDBQueue *> * _Nonnull queues NS_DEPRECATED_IOS(1_0, 10_0, "no cached in version 2");
+
+/// 获取每个数据库的同步队列 DEPRECATED @see [JRQueueMgr class]
+- (JRDBQueue * _Nullable)queueWithPath:(NSString * _Nonnull)path NS_DEPRECATED_IOS(1_0, 10_0, "see [JRQueueMgr class]");
+
+
+/// DEPRECATED @see - [id<JRPersistentHandler> jr_update***]
+- (void)updateDefaultDB NS_DEPRECATED_IOS(1_0, 10_0, "unusable - [id<JRPersistentHandler> jr_update***]");
+/// DEPRECATED @see - [id<JRPersistentHandler> jr_update***]
+- (void)updateDB:(id<JRPersistentHandler> _Nonnull)db NS_DEPRECATED_IOS(1_0, 10_0, "unusable - [id<JRPersistentHandler> jr_update***]");
+
+
+
+- (void)clearObjCaches NS_DEPRECATED_IOS(1_0, 10_0, "no cached in version 2");
+
+- (NSMutableDictionary<NSString *, id<JRPersistent>> * _Nonnull)recursiveCacheForDBPath:(NSString * _Nonnull)dbpath NS_DEPRECATED_IOS(1_0, 10_0, "no cached in version 2");
+- (NSMutableDictionary<NSString *, id<JRPersistent>> * _Nonnull)unRecursiveCacheForDBPath:(NSString * _Nonnull)dbpath NS_DEPRECATED_IOS(1_0, 10_0, "no cached in version 2");
+
+- (id<JRPersistentHandler> _Nullable)createDBWithPath:(NSString * _Nullable)path NS_DEPRECATED_IOS(1_0, 10_0, "use -[databaseWithPath:]");
 - (void)deleteDBWithPath:(NSString * _Nullable)path NS_DEPRECATED_IOS(1_0, 10_0, "use -[deleteDatabaseWithPath:]");
 
 @end

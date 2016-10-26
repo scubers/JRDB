@@ -34,16 +34,18 @@
     
     [JRDBMgr shareInstance].debugMode = YES;
     NSLog(@"%@", [[JRDBMgr shareInstance] registeredClazz]);
+    NSLog(@"%@", [NSThread currentThread]);
 }
 
 - (void)tearDown {
     
-    [[JRDBMgr defaultDB] close];
+//    [[JRDBMgr defaultDB] close];
     [super tearDown];
 }
 
 #pragma mark - table
 
+#ifdef bbb
 - (void)testAAAAACreateTable {
     BOOL a = J_CreateTable(Person);
     NSAssert(a, @"~~ error: %s", __FUNCTION__);
@@ -64,11 +66,9 @@
     NSAssert(a, @"~~ error: %s", __FUNCTION__);
 }
 
-#pragma mark - table schema
+#endif
 
-//- (void)testTableSchema {
-//    [[JRDBMgr defaultDB] jr_schemasInClazz:[Person class]];
-//}
+#pragma mark - table schema
 
 #pragma mark - Delete
 
@@ -233,7 +233,7 @@
 #pragma mark - Update
 
 - (void)testUpdateOne {
-    Person *p = J_Select(Person).Recursively.list.firstObject;
+    Person *p = J_Select(Person).Recursively.list[0];
     p.a_int = 1112;
     p.children = nil;
     BOOL a = J_Update(p).ColumnsJ(J(a_int), J(name), J(children)).Recursively.updateResult;
@@ -243,9 +243,9 @@
 - (void)testUpdateMany {
     NSArray<Person *> *ps = [Person jr_findAll];
     [ps enumerateObjectsUsingBlock:^(Person * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        obj.c_long = 9999;
+        obj.c_long = 9888;
     }];
-    BOOL a = J_Update(ps).Recursive(YES).updateResult;
+    BOOL a = J_Update(ps).Recursive(YES).ColumnsJ(J(c_long)).updateResult;
     NSAssert(a, @"~~ error: %s", __FUNCTION__);
 //    [J_UPDATE(ps).Recursive(NO) exe:nil];
 }
@@ -264,6 +264,7 @@
     Person *p = [Person jr_findAll].firstObject;
     p.card = nil;
 //    p.card = [self createCard:@"1123"];
+//    p.card.person = p;
     BOOL a = J_Update(p).Recursive(YES).updateResult;
     NSAssert(a, @"~~ error: %s", __FUNCTION__);
 //    [J_UPDATE(p).Recursive(NO) exe:nil];
@@ -280,11 +281,11 @@
 
 - (void)testUpdateOneToMany {
     Person *p = [Person jr_findAll].firstObject;
-    p.money = nil;
-//    for (int i = 0; i < 10; i++) {
-//        [p.money addObject:[self createMoney:i]];
-//    }
-//    [p.money removeLastObject];
+//    p.money = nil;
+    for (int i = 0; i < 10; i++) {
+        [p.money addObject:[self createMoney:i]];
+    }
+    [p.money removeLastObject];
     BOOL a = J_Update(p).Recursive(YES).updateResult;
     NSAssert(a, @"~~ error: %s", __FUNCTION__);
 //    [J_UPDATE(p).Recursive(NO) exe:nil];
@@ -299,12 +300,13 @@
         [p.money addObject:[self createMoney:i]];
         [p.children addObject:[self createPerson:i+10 name:nil]];
     }
-    BOOL a = J_Update(p).ColumnsJ(J(a_int)).Recursive(YES).updateResult;
+    BOOL a = J_Update(p).Recursive(YES).updateResult;
     NSAssert(a, @"~~ error: %s", __FUNCTION__);
 }
 
 - (void)testUpdateIgnore {
     Person *p = [Person jr_findAll].firstObject;
+    p.a_int = 100;
     p.son = [self createPerson:2 name:nil];
     p.card = [self createCard:@"1111"];
     p.card.person = p;
@@ -312,7 +314,7 @@
         [p.money addObject:[self createMoney:i]];
         [p.children addObject:[self createPerson:i+10 name:nil]];
     }
-    BOOL a = J_Update(p).IgnoreJ(J(a_int)).Recursive(YES).updateResult;
+    BOOL a = J_Update(p).IgnoreJ(J(a_int), J(money)).Recursive(YES).updateResult;
     NSAssert(a, @"~~ error: %s", __FUNCTION__);
 }
 
@@ -321,13 +323,13 @@
 - (void)testSaveOrUpdate {
     Person *p = [Person jr_findAll].firstObject;
     p.a_int = 1122;
-    JRDBResult *a = [J_SaveOrUpdate(p) exe];
-    NSAssert(a.flag, @"~~ error: %s", __FUNCTION__);
+    BOOL a = J_SaveOrUpdate(p).updateResult;
+    NSAssert(a, @"~~ error: %s", __FUNCTION__);
 }
 
 - (void)testSaveOrUpdate1 {
     Person *p = [self createPerson:1 name:nil];
-    p.a_int = 1122;
+    p.a_int = 1123;
     BOOL a = J_SaveOrUpdate(p).updateResult;
     NSAssert(a, @"~~ error: %s", __FUNCTION__);
 }
@@ -335,7 +337,8 @@
 - (void)testSaveOrUpdate2 {
     Person *p = [self createPerson:1 name:nil];
     p.a_int = 1122;
-    BOOL a = [JRDBChain new].SaveOrUpdateOne(p).Recursive(YES).updateResult;
+    p.card = [self createCard:@"000"];
+    BOOL a = J_SaveOrUpdate(p).Recursive(YES).updateResult;
     NSAssert(a, @"~~ error: %s", __FUNCTION__);
 }
 
@@ -344,7 +347,7 @@
     for (int i = 0; i < 10; i++) {
         [array addObject:[self createPerson:100 name:nil]];
     }
-    BOOL a = [JRDBChain new].SaveOrUpdate(array).updateResult;
+    BOOL a = J_SaveOrUpdate(array).updateResult;
     NSAssert(a, @"~~ error: %s", __FUNCTION__);
 }
 
@@ -364,7 +367,7 @@
 - (void)testSelectByID {
     Person *p = J_Select(Person).list.firstObject;
     Person *p1 = J_Select(Person).WherePKIs(p.ID).object;
-    Person *p2 = J_Select(Person).WherePKIs(p.ID).Cache(YES).object;
+    Person *p2 = J_Select(Person).WherePKIs(p.ID).object;
     [p1 isEqual:p2];
     
     [[JRDBMgr defaultDB] jr_getByID:p.ID clazz:[Person class] synchronized:YES];
@@ -372,7 +375,7 @@
 
     p = J_Select(Person).list.firstObject;
     p1 = J_Select(Person).WherePKIs(p.ID).object;
-    p2 = J_Select(Person).WherePKIs(p.ID).Cache(YES).object;
+    p2 = J_Select(Person).WherePKIs(p.ID).object;
     [p1 isEqual:p2];
     
 
@@ -479,20 +482,18 @@
     int count = 100;
     
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
-        [J_Select(Person) exe];
+        J_Select(Person).list;
+        NSLog(@"ok");
     });
-    
-//    sleep(5);
+    NSLog(@"end ");
+    sleep(5);
     return;
     for (int i = 0; i<count; i++) {
         [ori addObject:@(i)];
         
         dispatch_async(dispatch_get_global_queue(0, 0), ^{
-            JRDBResult *result = [J_Select(Person).Recursive(YES).Sync(YES) exe];
-            NSLog(@"=+=+=+=+  %@", @([result count]));
-//            [J_INSERT([self createPerson:i name:nil]).Sync(YES) exe:^(JRDBChain * _Nonnull chain, id  _Nullable result) {
-//                NSLog(@"%@", result);
-//            }];
+            NSArray<Person *> *result = J_Select(Person).Recursive(YES).Sync(YES).list;
+            NSLog(@"=+=+=+=+  %@", @(result.count));
         });
     }
     

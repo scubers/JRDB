@@ -6,19 +6,32 @@
 //  Copyright © 2016年 Jrwong. All rights reserved.
 //
 
-#import "FMDatabase+JRPersistentHandler.h"
-#import "JRQueueMgr.h"
 #import "JRUtils.h"
+#import "JRQueueMgr.h"
 #import "JRPersistent.h"
-#import "JRFMDBResultSetHandler.h"
 #import "NSObject+JRDB.h"
 #import "JRMiddleTable.h"
+#import "JRSqlGenerator.h"
+#import "JRFMDBResultSetHandler.h"
+#import "FMDatabase+JRPersistentHandler.h"
 
 #define AssertRegisteredClazz(clazz) NSAssert([clazz isRegistered], @"class: %@ should be registered in JRDBMgr", clazz)
 
 @implementation FMDatabase (JRPersistentHandler)
 
 #pragma mark - base operation
+
+- (BOOL)jr_openSynchronized:(BOOL)synchronized {
+    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentHandler> _Nonnull handler) {
+        return @([((FMDatabase *)handler) open]);
+    }] boolValue];
+}
+
+- (BOOL)jr_closeSynchronized:(BOOL)synchronized {
+    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentHandler> _Nonnull handler) {
+        return @([((FMDatabase *)handler) close]);
+    }] boolValue];
+}
 
 - (NSString *)handlerIdentifier {
     return self.databasePath;
@@ -409,7 +422,7 @@
         return @([handler jr_executeUseTransaction:useTransaction block:^BOOL(id<JRPersistentHandler>  _Nonnull handler) {
             __block BOOL needRollback;
             [objects enumerateObjectsUsingBlock:^(id<JRPersistent>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                needRollback = ![handler jr_deleteOne:obj useTransaction:useTransaction synchronized:synchronized];
+                needRollback = ![handler jr_saveOrUpdateOne:obj useTransaction:useTransaction synchronized:synchronized];
                 *stop = needRollback;
             }];
             return !needRollback;
@@ -559,20 +572,22 @@
             JRMiddleTable *mid = [JRMiddleTable table4Clazz:clazz andClazz:[obj class] db:self];
             needRollBack = ![mid saveObjs:array forObj:obj];
         } else {
-            // 是父子关系
+            // 是父子关系 删除多余的父子关系
             // update obj.class set _parent_link_var = null where _parent_link_var = ? and _id not in (xx,xx)
             
             NSMutableString *ids = [NSMutableString string];
-            [ids appendFormat:@"("];
-            [subids enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                [ids appendFormat:@"%@ %@", obj, idx == subids.count - 1 ? @")" : @","];
-            }];
+            if (subids.count) {
+                [ids appendFormat:@" and _id not in ("];
+                [subids enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                    [ids appendFormat:@"? %@", idx == subids.count - 1 ? @")" : @","];
+                }];
+            }
             
             NSString *sqlString =
-            [NSString stringWithFormat:@"update %@ set %@ = null where %@ = ? and _id not in %@ ;"
+            [NSString stringWithFormat:@"update %@ set %@ = null where %@ = ? %@ ;"
              , [clazz shortClazzName], ParentLinkColumn(key), ParentLinkColumn(key), ids];
-            
-            JRSql *sql = [JRSql sql:sqlString args:@[[obj ID]]];
+            NSArray *params = [@[[obj ID]] arrayByAddingObjectsFromArray:subids];
+            JRSql *sql = [JRSql sql:sqlString args:params];
             
             needRollBack = ![self jr_executeUpdate:sql];
             
@@ -677,7 +692,7 @@
             if (!needRollBack) {
                 NSObject<JRPersistent> *oneObj = (NSObject<JRPersistent> *)one;
                 [[[one class] jr_singleLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull clazz, BOOL * _Nonnull stop) {
-                    if (![columns containsObject:key]) { return;}
+                    if (columns.count && ![columns containsObject:key]) { return;}
                     id<JRPersistent> subObj = [oneObj valueForKey:key];
                     if (subObj && ![subObj ID]) {
                         needRollBack = ![self jr_saveOneRecursively:subObj useTransaction:NO synchronized:synchronized];

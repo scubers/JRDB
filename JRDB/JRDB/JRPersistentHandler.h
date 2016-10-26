@@ -9,7 +9,11 @@
 #ifndef JRPersistentHandler_h
 #define JRPersistentHandler_h
 
-#import "JRSqlGenerator.h"
+//#import "JRSqlGenerator.h"
+
+#import "JRPersistent.h"
+
+@class JRSql;
 
 @protocol JRPersistentHandler <NSObject>
 
@@ -18,6 +22,10 @@
 @required
 
 - (NSString * _Nonnull)handlerIdentifier;
+
+- (BOOL)jr_openSynchronized:(BOOL)synchronized;
+
+- (BOOL)jr_closeSynchronized:(BOOL)synchronized;
 
 /**
  使用block来进行队列操作，后台操作，线程安全
@@ -42,8 +50,6 @@
  @param useTransaction 是否使用默认事务 NO:需要自己开启和提交事务
  */
 - (BOOL)jr_executeUseTransaction:(BOOL)useTransaction block:(BOOL (^ _Nonnull)(id<JRPersistentHandler> _Nonnull handler))block;
-//- (BOOL)jr_execute:(BOOL (^ _Nonnull)(id<JRPersistentHandler> _Nonnull db))block useTransaction:(BOOL)useTransaction;
-
 
 /**
  任务是否同步执行
@@ -205,12 +211,6 @@
 
 - (long)jr_count4PrimaryKey:(id _Nonnull)pk clazz:(Class<JRPersistent> _Nonnull)clazz synchronized:(BOOL)synchronized;
 
-//- (NSString * _Nullable)jr_getIDByPrimarykey:(id _Nonnull)pk forClazz:(Class<JRPersistent> _Nonnull)clazz;
-
 @end
-
-
-
-
 
 #endif /* JRPersistentHandler_h */

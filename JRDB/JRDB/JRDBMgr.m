@@ -9,7 +9,6 @@
 #import "JRDBMgr.h"
 #import "JRReflectUtil.h"
 #import "JRSqlGenerator.h"
-//#import "FMDatabase+JRDB.h"
 #import "FMDatabase+JRPersistentHandler.h"
 #import "NSObject+JRDB.h"
 #import <objc/message.h>
@@ -20,12 +19,12 @@ static NSString * const jrdb_class_registered_key = @"jrdb_class_registered_key"
 
 @interface JRDBMgr()
 {
-    FMDatabase *_defaultDB;
+    id<JRPersistentHandler> _defaultDB;
     NSMutableArray<Class<JRPersistent>> *_clazzArray;
 }
 
-@property (nonatomic, strong) NSMutableDictionary<NSString *, NSMutableDictionary<NSString *, id<JRPersistent>> *> *recursiveCache;
-@property (nonatomic, strong) NSMutableDictionary<NSString *, NSMutableDictionary<NSString *, id<JRPersistent>> *> *unRecursiveCache;
+@property (nonatomic, strong) NSMutableDictionary<NSString *, NSMutableDictionary<NSString *, id<JRPersistent>> *> *recursiveCache NS_DEPRECATED_IOS(1_0, 10_0, "no cached in version 2");
+@property (nonatomic, strong) NSMutableDictionary<NSString *, NSMutableDictionary<NSString *, id<JRPersistent>> *> *unRecursiveCache NS_DEPRECATED_IOS(1_0, 10_0, "no cached in version 2");
 
 @end
 
@@ -60,47 +59,29 @@ static JRDBMgr *__shareInstance;
 
 #pragma mark - database operation
 
-+ (FMDatabase *)defaultDB {
++ (id<JRPersistentHandler>)defaultDB {
     return [[self shareInstance] defaultDB];
 }
 
-- (FMDatabase *)createDBWithPath:(NSString *)path {
-    return [self databaseWithPath:path];
-}
-- (FMDatabase *)databaseWithPath:(NSString *)path {
-    FMDatabase *db = self.dbs[path];
+- (id<JRPersistentHandler>)databaseWithPath:(NSString *)path {
+    id<JRPersistentHandler> db = self.dbs[path];
     if (!db) {
         db = [FMDatabase databaseWithPath:path];
         if (db) {
             [self.dbs setObject:db forKey:path];
-            [db open];
+            [db jr_openSynchronized:YES];
         }
     }
     return db;
 }
 
 - (void)deleteDatabaseWithPath:(NSString *)path {
-    FMDatabase *db = self.dbs[path];
+    id<JRPersistentHandler> db = self.dbs[path];
     if (db) {
-        [db close];
-        JRDBQueue *queue = [self queueWithPath:path];
-        [queue close];
-        [self.queues removeObjectForKey:path];
+        [db jr_closeSynchronized:YES];
     }
     NSFileManager *mgr = [NSFileManager defaultManager];
     [mgr removeItemAtPath:path error:nil];
-}
-- (void)deleteDBWithPath:(NSString *)path {
-    [self deleteDatabaseWithPath:path];
-}
-
-- (JRDBQueue *)queueWithPath:(NSString *)path {
-    JRDBQueue *queue = self.queues[path];
-    if (!queue) {
-        queue = [JRDBQueue databaseQueueWithPath:path];
-        if (queue) [self.queues setObject:queue forKey:path];
-    }
-    return queue;
 }
 
 #pragma mark - logic operation
@@ -110,7 +91,6 @@ static JRDBMgr *__shareInstance;
     [_clazzArray addObject:clazz];
     [self _configureRegisteredClazz:clazz];
     [clazz setRegistered:YES];
-//    objc_setAssociatedObject(clazz, &jrdb_class_registered_key, @YES, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (void)registerClazzes:(NSArray<Class<JRPersistent>> *)clazzArray {
@@ -123,39 +103,23 @@ static JRDBMgr *__shareInstance;
     return _clazzArray;
 }
 
-- (void)updateDefaultDB {
-    [self updateDB:[self defaultDB]];
-}
-
-- (void)updateDB:(FMDatabase *)db {
-    for (Class clazz in _clazzArray) {
-        BOOL flag = [db jr_updateTable4Clazz:clazz synchronized:YES];
-        NSLog(@"update table: %@ %@", [clazz description], flag ? @"success" : @"failure");
-    }
-}
-
-//- (BOOL)isValidClazz:(Class<JRPersistent>)clazz {
-//    return [objc_getAssociatedObject(clazz, &jrdb_class_registered_key) boolValue];
-//}
-
-- (void)closeDatabase:(FMDatabase *)database {
-    [self closeDatabaseWithPath:database.databasePath];
+- (void)closeDatabase:(id<JRPersistentHandler>)database {
+    [self closeDatabaseWithPath:database.handlerIdentifier];
 }
 
 - (void)closeDatabaseWithPath:(NSString *)path {
-    [self.dbs[path] close];
-    [self.queues[path] close];
+    [self.dbs[path] jr_closeSynchronized:YES];
 }
 
 - (void)close {
-    [self.dbs enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, FMDatabase * _Nonnull obj, BOOL * _Nonnull stop) {
-        [self closeDatabaseWithPath:key];
+    [self.dbs enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, id<JRPersistentHandler> _Nonnull obj, BOOL * _Nonnull stop) {
+        [self closeDatabase:obj];
     }];
 }
 
 #pragma mark - lazy load
 
-- (FMDatabase *)defaultDB {
+- (id<JRPersistentHandler>)defaultDB {
     if (!_defaultDB) {
         _defaultDB = [self databaseWithPath:[self _defaultPath]];
     }
@@ -168,36 +132,31 @@ static JRDBMgr *__shareInstance;
     }
     [self closeDatabase:_defaultDB];
     _defaultDB = defaultDB;
-    [_defaultDB open];
+    [_defaultDB jr_openSynchronized:YES];
 }
 
-- (NSMutableDictionary<NSString *,JRDBQueue *> *)queues {
-    if (!_queues) {
-        _queues = [NSMutableDictionary dictionary];
-    }
-    return _queues;
-}
-
-- (NSMutableDictionary<NSString *,FMDatabase *> *)dbs {
+- (NSMutableDictionary<NSString *,id<JRPersistentHandler>> *)dbs {
     if (!_dbs) {
         _dbs = [NSMutableDictionary dictionary];
     }
     return _dbs;
 }
 
-- (NSMutableDictionary<NSString *,NSMutableDictionary<NSString *,id<JRPersistent>> *> *)recursiveCache {
-    if (!_recursiveCache) {
-        _recursiveCache = [NSMutableDictionary dictionary];
-    }
-    return _recursiveCache;
+- (void)clearMidTableRubbishDataForDB:(FMDatabase *)db {
+    
+    [_clazzArray enumerateObjectsUsingBlock:^(Class<JRPersistent>  _Nonnull clazz, NSUInteger idx, BOOL * _Nonnull stop) {
+        
+        if (idx == _clazzArray.count - 1) { return ; }
+        
+        for (NSUInteger i = idx + 1; i < _clazzArray.count; i++) {
+            JRMiddleTable *mid = [JRMiddleTable table4Clazz:clazz andClazz:_clazzArray[i] db:db];
+            if ([db tableExists:[mid tableName]]) {
+                [mid cleanRubbishData];
+            }
+        }
+    }];
 }
 
-- (NSMutableDictionary<NSString *,NSMutableDictionary<NSString *,id<JRPersistent>> *> *)unRecursiveCache {
-    if (!_unRecursiveCache) {
-        _unRecursiveCache = [NSMutableDictionary dictionary];
-    }
-    return _unRecursiveCache;
-}
 
 #pragma mark - private method
 
@@ -217,22 +176,7 @@ static JRDBMgr *__shareInstance;
     [clazz jr_configure];
 }
 
-#pragma mark - cache
-
-- (void)clearMidTableRubbishDataForDB:(FMDatabase *)db {
-    
-    [_clazzArray enumerateObjectsUsingBlock:^(Class<JRPersistent>  _Nonnull clazz, NSUInteger idx, BOOL * _Nonnull stop) {
-        
-        if (idx == _clazzArray.count - 1) { return ; }
-        
-        for (NSUInteger i = idx + 1; i < _clazzArray.count; i++) {
-            JRMiddleTable *mid = [JRMiddleTable table4Clazz:clazz andClazz:_clazzArray[i] db:db];
-            if ([db tableExists:[mid tableName]]) {
-                [mid cleanRubbishData];
-            }
-        }
-    }];
-}
+#pragma mark - Cache DEPRECATED
 
 - (void)clearObjCaches {
     self.unRecursiveCache = nil;
@@ -240,21 +184,27 @@ static JRDBMgr *__shareInstance;
 }
 
 - (NSMutableDictionary<NSString *,id<JRPersistent>> *)recursiveCacheForDBPath:(NSString *)dbpath {
-    NSMutableDictionary *cache = self.recursiveCache[dbpath];
-    if (!cache) {
-        cache = [NSMutableDictionary dictionary];
-        self.recursiveCache[dbpath] = cache;
-    }
-    return cache;
+    return nil;
 }
 
 - (NSMutableDictionary<NSString *,id<JRPersistent>> *)unRecursiveCacheForDBPath:(NSString *)dbpath {
-    NSMutableDictionary *cache = self.unRecursiveCache[dbpath];
-    if (!cache) {
-        cache = [NSMutableDictionary dictionary];
-        self.unRecursiveCache[dbpath] = cache;
-    }
-    return cache;
+    return nil;
+}
+
+- (JRDBQueue *)queueWithPath:(NSString *)path {
+    return nil;
+}
+
+- (void)updateDefaultDB {}
+
+- (void)updateDB:(FMDatabase *)db {}
+
+- (id<JRPersistentHandler>)createDBWithPath:(NSString *)path {
+    return [self databaseWithPath:path];
+}
+
+- (void)deleteDBWithPath:(NSString *)path {
+    [self deleteDatabaseWithPath:path];
 }
 
 
