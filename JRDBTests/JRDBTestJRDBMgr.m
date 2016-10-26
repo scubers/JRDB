@@ -33,7 +33,7 @@
 
 - (void)tearDown {
     // Put teardown code here. This method is called after the invocation of each test method in the class.
-    [[JRDBMgr defaultDB] close];
+//    [[JRDBMgr defaultDB] close];
     [super tearDown];
     
 }
@@ -43,7 +43,8 @@
 }
 
 - (void)testDeleteDB {
-    [[JRDBMgr shareInstance] deleteDBWithPath:[JRDBMgr defaultDB].databasePath];
+    
+    [[JRDBMgr shareInstance] deleteDBWithPath:[[JRDBMgr defaultDB] handlerIdentifier]];
 }
 
 - (void)testUpdateDB {

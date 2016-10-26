@@ -62,7 +62,6 @@
     return self;
 }
 
-
 - (JRDBResult *)exe {
     if (!self.target && !self.targetArray.count && !self.targetClazz) {
         NSLog(@"chain excute error, target or targetArray or targetClazz is nil");
@@ -77,16 +76,16 @@
     switch (_operation) {
         case CSelect:
         case CSelectSingle:
-            result = [_db jr_executeQueryChain:self];
+//            result = [_db jr_executeQueryChain:self];
             break;
             
         case CSelectCustomized:
         case CSelectCount:
-            result = [_db jr_executeCustomizedQueryChain:self];
+//            result = [_db jr_executeCustomizedQueryChain:self];
             break;
             
-        default:
-            result = @([_db jr_executeUpdateChain:self]);
+        default:;
+//            result = @([_db jr_executeUpdateChain:self]);
     }
     
     JRDBResult *finalResult;
@@ -454,9 +453,11 @@ static inline JRBoolBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *key
 - (JRBoolBlock)Cache {
     return __setBoolPropertyToSelf(self, J(useCache));
 }
+
 - (instancetype)Cached {
     return self.Cache(YES);
 }
+
 - (instancetype)NoCached {
     return self.Cache(NO);
 }

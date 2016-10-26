@@ -40,7 +40,7 @@
 
 - (void)tearDown {
     
-    [[JRDBMgr defaultDB] close];
+//    [[JRDBMgr defaultDB] close];
     [super tearDown];
     
 }
