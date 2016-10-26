@@ -10,6 +10,7 @@
 #import "JRPersistent.h"
 #import "JRDBResult.h"
 #import "JRSqlGenerator.h"
+#import "JRPersistentHandler.h"
 
 @class JRDBChain;
 
@@ -81,7 +82,7 @@ typedef NS_ENUM(NSInteger, ChainOperation) {
 
 };
 
-@class FMDatabase, JRDBChain, JRQueryCondition;
+@class JRDBChain, JRQueryCondition;
 
 
 typedef JRDBChain * _Nonnull (^JRObjectBlock)(id _Nonnull value);
@@ -89,7 +90,7 @@ typedef JRDBChain * _Nonnull (^JRBoolBlock)(BOOL flag);
 typedef JRDBChain * _Nonnull (^JRClassBlock)(Class<JRPersistent> _Nonnull clazz);
 typedef JRDBChain * _Nonnull (^JRArrayBlock)(NSArray * _Nonnull array);
 typedef JRDBChain * _Nonnull (^JRLimitBlock)(NSUInteger start, NSUInteger length);
-//typedef JRDBChain * _Nonnull (^JRCompleteBlock)(JRDBChainComplete _Nonnull complete);
+typedef JRDBChain * _Nonnull (^JRCompleteBlock)(JRDBChainComplete _Nonnull complete);
 
 #define JRObjectBlockDefine(_generictype_, _name_)\
 JRDBChain<_generictype_> * _Nonnull(^_name_)(id _Nonnull obj)
@@ -106,14 +107,13 @@ JRDBChain<_generictype_> * _Nonnull(^_name_)(NSArray * _Nonnull array)
 #define JRLimitBlockDefine(_generictype_, _name_)\
 JRDBChain<_generictype_> * _Nonnull(^_name_)(NSUInteger start, NSUInteger length)
 
-//#define JRCompleteBlockDefine(_generictype_, _name_)\
-//JRDBChain<_generictype_> * _Nonnull(^_name_)(JRDBChainComplete _Nonnull complete)
+#define JRCompleteBlockDefine(_generictype_, _name_)\
+JRDBChain<_generictype_> * _Nonnull(^_name_)(JRDBChainComplete _Nonnull complete)
 
 typedef struct {
     long long start;
     long long length;
 } JRLimit;
-//typedef struct JRLimit JRLimit;
 
 @interface JRDBChain<T:id<JRPersistent>> : NSObject
 
@@ -140,8 +140,8 @@ typedef struct {
 @property (nonatomic, strong, readonly, nonnull ) JRLimitBlock      Limit;///< limit condition: Limit(start, length)
 
 
-@property (nonatomic, strong, readonly, nonnull ) FMDatabase        *db;
-@property (nonatomic, copy, readonly, nonnull   ) JRObjectBlockDefine(T, InDB);///< the database : parameter is FMDatabase: InDB(db)
+@property (nonatomic, strong, readonly, nonnull ) id<JRPersistentHandler> db;
+@property (nonatomic, copy, readonly, nonnull   ) JRObjectBlockDefine(T, InDB);///< the database : parameter is id<JRPersistentHandler>: InDB(db)
 
 
 @property (nonatomic, strong, readonly, nullable) NSString          *orderBy;
@@ -175,18 +175,10 @@ typedef struct {
 - (instancetype _Nonnull)Descend;///< equal to Desc(YES)
 - (instancetype _Nonnull)Ascend;///< equal to Desc(NO)
 
-@property (nonatomic, assign, readonly          ) BOOL              useCache;
-@property (nonatomic, copy, readonly, nonnull   ) JRBoolBlockDefine(T, Cache);///< cache condition, NO by default
-- (instancetype _Nonnull)Cached;///< equal to Cache(YES)
-- (instancetype _Nonnull)NoCached;///< equal to Cache(NO)
-
 @property (nonatomic, assign, readonly          ) BOOL              useTransaction;
 @property (nonatomic, copy, readonly, nonnull   ) JRBoolBlockDefine(T, Transaction);///< useTransaction , YES by default
 - (instancetype _Nonnull)NoTransaction;///< equal to Transaction(NO)
 - (instancetype _Nonnull)Transactional;///< equal to Transaction(YES)
-
-//@property (nonatomic, copy, readonly, nullable  ) JRDBChainComplete completeBlock;
-//@property (nonatomic, copy, readonly, nonnull   ) JRCompleteBlockDefine(T, Complete);
 
 // array param
 @property (nonatomic, strong, readonly, nullable) NSArray           *parameters;
@@ -222,7 +214,7 @@ typedef struct {
 
 
 /**
- *  the method that execute the operation
+ the method that execute the operation
  */
 - (JRDBResult * _Nonnull)exe;
 
@@ -239,5 +231,16 @@ typedef struct {
 - (JRObjectBlock _Nonnull)WhereJ NS_SWIFT_UNAVAILABLE("macro method");///< will not execute cause the macro
 - (JRObjectBlock _Nonnull)OrderJ NS_SWIFT_UNAVAILABLE("macro method");///< will not execute cause the macro
 - (JRObjectBlock _Nonnull)GroupJ NS_SWIFT_UNAVAILABLE("macro method");///< will not execute cause the macro
+
+#pragma mark - DEPRECATED
+
+@property (nonatomic, assign, readonly) BOOL useCache NS_DEPRECATED_IOS(1_0, 10_0, "no cached on version 2");
+@property (nonatomic, copy, readonly, nonnull) JRBoolBlockDefine(T, Cache) NS_DEPRECATED_IOS(1_0, 10_0, "no cached on version 2");
+@property (nonatomic, copy, readonly, nullable  ) JRDBChainComplete completeBlock NS_DEPRECATED_IOS(1_0, 10_0, "unusabled");
+@property (nonatomic, copy, readonly, nonnull   ) JRCompleteBlockDefine(T, Complete) NS_DEPRECATED_IOS(1_0, 10_0, "unusabled");
+
+- (instancetype _Nonnull)Cached NS_DEPRECATED_IOS(1_0, 10_0, "no cached on version 2");
+- (instancetype _Nonnull)NoCached NS_DEPRECATED_IOS(1_0, 10_0, "no cached on version 2");
+
 
 @end

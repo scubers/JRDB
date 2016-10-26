@@ -14,7 +14,6 @@
 
 @interface FMDatabase (Chain)
 
-//- (BOOL)jr_executeUpdateChain:(JRDBChain *)chain;
 - (BOOL)jr_executeUpdateChain:(JRDBChain *)chain;
 
 - (id)jr_executeQueryChain:(JRDBChain *)chain;

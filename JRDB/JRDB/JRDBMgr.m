@@ -23,14 +23,10 @@ static NSString * const jrdb_class_registered_key = @"jrdb_class_registered_key"
     NSMutableArray<Class<JRPersistent>> *_clazzArray;
 }
 
-@property (nonatomic, strong) NSMutableDictionary<NSString *, NSMutableDictionary<NSString *, id<JRPersistent>> *> *recursiveCache NS_DEPRECATED_IOS(1_0, 10_0, "no cached in version 2");
-@property (nonatomic, strong) NSMutableDictionary<NSString *, NSMutableDictionary<NSString *, id<JRPersistent>> *> *unRecursiveCache NS_DEPRECATED_IOS(1_0, 10_0, "no cached in version 2");
 
 @end
 
 @implementation JRDBMgr
-
-@synthesize queues = _queues;
 
 @synthesize dbs = _dbs;
 
@@ -176,7 +172,16 @@ static JRDBMgr *__shareInstance;
     [clazz jr_configure];
 }
 
+@end
+
 #pragma mark - Cache DEPRECATED
+
+
+@implementation JRDBMgr (DEPRECATED)
+
+@dynamic queues;
+@dynamic unRecursiveCache;
+@dynamic recursiveCache;
 
 - (void)clearObjCaches {
     self.unRecursiveCache = nil;
@@ -206,6 +211,9 @@ static JRDBMgr *__shareInstance;
 - (void)deleteDBWithPath:(NSString *)path {
     [self deleteDatabaseWithPath:path];
 }
+
+
+
 
 
 @end

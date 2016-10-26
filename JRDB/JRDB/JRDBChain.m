@@ -7,7 +7,6 @@
 //
 
 #import "JRDBChain.h"
-//#import "FMDatabase+JRDB.h"
 #import "FMDatabase+Chain.h"
 #import "JRDBMgr.h"
 #import <objc/runtime.h>
@@ -22,6 +21,7 @@
 
 @interface JRDBChain ()
 {
+    
 }
 
 @end
@@ -45,7 +45,6 @@
 @synthesize useTransaction = _useTransaction;
 @synthesize useCache       = _useCache;
 @synthesize isDesc         = _isDesc;
-//@synthesize completeBlock  = _completeBlock;
 @synthesize parameters     = _parameters;
 @synthesize columnsArray   = _columnsArray;
 @synthesize ignoreArray    = _ignoreArray;
@@ -78,11 +77,13 @@
     switch (_operation) {
         case CSelect:
         case CSelectSingle:
-            result = [_db jr_executeQueryChain:self];break;
+            result = [_db jr_executeQueryChain:self];
+            break;
             
         case CSelectCustomized:
         case CSelectCount:
-            result = [_db jr_executeCustomizedQueryChain:self];break;
+            result = [_db jr_executeCustomizedQueryChain:self];
+            break;
             
         default:
             result = @([_db jr_executeUpdateChain:self]);
@@ -90,6 +91,18 @@
     
     JRDBResult *finalResult;
     switch (self.operation) {
+        case CSelectCount:
+            finalResult = [JRDBResult resultWithCount:[result unsignedIntegerValue]];
+            break;
+            
+        case CSelect:
+        case CSelectCustomized:
+            finalResult = [JRDBResult resultWithArray:[result copy]];
+            break;
+        case CSelectSingle:
+            finalResult = [JRDBResult resultWithObject:result];
+            break;
+            
         case CCreateTable:
         case CUpdateTable:
         case CDropTable:
@@ -99,23 +112,11 @@
         case CDeleteAll:
         case CDelete:
         case CSaveOrUpdate:
-            finalResult = [JRDBResult resultWithBool:[result boolValue]];break;
-            
-        case CSelectCount:
-            finalResult = [JRDBResult resultWithCount:[result unsignedIntegerValue]];break;
-            
-        case CSelect:
-        case CSelectCustomized:
-            finalResult = [JRDBResult resultWithArray:[result copy]];break;
-        case CSelectSingle:
-            finalResult = [JRDBResult resultWithObject:result];break;
-            
         case COperationNone:
         default:
+            finalResult = [JRDBResult resultWithBool:[result boolValue]];break;
             finalResult = [JRDBResult resultWithBool:NO];
     }
-    
-//    EXE_BLOCK(_completeBlock, self, finalResult);
     
     return finalResult;
 }
@@ -132,7 +133,7 @@
     return self.exe.object;
 }
 
-- (NSArray<JRPersistent> *)list {
+- (NSArray *)list {
     return self.exe.list;
 }
 
@@ -365,23 +366,6 @@ static inline JRBoolBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *key
     return self.Desc(NO);
 }
 
-- (JRBoolBlock)Cache {
-    return __setBoolPropertyToSelf(self, J(useCache));
-}
-- (instancetype)Cached {
-    return self.Cache(YES);
-}
-- (instancetype)NoCached {
-    return self.Cache(NO);
-}
-
-//- (JRCompleteBlock)Complete {
-//    return ^(JRDBChainComplete complete) {
-//        self->_completeBlock = complete;
-//        return self;
-//    };
-//}
-
 #pragma mark - Other method
 
 - (NSArray<JRQueryCondition *> *)queryCondition {
@@ -456,6 +440,7 @@ static inline JRBoolBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *key
 }
 
 #pragma mark - macro method will not execute
+
 - (JRObjectBlock)FromJ {return nil;}
 - (JRArrayBlock)ParamsJ {return nil;}
 - (JRArrayBlock)IgnoreJ {return nil;}
@@ -464,6 +449,24 @@ static inline JRBoolBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *key
 - (JRObjectBlock)OrderJ {return nil;}
 - (JRObjectBlock)GroupJ {return nil;}
 
+#pragma mark - DEPRECATED
+
+- (JRBoolBlock)Cache {
+    return __setBoolPropertyToSelf(self, J(useCache));
+}
+- (instancetype)Cached {
+    return self.Cache(YES);
+}
+- (instancetype)NoCached {
+    return self.Cache(NO);
+}
+
+- (JRDBChain * _Nonnull (^)(JRDBChainComplete _Nonnull))Complete {
+    return ^(JRDBChainComplete complete) {
+        NSAssert(NO, @"JRDBChain complete block has been deprecated, you should not use it");
+        return self;
+    };
+}
 
 @end
 
