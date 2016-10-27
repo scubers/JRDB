@@ -481,13 +481,20 @@ void SqlLog(id sql) {
     
     [sqlString appendString:@" where 1=1 "];
     
-    for (JRQueryCondition *condition in chain.queryCondition) {
-        
-        [sqlString appendFormat:@" %@ (%@)", condition.type == JRQueryConditionTypeAnd ? @"and" : @"or", condition.condition];
-        
-        if (condition.args.count) {
-            [argList addObjectsFromArray:condition.args];
-        }
+    NSAssert(!(chain.whereString.length && chain.whereId.length), @"where condition should not hold more than one!!!");
+    NSAssert(!(chain.whereString.length && chain.wherePK), @"where condition should not hold more than one!!!");
+    NSAssert(!(chain.whereId.length && chain.wherePK), @"where condition should not hold more than one!!!");
+    
+    if (chain.whereString.length) {
+        [sqlString appendFormat:@" and (%@)", chain.whereString];
+        [argList addObjectsFromArray:chain.parameters];
+    } else if (chain.whereId.length) {
+        [sqlString appendFormat:@" and ( _id = ?)"];
+        [argList addObject:chain.whereId];
+    } else if (chain.wherePK) {
+        NSString *pk = [chain.targetClazz jr_primaryKey];
+        [sqlString appendFormat:@" and ( %@ = ?)", pk];
+        [argList addObject:chain.wherePK];
     }
     
     // group
@@ -499,6 +506,7 @@ void SqlLog(id sql) {
     // limit
     if (chain.limitString.length) { [sqlString appendFormat:@" %@ ", chain.limitString]; }
     
+    // 有可能是子查询，不能加 『;』
 //    [sqlString appendString:@";"];
     
     JRSql *jrsql = [JRSql sql:sqlString args:argList];

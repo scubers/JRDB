@@ -38,12 +38,10 @@
 }
 
 - (void)jr_inQueue:(void (^)(id<JRPersistentHandler> _Nonnull))block {
-    NSOperationQueue *queue = [[JRQueueMgr shared] queueWithIdentifier:self.handlerIdentifier];
-    NSBlockOperation *operation = [NSBlockOperation blockOperationWithBlock:^{
+    dispatch_queue_t queue = [[JRQueueMgr shared] queueWithIdentifier:self.handlerIdentifier];
+    dispatch_sync(queue, ^{
         block(self);
-    }];
-    [queue addOperation:operation];
-    [operation waitUntilFinished];
+    });
 }
 
 - (BOOL)jr_inTransaction:(void (^)(id<JRPersistentHandler> _Nonnull, BOOL * _Nonnull))block {
@@ -71,6 +69,7 @@
             return block(self);
         } else if (![self beginTransaction]) {
             NSLog(@"begin a transaction error");
+            [self rollback];
             return NO;
         }
     }
@@ -87,9 +86,7 @@
 }
 
 - (id)jr_executeSync:(BOOL)sync block:(id  _Nullable (^)(id<JRPersistentHandler> _Nonnull))block {
-    NSOperationQueue *queue = [[JRQueueMgr shared] queueWithIdentifier:self.handlerIdentifier];
-    BOOL flag = [queue isEqual:[NSOperationQueue currentQueue]];
-    if (sync && !flag) {
+    if (sync && ![[JRQueueMgr shared] isInCurrentQueue:self.handlerIdentifier]) {
         __block id result;
         [self jr_inQueue:^(id<JRPersistentHandler>  _Nonnull handler) {
             result = block(handler);

@@ -12,8 +12,10 @@
 
 + (instancetype)shared;
 
-- (NSOperationQueue *)queueWithIdentifier:(NSString *)identifier;
+- (dispatch_queue_t)queueWithIdentifier:(NSString *)identifier;
 
 - (void)removeQueueWithIdentifier:(NSString *)identifier;
+
+- (BOOL)isInCurrentQueue:(NSString *)identifier;
 
 @end

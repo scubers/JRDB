@@ -8,9 +8,11 @@
 
 #import "JRQueueMgr.h"
 
+static const void * const kJRQueueSpecificKey = &kJRQueueSpecificKey;
+
 @interface JRQueueMgr ()
 
-@property (nonatomic, strong) NSMutableDictionary<NSString *, NSOperationQueue *> *queues;
+@property (nonatomic, strong) NSMutableDictionary<NSString *, dispatch_queue_t> *queues;
 
 @end
 
@@ -31,24 +33,32 @@ static JRQueueMgr *__instance;
     return [[self alloc] init];
 }
 
-- (NSOperationQueue *)queueWithIdentifier:(NSString *)identifier {
-    NSOperationQueue *queue = self.queues[identifier];
-    if (!queue) {
-        queue = [[NSOperationQueue alloc] init];
-        self.queues[identifier] = queue;
+- (dispatch_queue_t)queueWithIdentifier:(NSString *)identifier {
+    @synchronized (self) {
+        dispatch_queue_t queue = self.queues[identifier];
+        if (!queue) {
+            queue = dispatch_queue_create(identifier.UTF8String, DISPATCH_QUEUE_SERIAL);
+            dispatch_queue_set_specific(queue, kJRQueueSpecificKey, (__bridge void *)[NSObject new], NULL);
+            self.queues[identifier] = queue;
+        }
+        return queue;
     }
-    return queue;
 }
 
 - (void)removeQueueWithIdentifier:(NSString *)identifier {
     [self.queues removeObjectForKey:identifier];
 }
 
+- (BOOL)isInCurrentQueue:(NSString *)identifier {
+    return dispatch_get_specific(kJRQueueSpecificKey) != NULL;
+}
+
 #pragma mark - getter setter
 
-- (NSMutableDictionary<NSString *, NSOperationQueue *> *)queues {
+
+- (NSMutableDictionary<NSString *, dispatch_queue_t> *)queues {
     if (!_queues) {
-        _queues = [[NSMutableDictionary<NSString *, NSOperationQueue *> alloc] init];
+        _queues = [[NSMutableDictionary<NSString *, dispatch_queue_t> alloc] init];
     }
     return _queues;
 }

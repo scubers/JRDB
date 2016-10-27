@@ -62,7 +62,6 @@ static inline NSArray * _Nonnull _variableListToArray(id _Nullable first, ...) {
 }
 
 
-
 typedef NS_ENUM(NSInteger, ChainOperation) {
     COperationNone = 0,
     CInsert,
@@ -127,7 +126,6 @@ typedef struct {
 @property (nonatomic, assign, readonly) ChainOperation   operation;///< operation type
 @property (nonatomic, strong, readonly, nullable) NSString         *tableName;///< operation table name
 
-@property (nonatomic, strong, readonly, nullable) NSArray<JRQueryCondition *> *queryCondition; ///< queryConditions which generic by where condition
 @property (nonatomic, strong, readonly, nullable) JRSql *querySql; ///< jrSql which generic by Self when execute query
 @property (nonatomic, strong, readonly, nullable) NSArray<NSString*> *selectColumns;///< customizd select columns array
 
@@ -224,6 +222,7 @@ typedef struct {
 - (NSArray<T> * _Nonnull)list;
 
 #pragma mark - macro method will not execute
+
 - (JRObjectBlock _Nonnull)FromJ NS_SWIFT_UNAVAILABLE("macro method");///< will not execute cause the macro
 - (JRArrayBlock _Nonnull)ParamsJ NS_SWIFT_UNAVAILABLE("macro method");///< will not execute cause the macro
 - (JRArrayBlock _Nonnull)ColumnsJ NS_SWIFT_UNAVAILABLE("macro method");///< will not execute cause the macro
@@ -236,11 +235,21 @@ typedef struct {
 
 @property (nonatomic, assign, readonly) BOOL useCache NS_DEPRECATED_IOS(1_0, 10_0, "no cached on version 2");
 @property (nonatomic, copy, readonly, nonnull) JRBoolBlockDefine(T, Cache) NS_DEPRECATED_IOS(1_0, 10_0, "no cached on version 2");
-@property (nonatomic, copy, readonly, nullable  ) JRDBChainComplete completeBlock NS_DEPRECATED_IOS(1_0, 10_0, "unusabled");
-@property (nonatomic, copy, readonly, nonnull   ) JRCompleteBlockDefine(T, Complete) NS_DEPRECATED_IOS(1_0, 10_0, "unusabled");
+@property (nonatomic, copy, readonly, nullable) JRDBChainComplete completeBlock NS_DEPRECATED_IOS(1_0, 10_0, "unusabled");
+@property (nonatomic, copy, readonly, nonnull) JRCompleteBlockDefine(T, Complete) NS_DEPRECATED_IOS(1_0, 10_0, "unusabled");
+@property (nonatomic, strong, readonly, nullable) NSArray<JRQueryCondition *> *queryCondition NS_DEPRECATED_IOS(1_0, 10_0, "unusabled");
+
 
 - (instancetype _Nonnull)Cached NS_DEPRECATED_IOS(1_0, 10_0, "no cached on version 2");
 - (instancetype _Nonnull)NoCached NS_DEPRECATED_IOS(1_0, 10_0, "no cached on version 2");
 
+@end
+
+
+
+@interface JRDBChain (Recursive)
+
+- (id _Nullable)jr_executeQueryChainRecusively;
+- (BOOL)jr_executeUpdateChainRecusively;
 
 @end

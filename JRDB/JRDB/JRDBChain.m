@@ -13,10 +13,16 @@
 #import "NSObject+Reflect.h"
 #import "JRQueryCondition.h"
 #import "JRSqlGenerator.h"
+#import "JRActivatedProperty.h"
+
+#import "FMDatabase+JRPersistentHandler.h"
+#import "JRFMDBResultSetHandler.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Woverriding-method-mismatch"
 #pragma clang diagnostic ignored "-Wmismatched-return-types"
+
+
 
 
 @interface JRDBChain ()
@@ -32,7 +38,6 @@
 @synthesize targetArray    = _targetArray;
 @synthesize targetClazz    = _targetClazz;
 @synthesize operation      = _operation;
-@synthesize queryCondition = _queryCondition;
 @synthesize selectColumns  = _selectColumns;
 @synthesize limitIn        = _limitIn;
 @synthesize limitString    = _limitString;
@@ -76,16 +81,34 @@
     switch (_operation) {
         case CSelect:
         case CSelectSingle:
-//            result = [_db jr_executeQueryChain:self];
-            break;
+        {
+            if (self.isRecursive)
+                result = [self jr_executeQueryChainRecusively];
+            else
+                result = [self jr_executeQueryChain];
+        }
+        break;
             
         case CSelectCustomized:
         case CSelectCount:
-//            result = [_db jr_executeCustomizedQueryChain:self];
-            break;
+        {
+            result = [self jr_executeCustomizedQueryChain];
+        }
+        break;
             
-        default:;
-//            result = @([_db jr_executeUpdateChain:self]);
+        case CCreateTable:
+        case CDropTable:
+        case CTruncateTable:
+        case CUpdateTable:
+            result = @([self jr_executeTableOperation]);
+            break;
+        default:
+        {
+            if (self.isRecursive)
+                result = @([self jr_executeUpdateChainRecusively]);
+            else
+                result = @([self jr_executeUpdateChain]);
+        }
     }
     
     JRDBResult *finalResult;
@@ -113,8 +136,8 @@
         case CSaveOrUpdate:
         case COperationNone:
         default:
-            finalResult = [JRDBResult resultWithBool:[result boolValue]];break;
-            finalResult = [JRDBResult resultWithBool:NO];
+            finalResult = [JRDBResult resultWithBool:[result boolValue]];
+            break;
     }
     
     return finalResult;
@@ -367,25 +390,6 @@ static inline JRBoolBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *key
 
 #pragma mark - Other method
 
-- (NSArray<JRQueryCondition *> *)queryCondition {
-    
-    NSAssert(!(_whereString.length && _whereId.length), @"where condition should not hold more than one!!!");
-    NSAssert(!(_whereString.length && _wherePK), @"where condition should not hold more than one!!!");
-    NSAssert(!(_whereId.length && _wherePK), @"where condition should not hold more than one!!!");
-
-    NSArray *conditions = nil;
-    if (_whereString.length) {
-        conditions = @[[JRQueryCondition condition:_whereString args:_parameters type:JRQueryConditionTypeAnd]];
-    } else if (_whereId.length) {
-        conditions = @[[JRQueryCondition condition:@"_id = ?" args:@[_whereId] type:JRQueryConditionTypeAnd]];
-    } else if (_wherePK) {
-        NSString *pk = [_targetClazz jr_primaryKey];
-        NSString *condition = [NSString stringWithFormat:@"%@ = ?", pk];
-        conditions = @[[JRQueryCondition condition:condition args:@[_wherePK] type:JRQueryConditionTypeAnd]];
-    }
-    return conditions;
-}
-
 - (BOOL)isQuerySingle {
     return _whereId.length || _wherePK;
 }
@@ -469,6 +473,147 @@ static inline JRBoolBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *key
     };
 }
 
-@end
 
 #pragma clang diagnostic pop
+
+#pragma mark - execution
+
+- (id)jr_executeQueryChain {
+    NSAssert(!self.selectColumns.count, @"selectColumns should not has count in normal query");
+    id result = [_db jr_getByJRSql:self.querySql sync:self.isSync resultClazz:self.targetClazz columns:self.selectColumns];
+    return [self _handleQueryResult:result];
+}
+
+- (id)jr_executeCustomizedQueryChain {
+    return
+    [_db jr_executeSync:self.isSync block:^id _Nullable(id<JRPersistentHandler>  _Nonnull handler) {
+        FMResultSet *resultSet = [handler jr_executeQuery:self.querySql];
+        id result = [JRFMDBResultSetHandler handleResultSet:resultSet forChain:self];
+        return result;
+    }];
+}
+
+- (BOOL)jr_executeUpdateChain {
+    
+    if (self.operation == CInsert) {
+        if (self.targetArray) {
+            return [_db jr_saveObjects:self.targetArray useTransaction:self.useTransaction synchronized:self.isSync];
+        }
+        return [_db jr_saveOne:self.target useTransaction:self.useTransaction synchronized:self.isSync];
+    }
+    else if (self.operation == CUpdate) {
+        if (self.targetArray) {
+            return [_db jr_updateObjects:self.targetArray columns:[self _needUpdateColumns] useTransaction:self.useTransaction synchronized:self.isSync];
+        }
+        return [_db jr_updateOne:self.target columns:[self _needUpdateColumns] useTransaction:self.useTransaction synchronized:self.isSync];
+    }
+    else if (self.operation == CDelete) {
+        if (self.targetArray) {
+            return [_db jr_deleteObjects:self.targetArray useTransaction:self.useTransaction synchronized:self.isSync];
+        }
+        return [_db jr_deleteOne:self.target useTransaction:self.useTransaction synchronized:self.isSync];
+    }
+    else if (self.operation == CSaveOrUpdate) {
+        if (self.targetArray) {
+            return [_db jr_saveOrUpdateObjects:self.targetArray useTransaction:self.useTransaction synchronized:self.isSync];
+        }
+        return [_db jr_saveOrUpdateOne:self.target useTransaction:self.useTransaction synchronized:self.isSync];
+    }
+    else if (self.operation == CDeleteAll) {
+        return [_db jr_deleteAll:self.targetClazz useTransaction:self.useTransaction synchronized:self.isSync];
+    }
+    else {
+        NSAssert(NO, @"%s :%@", __FUNCTION__, @"chain operation should be Inset or Update or Delete or DeleteAll");
+        return NO;
+    }
+}
+
+- (BOOL)jr_executeTableOperation {
+    if (self.operation == CCreateTable) {
+        return [_db jr_createTable4Clazz:self.targetClazz synchronized:self.isSync];
+    }
+    else if (self.operation == CUpdateTable) {
+        return [_db jr_updateTable4Clazz:self.targetClazz synchronized:self.isSync];
+    }
+    else if (self.operation == CDropTable) {
+        return [_db jr_dropTable4Clazz:self.targetClazz synchronized:self.isSync];
+    }
+    else if (self.operation == CTruncateTable) {
+        return [_db jr_truncateTable4Clazz:self.targetClazz synchronized:self.isSync];
+    }
+    else {
+        NSAssert(NO, @"%s :%@", __FUNCTION__, @"chain operation is not the table operation");
+        return NO;
+    }
+}
+
+
+- (id)_handleQueryResult:(NSArray *)result {
+    return self.operation == CSelectSingle ? [result firstObject] : result;
+}
+
+- (NSArray *)_needUpdateColumns {
+    NSAssert(!(self.columnsArray.count && self.ignoreArray.count), @"colums and ignore should not use at the same chain !!");
+    NSMutableArray *columns = [NSMutableArray array];
+    if (self.columnsArray.count) {
+        return self.columnsArray;
+    }
+    else if (self.ignoreArray.count) {
+        Class<JRPersistent> clazz = self.targetClazz;
+        [[clazz jr_activatedProperties] enumerateObjectsUsingBlock:^(JRActivatedProperty * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            if (![self.ignoreArray containsObject:obj.name]) {
+                [columns addObject:obj.name];
+            }
+        }];
+    }
+    return columns.count ? columns : nil;
+}
+
+@end
+
+
+
+
+@implementation JRDBChain (Recursive)
+
+- (id)jr_executeQueryChainRecusively {
+    NSAssert(!self.selectColumns.count, @"selectColumns should not has count in normal query");
+    id result = [((FMDatabase *)_db) jr_findByJRSql:self.querySql sync:self.isSync resultClazz:self.targetClazz columns:self.selectColumns];
+    return [self _handleQueryResult:result];
+}
+
+- (BOOL)jr_executeUpdateChainRecusively {
+    if (self.operation == CInsert) {
+        if (self.targetArray) {
+            return [((FMDatabase *)_db) jr_saveObjectsRecursively:self.targetArray useTransaction:self.useTransaction synchronized:self.isSync];
+        }
+        return [((FMDatabase *)_db) jr_saveOneRecursively:self.target useTransaction:self.useTransaction synchronized:self.isSync];
+    }
+    else if (self.operation == CUpdate) {
+        if (self.targetArray) {
+            return [((FMDatabase *)_db) jr_updateObjectsRecursively:self.targetArray columns:[self _needUpdateColumns] useTransaction:self.useTransaction synchronized:self.isSync];
+        }
+        return [((FMDatabase *)_db) jr_updateOneRecursively:self.target columns:[self _needUpdateColumns] useTransaction:self.useTransaction synchronized:self.isSync];
+    }
+    else if (self.operation == CDelete) {
+        if (self.targetArray) {
+            return [((FMDatabase *)_db) jr_deleteObjectsRecursively:self.targetArray useTransaction:self.useTransaction synchronized:self.isSync];
+        }
+        return [((FMDatabase *)_db) jr_deleteOneRecursively:self.target useTransaction:self.useTransaction synchronized:self.isSync];
+    }
+    else if (self.operation == CSaveOrUpdate) {
+        if (self.targetArray) {
+            return [((FMDatabase *)_db) jr_saveOrUpdateObjectsRecursively:self.targetArray useTransaction:self.useTransaction synchronized:self.isSync];
+        }
+        return [((FMDatabase *)_db) jr_saveOrUpdateOneRecursively:self.target useTransaction:self.useTransaction synchronized:self.isSync];
+    }
+    else if (self.operation == CDeleteAll) {
+        return [((FMDatabase *)_db) jr_deleteAllRecursively:self.targetClazz useTransaction:self.useTransaction synchronized:self.isSync];
+    }
+    else {
+        NSAssert(NO, @"%s :%@", __FUNCTION__, @"chain operation should be Inset or Update or Delete or DeleteAll");
+        return NO;
+    }
+}
+
+@end

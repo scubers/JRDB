@@ -24,7 +24,7 @@
 - (void)setUp {
     [super setUp];
     [JRDBMgr defaultDB];
-    FMDatabase *db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/mac/Desktop/test.sqlite"];
+    id<JRPersistentHandler> db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/mac/Desktop/test.sqlite"];
     [[JRDBMgr shareInstance] registerClazzes:@[
                                                [Person class],
                                                [Card class],
@@ -372,7 +372,7 @@
     
     [[JRDBMgr defaultDB] jr_getByID:p.ID clazz:[Person class] synchronized:YES];
     
-
+ 
     p = J_Select(Person).list.firstObject;
     p1 = J_Select(Person).WherePKIs(p.ID).object;
     p2 = J_Select(Person).WherePKIs(p.ID).object;
@@ -383,9 +383,9 @@
 
 - (void)testSelectAll {
     
-    NSArray<Person *> *ps2 = J_Select(Person).NoCached.list;
-    NSArray<Person *> *ps = J_Select(Person).Recursively.NoCached.list;
-    NSArray<Person *> *ps1 = J_Select(Person).Recursively.NoCached.list;
+    NSArray<Person *> *ps2 = J_Select(Person).list;
+    NSArray<Person *> *ps = J_Select(Person).Recursively.list;
+    NSArray<Person *> *ps1 = J_Select(Person).Recursively.list;
     NSLog(@"%@", ps);
     NSLog(@"%@", ps1);
     NSLog(@"%@", ps2);
@@ -435,9 +435,9 @@
     
 //    [[JRDBMgr defaultDB] jr_count4ID:p.ID clazz:[Person class] synchronized:YES];
     
-    [[JRDBMgr defaultDB] jr_count4PrimaryKey:[p jr_primaryKeyValue] clazz:[Person class] synchronized:YES];
+    long count1 = [[JRDBMgr defaultDB] jr_count4PrimaryKey:[p jr_primaryKeyValue] clazz:[Person class] synchronized:YES];
 
-    NSLog(@"%zd", count);
+    NSLog(@"%zd", count1);
 }
 
 - (void)testSelectColumn {
@@ -501,33 +501,23 @@
 }
 
 - (void)testGCD2 {
-    [Person jr_deleteAll];
-    NSMutableArray *p = [NSMutableArray array];
     for (int i = 0; i < 10; i++) {
-        [p addObject:[self createPerson:i name:nil]];
         dispatch_async(dispatch_get_global_queue(0, 0), ^{
-            [[JRDBMgr defaultDB] jr_inTransaction:^(FMDatabase * _Nonnull db, BOOL * _Nonnull rollBack) {
-                BOOL a = J_Insert(p[i]).InDB(db).Sync(NO).updateResult;
-                NSLog(@"%d", a);
+            Person *p = [self createPerson:i name:nil];
+            [[JRDBMgr defaultDB] jr_executeSync:YES block:^id _Nullable(id<JRPersistentHandler>  _Nonnull handler) {
+                return @([handler jr_executeUseTransaction:YES block:^BOOL(id<JRPersistentHandler>  _Nonnull handler) {
+                    BOOL a = J_Insert(p).InDB(handler).updateResult;
+                    NSLog(@"%d", a);
+                    NSLog(@"end %d", i);
+                    return a;
+                }]);
             }];
         });
     }
     
-//    sleep(5);
+    sleep(5);
 }
 
-
-- (void)testTemp {
-    
-    [[JRDBChain new] exe];
-    
-    
-    
-    [[JRDBChain new].db jr_inTransaction:^(FMDatabase * _Nonnull db, BOOL * _Nonnull rollBack) {
-        
-    }];
-
-}
 
 #pragma mark - database operation
 

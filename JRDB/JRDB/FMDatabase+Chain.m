@@ -20,62 +20,62 @@
 - (BOOL)jr_executeUpdateChain:(JRDBChain *)chain {
     
     if (chain.operation == CInsert) {
-        if (!chain.isRecursive) {
-            if (chain.targetArray) {
-                return [self jr_saveObjects:chain.targetArray useTransaction:chain.useTransaction synchronized:chain.isSync];
-            }
-            return [self jr_saveOne:chain.target useTransaction:chain.useTransaction synchronized:chain.isSync];
-        } else {
+        if (chain.isRecursive) {
             if (chain.targetArray) {
                 return [self jr_saveObjectsRecursively:chain.targetArray useTransaction:chain.useTransaction synchronized:chain.isSync];
             }
             return [self jr_saveOneRecursively:chain.target useTransaction:chain.useTransaction synchronized:chain.isSync];
+        } else {
+            if (chain.targetArray) {
+                return [self jr_saveObjects:chain.targetArray useTransaction:chain.useTransaction synchronized:chain.isSync];
+            }
+            return [self jr_saveOne:chain.target useTransaction:chain.useTransaction synchronized:chain.isSync];
         }
     }
     else if (chain.operation == CUpdate) {
-        if (!chain.isRecursive) {
-            if (chain.targetArray) {
-                return [self jr_updateObjects:chain.targetArray columns:[self _needUpdateColumnsInChain:chain] useTransaction:chain.useTransaction synchronized:chain.isSync];
-            }
-            return [self jr_updateOne:chain.target columns:[self _needUpdateColumnsInChain:chain] useTransaction:chain.useTransaction synchronized:chain.isSync];
-        } else {
+        if (chain.isRecursive) {
             if (chain.targetArray) {
                 return [self jr_updateObjectsRecursively:chain.targetArray columns:[self _needUpdateColumnsInChain:chain] useTransaction:chain.useTransaction synchronized:chain.isSync];
             }
             return [self jr_updateOneRecursively:chain.target columns:[self _needUpdateColumnsInChain:chain] useTransaction:chain.useTransaction synchronized:chain.isSync];
+        } else {
+            if (chain.targetArray) {
+                return [self jr_updateObjects:chain.targetArray columns:[self _needUpdateColumnsInChain:chain] useTransaction:chain.useTransaction synchronized:chain.isSync];
+            }
+            return [self jr_updateOne:chain.target columns:[self _needUpdateColumnsInChain:chain] useTransaction:chain.useTransaction synchronized:chain.isSync];
         }
     }
     else if (chain.operation == CDelete) {
-        if (!chain.isRecursive) {
-            if (chain.targetArray) {
-                return [self jr_deleteObjects:chain.targetArray useTransaction:chain.useTransaction synchronized:chain.isSync];
-            }
-            return [self jr_deleteOne:chain.target useTransaction:chain.useTransaction synchronized:chain.isSync];
-        } else {
+        if (chain.isRecursive) {
             if (chain.targetArray) {
                 return [self jr_deleteObjectsRecursively:chain.targetArray useTransaction:chain.useTransaction synchronized:chain.isSync];
             }
             return [self jr_deleteOneRecursively:chain.target useTransaction:chain.useTransaction synchronized:chain.isSync];
+        } else {
+            if (chain.targetArray) {
+                return [self jr_deleteObjects:chain.targetArray useTransaction:chain.useTransaction synchronized:chain.isSync];
+            }
+            return [self jr_deleteOne:chain.target useTransaction:chain.useTransaction synchronized:chain.isSync];
         }
     }
     else if (chain.operation == CSaveOrUpdate) {
-        if (!chain.isRecursive) {
-            if (chain.targetArray) {
-                return [self jr_saveOrUpdateObjects:chain.targetArray useTransaction:chain.useTransaction synchronized:chain.isSync];
-            }
-            return [self jr_saveOrUpdateOne:chain.target useTransaction:chain.useTransaction synchronized:chain.isSync];
-        } else {
+        if (chain.isRecursive) {
             if (chain.targetArray) {
                 return [self jr_saveOrUpdateObjectsRecursively:chain.targetArray useTransaction:chain.useTransaction synchronized:chain.isSync];
             }
             return [self jr_saveOrUpdateOneRecursively:chain.target useTransaction:chain.useTransaction synchronized:chain.isSync];
+        } else {
+            if (chain.targetArray) {
+                return [self jr_saveOrUpdateObjects:chain.targetArray useTransaction:chain.useTransaction synchronized:chain.isSync];
+            }
+            return [self jr_saveOrUpdateOne:chain.target useTransaction:chain.useTransaction synchronized:chain.isSync];
         }
     }
     else if (chain.operation == CDeleteAll) {
-        if (!chain.isRecursive) {
-            return [self jr_deleteAll:chain.targetClazz useTransaction:chain.useTransaction synchronized:chain.isSync];
-        } else {
+        if (chain.isRecursive) {
             return [self jr_deleteAllRecursively:chain.targetClazz useTransaction:chain.useTransaction synchronized:chain.isSync];
+        } else {
+            return [self jr_deleteAll:chain.targetClazz useTransaction:chain.useTransaction synchronized:chain.isSync];
         }
     }
     else if (chain.operation == CCreateTable) {

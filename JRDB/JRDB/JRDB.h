@@ -10,7 +10,6 @@
 #define JRDB_h
 
 #import "JRDBMgr.h"
-//#import "FMDatabase+JRDB.h"
 #import "FMDatabase+JRPersistentHandler.h"
 #import "JRPersistent.h"
 #import "JRPersistentHandler.h"
