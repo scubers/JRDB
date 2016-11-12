@@ -7,7 +7,6 @@
 //
 
 #import "JRMiddleTable.h"
-//#import "FMDatabase+JRDB.h"
 #import "NSObject+Reflect.h"
 #import "FMDatabase+JRPersistentHandler.h"
 

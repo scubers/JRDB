@@ -17,7 +17,7 @@
 @interface NSObject (JRDB) <JRPersistent>
 
 /**
- *  注册的时候自动调用, 刷新- [jr_activatedProperties];
+ *  注册的时候自动调用, 刷新 - [jr_activatedProperties];
  */
 + (void)jr_configure;
 
