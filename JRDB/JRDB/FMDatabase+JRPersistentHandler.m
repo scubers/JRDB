@@ -194,7 +194,7 @@
  *  @return 是否存在
  */
 - (BOOL)jr_checkExistsTable4Clazz:(Class<JRPersistent> _Nonnull)clazz synchronized:(BOOL)synchronized {
-    return [self tableExists:[clazz shortClazzName]];
+    return [self tableExists:[clazz jr_tableName]];
 }
 
 #pragma mark save
@@ -522,7 +522,7 @@
         }
     }];
     
-    NSString *tableName = [[obj class] shortClazzName];
+    NSString *tableName = [[obj class] jr_tableName];
     if (![self tableExists:tableName]) {
         if(![self jr_createTable4Clazz:[obj class] synchronized:NO]) {
             NSLog(@"create table: %@ error", tableName);
@@ -600,7 +600,7 @@
             
             NSString *sqlString =
             [NSString stringWithFormat:@"update %@ set %@ = null where %@ = ? %@ ;"
-             , [clazz shortClazzName], ParentLinkColumn(key), ParentLinkColumn(key), ids];
+             , [clazz jr_tableName], ParentLinkColumn(key), ParentLinkColumn(key), ids];
             NSArray *params = [@[[obj ID]] arrayByAddingObjectsFromArray:subids];
             JRSql *sql = [JRSql sql:sqlString args:params];
             

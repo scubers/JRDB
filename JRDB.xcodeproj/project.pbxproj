@@ -36,7 +36,7 @@
 		5AD63F241CE1C2480044ACE6 /* Person.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AD63F231CE1C2480044ACE6 /* Person.m */; };
 		5AD63F271CE1C40F0044ACE6 /* AViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AD63F261CE1C40F0044ACE6 /* AViewController.swift */; };
 		5AE115421D364ED400886657 /* JRDBChainTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AE115411D364ED400886657 /* JRDBChainTest.m */; };
-		A2C82B9403DEE809067FDA4B /* libPods-JRDBTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2CE99294CEA1A2C1C484D937 /* libPods-JRDBTests.a */; };
+		72357FC93EB5C7D59A18076F /* libPods-JRDBTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2CE99294CEA1A2C1C484D937 /* libPods-JRDBTests.a */; };
 		A80015F71D0EEC29000EA41A /* JRActivatedProperty.m in Sources */ = {isa = PBXBuildFile; fileRef = A80015F61D0EEC29000EA41A /* JRActivatedProperty.m */; };
 		A876AB9ABC8BE60FC4881BA5 /* libPods-JRDB.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 632830974E0244C0E00157B4 /* libPods-JRDB.a */; };
 		A8A1B2251D033C8C00886403 /* NSObject+Reflect.m in Sources */ = {isa = PBXBuildFile; fileRef = A8A1B2241D033C8C00886403 /* NSObject+Reflect.m */; };
@@ -71,7 +71,6 @@
 		09822BBA1DBF045F00662F49 /* JRQueueMgr.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRQueueMgr.m; sourceTree = "<group>"; };
 		09943EB41D630FB000C7164D /* JRDBMgrContextTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRDBMgrContextTests.m; sourceTree = "<group>"; };
 		2CE99294CEA1A2C1C484D937 /* libPods-JRDBTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-JRDBTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		3BBEAE96B975D059BCF0F9A0 /* Pods-JRDBTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-JRDBTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-JRDBTests/Pods-JRDBTests.debug.xcconfig"; sourceTree = "<group>"; };
 		4C07B4AAB655E10433E17527 /* Pods-JRDB.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-JRDB.release.xcconfig"; path = "Pods/Target Support Files/Pods-JRDB/Pods-JRDB.release.xcconfig"; sourceTree = "<group>"; };
 		5A7AED801D05294B000AD4FE /* JRMiddleTable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRMiddleTable.h; sourceTree = "<group>"; };
 		5A7AED811D05294B000AD4FE /* JRMiddleTable.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRMiddleTable.m; sourceTree = "<group>"; };
@@ -115,8 +114,8 @@
 		5AD63F251CE1C40F0044ACE6 /* JRDB-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "JRDB-Bridging-Header.h"; sourceTree = "<group>"; };
 		5AD63F261CE1C40F0044ACE6 /* AViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AViewController.swift; sourceTree = "<group>"; };
 		5AE115411D364ED400886657 /* JRDBChainTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRDBChainTest.m; sourceTree = "<group>"; };
-		5E4E442B13FB7BB2D2561AFE /* Pods-JRDBTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-JRDBTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-JRDBTests/Pods-JRDBTests.release.xcconfig"; sourceTree = "<group>"; };
 		632830974E0244C0E00157B4 /* libPods-JRDB.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-JRDB.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		939D01E04EAA2344216A9878 /* Pods-JRDBTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-JRDBTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-JRDBTests/Pods-JRDBTests.release.xcconfig"; sourceTree = "<group>"; };
 		A80015F51D0EEC29000EA41A /* JRActivatedProperty.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRActivatedProperty.h; sourceTree = "<group>"; };
 		A80015F61D0EEC29000EA41A /* JRActivatedProperty.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRActivatedProperty.m; sourceTree = "<group>"; };
 		A8A1B2231D033C8C00886403 /* NSObject+Reflect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+Reflect.h"; sourceTree = "<group>"; };
@@ -126,6 +125,7 @@
 		A8A1B22C1D03D29900886403 /* JRReflectable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JRReflectable.h; sourceTree = "<group>"; };
 		A8ED7A501D01CCA3009ED474 /* JRUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRUtils.h; sourceTree = "<group>"; };
 		A8ED7A511D01CCA3009ED474 /* JRUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRUtils.m; sourceTree = "<group>"; };
+		C78394A58BF0B0CB70137A8B /* Pods-JRDBTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-JRDBTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-JRDBTests/Pods-JRDBTests.debug.xcconfig"; sourceTree = "<group>"; };
 		F7813F0D5EFC5533FB83B8BB /* Pods-JRDB.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-JRDB.debug.xcconfig"; path = "Pods/Target Support Files/Pods-JRDB/Pods-JRDB.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -142,7 +142,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A2C82B9403DEE809067FDA4B /* libPods-JRDBTests.a in Frameworks */,
+				72357FC93EB5C7D59A18076F /* libPods-JRDBTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -170,8 +170,8 @@
 			children = (
 				F7813F0D5EFC5533FB83B8BB /* Pods-JRDB.debug.xcconfig */,
 				4C07B4AAB655E10433E17527 /* Pods-JRDB.release.xcconfig */,
-				3BBEAE96B975D059BCF0F9A0 /* Pods-JRDBTests.debug.xcconfig */,
-				5E4E442B13FB7BB2D2561AFE /* Pods-JRDBTests.release.xcconfig */,
+				C78394A58BF0B0CB70137A8B /* Pods-JRDBTests.debug.xcconfig */,
+				939D01E04EAA2344216A9878 /* Pods-JRDBTests.release.xcconfig */,
 			);
 			name = Pods;
 			sourceTree = "<group>";
@@ -454,7 +454,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 		765889B2FB1A21910A358FE3 /* [CP] Copy Pods Resources */ = {
@@ -499,7 +499,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 		E21E737E6F79938E7A667ABA /* [CP] Embed Pods Frameworks */ = {
@@ -736,7 +736,7 @@
 		};
 		5ACBEEDE1CE1B3A500371E01 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3BBEAE96B975D059BCF0F9A0 /* Pods-JRDBTests.debug.xcconfig */;
+			baseConfigurationReference = C78394A58BF0B0CB70137A8B /* Pods-JRDBTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ENABLE_MODULES = YES;
@@ -759,7 +759,7 @@
 		};
 		5ACBEEDF1CE1B3A500371E01 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 5E4E442B13FB7BB2D2561AFE /* Pods-JRDBTests.release.xcconfig */;
+			baseConfigurationReference = 939D01E04EAA2344216A9878 /* Pods-JRDBTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ENABLE_MODULES = YES;

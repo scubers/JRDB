@@ -21,6 +21,7 @@
  */
 + (void)jr_configure;
 
+
 #pragma mark - convinence method
 
 - (void)jr_setSingleLinkID:(NSString * _Nullable)ID forKey:(NSString * _Nonnull)key;

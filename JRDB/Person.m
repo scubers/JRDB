@@ -10,10 +10,20 @@
 #import "NSObject+JRDB.h"
 
 @implementation Money
+
++ (NSString *)jr_tableName {
+    return @"my_money";
+}
+
 @end
 
 
 @implementation Card
+
++ (NSString *)jr_tableName {
+    return @"my_card";
+}
+
 + (NSDictionary<NSString *,Class<JRPersistent>> *)jr_singleLinkedPropertyNames {
     return @{@"_person" : [Person class]};
 }
@@ -30,6 +40,10 @@
 @end
 
 @implementation Person
+
++ (NSString *)jr_tableName {
+    return @"my_person";
+}
 
 + (NSArray *)jr_excludePropertyNames {
     return @[

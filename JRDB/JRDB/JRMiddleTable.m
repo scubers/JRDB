@@ -10,8 +10,8 @@
 #import "NSObject+Reflect.h"
 #import "FMDatabase+JRPersistentHandler.h"
 
-#define MiddleTableName(clazz1,clazz2) [NSString stringWithFormat:@"%@_%@_Mid_Table", [clazz1 shortClazzName],[clazz2 shortClazzName]]
-#define MiddleColumn4Clazz(clazz) [NSString stringWithFormat:@"%@_ids", [clazz shortClazzName]]
+#define MiddleTableName(clazz1,clazz2) [NSString stringWithFormat:@"%@_%@_Mid_Table", [clazz1 jr_tableName],[clazz2 jr_tableName]]
+#define MiddleColumn4Clazz(clazz) [NSString stringWithFormat:@"%@_ids", [clazz jr_tableName]]
 
 
 @implementation JRMiddleTable
@@ -109,7 +109,7 @@
     return
     
     [_db jr_inTransaction:^(FMDatabase * _Nonnull db, BOOL * _Nonnull rollBack) {
-        NSString *sql = [NSString stringWithFormat:@"delete from %@ where (%@ not in (select _id from %@)) or (%@ not in (select _id from %@))", [self tableName], MiddleColumn4Clazz(_clazz1), [_clazz1 shortClazzName], MiddleColumn4Clazz(_clazz2), [_clazz2 shortClazzName]];
+        NSString *sql = [NSString stringWithFormat:@"delete from %@ where (%@ not in (select _id from %@)) or (%@ not in (select _id from %@))", [self tableName], MiddleColumn4Clazz(_clazz1), [_clazz1 jr_tableName], MiddleColumn4Clazz(_clazz2), [_clazz2 jr_tableName]];
         *rollBack = ![db executeUpdate:sql];
     }];
     

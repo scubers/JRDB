@@ -279,7 +279,7 @@ static inline JRObjectBlock __setTargetToSelf(JRDBChain *self, ChainOperation op
             self->_subChain = from;
         } else if (object_isClass(from)) {
             self->_targetClazz = from;
-            self->_tableName = [((Class)from) shortClazzName];
+            self->_tableName = [((Class<JRPersistent>)from) jr_tableName];
         }
         return self;
     };

@@ -34,6 +34,14 @@ typedef void(^JRDBDidFinishBlock)(id<JRPersistent> _Nonnull obj);
 
 @optional
 
+
+/**
+ 自定义表名，若不实现，或者返回nil，则默认为类名
+
+ @return 表名
+ */
++ (NSString * _Nonnull)jr_customTableName;
+
 /**
  *  返回不用入库的对象字段数组
  *  The full property names that you want to ignore for persistent
@@ -92,6 +100,14 @@ typedef void(^JRDBDidFinishBlock)(id<JRPersistent> _Nonnull obj);
 - (void)jr_executeFinishBlocks;
 
 #pragma mark - convenience
+
+/**
+ 便捷方法 @see + [jr_tableName] 若jr_tableName未返回或者为空，则返回本类名为表名
+
+ @return
+ */
++ (NSString * _Nonnull)jr_tableName;
+
 /**
  *  如果有自定义主键，则返回自定义主键key，例如 name，若没有实现，则返回默认主键key ： @"_ID"
  *

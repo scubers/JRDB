@@ -65,6 +65,14 @@
     return nil;
 }
 
++ (NSString *)jr_customTableName {
+    return nil;
+}
+
++ (NSString *)jr_tableName {
+    return [self jr_tableName]?:[self shortClazzName];
+}
+
 + (NSString *)jr_primaryKey {
     if ([self jr_customPrimarykey]) {
         return [self jr_customPrimarykey];
