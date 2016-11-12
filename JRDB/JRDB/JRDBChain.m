@@ -7,7 +7,6 @@
 //
 
 #import "JRDBChain.h"
-#import "FMDatabase+Chain.h"
 #import "JRDBMgr.h"
 #import <objc/runtime.h>
 #import "NSObject+Reflect.h"
@@ -23,12 +22,7 @@
 #pragma clang diagnostic ignored "-Wmismatched-return-types"
 
 
-
-
 @interface JRDBChain ()
-{
-    
-}
 
 @end
 
@@ -578,37 +572,37 @@ static inline JRBoolBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *key
 
 - (id)jr_executeQueryChainRecusively {
     NSAssert(!self.selectColumns.count, @"selectColumns should not has count in normal query");
-    id result = [((FMDatabase *)_db) jr_findByJRSql:self.querySql sync:self.isSync resultClazz:self.targetClazz columns:self.selectColumns];
+    id result = [_db jr_findByJRSql:self.querySql sync:self.isSync resultClazz:self.targetClazz columns:self.selectColumns];
     return [self _handleQueryResult:result];
 }
 
 - (BOOL)jr_executeUpdateChainRecusively {
     if (self.operation == CInsert) {
         if (self.targetArray) {
-            return [((FMDatabase *)_db) jr_saveObjectsRecursively:self.targetArray useTransaction:self.useTransaction synchronized:self.isSync];
+            return [_db jr_saveObjectsRecursively:self.targetArray useTransaction:self.useTransaction synchronized:self.isSync];
         }
-        return [((FMDatabase *)_db) jr_saveOneRecursively:self.target useTransaction:self.useTransaction synchronized:self.isSync];
+        return [_db jr_saveOneRecursively:self.target useTransaction:self.useTransaction synchronized:self.isSync];
     }
     else if (self.operation == CUpdate) {
         if (self.targetArray) {
-            return [((FMDatabase *)_db) jr_updateObjectsRecursively:self.targetArray columns:[self _needUpdateColumns] useTransaction:self.useTransaction synchronized:self.isSync];
+            return [_db jr_updateObjectsRecursively:self.targetArray columns:[self _needUpdateColumns] useTransaction:self.useTransaction synchronized:self.isSync];
         }
-        return [((FMDatabase *)_db) jr_updateOneRecursively:self.target columns:[self _needUpdateColumns] useTransaction:self.useTransaction synchronized:self.isSync];
+        return [_db jr_updateOneRecursively:self.target columns:[self _needUpdateColumns] useTransaction:self.useTransaction synchronized:self.isSync];
     }
     else if (self.operation == CDelete) {
         if (self.targetArray) {
-            return [((FMDatabase *)_db) jr_deleteObjectsRecursively:self.targetArray useTransaction:self.useTransaction synchronized:self.isSync];
+            return [_db jr_deleteObjectsRecursively:self.targetArray useTransaction:self.useTransaction synchronized:self.isSync];
         }
-        return [((FMDatabase *)_db) jr_deleteOneRecursively:self.target useTransaction:self.useTransaction synchronized:self.isSync];
+        return [_db jr_deleteOneRecursively:self.target useTransaction:self.useTransaction synchronized:self.isSync];
     }
     else if (self.operation == CSaveOrUpdate) {
         if (self.targetArray) {
-            return [((FMDatabase *)_db) jr_saveOrUpdateObjectsRecursively:self.targetArray useTransaction:self.useTransaction synchronized:self.isSync];
+            return [_db jr_saveOrUpdateObjectsRecursively:self.targetArray useTransaction:self.useTransaction synchronized:self.isSync];
         }
-        return [((FMDatabase *)_db) jr_saveOrUpdateOneRecursively:self.target useTransaction:self.useTransaction synchronized:self.isSync];
+        return [_db jr_saveOrUpdateOneRecursively:self.target useTransaction:self.useTransaction synchronized:self.isSync];
     }
     else if (self.operation == CDeleteAll) {
-        return [((FMDatabase *)_db) jr_deleteAllRecursively:self.targetClazz useTransaction:self.useTransaction synchronized:self.isSync];
+        return [_db jr_deleteAllRecursively:self.targetClazz useTransaction:self.useTransaction synchronized:self.isSync];
     }
     else {
         NSAssert(NO, @"%s :%@", __FUNCTION__, @"chain operation should be Inset or Update or Delete or DeleteAll");

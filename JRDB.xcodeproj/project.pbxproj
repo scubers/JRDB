@@ -32,7 +32,6 @@
 		5ACBEED61CE1B3A500371E01 /* JRDBUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 5ACBEED51CE1B3A500371E01 /* JRDBUITests.m */; };
 		5ACBEEE61CE1B65700371E01 /* JRDBMgr.m in Sources */ = {isa = PBXBuildFile; fileRef = 5ACBEEE51CE1B65700371E01 /* JRDBMgr.m */; };
 		5ACBEEEB1CE1B91F00371E01 /* JRSqlGenerator.m in Sources */ = {isa = PBXBuildFile; fileRef = 5ACBEEEA1CE1B91F00371E01 /* JRSqlGenerator.m */; };
-		5AD17B311D3346E000F2B669 /* FMDatabase+Chain.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AD17B301D3346E000F2B669 /* FMDatabase+Chain.m */; };
 		5AD17B341D3354BC00F2B669 /* JRDBChain.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AD17B331D3354BC00F2B669 /* JRDBChain.m */; };
 		5AD63F211CE1BE540044ACE6 /* JRReflectUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AD63F201CE1BE540044ACE6 /* JRReflectUtil.m */; };
 		5AD63F241CE1C2480044ACE6 /* Person.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AD63F231CE1C2480044ACE6 /* Person.m */; };
@@ -110,8 +109,6 @@
 		5ACBEEE81CE1B8B800371E01 /* JRPersistent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRPersistent.h; sourceTree = "<group>"; };
 		5ACBEEE91CE1B91F00371E01 /* JRSqlGenerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRSqlGenerator.h; sourceTree = "<group>"; };
 		5ACBEEEA1CE1B91F00371E01 /* JRSqlGenerator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRSqlGenerator.m; sourceTree = "<group>"; };
-		5AD17B2F1D3346E000F2B669 /* FMDatabase+Chain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "FMDatabase+Chain.h"; sourceTree = "<group>"; };
-		5AD17B301D3346E000F2B669 /* FMDatabase+Chain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "FMDatabase+Chain.m"; sourceTree = "<group>"; };
 		5AD17B321D3354BC00F2B669 /* JRDBChain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRDBChain.h; sourceTree = "<group>"; };
 		5AD17B331D3354BC00F2B669 /* JRDBChain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRDBChain.m; sourceTree = "<group>"; };
 		5AD63F1F1CE1BE540044ACE6 /* JRReflectUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRReflectUtil.h; sourceTree = "<group>"; };
@@ -279,8 +276,6 @@
 				09822BB31DBEF58600662F49 /* JRPersistentHandler.h */,
 				09822BB41DBF00D400662F49 /* FMDatabase+JRPersistentHandler.h */,
 				09822BB51DBF00D400662F49 /* FMDatabase+JRPersistentHandler.m */,
-				5AD17B2F1D3346E000F2B669 /* FMDatabase+Chain.h */,
-				5AD17B301D3346E000F2B669 /* FMDatabase+Chain.m */,
 				5AD17B321D3354BC00F2B669 /* JRDBChain.h */,
 				5AD17B331D3354BC00F2B669 /* JRDBChain.m */,
 				5AA5B3DC1CE2D46900360DC0 /* JRFMDBResultSetHandler.h */,
@@ -540,7 +535,6 @@
 				5ACBEEB81CE1B3A500371E01 /* ViewController.m in Sources */,
 				5AD63F241CE1C2480044ACE6 /* Person.m in Sources */,
 				5ACBEEB51CE1B3A500371E01 /* AppDelegate.m in Sources */,
-				5AD17B311D3346E000F2B669 /* FMDatabase+Chain.m in Sources */,
 				5AA5B3DE1CE2D46900360DC0 /* JRFMDBResultSetHandler.m in Sources */,
 				A8ED7A521D01CCA3009ED474 /* JRUtils.m in Sources */,
 				5ACBEEB21CE1B3A500371E01 /* main.m in Sources */,

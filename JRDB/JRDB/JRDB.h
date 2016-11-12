@@ -24,7 +24,6 @@
 #import "JRUtils.h"
 #import "JRMiddleTable.h"
 #import "JRDBChain.h"
-#import "FMDatabase+Chain.h"
 #import "JRActivatedProperty.h"
 #import "NSObject+JRDB.h"
 

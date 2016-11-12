@@ -139,7 +139,7 @@ typedef struct {
 
 
 @property (nonatomic, strong, readonly, nonnull ) id<JRPersistentHandler> db;
-@property (nonatomic, copy, readonly, nonnull   ) JRObjectBlockDefine(T, InDB);///< the database : parameter is id<JRPersistentHandler>: InDB(db)
+@property (nonatomic, copy, readonly, nonnull   ) JRObjectBlockDefine(T, InDB);///< the database : parameter is id<JRPersistentBaseHandler>: InDB(db)
 
 
 @property (nonatomic, strong, readonly, nullable) NSString          *orderBy;

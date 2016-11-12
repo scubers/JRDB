@@ -1,5 +1,5 @@
 //
-//  FMDatabase+JRPersistentHandler.m
+//  FMDatabase+JRPersistentBaseHandler.m
 //  JRDB
 //
 //  Created by J on 2016/10/25.
@@ -17,18 +17,28 @@
 
 #define AssertRegisteredClazz(clazz) NSAssert([clazz isRegistered], @"class: %@ should be registered in JRDBMgr", clazz)
 
-@implementation FMDatabase (JRPersistentHandler)
+#pragma mark - JRPersistentBaseHandler
 
-#pragma mark - base operation
+@implementation FMDatabase (JRPersistentBaseHandler)
+
+- (id<JRPersistentOperationsHandler>)jr_getOperationHandler {
+    return self;
+}
+
+- (id<JRPersistentRecursiveOperationsHandler>)jr_getRecursiveOperationHandler {
+    return self;
+}
+
+#pragma mark  base operation
 
 - (BOOL)jr_openSynchronized:(BOOL)synchronized {
-    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentHandler> _Nonnull handler) {
+    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentBaseHandler> _Nonnull handler) {
         return @([((FMDatabase *)handler) open]);
     }] boolValue];
 }
 
 - (BOOL)jr_closeSynchronized:(BOOL)synchronized {
-    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentHandler> _Nonnull handler) {
+    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentBaseHandler> _Nonnull handler) {
         return @([((FMDatabase *)handler) close]);
     }] boolValue];
 }
@@ -37,14 +47,14 @@
     return self.databasePath;
 }
 
-- (void)jr_inQueue:(void (^)(id<JRPersistentHandler> _Nonnull))block {
+- (void)jr_inQueue:(void (^)(id<JRPersistentBaseHandler> _Nonnull))block {
     dispatch_queue_t queue = [[JRQueueMgr shared] queueWithIdentifier:self.handlerIdentifier];
     dispatch_sync(queue, ^{
         block(self);
     });
 }
 
-- (BOOL)jr_inTransaction:(void (^)(id<JRPersistentHandler> _Nonnull, BOOL * _Nonnull))block {
+- (BOOL)jr_inTransaction:(void (^)(id<JRPersistentBaseHandler> _Nonnull, BOOL * _Nonnull))block {
     BOOL rollback = ![self beginTransaction];
     if (rollback) {
         NSLog(@"begin transaction fail");
@@ -62,7 +72,7 @@
     return !rollback;
 }
 
-- (BOOL)jr_executeUseTransaction:(BOOL)useTransaction block:(BOOL (^)(id<JRPersistentHandler> _Nonnull))block {
+- (BOOL)jr_executeUseTransaction:(BOOL)useTransaction block:(BOOL (^)(id<JRPersistentBaseHandler> _Nonnull))block {
     if (useTransaction) {
         if ([self inTransaction]) {
             NSLog(@"operation has open a transaction already, will not open again");
@@ -85,10 +95,10 @@
     return flag;
 }
 
-- (id)jr_executeSync:(BOOL)sync block:(id  _Nullable (^)(id<JRPersistentHandler> _Nonnull))block {
+- (id)jr_executeSync:(BOOL)sync block:(id  _Nullable (^)(id<JRPersistentBaseHandler> _Nonnull))block {
     if (sync && ![[JRQueueMgr shared] isInCurrentQueue:self.handlerIdentifier]) {
         __block id result;
-        [self jr_inQueue:^(id<JRPersistentHandler>  _Nonnull handler) {
+        [self jr_inQueue:^(id<JRPersistentBaseHandler>  _Nonnull handler) {
             result = block(handler);
         }];
         return result;
@@ -105,8 +115,13 @@
     return [self executeQuery:sql.sqlString withArgumentsInArray:sql.args];
 }
 
-#pragma mark - table operation
+@end
 
+#pragma mark - JRPersistentOperationsHandler
+
+@implementation FMDatabase (JRPersistentOperationsHandler)
+
+#pragma mark  table operation
 
 /**
  *  建表操作
@@ -115,7 +130,7 @@
  */
 - (BOOL)jr_createTable4Clazz:(Class<JRPersistent> _Nonnull)clazz synchronized:(BOOL)synchronized {
     AssertRegisteredClazz(clazz);
-    return [self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentHandler>  _Nonnull handler) {
+    return [self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentBaseHandler>  _Nonnull handler) {
         return @([handler jr_executeUpdate:[JRSqlGenerator createTableSql4Clazz:clazz table:nil]]);
     }];
 }
@@ -130,10 +145,10 @@
  */
 - (BOOL)jr_truncateTable4Clazz:(Class<JRPersistent> _Nonnull)clazz synchronized:(BOOL)synchronized {
     AssertRegisteredClazz(clazz);
-    return [self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentHandler>  _Nonnull handler) {
+    return [self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentBaseHandler>  _Nonnull handler) {
         BOOL flag = [handler jr_executeUpdate:[JRSqlGenerator dropTableSql4Clazz:clazz table:nil]];
         if (!flag) return @(flag);
-        return @([handler jr_createTable4Clazz:clazz synchronized:synchronized]);
+        return @([[handler jr_getOperationHandler] jr_createTable4Clazz:clazz synchronized:synchronized]);
         
     }];
 }
@@ -146,7 +161,7 @@
  */
 - (BOOL)jr_updateTable4Clazz:(Class<JRPersistent> _Nonnull)clazz synchronized:(BOOL)synchronized {
     AssertRegisteredClazz(clazz);
-    return [self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentHandler>  _Nonnull handler) {
+    return [self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentBaseHandler>  _Nonnull handler) {
         NSArray *sqls = [JRSqlGenerator updateTableSql4Clazz:clazz inDB:(FMDatabase *)handler table:nil];
         BOOL flag = YES;
         for (JRSql *sql in sqls) {
@@ -166,7 +181,7 @@
  */
 - (BOOL)jr_dropTable4Clazz:(Class<JRPersistent> _Nonnull)clazz synchronized:(BOOL)synchronized {
     AssertRegisteredClazz(clazz);
-    return [self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentHandler>  _Nonnull handler) {
+    return [self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentBaseHandler>  _Nonnull handler) {
         return @([self jr_executeUpdate:[JRSqlGenerator dropTableSql4Clazz:clazz table:nil]]);
     }];
 }
@@ -182,7 +197,7 @@
     return [self tableExists:[clazz shortClazzName]];
 }
 
-#pragma mark - save
+#pragma mark save
 
 
 /**
@@ -192,10 +207,10 @@
  */
 - (BOOL)jr_saveOne:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized {
     AssertRegisteredClazz([one class]);
-    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentHandler>  _Nonnull handler) {
-        return @([handler jr_executeUseTransaction:useTransaction block:^BOOL(id<JRPersistentHandler>  _Nonnull handler) {
-            if (![handler jr_checkExistsTable4Clazz:[one class] synchronized:synchronized]) {
-                BOOL result = [handler jr_createTable4Clazz:[one class] synchronized:synchronized];
+    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentBaseHandler>  _Nonnull handler) {
+        return @([handler jr_executeUseTransaction:useTransaction block:^BOOL(id<JRPersistentBaseHandler>  _Nonnull handler) {
+            if (![[handler jr_getOperationHandler] jr_checkExistsTable4Clazz:[one class] synchronized:synchronized]) {
+                BOOL result = [[handler jr_getOperationHandler] jr_createTable4Clazz:[one class] synchronized:synchronized];
                 if (!result) {
                     NSLog(@"create table error");
                     return NO;
@@ -204,7 +219,7 @@
             
             if ([[one class] jr_customPrimarykey]) { // 自定义主键
                 NSAssert([one jr_customPrimarykeyValue] != nil, @"custom Primary key should not be nil");
-                long count = [handler jr_count4PrimaryKey:[one jr_customPrimarykeyValue] clazz:[one class] synchronized:synchronized];
+                long count = [[handler jr_getOperationHandler] jr_count4PrimaryKey:[one jr_customPrimarykeyValue] clazz:[one class] synchronized:synchronized];
                 if (count) {
                     NSLog(@"warning: save error, primary key is exists");
                     return NO;
@@ -236,11 +251,11 @@
  *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
  */
 - (BOOL)jr_saveObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized {
-    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentHandler>  _Nonnull handler) {
-        return @([handler jr_executeUseTransaction:useTransaction block:^BOOL(id<JRPersistentHandler>  _Nonnull handler) {
+    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentBaseHandler>  _Nonnull handler) {
+        return @([handler jr_executeUseTransaction:useTransaction block:^BOOL(id<JRPersistentBaseHandler>  _Nonnull handler) {
             __block BOOL needRollback = NO;
             [objects enumerateObjectsUsingBlock:^(id<JRPersistent>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                needRollback = ![handler jr_saveOne:obj useTransaction:useTransaction synchronized:synchronized];
+                needRollback = ![[handler jr_getOperationHandler] jr_saveOne:obj useTransaction:useTransaction synchronized:synchronized];
                 *stop = needRollback;
             }];
             return !needRollback;
@@ -249,7 +264,7 @@
 }
 
 
-#pragma mark - update
+#pragma mark update
 
 
 /**
@@ -262,10 +277,10 @@
     AssertRegisteredClazz([one class]);
     NSAssert([one jr_primaryKeyValue], @"The obj to be updated should hold a primary key");
     
-    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentHandler>  _Nonnull handler) {
-        return @([handler jr_executeUseTransaction:useTransaction block:^BOOL(id<JRPersistentHandler>  _Nonnull handler) {
+    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentBaseHandler>  _Nonnull handler) {
+        return @([handler jr_executeUseTransaction:useTransaction block:^BOOL(id<JRPersistentBaseHandler>  _Nonnull handler) {
             // 表不存在
-            if (![handler jr_checkExistsTable4Clazz:[one class] synchronized:synchronized]) {
+            if (![[handler jr_getOperationHandler] jr_checkExistsTable4Clazz:[one class] synchronized:synchronized]) {
                 NSLog(@"table : %@ doesn't exists", [one class]);
                 return NO;
             }
@@ -314,11 +329,11 @@
  *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
  */
 - (BOOL)jr_updateObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects columns:(NSArray<NSString *> * _Nullable)columns useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized {
-    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentHandler>  _Nonnull handler) {
-        return @([handler jr_executeUseTransaction:useTransaction block:^BOOL(id<JRPersistentHandler>  _Nonnull handler) {
+    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentBaseHandler>  _Nonnull handler) {
+        return @([handler jr_executeUseTransaction:useTransaction block:^BOOL(id<JRPersistentBaseHandler>  _Nonnull handler) {
             __block BOOL needRollback;
             [objects enumerateObjectsUsingBlock:^(id<JRPersistent>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                needRollback = ![handler jr_updateOne:obj columns:columns useTransaction:useTransaction synchronized:synchronized];
+                needRollback = ![[handler jr_getOperationHandler] jr_updateOne:obj columns:columns useTransaction:useTransaction synchronized:synchronized];
                 *stop = needRollback;
             }];
             return !needRollback;
@@ -326,7 +341,7 @@
     }] boolValue];
 }
 
-#pragma mark - delete
+#pragma mark delete
 
 
 /**
@@ -340,9 +355,9 @@
     AssertRegisteredClazz([one class]);
     NSAssert([one jr_primaryKeyValue], @"primary key should not be nil");
     
-    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentHandler>  _Nonnull handler) {
-        return @([handler jr_executeUseTransaction:useTransaction block:^BOOL(id<JRPersistentHandler>  _Nonnull handler) {
-            if (![handler jr_checkExistsTable4Clazz:[one class] synchronized:synchronized]) {
+    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentBaseHandler>  _Nonnull handler) {
+        return @([handler jr_executeUseTransaction:useTransaction block:^BOOL(id<JRPersistentBaseHandler>  _Nonnull handler) {
+            if (![[handler jr_getOperationHandler] jr_checkExistsTable4Clazz:[one class] synchronized:synchronized]) {
                 NSLog(@"table : %@ doesn't exists", [one class]);
                 return NO;
             }
@@ -368,11 +383,11 @@
  *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
  */
 - (BOOL)jr_deleteObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized {
-    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentHandler>  _Nonnull handler) {
-        return @([handler jr_executeUseTransaction:useTransaction block:^BOOL(id<JRPersistentHandler>  _Nonnull handler) {
+    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentBaseHandler>  _Nonnull handler) {
+        return @([handler jr_executeUseTransaction:useTransaction block:^BOOL(id<JRPersistentBaseHandler>  _Nonnull handler) {
             __block BOOL needRollback;
             [objects enumerateObjectsUsingBlock:^(id<JRPersistent>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                needRollback = ![handler jr_deleteOne:obj useTransaction:useTransaction synchronized:synchronized];
+                needRollback = ![[handler jr_getOperationHandler] jr_deleteOne:obj useTransaction:useTransaction synchronized:synchronized];
                 *stop = needRollback;
             }];
             return !needRollback;
@@ -380,22 +395,22 @@
     }] boolValue];
 }
 
-#pragma mark - delete all
+#pragma mark delete all
 
 - (BOOL)jr_deleteAll:(Class<JRPersistent> _Nonnull)clazz useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized {
-    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentHandler>  _Nonnull handler) {
-        return @([handler jr_executeUseTransaction:useTransaction block:^BOOL(id<JRPersistentHandler>  _Nonnull handler) {
+    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentBaseHandler>  _Nonnull handler) {
+        return @([handler jr_executeUseTransaction:useTransaction block:^BOOL(id<JRPersistentBaseHandler>  _Nonnull handler) {
             JRSql *sql = [JRSqlGenerator sql4DeleteAll:clazz table:nil];
             return [handler jr_executeUpdate:sql];
         }]);
     }] boolValue];
 }
 
-#pragma mark - save or update
+#pragma mark save or update
 
 - (BOOL)jr_saveOrUpdateOne:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized {
-    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentHandler>  _Nonnull handler) {
-        return @([handler jr_executeUseTransaction:useTransaction block:^BOOL(id<JRPersistentHandler>  _Nonnull handler) {
+    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentBaseHandler>  _Nonnull handler) {
+        return @([handler jr_executeUseTransaction:useTransaction block:^BOOL(id<JRPersistentBaseHandler>  _Nonnull handler) {
             BOOL isSave = YES;
             if ([[one class] jr_customPrimarykey]) { // 自定义主键
                 NSAssert([one jr_customPrimarykeyValue] != nil, @"custom Primary key should not be nil");
@@ -415,11 +430,11 @@
 }
 
 - (BOOL)jr_saveOrUpdateObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized {
-    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentHandler>  _Nonnull handler) {
-        return @([handler jr_executeUseTransaction:useTransaction block:^BOOL(id<JRPersistentHandler>  _Nonnull handler) {
+    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentBaseHandler>  _Nonnull handler) {
+        return @([handler jr_executeUseTransaction:useTransaction block:^BOOL(id<JRPersistentBaseHandler>  _Nonnull handler) {
             __block BOOL needRollback;
             [objects enumerateObjectsUsingBlock:^(id<JRPersistent>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                needRollback = ![handler jr_saveOrUpdateOne:obj useTransaction:useTransaction synchronized:synchronized];
+                needRollback = ![[handler jr_getOperationHandler] jr_saveOrUpdateOne:obj useTransaction:useTransaction synchronized:synchronized];
                 *stop = needRollback;
             }];
             return !needRollback;
@@ -427,10 +442,10 @@
     }] boolValue];
 }
 
-#pragma mark - query
+#pragma mark query
 
 - (NSArray<id<JRPersistent>> * _Nonnull)jr_getByJRSql:(JRSql * _Nonnull)sql sync:(BOOL)sync resultClazz:(Class<JRPersistent> _Nonnull)clazz columns:(NSArray * _Nullable)columns {
-    return [self jr_executeSync:sync block:^id _Nullable(id<JRPersistentHandler>  _Nonnull handler) {
+    return [self jr_executeSync:sync block:^id _Nullable(id<JRPersistentBaseHandler>  _Nonnull handler) {
         FMResultSet *restultSet = [handler jr_executeQuery:sql];
         NSArray *array = [JRFMDBResultSetHandler handleResultSet:restultSet forClazz:clazz columns:columns];
         return [array copy];
@@ -447,14 +462,14 @@
 - (id<JRPersistent> _Nullable)jr_getByID:(NSString * _Nonnull)ID clazz:(Class<JRPersistent> _Nonnull)clazz synchronized:(BOOL)synchronized {
     AssertRegisteredClazz(clazz);
     NSAssert(ID, @"id should not be nil");
-    return [self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentHandler>  _Nonnull handler) {
+    return [self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentBaseHandler>  _Nonnull handler) {
         JRSql *sql = [JRSqlGenerator sql4GetByIDWithClazz:clazz ID:ID table:nil];
-        return [[handler jr_getByJRSql:sql sync:synchronized resultClazz:clazz columns:nil] firstObject];
+        return [[[handler jr_getOperationHandler] jr_getByJRSql:sql sync:synchronized resultClazz:clazz columns:nil] firstObject];
     }];
     
 }
 
-#pragma mark - convenience method
+#pragma mark convenience method
 
 - (long)jr_count4PrimaryKey:(id)pk clazz:(Class<JRPersistent>)clazz synchronized:(BOOL)synchronized {
     AssertRegisteredClazz(clazz);
@@ -470,11 +485,14 @@
 
 @end
 
+/************************************************************/
+
 #pragma mark - 关联操作
 
-@implementation FMDatabase (JRPersistentHandlerRecurively)
+@implementation FMDatabase (JRPersistentRecursiveOperationsHandler)
 
-#pragma mark - link operation method
+#pragma mark  link operation method
+
 - (BOOL)jr_handleSave:(id<JRPersistent>)obj stack:(NSMutableArray<id<JRPersistent>> **)stack needRollBack:(BOOL *)needRollBack {
     
     if (*needRollBack) {
@@ -625,7 +643,7 @@
     return obj;
 }
 
-#pragma mark - save
+#pragma mark save
 
 /**
  *  关联保存保存one
@@ -634,8 +652,8 @@
  */
 - (BOOL)jr_saveOneRecursively:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized {
     
-    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentHandler>  _Nonnull handler) {
-        return @([handler jr_executeUseTransaction:useTransaction block:^BOOL(id<JRPersistentHandler>  _Nonnull handler) {
+    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentBaseHandler>  _Nonnull handler) {
+        return @([handler jr_executeUseTransaction:useTransaction block:^BOOL(id<JRPersistentBaseHandler>  _Nonnull handler) {
             
             NSMutableArray *stack = [NSMutableArray array];
             __block BOOL needRollBack = NO;
@@ -657,8 +675,8 @@
  *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
  */
 - (BOOL)jr_saveObjectsRecursively:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized {
-    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentHandler>  _Nonnull handler) {
-        return @([handler jr_executeUseTransaction:useTransaction block:^BOOL(id<JRPersistentHandler>  _Nonnull handler) {
+    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentBaseHandler>  _Nonnull handler) {
+        return @([handler jr_executeUseTransaction:useTransaction block:^BOOL(id<JRPersistentBaseHandler>  _Nonnull handler) {
             __block BOOL needRollback;
             [objects enumerateObjectsUsingBlock:^(id<JRPersistent>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                 needRollback = ![((FMDatabase *)handler) jr_saveOneRecursively:obj useTransaction:useTransaction synchronized:synchronized];
@@ -669,7 +687,7 @@
     }] boolValue];
 }
 
-#pragma mark - update
+#pragma mark update
 
 
 /**
@@ -680,10 +698,10 @@
  */
 - (BOOL)jr_updateOneRecursively:(id<JRPersistent> _Nonnull)one columns:(NSArray<NSString *> * _Nullable)columns useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized {
     
-    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentHandler>  _Nonnull handler) {
-        return @([handler jr_executeUseTransaction:useTransaction block:^BOOL(id<JRPersistentHandler>  _Nonnull handler) {
+    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentBaseHandler>  _Nonnull handler) {
+        return @([handler jr_executeUseTransaction:useTransaction block:^BOOL(id<JRPersistentBaseHandler>  _Nonnull handler) {
             
-            __block BOOL needRollBack = ![handler jr_updateOne:one columns:columns useTransaction:NO synchronized:synchronized];
+            __block BOOL needRollBack = ![[handler jr_getOperationHandler] jr_updateOne:one columns:columns useTransaction:NO synchronized:synchronized];
             
             // 检测一对一是否需要更新持有id
             if (!needRollBack) {
@@ -722,8 +740,8 @@
  *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
  */
 - (BOOL)jr_updateObjectsRecursively:(NSArray<id<JRPersistent>> * _Nonnull)objects columns:(NSArray<NSString *> * _Nullable)columns useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized {
-    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentHandler>  _Nonnull handler) {
-        return @([handler jr_executeUseTransaction:useTransaction block:^BOOL(id<JRPersistentHandler>  _Nonnull handler) {
+    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentBaseHandler>  _Nonnull handler) {
+        return @([handler jr_executeUseTransaction:useTransaction block:^BOOL(id<JRPersistentBaseHandler>  _Nonnull handler) {
             __block BOOL needRollback;
             [objects enumerateObjectsUsingBlock:^(id<JRPersistent>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                 needRollback = ![((FMDatabase *)handler) jr_updateOneRecursively:obj columns:columns useTransaction:useTransaction synchronized:synchronized];
@@ -735,7 +753,7 @@
 }
 
 
-#pragma mark - delete
+#pragma mark  delete
 
 /**
  *  删除one，可选择自带事务或者自行在外层包裹事务
@@ -745,8 +763,8 @@
  */
 - (BOOL)jr_deleteOneRecursively:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized{
     
-    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentHandler>  _Nonnull handler) {
-        return @([handler jr_executeUseTransaction:useTransaction block:^BOOL(id<JRPersistentHandler>  _Nonnull handler) {
+    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentBaseHandler>  _Nonnull handler) {
+        return @([handler jr_executeUseTransaction:useTransaction block:^BOOL(id<JRPersistentBaseHandler>  _Nonnull handler) {
             __block BOOL needRollBack = ![self jr_deleteOne:one useTransaction:NO synchronized:NO];
             if (!needRollBack) {
                 // 监测一对多的 中间表 删除
@@ -786,8 +804,8 @@
  *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
  */
 - (BOOL)jr_deleteObjectsRecursively:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized {
-    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentHandler>  _Nonnull handler) {
-        return @([handler jr_executeUseTransaction:useTransaction block:^BOOL(id<JRPersistentHandler>  _Nonnull handler) {
+    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentBaseHandler>  _Nonnull handler) {
+        return @([handler jr_executeUseTransaction:useTransaction block:^BOOL(id<JRPersistentBaseHandler>  _Nonnull handler) {
             __block BOOL needRollback;
             [objects enumerateObjectsUsingBlock:^(id<JRPersistent>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                 needRollback = ![((FMDatabase *)handler) jr_deleteOneRecursively:obj useTransaction:useTransaction synchronized:synchronized];
@@ -799,11 +817,11 @@
 }
 
 
-#pragma mark - delete all
+#pragma mark  delete all
 
 - (BOOL)jr_deleteAllRecursively:(Class<JRPersistent> _Nonnull)clazz useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized {
-    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentHandler>  _Nonnull handler) {
-        return @([handler jr_executeUseTransaction:useTransaction block:^BOOL(id<JRPersistentHandler>  _Nonnull handler) {
+    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentBaseHandler>  _Nonnull handler) {
+        return @([handler jr_executeUseTransaction:useTransaction block:^BOOL(id<JRPersistentBaseHandler>  _Nonnull handler) {
             JRSql *sql = [JRSqlGenerator sql4GetColumns:nil byConditions:nil clazz:clazz groupBy:nil orderBy:nil limit:nil isDesc:NO table:nil];
             NSArray *array = [((FMDatabase *)handler) jr_getByJRSql:sql sync:synchronized resultClazz:clazz columns:nil];
             return [((FMDatabase *)handler) jr_deleteObjectsRecursively:array useTransaction:useTransaction synchronized:synchronized];
@@ -811,11 +829,11 @@
     }] boolValue];
 }
 
-#pragma mark - save or update
+#pragma mark  save or update
 
 - (BOOL)jr_saveOrUpdateOneRecursively:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized {
-    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentHandler>  _Nonnull handler) {
-        return @([handler jr_executeUseTransaction:useTransaction block:^BOOL(id<JRPersistentHandler>  _Nonnull handler) {
+    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentBaseHandler>  _Nonnull handler) {
+        return @([handler jr_executeUseTransaction:useTransaction block:^BOOL(id<JRPersistentBaseHandler>  _Nonnull handler) {
             BOOL isSave = YES;
             if ([[one class] jr_customPrimarykey]) { // 自定义主键
                 NSAssert([one jr_customPrimarykeyValue] != nil, @"custom Primary key should not be nil");
@@ -833,8 +851,8 @@
 }
 
 - (BOOL)jr_saveOrUpdateObjectsRecursively:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized {
-    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentHandler>  _Nonnull handler) {
-        return @([handler jr_executeUseTransaction:useTransaction block:^BOOL(id<JRPersistentHandler>  _Nonnull handler) {
+    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentBaseHandler>  _Nonnull handler) {
+        return @([handler jr_executeUseTransaction:useTransaction block:^BOOL(id<JRPersistentBaseHandler>  _Nonnull handler) {
             __block BOOL needRollback;
             [objects enumerateObjectsUsingBlock:^(id<JRPersistent>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                 needRollback = ![((FMDatabase *)handler) jr_saveOrUpdateOneRecursively:obj useTransaction:useTransaction synchronized:synchronized];
@@ -845,13 +863,13 @@
     }] boolValue];
 }
 
-#pragma mark - query
+#pragma mark  query
 
 - (NSArray<id<JRPersistent>> * _Nonnull)jr_findByJRSql:(JRSql * _Nonnull)sql sync:(BOOL)sync resultClazz:(Class<JRPersistent> _Nonnull)clazz columns:(NSArray * _Nullable)columns {
     
-    return [self jr_executeSync:sync block:^id _Nullable(id<JRPersistentHandler>  _Nonnull handler) {
+    return [self jr_executeSync:sync block:^id _Nullable(id<JRPersistentBaseHandler>  _Nonnull handler) {
         
-        NSArray *array = [handler jr_getByJRSql:sql sync:sync resultClazz:clazz columns:columns];
+        NSArray *array = [[handler jr_getOperationHandler] jr_getByJRSql:sql sync:sync resultClazz:clazz columns:columns];
         
         if (!columns.count) {
             NSMutableArray *arr = [NSMutableArray array];
@@ -866,7 +884,7 @@
 }
 
 - (id<JRPersistent> _Nullable)jr_findByPrimaryKey:(id _Nonnull)primaryKey clazz:(Class<JRPersistent> _Nonnull)clazz synchronized:(BOOL)synchronized {
-    return [self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentHandler>  _Nonnull handler) {
+    return [self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentBaseHandler>  _Nonnull handler) {
         if (![self jr_checkExistsTable4Clazz:clazz synchronized:synchronized]) {
             NSLog(@"table %@ doesn't exists", clazz);
             return nil;
@@ -877,7 +895,7 @@
 }
 
 - (id<JRPersistent>)jr_findByID:(NSString *)ID clazz:(Class<JRPersistent>)clazz synchronized:(BOOL)synchronized {
-    return [self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentHandler>  _Nonnull handler) {
+    return [self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentBaseHandler>  _Nonnull handler) {
         
         NSMutableArray *array = [NSMutableArray array];
         NSObject<JRPersistent> *obj = [((FMDatabase *)handler) jr_handleSingleLinkFindByID:ID clazz:clazz stack:&array];

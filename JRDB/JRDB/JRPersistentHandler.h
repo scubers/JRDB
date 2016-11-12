@@ -9,13 +9,25 @@
 #ifndef JRPersistentHandler_h
 #define JRPersistentHandler_h
 
-//#import "JRSqlGenerator.h"
-
 #import "JRPersistent.h"
 
 @class JRSql;
 
-@protocol JRPersistentHandler <NSObject>
+@protocol
+JRPersistentBaseHandler,
+JRPersistentOperationsHandler,
+JRPersistentRecursiveOperationsHandler;
+
+
+
+/************************************************************************/
+
+@protocol JRPersistentBaseHandler <NSObject>
+
+@optional
+
+- (id<JRPersistentOperationsHandler> _Nonnull)jr_getOperationHandler;
+- (id<JRPersistentRecursiveOperationsHandler> _Nonnull)jr_getRecursiveOperationHandler;
 
 #pragma mark - base operation
 
@@ -32,14 +44,14 @@
 
  @param block 执行block
  */
-- (void)jr_inQueue:(void (^ _Nonnull)(id<JRPersistentHandler> _Nonnull handler))block;
+- (void)jr_inQueue:(void (^ _Nonnull)(id<JRPersistentBaseHandler> _Nonnull handler))block;
 
 /**
  事物回滚操作
 
  @param block 执行block
  */
-- (BOOL)jr_inTransaction:(void (^ _Nonnull)(id<JRPersistentHandler> _Nonnull handler, BOOL * _Nonnull rollBack))block;
+- (BOOL)jr_inTransaction:(void (^ _Nonnull)(id<JRPersistentBaseHandler> _Nonnull handler, BOOL * _Nonnull rollBack))block;
 
 
 /**
@@ -49,7 +61,7 @@
  @param block
  @param useTransaction 是否使用默认事务 NO:需要自己开启和提交事务
  */
-- (BOOL)jr_executeUseTransaction:(BOOL)useTransaction block:(BOOL (^ _Nonnull)(id<JRPersistentHandler> _Nonnull handler))block;
+- (BOOL)jr_executeUseTransaction:(BOOL)useTransaction block:(BOOL (^ _Nonnull)(id<JRPersistentBaseHandler> _Nonnull handler))block;
 
 /**
  任务是否同步执行
@@ -58,7 +70,7 @@
  @param block
 
  */
-- (id _Nullable)jr_executeSync:(BOOL)sync block:(id _Nullable (^ _Nonnull)(id<JRPersistentHandler> _Nonnull handler))block;
+- (id _Nullable)jr_executeSync:(BOOL)sync block:(id _Nullable (^ _Nonnull)(id<JRPersistentBaseHandler> _Nonnull handler))block;
 
 /**
  执行sql 更新
@@ -74,6 +86,14 @@
  */
 - (id _Nonnull)jr_executeQuery:(JRSql * _Nonnull)sql;
 
+@end
+
+
+/*******************************************************/
+
+@protocol JRPersistentOperationsHandler <NSObject>
+
+@required
 
 #pragma mark - table operation
 
@@ -205,11 +225,99 @@
 
 - (id<JRPersistent> _Nullable)jr_getByID:(NSString * _Nonnull)ID clazz:(Class<JRPersistent> _Nonnull)clazz synchronized:(BOOL)synchronized;
 
-
-
 #pragma mark - convenience method
 
 - (long)jr_count4PrimaryKey:(id _Nonnull)pk clazz:(Class<JRPersistent> _Nonnull)clazz synchronized:(BOOL)synchronized;
+
+
+@end
+
+/******************************************************************************/
+
+@protocol JRPersistentRecursiveOperationsHandler <NSObject>
+
+@required
+
+#pragma mark - save
+
+/**
+ *  关联保存保存one
+ *
+ *  @param one
+ */
+- (BOOL)jr_saveOneRecursively:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized;
+
+/**
+ *  保存数组
+ *
+ *  @param objects
+ *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
+ */
+- (BOOL)jr_saveObjectsRecursively:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized;
+#pragma mark - update
+
+
+/**
+ *  更新one
+ *
+ *  @param one
+ *  @param columns 需要更新的字段
+ */
+- (BOOL)jr_updateOneRecursively:(id<JRPersistent> _Nonnull)one columns:(NSArray<NSString *> * _Nullable)columns useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized;
+
+
+/**
+ *  更新array
+ *
+ *  @param objects
+ *  @param columns 需要更新的字段
+ *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
+ */
+- (BOOL)jr_updateObjectsRecursively:(NSArray<id<JRPersistent>> * _Nonnull)objects columns:(NSArray<NSString *> * _Nullable)columns useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized;
+
+
+#pragma mark - delete
+
+/**
+ *  删除one，可选择自带事务或者自行在外层包裹事务
+ *
+ *  @param one
+ *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
+ */
+- (BOOL)jr_deleteOneRecursively:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized;
+
+/**
+ *  删除array，可选择自带事务或者自行在外层包裹事务
+ *
+ *  @param objects
+ *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
+ */
+- (BOOL)jr_deleteObjectsRecursively:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized;
+
+#pragma mark - delete all
+
+- (BOOL)jr_deleteAllRecursively:(Class<JRPersistent> _Nonnull)clazz useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized;
+
+
+#pragma mark - save or update
+
+- (BOOL)jr_saveOrUpdateOneRecursively:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized;
+
+- (BOOL)jr_saveOrUpdateObjectsRecursively:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized;
+
+
+#pragma mark - query
+
+- (NSArray<id<JRPersistent>> * _Nonnull)jr_findByJRSql:(JRSql * _Nonnull)sql sync:(BOOL)sync resultClazz:(Class<JRPersistent> _Nonnull)clazz columns:(NSArray * _Nullable)columns;
+
+- (id<JRPersistent> _Nullable)jr_findByPrimaryKey:(id _Nonnull)primaryKey clazz:(Class<JRPersistent> _Nonnull)clazz synchronized:(BOOL)synchronized;
+
+- (id<JRPersistent> _Nullable)jr_findByID:(NSString * _Nonnull)ID clazz:(Class<JRPersistent> _Nonnull)clazz synchronized:(BOOL)synchronized;
+
+@end
+
+
+@protocol JRPersistentHandler <JRPersistentBaseHandler, JRPersistentOperationsHandler, JRPersistentRecursiveOperationsHandler>
 
 @end
 
