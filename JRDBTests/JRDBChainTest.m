@@ -45,7 +45,7 @@
 
 #pragma mark - table
 
-#ifdef bbb
+#ifndef bbb
 - (void)testAAAAACreateTable {
     BOOL a = J_CreateTable(Person);
     NSAssert(a, @"~~ error: %s", __FUNCTION__);

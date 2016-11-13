@@ -122,7 +122,7 @@ static JRDBMgr *__shareInstance;
     return _defaultDB;
 }
 
-- (void)setDefaultDB:(FMDatabase *)defaultDB {
+- (void)setDefaultDB:(id<JRPersistentHandler>)defaultDB {
     if (_defaultDB == defaultDB) {
         return;
     }
@@ -138,15 +138,15 @@ static JRDBMgr *__shareInstance;
     return _dbs;
 }
 
-- (void)clearMidTableRubbishDataForDB:(FMDatabase *)db {
+- (void)clearMidTableRubbishDataForDB:(id<JRPersistentHandler>)db {
     
     [_clazzArray enumerateObjectsUsingBlock:^(Class<JRPersistent>  _Nonnull clazz, NSUInteger idx, BOOL * _Nonnull stop) {
         
         if (idx == _clazzArray.count - 1) { return ; }
         
         for (NSUInteger i = idx + 1; i < _clazzArray.count; i++) {
-            JRMiddleTable *mid = [JRMiddleTable table4Clazz:clazz andClazz:_clazzArray[i] db:db];
-            if ([db tableExists:[mid tableName]]) {
+            JRMiddleTable *mid = [JRMiddleTable table4Clazz:clazz andClazz:_clazzArray[i] db:((FMDatabase *)db)];
+            if ([((FMDatabase *)db) tableExists:[mid tableName]]) {
                 [mid cleanRubbishData];
             }
         }

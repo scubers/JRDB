@@ -9,4 +9,5 @@ target:JRDB do
 end
 
 target:JRDBTests do
+    pod 'Kiwi', '~> 2.4.0'
 end

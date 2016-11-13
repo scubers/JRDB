@@ -10,10 +10,8 @@
 		093FBC6D1D658D04002667CD /* JRDBResult.m in Sources */ = {isa = PBXBuildFile; fileRef = 093FBC6C1D658D04002667CD /* JRDBResult.m */; };
 		09822BB61DBF00D400662F49 /* FMDatabase+JRPersistentHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 09822BB51DBF00D400662F49 /* FMDatabase+JRPersistentHandler.m */; };
 		09822BB71DBF00D400662F49 /* FMDatabase+JRPersistentHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 09822BB51DBF00D400662F49 /* FMDatabase+JRPersistentHandler.m */; };
-		09822BB81DBF00D400662F49 /* FMDatabase+JRPersistentHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 09822BB51DBF00D400662F49 /* FMDatabase+JRPersistentHandler.m */; };
 		09822BBB1DBF045F00662F49 /* JRQueueMgr.m in Sources */ = {isa = PBXBuildFile; fileRef = 09822BBA1DBF045F00662F49 /* JRQueueMgr.m */; };
 		09822BBC1DBF045F00662F49 /* JRQueueMgr.m in Sources */ = {isa = PBXBuildFile; fileRef = 09822BBA1DBF045F00662F49 /* JRQueueMgr.m */; };
-		09822BBD1DBF045F00662F49 /* JRQueueMgr.m in Sources */ = {isa = PBXBuildFile; fileRef = 09822BBA1DBF045F00662F49 /* JRQueueMgr.m */; };
 		09943EB51D630FB000C7164D /* JRDBMgrContextTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 09943EB41D630FB000C7164D /* JRDBMgrContextTests.m */; };
 		5A7AED821D05294B000AD4FE /* JRMiddleTable.m in Sources */ = {isa = PBXBuildFile; fileRef = 5A7AED811D05294B000AD4FE /* JRMiddleTable.m */; };
 		5AA3DB331D067DD800795E80 /* JRDBTestJRDBMgr.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AA3DB321D067DD800795E80 /* JRDBTestJRDBMgr.m */; };
@@ -28,7 +26,6 @@
 		5ACBEEBD1CE1B3A500371E01 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5ACBEEBC1CE1B3A500371E01 /* Assets.xcassets */; };
 		5ACBEEC01CE1B3A500371E01 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5ACBEEBE1CE1B3A500371E01 /* LaunchScreen.storyboard */; };
 		5ACBEECB1CE1B3A500371E01 /* JRDBTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 5ACBEECA1CE1B3A500371E01 /* JRDBTests.m */; };
-		5ACBEED61CE1B3A500371E01 /* JRDBUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 5ACBEED51CE1B3A500371E01 /* JRDBUITests.m */; };
 		5ACBEEE61CE1B65700371E01 /* JRDBMgr.m in Sources */ = {isa = PBXBuildFile; fileRef = 5ACBEEE51CE1B65700371E01 /* JRDBMgr.m */; };
 		5ACBEEEB1CE1B91F00371E01 /* JRSqlGenerator.m in Sources */ = {isa = PBXBuildFile; fileRef = 5ACBEEEA1CE1B91F00371E01 /* JRSqlGenerator.m */; };
 		5AD17B341D3354BC00F2B669 /* JRDBChain.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AD17B331D3354BC00F2B669 /* JRDBChain.m */; };
@@ -38,6 +35,7 @@
 		5AE115421D364ED400886657 /* JRDBChainTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AE115411D364ED400886657 /* JRDBChainTest.m */; };
 		72357FC93EB5C7D59A18076F /* libPods-JRDBTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2CE99294CEA1A2C1C484D937 /* libPods-JRDBTests.a */; };
 		A80015F71D0EEC29000EA41A /* JRActivatedProperty.m in Sources */ = {isa = PBXBuildFile; fileRef = A80015F61D0EEC29000EA41A /* JRActivatedProperty.m */; };
+		A822B2F81DD8505B00A07ED4 /* JRDBTestByKiwi.m in Sources */ = {isa = PBXBuildFile; fileRef = A822B2F71DD8505B00A07ED4 /* JRDBTestByKiwi.m */; };
 		A876AB9ABC8BE60FC4881BA5 /* libPods-JRDB.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 632830974E0244C0E00157B4 /* libPods-JRDB.a */; };
 		A8A1B2251D033C8C00886403 /* NSObject+Reflect.m in Sources */ = {isa = PBXBuildFile; fileRef = A8A1B2241D033C8C00886403 /* NSObject+Reflect.m */; };
 		A8A1B2281D033CDC00886403 /* OBJCProperty.m in Sources */ = {isa = PBXBuildFile; fileRef = A8A1B2271D033CDC00886403 /* OBJCProperty.m */; };
@@ -46,13 +44,6 @@
 
 /* Begin PBXContainerItemProxy section */
 		5ACBEEC71CE1B3A500371E01 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 5ACBEEA51CE1B3A500371E01 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 5ACBEEAC1CE1B3A500371E01;
-			remoteInfo = JRDB;
-		};
-		5ACBEED21CE1B3A500371E01 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 5ACBEEA51CE1B3A500371E01 /* Project object */;
 			proxyType = 1;
@@ -97,9 +88,6 @@
 		5ACBEEC61CE1B3A500371E01 /* JRDBTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JRDBTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5ACBEECA1CE1B3A500371E01 /* JRDBTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JRDBTests.m; sourceTree = "<group>"; };
 		5ACBEECC1CE1B3A500371E01 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		5ACBEED11CE1B3A500371E01 /* JRDBUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JRDBUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		5ACBEED51CE1B3A500371E01 /* JRDBUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JRDBUITests.m; sourceTree = "<group>"; };
-		5ACBEED71CE1B3A500371E01 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		5ACBEEE41CE1B65700371E01 /* JRDBMgr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRDBMgr.h; sourceTree = "<group>"; };
 		5ACBEEE51CE1B65700371E01 /* JRDBMgr.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRDBMgr.m; sourceTree = "<group>"; };
 		5ACBEEE81CE1B8B800371E01 /* JRPersistent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRPersistent.h; sourceTree = "<group>"; };
@@ -118,6 +106,7 @@
 		939D01E04EAA2344216A9878 /* Pods-JRDBTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-JRDBTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-JRDBTests/Pods-JRDBTests.release.xcconfig"; sourceTree = "<group>"; };
 		A80015F51D0EEC29000EA41A /* JRActivatedProperty.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRActivatedProperty.h; sourceTree = "<group>"; };
 		A80015F61D0EEC29000EA41A /* JRActivatedProperty.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRActivatedProperty.m; sourceTree = "<group>"; };
+		A822B2F71DD8505B00A07ED4 /* JRDBTestByKiwi.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRDBTestByKiwi.m; sourceTree = "<group>"; };
 		A8A1B2231D033C8C00886403 /* NSObject+Reflect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+Reflect.h"; sourceTree = "<group>"; };
 		A8A1B2241D033C8C00886403 /* NSObject+Reflect.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+Reflect.m"; sourceTree = "<group>"; };
 		A8A1B2261D033CDC00886403 /* OBJCProperty.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OBJCProperty.h; sourceTree = "<group>"; };
@@ -143,13 +132,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				72357FC93EB5C7D59A18076F /* libPods-JRDBTests.a in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		5ACBEECE1CE1B3A500371E01 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -181,7 +163,6 @@
 			children = (
 				5ACBEEAF1CE1B3A500371E01 /* JRDB */,
 				5ACBEEC91CE1B3A500371E01 /* JRDBTests */,
-				5ACBEED41CE1B3A500371E01 /* JRDBUITests */,
 				5ACBEEAE1CE1B3A500371E01 /* Products */,
 				28532896B31528612AD6CBEE /* Pods */,
 				073414814C1B4FCC2015ECDC /* Frameworks */,
@@ -193,7 +174,6 @@
 			children = (
 				5ACBEEAD1CE1B3A500371E01 /* JRDB.app */,
 				5ACBEEC61CE1B3A500371E01 /* JRDBTests.xctest */,
-				5ACBEED11CE1B3A500371E01 /* JRDBUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -231,21 +211,13 @@
 			isa = PBXGroup;
 			children = (
 				5AE115411D364ED400886657 /* JRDBChainTest.m */,
+				A822B2F71DD8505B00A07ED4 /* JRDBTestByKiwi.m */,
 				5ACBEECA1CE1B3A500371E01 /* JRDBTests.m */,
 				5AA3DB321D067DD800795E80 /* JRDBTestJRDBMgr.m */,
 				5ACBEECC1CE1B3A500371E01 /* Info.plist */,
 				09943EB41D630FB000C7164D /* JRDBMgrContextTests.m */,
 			);
 			path = JRDBTests;
-			sourceTree = "<group>";
-		};
-		5ACBEED41CE1B3A500371E01 /* JRDBUITests */ = {
-			isa = PBXGroup;
-			children = (
-				5ACBEED51CE1B3A500371E01 /* JRDBUITests.m */,
-				5ACBEED71CE1B3A500371E01 /* Info.plist */,
-			);
-			path = JRDBUITests;
 			sourceTree = "<group>";
 		};
 		5ACBEEE31CE1B3BC00371E01 /* JRDB */ = {
@@ -335,24 +307,6 @@
 			productReference = 5ACBEEC61CE1B3A500371E01 /* JRDBTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		5ACBEED01CE1B3A500371E01 /* JRDBUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 5ACBEEE01CE1B3A500371E01 /* Build configuration list for PBXNativeTarget "JRDBUITests" */;
-			buildPhases = (
-				5ACBEECD1CE1B3A500371E01 /* Sources */,
-				5ACBEECE1CE1B3A500371E01 /* Frameworks */,
-				5ACBEECF1CE1B3A500371E01 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				5ACBEED31CE1B3A500371E01 /* PBXTargetDependency */,
-			);
-			name = JRDBUITests;
-			productName = JRDBUITests;
-			productReference = 5ACBEED11CE1B3A500371E01 /* JRDBUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -368,11 +322,6 @@
 						LastSwiftMigration = 0800;
 					};
 					5ACBEEC51CE1B3A500371E01 = {
-						CreatedOnToolsVersion = 7.3;
-						DevelopmentTeam = FJ535WN7FW;
-						TestTargetID = 5ACBEEAC1CE1B3A500371E01;
-					};
-					5ACBEED01CE1B3A500371E01 = {
 						CreatedOnToolsVersion = 7.3;
 						DevelopmentTeam = FJ535WN7FW;
 						TestTargetID = 5ACBEEAC1CE1B3A500371E01;
@@ -394,7 +343,6 @@
 			targets = (
 				5ACBEEAC1CE1B3A500371E01 /* JRDB */,
 				5ACBEEC51CE1B3A500371E01 /* JRDBTests */,
-				5ACBEED01CE1B3A500371E01 /* JRDBUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -411,13 +359,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		5ACBEEC41CE1B3A500371E01 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		5ACBEECF1CE1B3A500371E01 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -555,19 +496,10 @@
 				09943EB51D630FB000C7164D /* JRDBMgrContextTests.m in Sources */,
 				5AA3DB331D067DD800795E80 /* JRDBTestJRDBMgr.m in Sources */,
 				5ACBEECB1CE1B3A500371E01 /* JRDBTests.m in Sources */,
+				A822B2F81DD8505B00A07ED4 /* JRDBTestByKiwi.m in Sources */,
 				5AE115421D364ED400886657 /* JRDBChainTest.m in Sources */,
 				09822BBC1DBF045F00662F49 /* JRQueueMgr.m in Sources */,
 				09822BB71DBF00D400662F49 /* FMDatabase+JRPersistentHandler.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		5ACBEECD1CE1B3A500371E01 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				09822BB81DBF00D400662F49 /* FMDatabase+JRPersistentHandler.m in Sources */,
-				09822BBD1DBF045F00662F49 /* JRQueueMgr.m in Sources */,
-				5ACBEED61CE1B3A500371E01 /* JRDBUITests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -578,11 +510,6 @@
 			isa = PBXTargetDependency;
 			target = 5ACBEEAC1CE1B3A500371E01 /* JRDB */;
 			targetProxy = 5ACBEEC71CE1B3A500371E01 /* PBXContainerItemProxy */;
-		};
-		5ACBEED31CE1B3A500371E01 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 5ACBEEAC1CE1B3A500371E01 /* JRDB */;
-			targetProxy = 5ACBEED21CE1B3A500371E01 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -774,28 +701,6 @@
 			};
 			name = Release;
 		};
-		5ACBEEE11CE1B3A500371E01 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				INFOPLIST_FILE = JRDBUITests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = jrwong.abc.JRDBUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_TARGET_NAME = JRDB;
-			};
-			name = Debug;
-		};
-		5ACBEEE21CE1B3A500371E01 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				INFOPLIST_FILE = JRDBUITests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = jrwong.abc.JRDBUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_TARGET_NAME = JRDB;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -822,15 +727,6 @@
 			buildConfigurations = (
 				5ACBEEDE1CE1B3A500371E01 /* Debug */,
 				5ACBEEDF1CE1B3A500371E01 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		5ACBEEE01CE1B3A500371E01 /* Build configuration list for PBXNativeTarget "JRDBUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				5ACBEEE11CE1B3A500371E01 /* Debug */,
-				5ACBEEE21CE1B3A500371E01 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
