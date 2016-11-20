@@ -68,6 +68,7 @@ describe(@"normal operation test", ^{
     });
 
     afterEach(^{
+        [JRDBMgr shareInstance].debugMode = NO;
         J_DeleteAll(Person).updateResult;
         J_DeleteAll(Card).updateResult;
         J_DeleteAll(Money).updateResult;
@@ -75,6 +76,7 @@ describe(@"normal operation test", ^{
         J_DropTable(Person);
         J_DropTable(Card);
         J_DropTable(Money);
+        [JRDBMgr shareInstance].debugMode = YES;
     });
 
     context(@"table operation", ^{
