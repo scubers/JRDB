@@ -47,6 +47,8 @@ Money *createMoney(int value) {
 }
 
 
+
+
 SPEC_BEGIN(JRDBTss)
 
 
