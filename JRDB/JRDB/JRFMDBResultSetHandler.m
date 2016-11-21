@@ -50,43 +50,59 @@
                     break;
                 }
                 case RetDataTypeInt: {
-                    Ivar ivar = class_getInstanceVariable(clazz, [prop.name UTF8String]);
-                    *(int *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = [resultSet intForColumn:prop.dataBaseName];
+                    int temp = [resultSet intForColumn:prop.dataBaseName];
+                    [obj setValue:@(temp) forKey:prop.name];
+//                    Ivar ivar = class_getInstanceVariable(clazz, [prop.name UTF8String]);
+//                    *(int *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = [resultSet intForColumn:prop.dataBaseName];
                     break;
                 }
                 case RetDataTypeUnsignedInt: {
-                    Ivar ivar = class_getInstanceVariable(clazz, [prop.name UTF8String]);
-                    *(unsigned int *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = (unsigned int)[resultSet unsignedLongLongIntForColumn:prop.dataBaseName];
+                    unsigned long long temp = [resultSet unsignedLongLongIntForColumn:prop.dataBaseName];
+                    [obj setValue:@(temp) forKey:prop.name];
+//                    Ivar ivar = class_getInstanceVariable(clazz, [prop.name UTF8String]);
+//                    *(unsigned int *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = (unsigned int)[resultSet unsignedLongLongIntForColumn:prop.dataBaseName];
                     break;
                 }
                 case RetDataTypeLong: {
-                    Ivar ivar = class_getInstanceVariable(clazz, [prop.name UTF8String]);
-                    *(long *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = [resultSet longForColumn:prop.dataBaseName];
+                    long temp = [resultSet longForColumn:prop.dataBaseName];
+                    [obj setValue:@(temp) forKey:prop.name];
+//                    Ivar ivar = class_getInstanceVariable(clazz, [prop.name UTF8String]);
+//                    *(long *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = [resultSet longForColumn:prop.dataBaseName];
                     break;
                 }
                 case RetDataTypeLongLong: {
-                    Ivar ivar = class_getInstanceVariable(clazz, [prop.name UTF8String]);
-                    *(long long *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = [resultSet longLongIntForColumn:prop.dataBaseName];
+                    long long temp = [resultSet longLongIntForColumn:prop.dataBaseName];
+                    [obj setValue:@(temp) forKey:prop.name];
+//                    Ivar ivar = class_getInstanceVariable(clazz, [prop.name UTF8String]);
+//                    *(long long *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = [resultSet longLongIntForColumn:prop.dataBaseName];
                     break;
                 }
                 case RetDataTypeUnsignedLong: {
-                    Ivar ivar = class_getInstanceVariable(clazz, [prop.name UTF8String]);
-                    *(unsigned long *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = (unsigned long)[resultSet unsignedLongLongIntForColumn:prop.dataBaseName];
+                    unsigned long long temp = [resultSet unsignedLongLongIntForColumn:prop.dataBaseName];
+                    [obj setValue:@(temp) forKey:prop.name];
+//                    Ivar ivar = class_getInstanceVariable(clazz, [prop.name UTF8String]);
+//                    *(unsigned long *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = (unsigned long)[resultSet unsignedLongLongIntForColumn:prop.dataBaseName];
                     break;
                 }
                 case RetDataTypeUnsignedLongLong:{
-                    Ivar ivar = class_getInstanceVariable(clazz, [prop.name UTF8String]);
-                    *(unsigned long long *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = [resultSet unsignedLongLongIntForColumn:prop.dataBaseName];
+                    unsigned long long temp = [resultSet unsignedLongLongIntForColumn:prop.dataBaseName];
+                    [obj setValue:@(temp) forKey:prop.name];
+//                    Ivar ivar = class_getInstanceVariable(clazz, [prop.name UTF8String]);
+//                    *(unsigned long long *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = [resultSet unsignedLongLongIntForColumn:prop.dataBaseName];
                     break;
                 }
                 case RetDataTypeDouble: {
-                    Ivar ivar = class_getInstanceVariable(clazz, [prop.name UTF8String]);
-                    *(double *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = [resultSet doubleForColumn:prop.dataBaseName];
+                    double temp = [resultSet doubleForColumn:prop.dataBaseName];
+                    [obj setValue:@(temp) forKey:prop.name];
+//                    Ivar ivar = class_getInstanceVariable(clazz, [prop.name UTF8String]);
+//                    *(double *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = [resultSet doubleForColumn:prop.dataBaseName];
                     break;
                 }
                 case RetDataTypeFloat: {
-                    Ivar ivar = class_getInstanceVariable(clazz, [prop.name UTF8String]);
-                    *(float *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = [resultSet doubleForColumn:prop.dataBaseName];
+                    float temp = [resultSet doubleForColumn:prop.dataBaseName];
+                    [obj setValue:@(temp) forKey:prop.name];
+//                    Ivar ivar = class_getInstanceVariable(clazz, [prop.name UTF8String]);
+//                    *(float *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = [resultSet doubleForColumn:prop.dataBaseName];
                     break;
                 }
                 case RetDataTypeNSDate:{
@@ -216,43 +232,59 @@
                     break;
                 }
                 case RetDataTypeInt: {
-                    Ivar ivar = class_getInstanceVariable(chain.targetClazz, [prop.name UTF8String]);
-                    *(int *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = [resultSet intForColumn:prop.dataBaseName];
+                    int temp = [resultSet intForColumn:prop.dataBaseName];
+                    [obj setValue:@(temp) forKey:prop.name];
+                    //                    Ivar ivar = class_getInstanceVariable(clazz, [prop.name UTF8String]);
+                    //                    *(int *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = [resultSet intForColumn:prop.dataBaseName];
                     break;
                 }
                 case RetDataTypeUnsignedInt: {
-                    Ivar ivar = class_getInstanceVariable(chain.targetClazz, [prop.name UTF8String]);
-                    *(unsigned int *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = (unsigned int)[resultSet unsignedLongLongIntForColumn:prop.dataBaseName];
+                    unsigned long long temp = [resultSet unsignedLongLongIntForColumn:prop.dataBaseName];
+                    [obj setValue:@(temp) forKey:prop.name];
+                    //                    Ivar ivar = class_getInstanceVariable(clazz, [prop.name UTF8String]);
+                    //                    *(unsigned int *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = (unsigned int)[resultSet unsignedLongLongIntForColumn:prop.dataBaseName];
                     break;
                 }
                 case RetDataTypeLong: {
-                    Ivar ivar = class_getInstanceVariable(chain.targetClazz, [prop.name UTF8String]);
-                    *(long *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = [resultSet longForColumn:prop.dataBaseName];
+                    long temp = [resultSet longForColumn:prop.dataBaseName];
+                    [obj setValue:@(temp) forKey:prop.name];
+                    //                    Ivar ivar = class_getInstanceVariable(clazz, [prop.name UTF8String]);
+                    //                    *(long *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = [resultSet longForColumn:prop.dataBaseName];
                     break;
                 }
                 case RetDataTypeLongLong: {
-                    Ivar ivar = class_getInstanceVariable(chain.targetClazz, [prop.name UTF8String]);
-                    *(long long *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = [resultSet longLongIntForColumn:prop.dataBaseName];
+                    long long temp = [resultSet longLongIntForColumn:prop.dataBaseName];
+                    [obj setValue:@(temp) forKey:prop.name];
+                    //                    Ivar ivar = class_getInstanceVariable(clazz, [prop.name UTF8String]);
+                    //                    *(long long *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = [resultSet longLongIntForColumn:prop.dataBaseName];
                     break;
                 }
                 case RetDataTypeUnsignedLong: {
-                    Ivar ivar = class_getInstanceVariable(chain.targetClazz, [prop.name UTF8String]);
-                    *(unsigned long *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = (unsigned long)[resultSet unsignedLongLongIntForColumn:prop.dataBaseName];
+                    unsigned long long temp = [resultSet unsignedLongLongIntForColumn:prop.dataBaseName];
+                    [obj setValue:@(temp) forKey:prop.name];
+                    //                    Ivar ivar = class_getInstanceVariable(clazz, [prop.name UTF8String]);
+                    //                    *(unsigned long *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = (unsigned long)[resultSet unsignedLongLongIntForColumn:prop.dataBaseName];
                     break;
                 }
                 case RetDataTypeUnsignedLongLong:{
-                    Ivar ivar = class_getInstanceVariable(chain.targetClazz, [prop.name UTF8String]);
-                    *(unsigned long long *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = [resultSet unsignedLongLongIntForColumn:prop.dataBaseName];
+                    unsigned long long temp = [resultSet unsignedLongLongIntForColumn:prop.dataBaseName];
+                    [obj setValue:@(temp) forKey:prop.name];
+                    //                    Ivar ivar = class_getInstanceVariable(clazz, [prop.name UTF8String]);
+                    //                    *(unsigned long long *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = [resultSet unsignedLongLongIntForColumn:prop.dataBaseName];
                     break;
                 }
                 case RetDataTypeDouble: {
-                    Ivar ivar = class_getInstanceVariable(chain.targetClazz, [prop.name UTF8String]);
-                    *(double *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = [resultSet doubleForColumn:prop.dataBaseName];
+                    double temp = [resultSet doubleForColumn:prop.dataBaseName];
+                    [obj setValue:@(temp) forKey:prop.name];
+                    //                    Ivar ivar = class_getInstanceVariable(clazz, [prop.name UTF8String]);
+                    //                    *(double *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = [resultSet doubleForColumn:prop.dataBaseName];
                     break;
                 }
                 case RetDataTypeFloat: {
-                    Ivar ivar = class_getInstanceVariable(chain.targetClazz, [prop.name UTF8String]);
-                    *(float *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = [resultSet doubleForColumn:prop.dataBaseName];
+                    float temp = [resultSet doubleForColumn:prop.dataBaseName];
+                    [obj setValue:@(temp) forKey:prop.name];
+                    //                    Ivar ivar = class_getInstanceVariable(clazz, [prop.name UTF8String]);
+                    //                    *(float *)((__bridge void *)(obj) + ivar_getOffset(ivar)) = [resultSet doubleForColumn:prop.dataBaseName];
                     break;
                 }
                 case RetDataTypeNSDate:{
