@@ -86,7 +86,6 @@ typedef NS_ENUM(NSInteger, ChainOperation) {
 
 typedef JRDBChain * _Nonnull (^JRObjectBlock)(id _Nonnull value);
 typedef JRDBChain * _Nonnull (^JRBoolBlock)(BOOL flag);
-//typedef JRDBChain * _Nonnull (^JRIntegerBlock)(NSInteger value);
 typedef JRDBChain * _Nonnull (^JRClassBlock)(Class<JRPersistent> _Nonnull clazz);
 typedef JRDBChain * _Nonnull (^JRArrayBlock)(NSArray * _Nonnull array);
 typedef JRDBChain * _Nonnull (^JRLimitBlock)(NSUInteger start, NSUInteger length);
@@ -114,7 +113,6 @@ typedef struct {
     long long start;
     long long length;
 } JRLimit;
-//typedef struct JRLimit JRLimit;
 
 @interface JRDBChain<T:id<JRPersistent>> : NSObject
 
