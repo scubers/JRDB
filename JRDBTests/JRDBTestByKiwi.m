@@ -46,8 +46,37 @@ Money *createMoney(int value) {
     return m;
 }
 
+void randomChangePerson(Person *p) {
+    p.a_int = 129487;
+    p.bbbbb = NO;
+    p.c_long = 98987;
+    p.d_long_long = 98778;
+    p.f_unsigned_long_long = 23425435;
+    p.h_double = 9874.4545;
+    p.i_string = @"98ujgoijg";
+    p.j_number = @23556754;
+    p.k_data = [NSData data];
+    p.l_date = [NSDate date];
+}
 
+BOOL matchPersons(Person *p1, Person *p2, NSArray<NSString *> *columns) {
+    BOOL result = YES;
+    for (NSString *keypath in columns) {
+        id value1 = [p1 valueForKey:keypath];
+        id value2 = [p2 valueForKey:keypath];
 
+        if ((!value1 || !value2) && (!value1 && !value2)) {
+            result = NO;
+            break;
+        }
+
+        if (![value1 isEqual:value2]) {
+            result = NO;
+            break;
+        }
+    }
+    return result;
+}
 
 SPEC_BEGIN(JRDBTss)
 
@@ -63,7 +92,7 @@ describe(@"normal operation test", ^{
                                                    ]];
         [JRDBMgr shareInstance].defaultDB = db;
 
-        [JRDBMgr shareInstance].debugMode = YES;
+        [JRDBMgr shareInstance].debugMode = NO;
         return db;
     });
 
@@ -103,6 +132,38 @@ describe(@"normal operation test", ^{
             [[theValue(a) should] beYes];
             [[theValue(J_Select(Person).list.count) should] equal:@10];
         });
+    });
+
+    context(@"update", ^{
+
+        beforeEach(^{
+            for(int i = 0; i < 10; i++) {
+                Person *p = createPerson(i, nil);
+                J_Insert(p).updateResult;
+            }
+        });
+
+        it(@"update single", ^{
+            NSArray<Person *> *list = J_Select(Person).list;
+            Person *p = list[1];
+
+            randomChangePerson(p);
+
+            BOOL ret = J_Update(p).updateResult;
+            [[theValue(ret) should] beYes];
+            Person *person = J_Select(Person).WherePKIs([p jr_primaryKeyValue]).object;
+
+            ret = matchPersons(p, person, @[
+                                            J(a_int),
+                                            J(b_unsigned_int),
+                                            J(c_long),
+                                            J(d_long_long),
+                                            J(i_string),
+                                            ]);
+            [[theValue(ret) should] beYes];
+        });
+
+
     });
 
 });
