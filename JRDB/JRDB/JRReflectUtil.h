@@ -14,6 +14,8 @@
 
 @class JRActivatedProperty;
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface JRReflectUtil : NSObject
 
 /**
@@ -23,12 +25,14 @@
  *
  *  @return {ivar:@encode(int),ivar:@encode(int)} example : {@"_age" : @"i"}
  */
-+ (NSDictionary<NSString *, NSString *> * _Nonnull)propNameAndEncode4Clazz:(Class<JRPersistent> _Nonnull)clazz;
++ (NSDictionary<NSString *, NSString *> *)propNameAndEncode4Clazz:(Class<JRPersistent>)clazz;
 
-+ (const char * _Nonnull)typeEncoding4InstanceMethod:(SEL _Nonnull)selector inClazz:(Class _Nonnull)clazz;
++ (const char *)typeEncoding4InstanceMethod:(SEL)selector inClazz:(Class)clazz;
 
-+ (void)exchangeClazz:(Class _Nonnull)clazz method:(SEL _Nonnull)selector withMethod:(SEL _Nonnull)aSelector;
++ (void)exchangeClazz:(Class)clazz method:(SEL)selector withMethod:(SEL)aSelector;
 
-+ (NSArray<JRActivatedProperty *> * _Nonnull)activitedProperties4Clazz:(Class<JRPersistent> _Nonnull)clazz;
++ (NSArray<JRActivatedProperty *> *)activitedProperties4Clazz:(Class<JRPersistent>)clazz;
 
 @end
+
+NS_ASSUME_NONNULL_END

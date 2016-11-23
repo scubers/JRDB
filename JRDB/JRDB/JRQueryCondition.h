@@ -8,6 +8,8 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 typedef NS_ENUM(NSInteger, JRQueryConditionType) {
     JRQueryConditionTypeAnd = 1,
     JRQueryConditionTypeOr,
@@ -15,8 +17,8 @@ typedef NS_ENUM(NSInteger, JRQueryConditionType) {
 
 @interface JRQueryCondition : NSObject
 
-@property (nonatomic, copy, readonly  ) NSString             * _Nonnull condition;
-@property (nonatomic, copy, readonly  ) NSArray              * _Nullable args;
+@property (nonatomic, copy, readonly  ) NSString             * condition;
+@property (nonatomic, copy, readonly, nullable) NSArray              *args;
 @property (nonatomic, assign, readonly) JRQueryConditionType type;
 
 /**
@@ -28,7 +30,7 @@ typedef NS_ENUM(NSInteger, JRQueryConditionType) {
  *
  *  @return instancetype
  */
-+ (instancetype _Nonnull)condition:(NSString * _Nonnull)condition args:(NSArray * _Nullable)args type:(JRQueryConditionType)type;
++ (instancetype)condition:(NSString *)condition args:(NSArray * _Nullable)args type:(JRQueryConditionType)type;
 
 /**
  *  条件查询需要的condition
@@ -38,8 +40,9 @@ typedef NS_ENUM(NSInteger, JRQueryConditionType) {
  *
  *  @return instancetype
  */
-+ (instancetype _Nonnull)type:(JRQueryConditionType)type condition:(NSString * _Nonnull)condition, ...;
++ (instancetype)type:(JRQueryConditionType)type condition:(NSString *)condition, ...;
 
-//+ (instancetype _Nonnull)condition:(NSString * _Nonnull)condition args:(NSArray * _Nullable)args type:(JRQueryConditionType)type;
 
 @end
+
+NS_ASSUME_NONNULL_END

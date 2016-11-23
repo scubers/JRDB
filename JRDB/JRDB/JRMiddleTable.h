@@ -13,15 +13,17 @@
 
 @class FMDatabase;
 
+NS_ASSUME_NONNULL_BEGIN
+
 /**
  *  用于保存多对多的关系
  */
 @interface JRMiddleTable : NSObject
 
-@property (nonatomic, readonly, strong, nonnull) Class<JRPersistent> clazz1;
-@property (nonatomic, readonly, strong, nonnull) Class<JRPersistent> clazz2;
+@property (nonatomic, readonly, strong) Class<JRPersistent> clazz1;
+@property (nonatomic, readonly, strong) Class<JRPersistent> clazz2;
 
-@property (nonatomic, readonly, strong, nonnull) FMDatabase *db;
+@property (nonatomic, readonly, strong) FMDatabase *db;
 
 /**
  *  创建中建表对象
@@ -30,9 +32,9 @@
  *  @param clazz2
  *  @param db
  */
-+ (instancetype _Nullable)table4Clazz:(Class<JRPersistent> _Nonnull)clazz1 andClazz:(Class<JRPersistent> _Nonnull)clazz2 db:(FMDatabase * _Nonnull)db;
++ (instancetype _Nullable)table4Clazz:(Class<JRPersistent>)clazz1 andClazz:(Class<JRPersistent>)clazz2 db:(FMDatabase *)db;
 
-- (NSString * _Nonnull)tableName;
+- (NSString *)tableName;
 
 /**
  *  查询另一个关联类的ID数组
@@ -42,7 +44,7 @@
  *
  *  @return 另一个类的id数组
  */
-- (NSArray<NSString *> * _Nonnull)anotherClazzIDsWithID:(NSString * _Nonnull)ID clazz:(Class<JRPersistent> _Nonnull)clazz;
+- (NSArray<NSString *> *)anotherClazzIDsWithID:(NSString *)ID clazz:(Class<JRPersistent>)clazz;
 
 /**
  *  保存关系数据 一对多 外界必须包含事务 执行完方法后需要commit
@@ -55,7 +57,7 @@
  *
  *  @return 结果
  */
-- (BOOL)saveIDs:(NSArray<NSString *> * _Nonnull)IDs withClazz:(Class<JRPersistent> _Nonnull)withClazz forID:(NSString * _Nonnull)ID withIDClazz:(Class<JRPersistent> _Nonnull)IDClazz;
+- (BOOL)saveIDs:(NSArray<NSString *> *)IDs withClazz:(Class<JRPersistent>)withClazz forID:(NSString *)ID withIDClazz:(Class<JRPersistent>)IDClazz;
 
 /**
  *   对JRPersistent的封装
@@ -66,10 +68,10 @@
  *
  *  @return 
  */
-- (BOOL)saveObjs:(NSArray<id<JRPersistent>> * _Nonnull)objs forObj:(id<JRPersistent> _Nonnull)obj;
+- (BOOL)saveObjs:(NSArray<id<JRPersistent>> *)objs forObj:(id<JRPersistent>)obj;
 
 
-- (BOOL)deleteID:(NSString * _Nonnull)ID forClazz:(Class<JRPersistent> _Nonnull)clazz;
+- (BOOL)deleteID:(NSString *)ID forClazz:(Class<JRPersistent>)clazz;
 
 /**
  *  自身自带事务
@@ -80,6 +82,6 @@
 
 @end
 
-
+NS_ASSUME_NONNULL_END
 
 

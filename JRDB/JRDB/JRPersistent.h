@@ -16,12 +16,14 @@
 
 @class JRActivatedProperty, JRDBChain;
 
+NS_ASSUME_NONNULL_BEGIN
+
 @protocol JRPersistent <JRReflectable>
 
 typedef void(^JRDBComplete)(BOOL success);
-typedef void(^JRDBChainComplete)(JRDBChain * _Nonnull chain, id _Nullable result);
+typedef void(^JRDBChainComplete)(JRDBChain * chain, id _Nullable result);
 typedef void(^JRDBQueryComplete)(id _Nullable result);
-typedef void(^JRDBDidFinishBlock)(id<JRPersistent> _Nonnull obj);
+typedef void(^JRDBDidFinishBlock)(id<JRPersistent> obj);
 
 @required
 - (void)setID:(NSString * _Nullable)ID;
@@ -40,7 +42,7 @@ typedef void(^JRDBDidFinishBlock)(id<JRPersistent> _Nonnull obj);
 
  @return 表名
  */
-+ (NSString * _Nonnull)jr_customTableName;
++ (NSString *)jr_customTableName;
 
 /**
  *  返回不用入库的对象字段数组
@@ -90,8 +92,8 @@ typedef void(^JRDBDidFinishBlock)(id<JRPersistent> _Nonnull obj);
  *
  *  @param block 代码块
  */
-- (void)jr_addDidFinishBlock:(JRDBDidFinishBlock _Nullable)block forIdentifier:(NSString * _Nonnull)identifier;
-- (void)jr_removeDidFinishBlockForIdentifier:(NSString * _Nonnull)identifier;
+- (void)jr_addDidFinishBlock:(JRDBDidFinishBlock _Nullable)block forIdentifier:(NSString *)identifier;
+- (void)jr_removeDidFinishBlockForIdentifier:(NSString *)identifier;
 
 
 /**
@@ -106,14 +108,14 @@ typedef void(^JRDBDidFinishBlock)(id<JRPersistent> _Nonnull obj);
 
  @return
  */
-+ (NSString * _Nonnull)jr_tableName;
++ (NSString *)jr_tableName;
 
 /**
  *  如果有自定义主键，则返回自定义主键key，例如 name，若没有实现，则返回默认主键key ： @"_ID"
  *
  *  @return 主键的字段名
  */
-+ (NSString * _Nonnull)jr_primaryKey;
++ (NSString *)jr_primaryKey;
 
 
 /**
@@ -133,3 +135,4 @@ typedef void(^JRDBDidFinishBlock)(id<JRPersistent> _Nonnull obj);
 
 @end
 
+NS_ASSUME_NONNULL_END

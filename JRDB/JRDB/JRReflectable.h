@@ -11,27 +11,29 @@
 
 @class OBJCProperty, OBJCMethod;
 
+NS_ASSUME_NONNULL_BEGIN
+
 @protocol JRReflectable <NSObject>
 
 @optional
-+ (NSString * _Nonnull)fullClazzName;
-+ (NSString * _Nonnull)shortClazzName;
++ (NSString *)fullClazzName;
++ (NSString *)shortClazzName;
 
 /**
  *  返回本类的所有property
  *  @return properties
  */
-+ (NSArray<OBJCProperty *> * _Nonnull)objc_properties;
++ (NSArray<OBJCProperty *> *)objc_properties;
 
-+ (OBJCProperty * _Nullable)objcPropertyWithName:(NSString * _Nonnull)name;
++ (OBJCProperty * _Nullable)objcPropertyWithName:(NSString *)name;
 
 /**
  *  返回本类的所有methods
  *  @return methods
  */
-+ (NSArray<OBJCMethod *> * _Nonnull)objc_methods;
++ (NSArray<OBJCMethod *> *)objc_methods;
 
-+ (OBJCMethod * _Nullable)objcMethodWithSel:(SEL _Nonnull)selector;
++ (OBJCMethod * _Nullable)objcMethodWithSel:(SEL)selector;
 
 /**
  *  替换本类的方法
@@ -41,11 +43,13 @@
  *
  *  @return ret
  */
-+ (void)objc_exchangeMethod:(SEL _Nonnull)selector withMethod:(SEL _Nonnull)aSelector;
++ (void)objc_exchangeMethod:(SEL)selector withMethod:(SEL)aSelector;
 
 
-- (NSDictionary<NSString *, id> * _Nonnull)jr_toDict;
+- (NSDictionary<NSString *, id> *)jr_toDict;
 
 @end
+
+NS_ASSUME_NONNULL_END
 
 #endif /* JRReflectable_h */

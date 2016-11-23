@@ -11,17 +11,19 @@
 
 @class FMDatabase, JRQueryCondition;
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface JRSql : NSObject
 
 @property (nonatomic, nullable, readonly) NSString *sqlString;
 @property (nonatomic, nullable, readonly) NSMutableArray *args;
 
-+ (instancetype _Nonnull)sql:(NSString * _Nonnull)sql args:(NSArray * _Nullable)args;
++ (instancetype)sql:(NSString *)sql args:(NSArray * _Nullable)args;
 
 @end
 
 
-void SqlLog(id _Nonnull sql);
+void SqlLog(id sql);
 
 typedef NS_ENUM(NSInteger, DBType) {
     DBTypeNull = 1,
@@ -45,7 +47,7 @@ typedef NS_ENUM(NSInteger, DBType) {
  *  @param clazz 对应的类
  *  @return sql
  */
-+ (JRSql * _Nonnull)createTableSql4Clazz:(Class<JRPersistent> _Nonnull)clazz table:(NSString * _Nullable)table;
++ (JRSql *)createTableSql4Clazz:(Class<JRPersistent>)clazz table:(NSString * _Nullable)table;
 
 /**
  *  删表
@@ -53,7 +55,7 @@ typedef NS_ENUM(NSInteger, DBType) {
  *  @param clazz 对应的类
  *  @return sql
  */
-+ (JRSql * _Nonnull)dropTableSql4Clazz:(Class<JRPersistent> _Nonnull)clazz table:(NSString * _Nullable)table;
++ (JRSql *)dropTableSql4Clazz:(Class<JRPersistent>)clazz table:(NSString * _Nullable)table;
 
 /**
  *  因为sqlite不支持批量添加字段，只能返回多条语句，多次更新表
@@ -63,23 +65,23 @@ typedef NS_ENUM(NSInteger, DBType) {
  *
  *  @return sql数组
  */
-+ (NSArray<JRSql *> * _Nonnull)updateTableSql4Clazz:(Class<JRPersistent> _Nonnull)clazz inDB:(FMDatabase * _Nonnull)db table:(NSString * _Nullable)table;
++ (NSArray<JRSql *> *)updateTableSql4Clazz:(Class<JRPersistent>)clazz inDB:(FMDatabase *)db table:(NSString * _Nullable)table;
 
 #pragma mark - insert
 
 /**
  *  返回占位符的sql insert into tablename values (name= ? , name2 = ?,)
  */
-+ (JRSql * _Nonnull)sql4Insert:(id<JRPersistent> _Nonnull)obj toDB:(FMDatabase * _Nonnull)db table:(NSString * _Nullable)table;
++ (JRSql *)sql4Insert:(id<JRPersistent>)obj toDB:(FMDatabase *)db table:(NSString * _Nullable)table;
 
 #pragma mark - update
 /**
  *  返回占位符的sql update tablename set name = ?, name2 = ? where ID = ?
  *  columns 需要更新的列，传nil则全部更新
  */
-+ (JRSql * _Nonnull)sql4Update:(id<JRPersistent> _Nonnull)obj
++ (JRSql *)sql4Update:(id<JRPersistent>)obj
                        columns:(NSArray<NSString *> * _Nullable)columns
-                          toDB:(FMDatabase * _Nonnull)db
+                          toDB:(FMDatabase *)db
                          table:(NSString * _Nullable)table;
 
 
@@ -87,12 +89,12 @@ typedef NS_ENUM(NSInteger, DBType) {
 /**
  *  返回占位符的sql delete from tablename where ID = ?
  */
-+ (JRSql * _Nonnull)sql4Delete:(id<JRPersistent> _Nonnull)obj table:(NSString * _Nullable)table;
++ (JRSql *)sql4Delete:(id<JRPersistent>)obj table:(NSString * _Nullable)table;
 
 /**
  *  返回占位符的sql delete from tablename
  */
-+ (JRSql * _Nonnull)sql4DeleteAll:(Class<JRPersistent> _Nonnull)clazz table:(NSString * _Nullable)table;
++ (JRSql *)sql4DeleteAll:(Class<JRPersistent>)clazz table:(NSString * _Nullable)table;
 
 
 #pragma mark - query
@@ -103,7 +105,7 @@ typedef NS_ENUM(NSInteger, DBType) {
  *
  *  @return sql
  */
-+ (JRSql * _Nonnull)sql4GetByIDWithClazz:(Class<JRPersistent> _Nonnull)clazz ID:(NSString * _Nonnull)ID table:(NSString * _Nullable)table;
++ (JRSql *)sql4GetByIDWithClazz:(Class<JRPersistent>)clazz ID:(NSString *)ID table:(NSString * _Nullable)table;
 
 
 /**
@@ -113,7 +115,7 @@ typedef NS_ENUM(NSInteger, DBType) {
  *
  *  @return sql
  */
-+ (JRSql * _Nonnull)sql4GetByPrimaryKeyWithClazz:(Class<JRPersistent> _Nonnull)clazz primaryKey:(id _Nonnull)primaryKey table:(NSString * _Nullable)table;
++ (JRSql *)sql4GetByPrimaryKeyWithClazz:(Class<JRPersistent>)clazz primaryKey:(id)primaryKey table:(NSString * _Nullable)table;
 
 /**
  *  查找某个类的所有对象
@@ -123,7 +125,7 @@ typedef NS_ENUM(NSInteger, DBType) {
  *
  *  @return sql
  */
-+ (JRSql * _Nonnull)sql4FindAll:(Class<JRPersistent> _Nonnull)clazz orderby:(NSString * _Nullable)orderby isDesc:(BOOL)isDesc table:(NSString * _Nullable)table;
++ (JRSql *)sql4FindAll:(Class<JRPersistent>)clazz orderby:(NSString * _Nullable)orderby isDesc:(BOOL)isDesc table:(NSString * _Nullable)table;
 
 /**
  *  根据条件查询
@@ -134,20 +136,20 @@ typedef NS_ENUM(NSInteger, DBType) {
  *
  *  @return sql
  */
-+ (JRSql * _Nonnull)sql4FindByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions
-                                   clazz:(Class<JRPersistent> _Nonnull)clazz
++ (JRSql *)sql4FindByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions
+                                   clazz:(Class<JRPersistent>)clazz
                                  groupBy:(NSString * _Nullable)groupBy
                                  orderBy:(NSString * _Nullable)orderBy
                                    limit:(NSString * _Nullable)limit
                                   isDesc:(BOOL)isDesc
                                    table:(NSString * _Nullable)table;
 #pragma mark - conenience
-+ (JRSql * _Nonnull)sql4CountByPrimaryKey:(id _Nonnull)pk clazz:(Class<JRPersistent> _Nonnull)clazz table:(NSString * _Nullable)table;
-+ (JRSql * _Nonnull)sql4CountByID:(NSString * _Nonnull)ID clazz:(Class<JRPersistent> _Nonnull)clazz table:(NSString * _Nullable)table;
++ (JRSql *)sql4CountByPrimaryKey:(id)pk clazz:(Class<JRPersistent>)clazz table:(NSString * _Nullable)table;
++ (JRSql *)sql4CountByID:(NSString *)ID clazz:(Class<JRPersistent>)clazz table:(NSString * _Nullable)table;
 
-+ (JRSql * _Nonnull)sql4GetColumns:(NSArray<NSString *> * _Nullable)columns
++ (JRSql *)sql4GetColumns:(NSArray<NSString *> * _Nullable)columns
                       byConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions
-                             clazz:(Class<JRPersistent> _Nonnull)clazz
+                             clazz:(Class<JRPersistent>)clazz
                            groupBy:(NSString * _Nullable)groupBy
                            orderBy:(NSString * _Nullable)orderBy
                              limit:(NSString * _Nullable)limit
@@ -159,8 +161,10 @@ typedef NS_ENUM(NSInteger, DBType) {
 
 @interface JRSqlGenerator (Chain)
 
-+ (JRSql * _Nonnull)sql4ChainCustomizedSelect:(JRDBChain * _Nonnull)chain;
-+ (JRSql * _Nonnull)sql4GetColumns:(NSArray<NSString *> * _Nullable)columns forChain:(JRDBChain * _Nonnull)chain;
-+ (JRSql * _Nonnull)sql4Chain:(JRDBChain * _Nonnull)chain;
++ (JRSql *)sql4ChainCustomizedSelect:(JRDBChain *)chain;
++ (JRSql *)sql4GetColumns:(NSArray<NSString *> * _Nullable)columns forChain:(JRDBChain *)chain;
++ (JRSql *)sql4Chain:(JRDBChain *)chain;
 
 @end
+
+NS_ASSUME_NONNULL_END
