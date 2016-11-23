@@ -23,7 +23,6 @@ NS_ASSUME_NONNULL_BEGIN
  */
 + (void)jr_configure;
 
-
 #pragma mark - convinence method
 
 - (void)jr_setSingleLinkID:(NSString * _Nullable)ID forKey:(NSString *)key;
@@ -156,7 +155,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark - table message
 
-+ (NSArray<NSString *> * _Nonnull)jr_currentColumns NS_DEPRECATED_IOS(1_0, 10_0, "- unusable");
++ (NSArray<NSString *> *)jr_currentColumns NS_DEPRECATED_IOS(1_0, 10_0, "- unusable");
 
 #pragma mark - hooking
 + (void)jr_swizzleSetters4Clazz;

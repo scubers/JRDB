@@ -137,11 +137,11 @@ typedef struct {
 
 @property (nonatomic, strong, readonly, nullable) NSString          *limitString;
 @property (nonatomic, assign, readonly          ) JRLimit           limitIn;
-@property (nonatomic, strong, readonly, nonnull ) JRLimitBlock      Limit;///< limit condition: Limit(start, length)
+@property (nonatomic, strong, readonly) JRLimitBlock      Limit;///< limit condition: Limit(start, length)
 
 
-@property (nonatomic, strong, readonly, nonnull ) id<JRPersistentHandler> db;
-@property (nonatomic, copy, readonly, nonnull   ) JRObjectBlockDefine(T, InDB);///< the database : parameter is id<JRPersistentBaseHandler>: InDB(db)
+@property (nonatomic, strong, readonly) id<JRPersistentHandler> db;
+@property (nonatomic, copy, readonly  ) JRObjectBlockDefine(T, InDB);///< the database : parameter is id<JRPersistentBaseHandler>: InDB(db)
 
 
 @property (nonatomic, strong, readonly, nullable) NSString          *orderBy;
@@ -216,7 +216,7 @@ typedef struct {
 /**
  the method that execute the operation
  */
-- (JRDBResult * _Nonnull)exe;
+- (JRDBResult *)exe;
 
 - (BOOL)updateResult;
 - (NSUInteger)count;
@@ -225,13 +225,13 @@ typedef struct {
 
 #pragma mark - macro method will not execute
 
-- (JRObjectBlock _Nonnull)FromJ NS_SWIFT_UNAVAILABLE("macro method");///< will not execute cause the macro
-- (JRArrayBlock _Nonnull)ParamsJ NS_SWIFT_UNAVAILABLE("macro method");///< will not execute cause the macro
-- (JRArrayBlock _Nonnull)ColumnsJ NS_SWIFT_UNAVAILABLE("macro method");///< will not execute cause the macro
-- (JRArrayBlock _Nonnull)IgnoreJ NS_SWIFT_UNAVAILABLE("macro method");///< will not execute cause the macro
-- (JRObjectBlock _Nonnull)WhereJ NS_SWIFT_UNAVAILABLE("macro method");///< will not execute cause the macro
-- (JRObjectBlock _Nonnull)OrderJ NS_SWIFT_UNAVAILABLE("macro method");///< will not execute cause the macro
-- (JRObjectBlock _Nonnull)GroupJ NS_SWIFT_UNAVAILABLE("macro method");///< will not execute cause the macro
+- (JRObjectBlock)FromJ NS_SWIFT_UNAVAILABLE("macro method");///< will not execute cause the macro
+- (JRArrayBlock)ParamsJ NS_SWIFT_UNAVAILABLE("macro method");///< will not execute cause the macro
+- (JRArrayBlock)ColumnsJ NS_SWIFT_UNAVAILABLE("macro method");///< will not execute cause the macro
+- (JRArrayBlock)IgnoreJ NS_SWIFT_UNAVAILABLE("macro method");///< will not execute cause the macro
+- (JRObjectBlock)WhereJ NS_SWIFT_UNAVAILABLE("macro method");///< will not execute cause the macro
+- (JRObjectBlock)OrderJ NS_SWIFT_UNAVAILABLE("macro method");///< will not execute cause the macro
+- (JRObjectBlock)GroupJ NS_SWIFT_UNAVAILABLE("macro method");///< will not execute cause the macro
 
 #pragma mark - DEPRECATED
 
@@ -242,8 +242,8 @@ typedef struct {
 @property (nonatomic, strong, readonly, nullable) NSArray<JRQueryCondition *> *queryCondition NS_DEPRECATED_IOS(1_0, 10_0, "unusabled");
 
 
-- (instancetype _Nonnull)Cached NS_DEPRECATED_IOS(1_0, 10_0, "no cached on version 2");
-- (instancetype _Nonnull)NoCached NS_DEPRECATED_IOS(1_0, 10_0, "no cached on version 2");
+- (instancetype)Cached NS_DEPRECATED_IOS(1_0, 10_0, "no cached on version 2");
+- (instancetype)NoCached NS_DEPRECATED_IOS(1_0, 10_0, "no cached on version 2");
 
 @end
 

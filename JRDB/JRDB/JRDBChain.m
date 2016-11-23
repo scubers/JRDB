@@ -574,8 +574,6 @@ static inline JRBoolBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *key
 @end
 
 
-
-
 @implementation JRDBChain (Recursive)
 
 - (id)jr_executeQueryChainRecusively {
