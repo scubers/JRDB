@@ -43,6 +43,8 @@
 
 #define J(_prop_)               (((void)(NO && ((void)[((id)[NSObject new]) _prop_], NO)), @"_"#_prop_))
 
+NS_ASSUME_NONNULL_BEGIN
+
 static inline NSArray * _Nonnull _variableListToArray(id _Nullable first, ...) {
     NSMutableArray *args = [NSMutableArray array];
     if (!first) {
@@ -131,7 +133,7 @@ typedef struct {
 
 
 // value param
-@property (nonatomic, copy, readonly, nonnull   ) JRObjectBlockDefine(T, From);///< sepecific a class for operation
+@property (nonatomic, copy, readonly) JRObjectBlockDefine(T, From);///< sepecific a class for operation
 
 @property (nonatomic, strong, readonly, nullable) NSString          *limitString;
 @property (nonatomic, assign, readonly          ) JRLimit           limitIn;
@@ -143,72 +145,72 @@ typedef struct {
 
 
 @property (nonatomic, strong, readonly, nullable) NSString          *orderBy;
-@property (nonatomic, copy, readonly, nonnull   ) JRObjectBlockDefine(T, Order);///< orderBy condition: parameter is NSString: Order(@"_age")
+@property (nonatomic, copy, readonly) JRObjectBlockDefine(T, Order);///< orderBy condition: parameter is NSString: Order(@"_age")
 
 @property (nonatomic, strong, readonly, nullable) NSString          *groupBy;
-@property (nonatomic, copy, readonly, nonnull   ) JRObjectBlockDefine(T, Group);///< groupBy condition: parameter is NSString: Group(@"_age")
+@property (nonatomic, copy, readonly) JRObjectBlockDefine(T, Group);///< groupBy condition: parameter is NSString: Group(@"_age")
 
 @property (nonatomic, strong, readonly, nullable) NSString          *whereString;
-@property (nonatomic, copy, readonly, nonnull   ) JRObjectBlockDefine(T, Where);///< where condition: parameter is NSString: Where(@"_age > ? and _name like 'L%'")
+@property (nonatomic, copy, readonly) JRObjectBlockDefine(T, Where);///< where condition: parameter is NSString: Where(@"_age > ? and _name like 'L%'")
 
 @property (nonatomic, strong, readonly, nullable) NSString          *whereId;
-@property (nonatomic, copy, readonly, nonnull   ) JRObjectBlockDefine(T, WhereIdIs);///< whereIdIs condition: parameter is NSString: WhereIdIs(@"xxxxxxxxxx")
+@property (nonatomic, copy, readonly) JRObjectBlockDefine(T, WhereIdIs);///< whereIdIs condition: parameter is NSString: WhereIdIs(@"xxxxxxxxxx")
 
 @property (nonatomic, strong, readonly, nullable) id                wherePK;
-@property (nonatomic, copy, readonly, nonnull   ) JRObjectBlockDefine(T, WherePKIs);///< wehrePKIs condition: parameter is id: WherePKIs(obj)
+@property (nonatomic, copy, readonly) JRObjectBlockDefine(T, WherePKIs);///< wehrePKIs condition: parameter is id: WherePKIs(obj)
 
 @property (nonatomic, assign, readonly          ) BOOL              isRecursive;
-@property (nonatomic, copy, readonly, nonnull   ) JRBoolBlockDefine(T, Recursive);///< recursive condition, if the operation should recursive, NO by default
-- (instancetype _Nonnull)Recursively;///< equal to Recursive(YES)
-- (instancetype _Nonnull)UnRecursively;///< equal to Recursive(NO)
+@property (nonatomic, copy, readonly) JRBoolBlockDefine(T, Recursive);///< recursive condition, if the operation should recursive, NO by default
+- (instancetype)Recursively;///< equal to Recursive(YES)
+- (instancetype)UnRecursively;///< equal to Recursive(NO)
 
 @property (nonatomic, assign, readonly          ) BOOL              isSync;
-@property (nonatomic, copy, readonly, nonnull   ) JRBoolBlockDefine(T, Sync);///< sync condition, if the operation should execute on sepecific serial queue and wait on current thread, YES by default
-- (instancetype _Nonnull)UnSafely;///< equal to Sync(NO)
-- (instancetype _Nonnull)Safely;///< equal to Sync(YES)
+@property (nonatomic, copy, readonly) JRBoolBlockDefine(T, Sync);///< sync condition, if the operation should execute on sepecific serial queue and wait on current thread, YES by default
+- (instancetype)UnSafely;///< equal to Sync(NO)
+- (instancetype)Safely;///< equal to Sync(YES)
 
 
 @property (nonatomic, assign, readonly          ) BOOL              isDesc;
-@property (nonatomic, copy, readonly, nonnull   ) JRBoolBlockDefine(T, Desc);///< desc condition, NO by default
-- (instancetype _Nonnull)Descend;///< equal to Desc(YES)
-- (instancetype _Nonnull)Ascend;///< equal to Desc(NO)
+@property (nonatomic, copy, readonly) JRBoolBlockDefine(T, Desc);///< desc condition, NO by default
+- (instancetype)Descend;///< equal to Desc(YES)
+- (instancetype)Ascend;///< equal to Desc(NO)
 
 @property (nonatomic, assign, readonly          ) BOOL              useTransaction;
-@property (nonatomic, copy, readonly, nonnull   ) JRBoolBlockDefine(T, Transaction);///< useTransaction , YES by default
-- (instancetype _Nonnull)NoTransaction;///< equal to Transaction(NO)
-- (instancetype _Nonnull)Transactional;///< equal to Transaction(YES)
+@property (nonatomic, copy, readonly) JRBoolBlockDefine(T, Transaction);///< useTransaction , YES by default
+- (instancetype)NoTransaction;///< equal to Transaction(NO)
+- (instancetype)Transactional;///< equal to Transaction(YES)
 
 // array param
 @property (nonatomic, strong, readonly, nullable) NSArray           *parameters;
-@property (nonatomic, copy, readonly, nonnull   ) JRArrayBlockDefine(T, Params);
+@property (nonatomic, copy, readonly) JRArrayBlockDefine(T, Params);
 
 @property (nonatomic, strong, readonly, nullable) NSArray           *columnsArray;
-@property (nonatomic, copy, readonly, nonnull   ) JRArrayBlockDefine(T, Columns);
+@property (nonatomic, copy, readonly) JRArrayBlockDefine(T, Columns);
 
 @property (nonatomic, strong, readonly, nullable) NSArray           *ignoreArray;
-@property (nonatomic, copy, readonly, nonnull   ) JRArrayBlockDefine(T, Ignore);
+@property (nonatomic, copy, readonly) JRArrayBlockDefine(T, Ignore);
 
 
 // operation
-@property (nonatomic, copy, readonly, nonnull   ) JRArrayBlockDefine(T, Insert);///< InsertBlock parameter is NSArray: Insert(@[obj, obj1])
-@property (nonatomic, copy, readonly, nonnull   ) JRArrayBlockDefine(T, Update);///< UpdateBlock parameter is NSArray: Update(@[obj, obj1])
-@property (nonatomic, copy, readonly, nonnull   ) JRArrayBlockDefine(T, Delete);///< DeleteBlock parameter is NSArray: Delete(@[obj, obj1])
-@property (nonatomic, copy, readonly, nonnull   ) JRArrayBlockDefine(T, SaveOrUpdate);///< SaveOrUpdateBlock parameter is NSArray: SaveOrUpdate(@[obj, obj1])
+@property (nonatomic, copy, readonly) JRArrayBlockDefine(T, Insert);///< InsertBlock parameter is NSArray: Insert(@[obj, obj1])
+@property (nonatomic, copy, readonly) JRArrayBlockDefine(T, Update);///< UpdateBlock parameter is NSArray: Update(@[obj, obj1])
+@property (nonatomic, copy, readonly) JRArrayBlockDefine(T, Delete);///< DeleteBlock parameter is NSArray: Delete(@[obj, obj1])
+@property (nonatomic, copy, readonly) JRArrayBlockDefine(T, SaveOrUpdate);///< SaveOrUpdateBlock parameter is NSArray: SaveOrUpdate(@[obj, obj1])
 
-@property (nonatomic, copy, readonly, nonnull   ) JRObjectBlockDefine(T, InsertOne);///< InsertOneBlock parameter is id<JRPersistent>: InsertOne(obj)
-@property (nonatomic, copy, readonly, nonnull   ) JRObjectBlockDefine(T, UpdateOne);///< UpdateOneBlock parameter is id<JRPersistent>: UpdateOne(obj)
-@property (nonatomic, copy, readonly, nonnull   ) JRObjectBlockDefine(T, DeleteOne);///< DeleteOneBlock parameter is id<JRPersistent>: DeleteOne(obj)
-@property (nonatomic, copy, readonly, nonnull   ) JRObjectBlockDefine(T, SaveOrUpdateOne);///< SaveOrUpdateOneBlock parameter is id<JRPersistent>: SaveOrUpdateOne(obj)
+@property (nonatomic, copy, readonly) JRObjectBlockDefine(T, InsertOne);///< InsertOneBlock parameter is id<JRPersistent>: InsertOne(obj)
+@property (nonatomic, copy, readonly) JRObjectBlockDefine(T, UpdateOne);///< UpdateOneBlock parameter is id<JRPersistent>: UpdateOne(obj)
+@property (nonatomic, copy, readonly) JRObjectBlockDefine(T, DeleteOne);///< DeleteOneBlock parameter is id<JRPersistent>: DeleteOne(obj)
+@property (nonatomic, copy, readonly) JRObjectBlockDefine(T, SaveOrUpdateOne);///< SaveOrUpdateOneBlock parameter is id<JRPersistent>: SaveOrUpdateOne(obj)
 
-@property (nonatomic, copy, readonly, nonnull   ) JRClassBlockDefine(T, DeleteAll);///< DeleteAllBlock parameter is Class<JRPersistent>: DeleteAll([Person class])
-@property (nonatomic, copy, readonly, nonnull   ) JRArrayBlockDefine(T, ColumnsSelect);///< SelectBlock parameter is NSArray; <br/> Usage:<br/> (ColumnsSelect(@[@"_name", @"_age"]))
-@property (nonatomic, copy, readonly, nonnull   ) JRClassBlockDefine(T, CountSelect);///< SelectBlock parameter is NSArray; <br/> Usage:<br/>     1-(CountSelect(@[[Person class]]))
-@property (nonatomic, copy, readonly, nonnull   ) JRClassBlockDefine(T, Select);///< SelectBlock parameter is NSArray; <br/> Usage:<br/>     1-(Select(@[[Person class]]))
+@property (nonatomic, copy, readonly) JRClassBlockDefine(T, DeleteAll);///< DeleteAllBlock parameter is Class<JRPersistent>: DeleteAll([Person class])
+@property (nonatomic, copy, readonly) JRArrayBlockDefine(T, ColumnsSelect);///< SelectBlock parameter is NSArray; <br/> Usage:<br/> (ColumnsSelect(@[@"_name", @"_age"]))
+@property (nonatomic, copy, readonly) JRClassBlockDefine(T, CountSelect);///< SelectBlock parameter is NSArray; <br/> Usage:<br/>     1-(CountSelect(@[[Person class]]))
+@property (nonatomic, copy, readonly) JRClassBlockDefine(T, Select);///< SelectBlock parameter is NSArray; <br/> Usage:<br/>     1-(Select(@[[Person class]]))
 
-@property (nonatomic, copy, readonly, nonnull   ) JRClassBlockDefine(T, CreateTable);///< CreateTableBlock parameter is Class<JRPersistent>: CreateTable([Person class])
-@property (nonatomic, copy, readonly, nonnull   ) JRClassBlockDefine(T, UpdateTable);///< UpdateTableBlock parameter is Class<JRPersistent>: UpdateTable([Person class])
-@property (nonatomic, copy, readonly, nonnull   ) JRClassBlockDefine(T, DropTable);///< DropTableBlock parameter is Class<JRPersistent>: DropTable([Person class])
-@property (nonatomic, copy, readonly, nonnull   ) JRClassBlockDefine(T, TruncateTable);///< TruncateTableBlock parameter is Class<JRPersistent>: TruncateTable([Person class])
+@property (nonatomic, copy, readonly) JRClassBlockDefine(T, CreateTable);///< CreateTableBlock parameter is Class<JRPersistent>: CreateTable([Person class])
+@property (nonatomic, copy, readonly) JRClassBlockDefine(T, UpdateTable);///< UpdateTableBlock parameter is Class<JRPersistent>: UpdateTable([Person class])
+@property (nonatomic, copy, readonly) JRClassBlockDefine(T, DropTable);///< DropTableBlock parameter is Class<JRPersistent>: DropTable([Person class])
+@property (nonatomic, copy, readonly) JRClassBlockDefine(T, TruncateTable);///< TruncateTableBlock parameter is Class<JRPersistent>: TruncateTable([Person class])
 
 
 /**
@@ -219,7 +221,7 @@ typedef struct {
 - (BOOL)updateResult;
 - (NSUInteger)count;
 - (T _Nullable)object;
-- (NSArray<T> * _Nonnull)list;
+- (NSArray<T> *)list;
 
 #pragma mark - macro method will not execute
 
@@ -253,3 +255,5 @@ typedef struct {
 - (BOOL)jr_executeUpdateChainRecusively;
 
 @end
+
+NS_ASSUME_NONNULL_END
