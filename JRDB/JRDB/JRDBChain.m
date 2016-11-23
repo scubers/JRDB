@@ -287,7 +287,11 @@ static inline JRObjectBlock __setTargetToSelf(JRDBChain *self, ChainOperation op
 
 static inline JRObjectBlock __setObjectPropertyToSelf(JRDBChain *self, NSString *keypath) {
     return ^(id value) {
-        if (!value) {
+        if (
+            (![keypath isEqualToString:J(columnsArray)]
+             &&![keypath isEqualToString:J(ignoreArray)]
+             )
+            &&!value) {
             NSLog(@"passing a nil value to keypath: %@", keypath);
             assert(NO);
         }

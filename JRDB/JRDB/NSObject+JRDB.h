@@ -14,6 +14,8 @@
 
 @class FMDatabase;
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface NSObject (JRDB) <JRPersistent>
 
 /**
@@ -23,14 +25,14 @@
 
 #pragma mark - convinence method
 
-- (void)jr_setSingleLinkID:(NSString * _Nullable)ID forKey:(NSString * _Nonnull)key;
-- (NSString * _Nullable)jr_singleLinkIDforKey:(NSString * _Nonnull)key;
+- (void)jr_setSingleLinkID:(NSString * _Nullable)ID forKey:(NSString *)key;
+- (NSString * _Nullable)jr_singleLinkIDforKey:(NSString *)key;
 
-- (void)jr_setParentLinkID:(NSString * _Nullable)ID forKey:(NSString * _Nonnull)key;
-- (NSString * _Nullable)jr_parentLinkIDforKey:(NSString * _Nonnull)key;
+- (void)jr_setParentLinkID:(NSString * _Nullable)ID forKey:(NSString *)key;
+- (NSString * _Nullable)jr_parentLinkIDforKey:(NSString *)key;
 
 
-- (NSMutableDictionary<NSString *,JRDBDidFinishBlock> * _Nonnull)jr_finishBlocks;
+- (NSMutableDictionary<NSString *,JRDBDidFinishBlock> *)jr_finishBlocks;
 
 #pragma mark - save or update
 
@@ -103,21 +105,21 @@
  *
  *  @param ID
  */
-+ (instancetype _Nullable)jr_findByID:(NSString * _Nonnull)ID;
++ (instancetype _Nullable)jr_findByID:(NSString *)ID;
 
 /**
  *  关联查询
  *
  *  @param primaryKey
  */
-+ (instancetype _Nullable)jr_findByPrimaryKey:(id _Nonnull)primaryKey;
++ (instancetype _Nullable)jr_findByPrimaryKey:(id)primaryKey;
 
 /**
  *  关联查询
  *
  *  @return
  */
-+ (NSArray<id<JRPersistent>> * _Nonnull)jr_findAll;
++ (NSArray<id<JRPersistent>> *)jr_findAll;
 
 /**
  *  非关联查询
@@ -125,19 +127,19 @@
  *  @param ID
  *
  */
-+ (instancetype _Nullable)jr_getByID:(NSString * _Nonnull)ID;
++ (instancetype _Nullable)jr_getByID:(NSString *)ID;
 
 /**
  *  非关联查询
  *
  *  @param primaryKey
  */
-+ (instancetype _Nullable)jr_getByPrimaryKey:(id _Nonnull)primaryKey;
++ (instancetype _Nullable)jr_getByPrimaryKey:(id)primaryKey;
 
 /**
  *  非关联查询
  */
-+ (NSArray<id<JRPersistent>> * _Nonnull)jr_getAll;
++ (NSArray<id<JRPersistent>> *)jr_getAll;
 
 
 
@@ -153,7 +155,7 @@
 
 #pragma mark - table message
 
-+ (NSArray<NSString *> * _Nonnull)jr_currentColumns;
++ (NSArray<NSString *> *)jr_currentColumns;
 
 #pragma mark - hooking
 + (void)jr_swizzleSetters4Clazz;
@@ -161,3 +163,5 @@
 
 
 @end
+
+NS_ASSUME_NONNULL_END
