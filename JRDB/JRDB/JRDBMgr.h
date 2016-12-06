@@ -60,31 +60,4 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 
-#pragma mark - Cache DEPRECATED
-
-@interface JRDBMgr (DEPRECATED)
-
-@property (nonatomic, strong, readonly) NSMutableDictionary<NSString *, JRDBQueue *> * queues NS_DEPRECATED_IOS(1_0, 10_0, "no cached in version 2");
-
-@property (nonatomic, strong, nullable) NSMutableDictionary<NSString *, NSMutableDictionary<NSString *, id<JRPersistent>> *> *recursiveCache NS_DEPRECATED_IOS(1_0, 10_0, "no cached in version 2");
-@property (nonatomic, strong, nullable) NSMutableDictionary<NSString *, NSMutableDictionary<NSString *, id<JRPersistent>> *> *unRecursiveCache NS_DEPRECATED_IOS(1_0, 10_0, "no cached in version 2");
-
-/// 获取每个数据库的同步队列 DEPRECATED @see [JRQueueMgr class]
-- (JRDBQueue * _Nullable)queueWithPath:(NSString *)path NS_DEPRECATED_IOS(1_0, 10_0, "see [JRQueueMgr class]");
-
-/// DEPRECATED @see - [id<JRPersistentHandler> jr_update***]
-- (void)updateDefaultDB NS_DEPRECATED_IOS(1_0, 10_0, "unusable - [id<JRPersistentHandler> jr_update***]");
-/// DEPRECATED @see - [id<JRPersistentHandler> jr_update***]
-- (void)updateDB:(id<JRPersistentHandler>)db NS_DEPRECATED_IOS(1_0, 10_0, "unusable - [id<JRPersistentHandler> jr_update***]");
-
-- (void)clearObjCaches NS_DEPRECATED_IOS(1_0, 10_0, "no cached in version 2");
-
-- (NSMutableDictionary<NSString *, id<JRPersistent>> *)recursiveCacheForDBPath:(NSString *)dbpath NS_DEPRECATED_IOS(1_0, 10_0, "no cached in version 2");
-- (NSMutableDictionary<NSString *, id<JRPersistent>> *)unRecursiveCacheForDBPath:(NSString *)dbpath NS_DEPRECATED_IOS(1_0, 10_0, "no cached in version 2");
-
-- (id<JRPersistentHandler> _Nullable)createDBWithPath:(NSString * _Nullable)path NS_DEPRECATED_IOS(1_0, 10_0, "use -[databaseWithPath:]");
-- (void)deleteDBWithPath:(NSString * _Nullable)path NS_DEPRECATED_IOS(1_0, 10_0, "use -[deleteDatabaseWithPath:]");
-
-@end
-
 NS_ASSUME_NONNULL_END

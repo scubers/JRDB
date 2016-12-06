@@ -9,7 +9,7 @@
 #ifndef JRReflectable_h
 #define JRReflectable_h
 
-@class OBJCProperty, OBJCMethod;
+@class OBJCProperty;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -24,16 +24,6 @@ NS_ASSUME_NONNULL_BEGIN
  *  @return properties
  */
 + (NSArray<OBJCProperty *> *)objc_properties;
-
-+ (OBJCProperty * _Nullable)objcPropertyWithName:(NSString *)name;
-
-/**
- *  返回本类的所有methods
- *  @return methods
- */
-+ (NSArray<OBJCMethod *> *)objc_methods;
-
-+ (OBJCMethod * _Nullable)objcMethodWithSel:(SEL)selector;
 
 /**
  *  替换本类的方法

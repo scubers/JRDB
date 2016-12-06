@@ -83,7 +83,7 @@ typedef NS_ENUM(NSInteger, ChainOperation) {
 
 };
 
-@class JRDBChain, JRQueryCondition;
+@class JRDBChain;
 
 
 typedef JRDBChain * _Nonnull (^JRObjectBlock)(id _Nonnull value);
@@ -232,18 +232,6 @@ typedef struct {
 - (JRObjectBlock)WhereJ NS_SWIFT_UNAVAILABLE("macro method");///< will not execute cause the macro
 - (JRObjectBlock)OrderJ NS_SWIFT_UNAVAILABLE("macro method");///< will not execute cause the macro
 - (JRObjectBlock)GroupJ NS_SWIFT_UNAVAILABLE("macro method");///< will not execute cause the macro
-
-#pragma mark - DEPRECATED
-
-@property (nonatomic, assign, readonly) BOOL useCache NS_DEPRECATED_IOS(1_0, 10_0, "no cached on version 2");
-@property (nonatomic, copy, readonly, nonnull) JRBoolBlockDefine(T, Cache) NS_DEPRECATED_IOS(1_0, 10_0, "no cached on version 2");
-@property (nonatomic, copy, readonly, nullable) JRDBChainComplete completeBlock NS_DEPRECATED_IOS(1_0, 10_0, "unusabled");
-@property (nonatomic, copy, readonly, nonnull) JRCompleteBlockDefine(T, Complete) NS_DEPRECATED_IOS(1_0, 10_0, "unusabled");
-@property (nonatomic, strong, readonly, nullable) NSArray<JRQueryCondition *> *queryCondition NS_DEPRECATED_IOS(1_0, 10_0, "unusabled");
-
-
-- (instancetype)Cached NS_DEPRECATED_IOS(1_0, 10_0, "no cached on version 2");
-- (instancetype)NoCached NS_DEPRECATED_IOS(1_0, 10_0, "no cached on version 2");
 
 @end
 

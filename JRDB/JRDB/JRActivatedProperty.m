@@ -10,24 +10,23 @@
 
 @implementation JRActivatedProperty
 
-@synthesize name = _name;
-@synthesize relateionShip = _relateionShip;
 
 + (instancetype)property:(NSString *)name relationShip:(JRRelation)relationShip {
     JRActivatedProperty *property = [JRActivatedProperty new];
-    property->_name = name;
+    property->_propertyName = name;
     property->_relateionShip = relationShip;
     return property;
 }
 
 - (NSString *)description {
-    return [NSString stringWithFormat:@"%@: name:%@, databaseName:%@, databaseType:%@, relation:%zd, clazz:%@"
-            , @"JRActivatedProperty"
-            , self.name
+    return [NSString stringWithFormat:@"JRActivatedProperty: propertyName:%@, ivarName:%@, databaseName:%@, databaseType:%@, relation:%zd, clazz:%@, typeEncoding: %@"
+            , self.propertyName
+            , self.ivarName
             , self.dataBaseName
             , self.dataBaseType
             , (int)self.relateionShip
             , self.clazz
+            , self.typeEncode
             ];
 }
 

@@ -773,9 +773,8 @@
                     if ([one class] == clazz) {// 同类父子关系
                         NSString *condition = [NSString stringWithFormat:@"%@ = ?", ParentLinkColumn(key)];
                         JRSql *sql = [JRSqlGenerator sql4GetColumns:nil
-                                                       byConditions:@[
-                                                                      [JRQueryCondition condition:condition args:@[[one ID]] type:JRQueryConditionTypeAnd]
-                                                                      ]
+                                                        byCondition:condition
+                                                             params:@[[one ID]]
                                                               clazz:clazz
                                                             groupBy:nil
                                                             orderBy:nil
@@ -822,7 +821,7 @@
 - (BOOL)jr_deleteAllRecursively:(Class<JRPersistent> _Nonnull)clazz useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized {
     return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentBaseHandler>  _Nonnull handler) {
         return @([handler jr_executeUseTransaction:useTransaction block:^BOOL(id<JRPersistentBaseHandler>  _Nonnull handler) {
-            JRSql *sql = [JRSqlGenerator sql4GetColumns:nil byConditions:nil clazz:clazz groupBy:nil orderBy:nil limit:nil isDesc:NO table:nil];
+            JRSql *sql = [JRSqlGenerator sql4GetColumns:nil byCondition:nil params:nil clazz:clazz groupBy:nil orderBy:nil limit:nil isDesc:NO table:nil];
             NSArray *array = [((FMDatabase *)handler) jr_getByJRSql:sql sync:synchronized resultClazz:clazz columns:nil];
             return [((FMDatabase *)handler) jr_deleteObjectsRecursively:array useTransaction:useTransaction synchronized:synchronized];
         }]);
@@ -907,9 +906,8 @@
             if ([obj class] == clazz) { // 父子关系 同个类
                 NSString *condition = [NSString stringWithFormat:@"%@ = ?", ParentLinkColumn(key)];
                 JRSql *sql = [JRSqlGenerator sql4GetColumns:nil
-                                               byConditions:@[
-                                                              [JRQueryCondition condition:condition args:@[[obj ID]] type:JRQueryConditionTypeAnd],
-                                                              ]
+                                                byCondition:condition
+                                                     params:@[[obj ID]]
                                                       clazz:clazz
                                                     groupBy:nil
                                                     orderBy:nil

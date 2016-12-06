@@ -25,7 +25,7 @@
 }
 
 + (NSDictionary<NSString *,Class<JRPersistent>> *)jr_singleLinkedPropertyNames {
-    return @{@"_person" : [Person class]};
+    return @{@"person" : [Person class]};
 }
 - (void)dealloc {
     NSLog(@"%@, dealloc", self);
@@ -47,31 +47,31 @@
 
 + (NSArray *)jr_excludePropertyNames {
     return @[
-//             @"_k_data",
-//             @"_l_date",
-             @"_m_date",
+//             @"k_data",
+//             @"l_date",
+             @"m_date",
              ];
 }
 
 + (NSDictionary<NSString *,Class<JRPersistent>> *)jr_singleLinkedPropertyNames {
     return @{
-             @"_card" : [Card class],
-             @"_card1" : [Card class],
-             @"_cccc" : [Card class],
-             @"_son" : [Person class],
+             @"card" : [Card class],
+             @"card1" : [Card class],
+             @"cccc" : [Card class],
+             @"son" : [Person class],
              };
 }
 
 + (NSDictionary<NSString *,Class<JRPersistent>> *)jr_oneToManyLinkedPropertyNames {
     return @{
-             @"_money" : [Money class],
-             @"_children" : [Person class],
-             @"_nnnn" : [Person class],
+             @"money" : [Money class],
+             @"children" : [Person class],
+             @"nnnn" : [Person class],
              };
 }
 
 //+ (NSString *)jr_customPrimarykey {
-//    return @"_i_string";
+//    return @"i_string";
 //}
 //
 //- (id)jr_customPrimarykeyValue {

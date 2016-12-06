@@ -12,8 +12,6 @@
 #import "Person.h"
 #import "JRDBMgr.h"
 #import "FMDB.h"
-//#import "FMDatabase+JRDB.h"
-#import "JRQueryCondition.h"
 #import "NSObject+JRDB.h"
 #import <objc/runtime.h>
 #import "JRDBChain.h"
@@ -43,7 +41,7 @@
 }
 
 - (void)testOneToManySave {
-    id<JRPersistentHandler> db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/mac/Desktop/test.sqlite"];
+    id<JRPersistentHandler> db = [[JRDBMgr shareInstance] databaseWithPath:@"/Users/mac/Desktop/test.sqlite"];
     [[JRDBMgr shareInstance] registerClazzes:@[
                                                [Person class],
                                                [Card class],

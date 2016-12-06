@@ -41,7 +41,6 @@ static JRDBMgr *__shareInstance;
         __shareInstance = [super allocWithZone:zone];
         __shareInstance->_clazzArray = [NSMutableArray array];
         
-        [[NSNotificationCenter defaultCenter] addObserver:__shareInstance selector:@selector(clearObjCaches) name:UIApplicationDidReceiveMemoryWarningNotification object:nil];
 #ifdef DEBUG
         __shareInstance->_debugMode = YES;
 #endif
@@ -174,46 +173,5 @@ static JRDBMgr *__shareInstance;
 
 @end
 
-#pragma mark - Cache DEPRECATED
 
 
-@implementation JRDBMgr (DEPRECATED)
-
-@dynamic queues;
-@dynamic unRecursiveCache;
-@dynamic recursiveCache;
-
-- (void)clearObjCaches {
-    self.unRecursiveCache = nil;
-    self.recursiveCache = nil;
-}
-
-- (NSMutableDictionary<NSString *,id<JRPersistent>> *)recursiveCacheForDBPath:(NSString *)dbpath {
-    return nil;
-}
-
-- (NSMutableDictionary<NSString *,id<JRPersistent>> *)unRecursiveCacheForDBPath:(NSString *)dbpath {
-    return nil;
-}
-
-- (JRDBQueue *)queueWithPath:(NSString *)path {
-    return nil;
-}
-
-- (void)updateDefaultDB {}
-
-- (void)updateDB:(FMDatabase *)db {}
-
-- (id<JRPersistentHandler>)createDBWithPath:(NSString *)path {
-    return [self databaseWithPath:path];
-}
-
-- (void)deleteDBWithPath:(NSString *)path {
-    [self deleteDatabaseWithPath:path];
-}
-
-
-
-
-
-@end

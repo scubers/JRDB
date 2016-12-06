@@ -8,18 +8,16 @@
 
 #import "NSObject+JRDB.h"
 #import <objc/runtime.h>
-//#import "FMDatabase+JRDB.h"
 #import "JRDBMgr.h"
 #import "JRFMDBResultSetHandler.h"
-#import "JRReflectUtil.h"
-#import "JRColumnSchema.h"
 #import "JRDBChain.h"
+#import "JRPersistentUtil.h"
 
 
 @implementation NSObject (JRDB)
 
 + (void)jr_configure {
-    NSArray *activatedProp = [JRReflectUtil activitedProperties4Clazz:self];
+    NSArray *activatedProp = [JRPersistentUtil allPropertesForClass:self];
     objc_setAssociatedObject(self, @selector(jr_activatedProperties), activatedProp, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
@@ -233,181 +231,6 @@
     return J_TruncateTable(self);
 }
 
-#pragma mark - table message
-
-+ (NSArray<NSString *> * _Nonnull)jr_currentColumns {
-    return @[];
-//    NSArray<JRColumnSchema *> * arr = [[JRDBMgr defaultDB] jr_schemasInClazz:self];
-//    NSMutableArray *array = [NSMutableArray array];
-//    [arr enumerateObjectsUsingBlock:^(JRColumnSchema * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-//        [array addObject:obj.name];
-//    }];
-//    return array;
-}
-
-#pragma mark - method hook   now unavaliable  监听setter 由于swift 不适用，暂停使用
-const static NSString *jr_changedArrayKey = @"jr_changedArrayKey";
-- (NSMutableArray *)jr_changedArray {
-    NSMutableArray *array = objc_getAssociatedObject(self, &jr_changedArrayKey);
-    if (!array) {
-        array = [NSMutableArray array];
-        objc_setAssociatedObject(self, &jr_changedArrayKey, array, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    }
-    return array;
-}
-
-+ (void)jr_swizzleSetters4Clazz {
-    unsigned int outCount;
-    Method *list = class_copyMethodList(self, &outCount);
-    for (int i = 0; i < outCount; i++) {
-
-        Method originMethod = list[i];
-        SEL originSelector = method_getName(originMethod);
-        NSString *methodName = [NSString stringWithUTF8String:sel_getName(originSelector)];
-
-        NSString *paramterType = [self jr_type4SetterParameter:originSelector];
-        if (paramterType && [methodName hasPrefix:@"set"]) {
-
-            const char *typeEncoding = method_getTypeEncoding(originMethod);
-
-            NSString *newMethodName = [NSString stringWithFormat:@"jr_%@", methodName];
-
-            SEL newSelector = sel_registerName([newMethodName UTF8String]);
-            IMP newImp = [self jr_swizzleImp4Selector:newSelector withTemplateSelector:originSelector];
-
-            BOOL ret = class_addMethod(self, newSelector, newImp, typeEncoding);
-
-            if (ret) {
-                Method newMethod = class_getInstanceMethod(self, newSelector);
-                method_exchangeImplementations(originMethod, newMethod);
-            }
-        }
-    }
-}
-
-- (NSString *)jr_propertyNameWithSetter:(SEL)setter {
-
-    NSString *setterName = [NSString stringWithUTF8String:sel_getName(setter)];
-    if (![setterName hasPrefix:@"set"]) {
-        return nil;
-    }
-
-    NSArray *ivarNames = [JRReflectUtil propNameAndEncode4Clazz:[self class]].allKeys;
-
-    NSString *name = [setterName substringWithRange:NSMakeRange(3, setterName.length - 4)];
-    NSString *first = [setterName substringWithRange:NSMakeRange(3, 1)].lowercaseString;
-    name = [@"_" stringByAppendingString:[first stringByAppendingString:[name substringFromIndex:1]]];
-
-    if ([ivarNames containsObject:name]) {
-        return name;
-    }
-    name = [name substringFromIndex:1];
-    if ([ivarNames containsObject:name]) {
-        return name;
-    }
-    return nil;
-}
-
-
-#define IMPSomething(typeEncoding, jr_sel, jr_templateSel, jr_clazz, jr_type) \
-if ([paramType isEqualToString:[NSString stringWithUTF8String:@encode(jr_type)]]) { \
-imp = imp_implementationWithBlock(^(id target, jr_type value){ \
-    NSLog(@"new method "); \
-    NSLog(@"target: %@, value: %@ ", target, @(value)); \
-    NSInvocation *inv = [NSInvocation invocationWithMethodSignature:[NSMethodSignature signatureWithObjCTypes:typeEncoding]]; \
-    inv.target = target; \
-    inv.selector = jr_sel; \
-    [inv setArgument:&value atIndex:2]; \
-    [inv invoke]; \
-    NSString *propertyName = [((NSObject *)target) jr_propertyNameWithSetter:jr_templateSel]; \
-    if (![((NSObject *)target).jr_changedArray containsObject:propertyName]) { \
-        [((NSObject *)target).jr_changedArray addObject:propertyName]; \
-    } \
-}); \
-}
-
-#define ElseIMPSomething(typeEncoding, jr_sel, jr_templateSel, jr_clazz, jr_type) \
-else IMPSomething(typeEncoding, jr_sel, jr_templateSel, jr_clazz, jr_type)
-
-#define setMethod(name,type) \
-- (void)jr__set##name:(type)a{}
-
-//paramType
-+ (IMP)jr_swizzleImp4Selector:(SEL)newSelector withTemplateSelector:(SEL)templeteSelector {
-
-    IMP imp = nil;
-
-    NSLog(@"%@", NSStringFromSelector(templeteSelector));
-
-    const char *typeEncoding = method_getTypeEncoding(class_getInstanceMethod(self, templeteSelector));
-    NSString *paramType = [self jr_type4SetterParameter:templeteSelector];
-
-    IMPSomething(typeEncoding, newSelector, templeteSelector, self, int)
-    ElseIMPSomething(typeEncoding, newSelector, templeteSelector, self, unsigned int)
-    ElseIMPSomething(typeEncoding, newSelector, templeteSelector, self, long)
-    ElseIMPSomething(typeEncoding, newSelector, templeteSelector, self, unsigned long)
-    ElseIMPSomething(typeEncoding, newSelector, templeteSelector, self, double)
-    ElseIMPSomething(typeEncoding, newSelector, templeteSelector, self, float)
-    else
-    {
-        imp = imp_implementationWithBlock(^(id<NSObject> target, id value){
-
-            NSLog(@"new method ");
-            NSLog(@"target: %@, value: %@ ", target, value);
-
-            NSInvocation *inv = [NSInvocation invocationWithMethodSignature:[NSMethodSignature signatureWithObjCTypes:typeEncoding]];
-            inv.selector = newSelector;
-            inv.target = target;
-            [inv setArgument:&value atIndex:2];
-            [inv invoke];
-
-            NSString *propertyName = [((NSObject *)target) jr_propertyNameWithSetter:templeteSelector];
-            if (![((NSObject *)target).jr_changedArray containsObject:propertyName]) {
-                [((NSObject *)target).jr_changedArray addObject:propertyName];
-            }
-
-        });
-    }
-    return imp;
-}
-
-#define TypeEncodingEqual(sel, encoding) \
-[[NSString stringWithUTF8String:encoding] isEqualToString:[NSString stringWithUTF8String:[JRReflectUtil typeEncoding4InstanceMethod:sel inClazz:[self class]]]]
-
-+ (NSString *)jr_type4SetterParameter:(SEL)selector {
-    const char *encoding = method_getTypeEncoding(class_getInstanceMethod(self, selector));
-
-    if (TypeEncodingEqual(@selector(jr__setint:), encoding)) {
-        return [NSString stringWithUTF8String:@encode(int)];
-    }
-    if (TypeEncodingEqual(@selector(jr__setunsignedInt:), encoding)) {
-        return [NSString stringWithUTF8String:@encode(unsigned int)];
-    }
-    if (TypeEncodingEqual(@selector(jr__setlong:), encoding)) {
-        return [NSString stringWithUTF8String:@encode(long)];
-    }
-    if (TypeEncodingEqual(@selector(jr__setunsignedLong:), encoding)) {
-        return [NSString stringWithUTF8String:@encode(unsigned long)];
-    }
-    if (TypeEncodingEqual(@selector(jr__setdouble:), encoding)) {
-        return [NSString stringWithUTF8String:@encode(double)];
-    }
-    if (TypeEncodingEqual(@selector(jr__setfloat:), encoding)) {
-        return [NSString stringWithUTF8String:@encode(float)];
-    }
-    if (TypeEncodingEqual(@selector(jr__setid:), encoding)) {
-        return [NSString stringWithUTF8String:@encode(id)];
-    }
-    return nil;
-}
-
-setMethod(int,int)
-setMethod(unsignedInt,unsigned int)
-setMethod(long,long)
-setMethod(unsignedLong,unsigned long)
-setMethod(double,double)
-setMethod(float,float)
-setMethod(id,id)
 
 
 @end

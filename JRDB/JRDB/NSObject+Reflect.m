@@ -36,17 +36,6 @@
     return array;
 }
 
-+ (OBJCProperty *)objcPropertyWithName:(NSString *)name {
-    __block OBJCProperty *p = nil;
-    [[self objc_properties] enumerateObjectsUsingBlock:^(OBJCProperty * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        if ([obj.name isEqualToString:name] || [obj.ivarName isEqualToString:name]) {
-            p = obj;
-            *stop = YES;
-        }
-    }];
-    return p;
-}
-
 + (void)objc_exchangeMethod:(SEL)selector withMethod:(SEL)aSelector {
     Method m1 = class_getInstanceMethod(self, selector);
     Method m2 = class_getInstanceMethod(self, aSelector);

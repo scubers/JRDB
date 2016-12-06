@@ -33,15 +33,6 @@
     
 }
 
-+ (const char *)typeEncoding4InstanceMethod:(SEL)selector inClazz:(Class)clazz {
-    Method method = class_getInstanceMethod(clazz, selector);
-    return method_getTypeEncoding(method);
-}
-
-+ (void)exchangeClazz:(Class)clazz method:(SEL)selector withMethod:(SEL)aSelector {
-    [clazz objc_exchangeMethod:selector withMethod:aSelector];
-}
-
 + (NSArray<JRActivatedProperty *> *)activitedProperties4Clazz:(Class<JRPersistent>)clazz {
     NSDictionary<NSString *, NSString *> *dict = [self propNameAndEncode4Clazz:clazz];
     NSMutableArray *properties = [NSMutableArray array];

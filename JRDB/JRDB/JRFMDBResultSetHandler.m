@@ -29,69 +29,69 @@
         [obj setID:ID];
         
         [props enumerateObjectsUsingBlock:^(JRActivatedProperty * _Nonnull prop, NSUInteger idx, BOOL * _Nonnull stop) {
-            if (isID(prop.name)) { return; }
-            if (columns && ![columns containsObject:prop.name]) { return; }
+            if (isID(prop.ivarName)) { return; }
+            if (columns && ![columns containsObject:prop.ivarName]) { return; }
             
             RetDataType type = [self typeWithEncode:prop.typeEncode];
             switch (type) {
                 case RetDataTypeNSData: {
                     id value = [resultSet dataForColumn:prop.dataBaseName];
-                    [obj setValue:value forKey:prop.name];
+                    [obj setValue:value forKey:prop.propertyName];
                     break;
                 }
                 case RetDataTypeString: {
                     id value = [resultSet stringForColumn:prop.dataBaseName];
-                    [obj setValue:value forKey:prop.name];
+                    [obj setValue:value forKey:prop.propertyName];
                     break;
                 }
                 case RetDataTypeNSNumber: {
                     id value = [NSNumber numberWithDouble:[resultSet doubleForColumn:prop.dataBaseName]];
-                    [obj setValue:value forKey:prop.name];
+                    [obj setValue:value forKey:prop.propertyName];
                     break;
                 }
                 case RetDataTypeInt: {
                     int temp = [resultSet intForColumn:prop.dataBaseName];
-                    [obj setValue:@(temp) forKey:prop.name];
+                    [obj setValue:@(temp) forKey:prop.propertyName];
                     break;
                 }
                 case RetDataTypeUnsignedInt: {
                     unsigned long long temp = [resultSet unsignedLongLongIntForColumn:prop.dataBaseName];
-                    [obj setValue:@(temp) forKey:prop.name];
+                    [obj setValue:@(temp) forKey:prop.propertyName];
                     break;
                 }
                 case RetDataTypeLong: {
                     long temp = [resultSet longForColumn:prop.dataBaseName];
-                    [obj setValue:@(temp) forKey:prop.name];
+                    [obj setValue:@(temp) forKey:prop.propertyName];
                     break;
                 }
                 case RetDataTypeLongLong: {
                     long long temp = [resultSet longLongIntForColumn:prop.dataBaseName];
-                    [obj setValue:@(temp) forKey:prop.name];
+                    [obj setValue:@(temp) forKey:prop.propertyName];
                     break;
                 }
                 case RetDataTypeUnsignedLong: {
                     unsigned long long temp = [resultSet unsignedLongLongIntForColumn:prop.dataBaseName];
-                    [obj setValue:@(temp) forKey:prop.name];
+                    [obj setValue:@(temp) forKey:prop.propertyName];
                     break;
                 }
                 case RetDataTypeUnsignedLongLong:{
                     unsigned long long temp = [resultSet unsignedLongLongIntForColumn:prop.dataBaseName];
-                    [obj setValue:@(temp) forKey:prop.name];
+                    [obj setValue:@(temp) forKey:prop.propertyName];
                     break;
                 }
                 case RetDataTypeDouble: {
                     double temp = [resultSet doubleForColumn:prop.dataBaseName];
-                    [obj setValue:@(temp) forKey:prop.name];
+                    [obj setValue:@(temp) forKey:prop.propertyName];
                     break;
                 }
                 case RetDataTypeFloat: {
                     float temp = [resultSet doubleForColumn:prop.dataBaseName];
-                    [obj setValue:@(temp) forKey:prop.name];
+                    [obj setValue:@(temp) forKey:prop.propertyName];
                     break;
                 }
                 case RetDataTypeNSDate:{
                     NSDate *date = [resultSet dateForColumn:prop.dataBaseName];
-                    [obj setValue:date forKey:prop.name];
+                    [obj setValue:date forKey:prop.propertyName];
                     break;
                 }
                 case RetDataTypeUnsupport:
@@ -195,69 +195,69 @@
         }
 
         [props enumerateObjectsUsingBlock:^(JRActivatedProperty * _Nonnull prop, NSUInteger idx, BOOL * _Nonnull stop) {
-            if (isID(prop.name)) { return; }
-            if (![selectCols containsObject:prop.name]) { return; }
+            if (isID(prop.ivarName)) { return; }
+            if (![selectCols containsObject:prop.ivarName]) { return; }
 
             RetDataType type = [self typeWithEncode:prop.typeEncode];
             switch (type) {
                 case RetDataTypeNSData: {
                     id value = [resultSet dataForColumn:prop.dataBaseName];
-                    [obj setValue:value forKey:prop.name];
+                    [obj setValue:value forKey:prop.propertyName];
                     break;
                 }
                 case RetDataTypeString: {
                     id value = [resultSet stringForColumn:prop.dataBaseName];
-                    [obj setValue:value forKey:prop.name];
+                    [obj setValue:value forKey:prop.propertyName];
                     break;
                 }
                 case RetDataTypeNSNumber: {
                     id value = [NSNumber numberWithDouble:[resultSet doubleForColumn:prop.dataBaseName]];
-                    [obj setValue:value forKey:prop.name];
+                    [obj setValue:value forKey:prop.propertyName];
                     break;
                 }
                 case RetDataTypeInt: {
                     int temp = [resultSet intForColumn:prop.dataBaseName];
-                    [obj setValue:@(temp) forKey:prop.name];
+                    [obj setValue:@(temp) forKey:prop.propertyName];
                     break;
                 }
                 case RetDataTypeUnsignedInt: {
                     unsigned long long temp = [resultSet unsignedLongLongIntForColumn:prop.dataBaseName];
-                    [obj setValue:@(temp) forKey:prop.name];
+                    [obj setValue:@(temp) forKey:prop.propertyName];
                     break;
                 }
                 case RetDataTypeLong: {
                     long temp = [resultSet longForColumn:prop.dataBaseName];
-                    [obj setValue:@(temp) forKey:prop.name];
+                    [obj setValue:@(temp) forKey:prop.propertyName];
                     break;
                 }
                 case RetDataTypeLongLong: {
                     long long temp = [resultSet longLongIntForColumn:prop.dataBaseName];
-                    [obj setValue:@(temp) forKey:prop.name];
+                    [obj setValue:@(temp) forKey:prop.propertyName];
                     break;
                 }
                 case RetDataTypeUnsignedLong: {
                     unsigned long long temp = [resultSet unsignedLongLongIntForColumn:prop.dataBaseName];
-                    [obj setValue:@(temp) forKey:prop.name];
+                    [obj setValue:@(temp) forKey:prop.propertyName];
                     break;
                 }
                 case RetDataTypeUnsignedLongLong:{
                     unsigned long long temp = [resultSet unsignedLongLongIntForColumn:prop.dataBaseName];
-                    [obj setValue:@(temp) forKey:prop.name];
+                    [obj setValue:@(temp) forKey:prop.propertyName];
                     break;
                 }
                 case RetDataTypeDouble: {
                     double temp = [resultSet doubleForColumn:prop.dataBaseName];
-                    [obj setValue:@(temp) forKey:prop.name];
+                    [obj setValue:@(temp) forKey:prop.propertyName];
                     break;
                 }
                 case RetDataTypeFloat: {
                     float temp = [resultSet doubleForColumn:prop.dataBaseName];
-                    [obj setValue:@(temp) forKey:prop.name];
+                    [obj setValue:@(temp) forKey:prop.propertyName];
                     break;
                 }
                 case RetDataTypeNSDate:{
                     NSDate *date = [resultSet dateForColumn:prop.dataBaseName];
-                    [obj setValue:date forKey:prop.name];
+                    [obj setValue:date forKey:prop.propertyName];
                     break;
                 }
                 case RetDataTypeUnsupport:

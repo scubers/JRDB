@@ -12,7 +12,6 @@
 #import "NSObject+JRDB.h"
 #import "JRReflectUtil.h"
 #import "JRSqlGenerator.h"
-#import "JRQueryCondition.h"
 #import "NSObject+Reflect.h"
 #import "JRActivatedProperty.h"
 
@@ -71,7 +70,7 @@ void SqlLog(id sql) {
 
     [ap enumerateObjectsUsingBlock:^(JRActivatedProperty * _Nonnull prop, NSUInteger idx, BOOL * _Nonnull stop) {
         // 如果是关键字'ID' 或 '_ID' 则继续循环
-        if (isID(prop.name)) {return;}
+        if (isID(prop.ivarName)) {return;}
 
         switch (prop.relateionShip) {
             case JRRelationNormal:
@@ -103,7 +102,7 @@ void SqlLog(id sql) {
 
     [ap enumerateObjectsUsingBlock:^(JRActivatedProperty * _Nonnull prop, NSUInteger idx, BOOL * _Nonnull stop) {
         // 如果是关键字'ID' 或 '_ID' 则继续循环
-        if (isID(prop.name)) {return;}
+        if (isID(prop.ivarName)) {return;}
         if ([db columnExists:prop.dataBaseName inTableWithName:tableName]) { return; }
 
         JRSql *jrsql;
@@ -147,7 +146,7 @@ void SqlLog(id sql) {
     
     [ap enumerateObjectsUsingBlock:^(JRActivatedProperty * _Nonnull prop, NSUInteger idx, BOOL * _Nonnull stop) {
         // 如果是关键字'ID' 或 '_ID' 则继续循环
-        if (isID(prop.name)) {return;}
+        if (isID(prop.ivarName)) {return;}
         if (![db columnExists:prop.dataBaseName inTableWithName:tableName]) { return; }
         
         // 拼接语句
@@ -158,18 +157,18 @@ void SqlLog(id sql) {
         switch (prop.relateionShip) {
             case JRRelationNormal:
             {
-                value = [(NSObject *)obj valueForKey:prop.name];
+                value = [(NSObject *)obj valueForKey:prop.propertyName];
                 break;
             }
             case JRRelationOneToOne:
             {
-                NSObject<JRPersistent> *sub = [((NSObject *)obj) valueForKey:prop.name];
+                NSObject<JRPersistent> *sub = [((NSObject *)obj) valueForKey:prop.propertyName];
                 value = [sub ID];
                 break;
             }
             case JRRelationChildren:
             {
-                NSString *parentID = [((NSObject *)obj) jr_parentLinkIDforKey:prop.name];
+                NSString *parentID = [((NSObject *)obj) jr_parentLinkIDforKey:prop.propertyName];
                 value = parentID;
                 break;
             }
@@ -223,31 +222,31 @@ void SqlLog(id sql) {
     
     [ap enumerateObjectsUsingBlock:^(JRActivatedProperty * _Nonnull prop, NSUInteger idx, BOOL * _Nonnull stop) {
         // 如果是关键字'ID' 或 '_ID' 则继续循环
-        if (isID(prop.name)) {return;}
+        if (isID(prop.ivarName)) {return;}
         // 是否在指定更新列中
-        if (columns.count && ![columns containsObject:prop.name]) { return; }
+        if (columns.count && ![columns containsObject:prop.ivarName]) { return; }
         if (![db columnExists:prop.dataBaseName inTableWithName:tableName]) { return; }
         
         id value;
         switch (prop.relateionShip) {
             case JRRelationNormal:
             {
-                value = [(NSObject *)obj valueForKey:prop.name];
+                value = [(NSObject *)obj valueForKey:prop.propertyName];
                 break;
             }
             case JRRelationOneToOne:
             {
-                NSObject<JRPersistent> *sub = [((NSObject *)obj) valueForKey:prop.name];
+                NSObject<JRPersistent> *sub = [((NSObject *)obj) valueForKey:prop.propertyName];
                 if (sub && ![sub ID]) {// 如果有新的子对象，则不更新
                     return;
                 }
-                [((NSObject *)obj) jr_setSingleLinkID:[sub ID] forKey:prop.name];
+                [((NSObject *)obj) jr_setSingleLinkID:[sub ID] forKey:prop.propertyName];
                 value = [sub ID];
                 break;
             }
             case JRRelationChildren:
             {
-                NSString *parentID = [((NSObject *)obj) jr_parentLinkIDforKey:prop.name];
+                NSString *parentID = [((NSObject *)obj) jr_parentLinkIDforKey:prop.propertyName];
                 value = parentID;
                 break;
             }
@@ -275,49 +274,43 @@ void SqlLog(id sql) {
 }
 
 + (JRSql * _Nonnull)sql4GetByIDWithClazz:(Class<JRPersistent> _Nonnull)clazz ID:(NSString *)ID table:(NSString * _Nullable)table {
+    NSString *condition = [NSString stringWithFormat:@"_ID=?"];
     return [self sql4GetColumns:nil
-                   byConditions:@[
-                                  [JRQueryCondition type:JRQueryConditionTypeAnd condition:@"_ID=?", ID, nil]
-                                  ]
+                    byCondition:condition
+                         params:@[ID]
                           clazz:clazz
                         groupBy:nil
                         orderBy:nil
                           limit:nil
                          isDesc:NO
-                          table:table];
+                          table:nil];
 }
 
 + (JRSql *)sql4GetByPrimaryKeyWithClazz:(Class<JRPersistent>)clazz primaryKey:(id _Nonnull)primaryKey table:(NSString * _Nullable)table {
 
-    NSString *string = [NSString stringWithFormat:@"%@=?", [clazz jr_primaryKey]];
+    NSString *condition = [NSString stringWithFormat:@"%@=?", [clazz jr_primaryKey]];
     return [self sql4GetColumns:nil
-                   byConditions:@[
-                                  [JRQueryCondition type:JRQueryConditionTypeAnd condition:string, primaryKey, nil]
-                                  ]
+                    byCondition:condition
+                         params:@[primaryKey]
                           clazz:clazz
                         groupBy:nil
                         orderBy:nil
                           limit:nil
                          isDesc:NO
-                          table:table];
+                          table:nil];
 }
 
 + (JRSql *)sql4FindAll:(Class<JRPersistent>)clazz orderby:(NSString *)orderby isDesc:(BOOL)isDesc table:(NSString * _Nullable)table {
     return [self sql4GetColumns:nil
-                   byConditions:nil
+                    byCondition:nil
+                         params:nil
                           clazz:clazz
                         groupBy:nil
-                        orderBy:orderby
+                        orderBy:nil
                           limit:nil
-                         isDesc:isDesc
-                          table:table];
+                         isDesc:NO
+                          table:nil];
 }
-
-+ (JRSql *)sql4FindByConditions:(NSArray<JRQueryCondition *> *)conditions clazz:(Class<JRPersistent>)clazz groupBy:(NSString *)groupBy orderBy:(NSString *)orderBy limit:(NSString *)limit isDesc:(BOOL)isDesc table:(NSString * _Nullable)table {
-
-    return [self sql4GetColumns:nil byConditions:conditions clazz:clazz groupBy:groupBy orderBy:orderBy limit:limit isDesc:isDesc table:table];
-}
-
 
 #pragma mark - convenience
 
@@ -335,14 +328,16 @@ void SqlLog(id sql) {
     return jrsql;
 }
 
-+ (JRSql * _Nonnull)sql4GetColumns:(NSArray<NSString *> * _Nullable)columns
-                      byConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions
-                             clazz:(Class<JRPersistent> _Nonnull)clazz
-                           groupBy:(NSString * _Nullable)groupBy
-                           orderBy:(NSString * _Nullable)orderBy
-                             limit:(NSString * _Nullable)limit
-                            isDesc:(BOOL)isDesc
-                             table:(NSString * _Nullable)table {
++ (JRSql *)sql4GetColumns:(NSArray<NSString *> *)columns
+              byCondition:(NSString *)condition
+                   params:(NSArray *)params
+                    clazz:(Class<JRPersistent>)clazz
+                  groupBy:(NSString *)groupBy
+                  orderBy:(NSString *)orderBy
+                    limit:(NSString *)limit
+                   isDesc:(BOOL)isDesc
+                    table:(NSString *)table
+{
 
     NSMutableArray *argList = [NSMutableArray array];
     NSString *tableName = table ?: [self getTableNameForClazz:clazz];
@@ -359,13 +354,12 @@ void SqlLog(id sql) {
     
     [sqlString appendFormat:@" from %@ where 1=1 ", tableName];
 
-    for (JRQueryCondition *condition in conditions) {
+    if (condition) {
+        [sqlString appendFormat:@"%@ ", condition];
+    }
 
-        [sqlString appendFormat:@" %@ (%@)", condition.type == JRQueryConditionTypeAnd ? @"and" : @"or", condition.condition];
-
-        if (condition.args.count) {
-            [argList addObjectsFromArray:condition.args];
-        }
+    if (params.count) {
+        [argList addObjectsFromArray:params];
     }
 
     // group
@@ -387,10 +381,10 @@ void SqlLog(id sql) {
 
 #pragma mark - private method
 + (NSString *)typeWithEncodeName:(NSString *)encode {
-    if ([encode isEqualToString:[NSString stringWithUTF8String:@encode(int)]]
-        ||[encode isEqualToString:[NSString stringWithUTF8String:@encode(unsigned int)]]
-        ||[encode isEqualToString:[NSString stringWithUTF8String:@encode(long)]]
-        ||[encode isEqualToString:[NSString stringWithUTF8String:@encode(unsigned long)]]
+    if (strcmp(encode.UTF8String, @encode(int)) == 0
+        || strcmp(encode.UTF8String, @encode(unsigned int)) == 0
+        || strcmp(encode.UTF8String, @encode(long)) == 0
+        || strcmp(encode.UTF8String, @encode(unsigned long)) == 0
         ) {
         return @"INTEGER";
     }
@@ -425,37 +419,6 @@ void SqlLog(id sql) {
 
 
 @implementation JRSqlGenerator (Chain)
-
-+ (JRSql *)sql4ChainCustomizedSelect:(JRDBChain *)chain {
-    NSAssert(chain.targetClazz, @"customized query should specified a class");
-
-    NSMutableArray *selectColumns = [NSMutableArray array];
-    if (chain.operation == CSelectCustomized) {
-        // 默认把主键和ID放入select 列中
-        [selectColumns addObjectsFromArray:chain.selectColumns];
-        if (![selectColumns containsObject:@"_ID"]) {
-            [selectColumns addObject:@"_ID"];
-        }
-        NSString *primaryKey = [((Class<JRPersistent>)chain.target) jr_customPrimarykey];
-        if (primaryKey && ![selectColumns containsObject:primaryKey]) {
-            [selectColumns addObject:primaryKey];
-        }
-    } else {
-        [selectColumns addObject:@"count(1)"];
-    }
-    return [self sql4GetColumns:selectColumns forChain:chain];
-}
-
-+ (JRSql *)sql4GetColumns:(NSArray<NSString *> *)columns forChain:(JRDBChain *)chain {
-    return [self sql4GetColumns:columns
-                   byConditions:chain.queryCondition
-                          clazz:chain.targetClazz
-                        groupBy:chain.groupBy
-                        orderBy:chain.orderBy
-                          limit:chain.limitString
-                         isDesc:chain.isDesc
-                          table:chain.tableName];
-}
 
 + (JRSql *)sql4Chain:(JRDBChain *)chain {
     

@@ -10,7 +10,6 @@
 #import "JRDBMgr.h"
 #import <objc/runtime.h>
 #import "NSObject+Reflect.h"
-#import "JRQueryCondition.h"
 #import "JRSqlGenerator.h"
 #import "JRActivatedProperty.h"
 
@@ -42,7 +41,6 @@
 @synthesize isRecursive    = _isRecursive;
 @synthesize isSync         = _isSync;
 @synthesize useTransaction = _useTransaction;
-@synthesize useCache       = _useCache;
 @synthesize isDesc         = _isDesc;
 @synthesize parameters     = _parameters;
 @synthesize columnsArray   = _columnsArray;
@@ -52,7 +50,6 @@
 - (instancetype)init {
     if (self = [super init]) {
         _isRecursive    = NO;
-        _useCache       = NO;
         _useTransaction = YES;
         _isSync         = YES;
         _db             = [JRDBMgr defaultDB];
@@ -454,28 +451,6 @@ static inline JRBoolBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *key
 - (JRObjectBlock)OrderJ {return nil;}
 - (JRObjectBlock)GroupJ {return nil;}
 
-#pragma mark - DEPRECATED
-
-- (JRBoolBlock)Cache {
-    return __setBoolPropertyToSelf(self, J(useCache));
-}
-
-- (instancetype)Cached {
-    return self.Cache(YES);
-}
-
-- (instancetype)NoCached {
-    return self.Cache(NO);
-}
-
-- (JRDBChain * _Nonnull (^)(JRDBChainComplete _Nonnull))Complete {
-    return ^(JRDBChainComplete complete) {
-        NSAssert(NO, @"JRDBChain complete block has been deprecated, you should not use it");
-        return self;
-    };
-}
-
-
 #pragma clang diagnostic pop
 
 #pragma mark - execution
@@ -563,8 +538,8 @@ static inline JRBoolBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *key
     else if (self.ignoreArray.count) {
         Class<JRPersistent> clazz = self.targetClazz;
         [[clazz jr_activatedProperties] enumerateObjectsUsingBlock:^(JRActivatedProperty * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            if (![self.ignoreArray containsObject:obj.name]) {
-                [columns addObject:obj.name];
+            if (![self.ignoreArray containsObject:obj.ivarName]) {
+                [columns addObject:obj.ivarName];
             }
         }];
     }

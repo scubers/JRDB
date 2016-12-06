@@ -16,8 +16,6 @@
 		5A7AED821D05294B000AD4FE /* JRMiddleTable.m in Sources */ = {isa = PBXBuildFile; fileRef = 5A7AED811D05294B000AD4FE /* JRMiddleTable.m */; };
 		5AA3DB331D067DD800795E80 /* JRDBTestJRDBMgr.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AA3DB321D067DD800795E80 /* JRDBTestJRDBMgr.m */; };
 		5AA5B3DE1CE2D46900360DC0 /* JRFMDBResultSetHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AA5B3DD1CE2D46900360DC0 /* JRFMDBResultSetHandler.m */; };
-		5AA5B3E11CE3120B00360DC0 /* JRQueryCondition.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AA5B3E01CE3120B00360DC0 /* JRQueryCondition.m */; };
-		5AB1BFA91D00115F001595D3 /* JRColumnSchema.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AB1BFA81D00115F001595D3 /* JRColumnSchema.m */; };
 		5AC8B3321CE1DA2500079BC8 /* NSObject+JRDB.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AC8B3311CE1DA2500079BC8 /* NSObject+JRDB.m */; };
 		5ACBEEB21CE1B3A500371E01 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 5ACBEEB11CE1B3A500371E01 /* main.m */; };
 		5ACBEEB51CE1B3A500371E01 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 5ACBEEB41CE1B3A500371E01 /* AppDelegate.m */; };
@@ -39,6 +37,7 @@
 		A876AB9ABC8BE60FC4881BA5 /* libPods-JRDB.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 632830974E0244C0E00157B4 /* libPods-JRDB.a */; };
 		A8A1B2251D033C8C00886403 /* NSObject+Reflect.m in Sources */ = {isa = PBXBuildFile; fileRef = A8A1B2241D033C8C00886403 /* NSObject+Reflect.m */; };
 		A8A1B2281D033CDC00886403 /* OBJCProperty.m in Sources */ = {isa = PBXBuildFile; fileRef = A8A1B2271D033CDC00886403 /* OBJCProperty.m */; };
+		A8C6B41D1DF71B77003A57B3 /* JRPersistentUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = A8C6B41C1DF71B77003A57B3 /* JRPersistentUtil.m */; };
 		A8ED7A521D01CCA3009ED474 /* JRUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = A8ED7A511D01CCA3009ED474 /* JRUtils.m */; };
 /* End PBXBuildFile section */
 
@@ -68,11 +67,7 @@
 		5AA3DB321D067DD800795E80 /* JRDBTestJRDBMgr.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRDBTestJRDBMgr.m; sourceTree = "<group>"; };
 		5AA5B3DC1CE2D46900360DC0 /* JRFMDBResultSetHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRFMDBResultSetHandler.h; sourceTree = "<group>"; };
 		5AA5B3DD1CE2D46900360DC0 /* JRFMDBResultSetHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRFMDBResultSetHandler.m; sourceTree = "<group>"; };
-		5AA5B3DF1CE3120B00360DC0 /* JRQueryCondition.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRQueryCondition.h; sourceTree = "<group>"; };
-		5AA5B3E01CE3120B00360DC0 /* JRQueryCondition.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRQueryCondition.m; sourceTree = "<group>"; };
 		5AA7387B1CE430E20020947F /* JRDB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRDB.h; sourceTree = "<group>"; };
-		5AB1BFA71D00115F001595D3 /* JRColumnSchema.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRColumnSchema.h; sourceTree = "<group>"; };
-		5AB1BFA81D00115F001595D3 /* JRColumnSchema.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRColumnSchema.m; sourceTree = "<group>"; };
 		5AC8B3301CE1DA2500079BC8 /* NSObject+JRDB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+JRDB.h"; sourceTree = "<group>"; };
 		5AC8B3311CE1DA2500079BC8 /* NSObject+JRDB.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+JRDB.m"; sourceTree = "<group>"; };
 		5ACBEEAD1CE1B3A500371E01 /* JRDB.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JRDB.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -112,6 +107,8 @@
 		A8A1B2261D033CDC00886403 /* OBJCProperty.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OBJCProperty.h; sourceTree = "<group>"; };
 		A8A1B2271D033CDC00886403 /* OBJCProperty.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OBJCProperty.m; sourceTree = "<group>"; };
 		A8A1B22C1D03D29900886403 /* JRReflectable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JRReflectable.h; sourceTree = "<group>"; };
+		A8C6B41B1DF71B77003A57B3 /* JRPersistentUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRPersistentUtil.h; sourceTree = "<group>"; };
+		A8C6B41C1DF71B77003A57B3 /* JRPersistentUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRPersistentUtil.m; sourceTree = "<group>"; };
 		A8ED7A501D01CCA3009ED474 /* JRUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRUtils.h; sourceTree = "<group>"; };
 		A8ED7A511D01CCA3009ED474 /* JRUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRUtils.m; sourceTree = "<group>"; };
 		C78394A58BF0B0CB70137A8B /* Pods-JRDBTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-JRDBTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-JRDBTests/Pods-JRDBTests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -227,6 +224,8 @@
 				A8A1B22C1D03D29900886403 /* JRReflectable.h */,
 				A8A1B2231D033C8C00886403 /* NSObject+Reflect.h */,
 				A8A1B2241D033C8C00886403 /* NSObject+Reflect.m */,
+				A8C6B41B1DF71B77003A57B3 /* JRPersistentUtil.h */,
+				A8C6B41C1DF71B77003A57B3 /* JRPersistentUtil.m */,
 				A8A1B2261D033CDC00886403 /* OBJCProperty.h */,
 				A8A1B2271D033CDC00886403 /* OBJCProperty.m */,
 				5ACBEEE81CE1B8B800371E01 /* JRPersistent.h */,
@@ -249,10 +248,6 @@
 				5AD17B331D3354BC00F2B669 /* JRDBChain.m */,
 				5AA5B3DC1CE2D46900360DC0 /* JRFMDBResultSetHandler.h */,
 				5AA5B3DD1CE2D46900360DC0 /* JRFMDBResultSetHandler.m */,
-				5AA5B3DF1CE3120B00360DC0 /* JRQueryCondition.h */,
-				5AA5B3E01CE3120B00360DC0 /* JRQueryCondition.m */,
-				5AB1BFA71D00115F001595D3 /* JRColumnSchema.h */,
-				5AB1BFA81D00115F001595D3 /* JRColumnSchema.m */,
 				A8ED7A501D01CCA3009ED474 /* JRUtils.h */,
 				A8ED7A511D01CCA3009ED474 /* JRUtils.m */,
 				5A7AED801D05294B000AD4FE /* JRMiddleTable.h */,
@@ -320,6 +315,7 @@
 						CreatedOnToolsVersion = 7.3;
 						DevelopmentTeam = FJ535WN7FW;
 						LastSwiftMigration = 0800;
+						ProvisioningStyle = Automatic;
 					};
 					5ACBEEC51CE1B3A500371E01 = {
 						CreatedOnToolsVersion = 7.3;
@@ -474,15 +470,14 @@
 				5AA5B3DE1CE2D46900360DC0 /* JRFMDBResultSetHandler.m in Sources */,
 				A8ED7A521D01CCA3009ED474 /* JRUtils.m in Sources */,
 				5ACBEEB21CE1B3A500371E01 /* main.m in Sources */,
-				5AB1BFA91D00115F001595D3 /* JRColumnSchema.m in Sources */,
 				093FBC6D1D658D04002667CD /* JRDBResult.m in Sources */,
 				5AD17B341D3354BC00F2B669 /* JRDBChain.m in Sources */,
 				5ACBEEEB1CE1B91F00371E01 /* JRSqlGenerator.m in Sources */,
 				5AC8B3321CE1DA2500079BC8 /* NSObject+JRDB.m in Sources */,
 				A8A1B2281D033CDC00886403 /* OBJCProperty.m in Sources */,
 				A8A1B2251D033C8C00886403 /* NSObject+Reflect.m in Sources */,
-				5AA5B3E11CE3120B00360DC0 /* JRQueryCondition.m in Sources */,
 				5A7AED821D05294B000AD4FE /* JRMiddleTable.m in Sources */,
+				A8C6B41D1DF71B77003A57B3 /* JRPersistentUtil.m in Sources */,
 				A80015F71D0EEC29000EA41A /* JRActivatedProperty.m in Sources */,
 				09822BBB1DBF045F00662F49 /* JRQueueMgr.m in Sources */,
 				5AD63F211CE1BE540044ACE6 /* JRReflectUtil.m in Sources */,
@@ -622,6 +617,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = FJ535WN7FW;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
@@ -633,7 +629,7 @@
 				INFOPLIST_FILE = JRDB/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = jrwong.abc;
+				PRODUCT_BUNDLE_IDENTIFIER = jrwong.abcxxxx;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "JRDB/JRDB-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -648,13 +644,14 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = FJ535WN7FW;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = JRDB/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = jrwong.abc;
+				PRODUCT_BUNDLE_IDENTIFIER = jrwong.abcxxxx;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "JRDB/JRDB-Bridging-Header.h";
 				SWIFT_VERSION = 3.0;

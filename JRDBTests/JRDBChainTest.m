@@ -9,7 +9,6 @@
 #import <XCTest/XCTest.h>
 #import "JRDB.h"
 #import "Person.h"
-#import "JRColumnSchema.h"
 #import "NSObject+Reflect.h"
 #import "JRDBChain.h"
 #import <objc/runtime.h>

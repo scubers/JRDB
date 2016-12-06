@@ -27,10 +27,6 @@ NS_ASSUME_NONNULL_BEGIN
  */
 + (NSDictionary<NSString *, NSString *> *)propNameAndEncode4Clazz:(Class<JRPersistent>)clazz;
 
-+ (const char *)typeEncoding4InstanceMethod:(SEL)selector inClazz:(Class)clazz;
-
-+ (void)exchangeClazz:(Class)clazz method:(SEL)selector withMethod:(SEL)aSelector;
-
 + (NSArray<JRActivatedProperty *> *)activitedProperties4Clazz:(Class<JRPersistent>)clazz;
 
 @end

@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "JRPersistent.h"
 
-@class FMDatabase, JRQueryCondition;
+@class FMDatabase;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -31,11 +31,11 @@ typedef NS_ENUM(NSInteger, DBType) {
     DBTypeReal,
     DBTypeText,
     DBTypeBlob
-//    NULL，值是NULL
-//    l  INTEGER，值是有符号整形，根据值的大小以1,2,3,4,6或8字节存放
-//    l  REAL，值是浮点型值，以8字节IEEE浮点数存放
-//    l  TEXT，值是文本字符串，使用数据库编码（UTF-8，UTF-16BE或者UTF-16LE）存放
-//    l  BLOB
+    //    NULL，值是NULL
+    //    l  INTEGER，值是有符号整形，根据值的大小以1,2,3,4,6或8字节存放
+    //    l  REAL，值是浮点型值，以8字节IEEE浮点数存放
+    //    l  TEXT，值是文本字符串，使用数据库编码（UTF-8，UTF-16BE或者UTF-16LE）存放
+    //    l  BLOB
 } ;
 
 @interface JRSqlGenerator : NSObject
@@ -80,9 +80,9 @@ typedef NS_ENUM(NSInteger, DBType) {
  *  columns 需要更新的列，传nil则全部更新
  */
 + (JRSql *)sql4Update:(id<JRPersistent>)obj
-                       columns:(NSArray<NSString *> * _Nullable)columns
-                          toDB:(FMDatabase *)db
-                         table:(NSString * _Nullable)table;
+              columns:(NSArray<NSString *> * _Nullable)columns
+                 toDB:(FMDatabase *)db
+                table:(NSString * _Nullable)table;
 
 
 #pragma mark - delete
@@ -127,42 +127,40 @@ typedef NS_ENUM(NSInteger, DBType) {
  */
 + (JRSql *)sql4FindAll:(Class<JRPersistent>)clazz orderby:(NSString * _Nullable)orderby isDesc:(BOOL)isDesc table:(NSString * _Nullable)table;
 
-/**
- *  根据条件查询
- *
- *  @param conditions 条件数组
- *  @param clazz      类
- *  @param isDesc     是否倒序
- *
- *  @return sql
- */
-+ (JRSql *)sql4FindByConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions
-                                   clazz:(Class<JRPersistent>)clazz
-                                 groupBy:(NSString * _Nullable)groupBy
-                                 orderBy:(NSString * _Nullable)orderBy
-                                   limit:(NSString * _Nullable)limit
-                                  isDesc:(BOOL)isDesc
-                                   table:(NSString * _Nullable)table;
 #pragma mark - conenience
+
 + (JRSql *)sql4CountByPrimaryKey:(id)pk clazz:(Class<JRPersistent>)clazz table:(NSString * _Nullable)table;
 + (JRSql *)sql4CountByID:(NSString *)ID clazz:(Class<JRPersistent>)clazz table:(NSString * _Nullable)table;
 
+
+/**
+ 根据条件查询
+
+ @param columns 要查找的列
+ @param conditions where 语句
+ @param params where 语句的参数
+ @param clazz clazz description
+ @param groupBy groupBy description
+ @param orderBy orderBy description
+ @param limit limit description
+ @param isDesc isDesc description
+ @param table table description
+ */
 + (JRSql *)sql4GetColumns:(NSArray<NSString *> * _Nullable)columns
-                      byConditions:(NSArray<JRQueryCondition *> * _Nullable)conditions
-                             clazz:(Class<JRPersistent>)clazz
-                           groupBy:(NSString * _Nullable)groupBy
-                           orderBy:(NSString * _Nullable)orderBy
-                             limit:(NSString * _Nullable)limit
-                            isDesc:(BOOL)isDesc
-                             table:(NSString * _Nullable)table;
+              byCondition:(NSString * _Nullable)condition
+                   params:(NSArray * _Nullable)params
+                    clazz:(Class<JRPersistent>)clazz
+                  groupBy:(NSString * _Nullable)groupBy
+                  orderBy:(NSString * _Nullable)orderBy
+                    limit:(NSString * _Nullable)limit
+                   isDesc:(BOOL)isDesc
+                    table:(NSString * _Nullable)table;
 
 @end
 
 
 @interface JRSqlGenerator (Chain)
 
-+ (JRSql *)sql4ChainCustomizedSelect:(JRDBChain *)chain;
-+ (JRSql *)sql4GetColumns:(NSArray<NSString *> * _Nullable)columns forChain:(JRDBChain *)chain;
 + (JRSql *)sql4Chain:(JRDBChain *)chain;
 
 @end

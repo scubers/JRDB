@@ -20,7 +20,8 @@ typedef NS_ENUM(NSInteger, JRRelation) {
 @interface JRActivatedProperty : NSObject
 
 @property (nonatomic, assign, readonly) JRRelation relateionShip;
-@property (nonatomic, copy   ) NSString   *name;
+@property (nonatomic, copy   ) NSString   *propertyName;
+@property (nonatomic, copy   ) NSString   *ivarName;
 @property (nonatomic, copy   ) NSString   *dataBaseName;
 @property (nonatomic, copy   ) NSString   *dataBaseType;
 @property (nonatomic, copy   ) NSString   *typeEncode;

@@ -8,7 +8,6 @@
 
 #import <Foundation/Foundation.h>
 #import "JRPersistent.h"
-#import "JRQueryCondition.h"
 
 #define JR_DEFAULTDB [JRDBMgr defaultDB]
 
@@ -152,14 +151,6 @@ NS_ASSUME_NONNULL_BEGIN
 + (BOOL)jr_dropTable;
 
 + (BOOL)jr_truncateTable;
-
-#pragma mark - table message
-
-+ (NSArray<NSString *> *)jr_currentColumns NS_DEPRECATED_IOS(1_0, 10_0, "- unusable");
-
-#pragma mark - hooking
-+ (void)jr_swizzleSetters4Clazz;
-- (NSMutableArray * _Nullable)jr_changedArray;
 
 
 @end
