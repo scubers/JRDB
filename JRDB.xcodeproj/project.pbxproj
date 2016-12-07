@@ -11,8 +11,6 @@
 		096773901DF7DC1800553366 /* JRDBChainCondition.m in Sources */ = {isa = PBXBuildFile; fileRef = 0967738F1DF7DC1800553366 /* JRDBChainCondition.m */; };
 		09822BB61DBF00D400662F49 /* FMDatabase+JRPersistentHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 09822BB51DBF00D400662F49 /* FMDatabase+JRPersistentHandler.m */; };
 		09822BB71DBF00D400662F49 /* FMDatabase+JRPersistentHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 09822BB51DBF00D400662F49 /* FMDatabase+JRPersistentHandler.m */; };
-		09822BBB1DBF045F00662F49 /* JRQueueMgr.m in Sources */ = {isa = PBXBuildFile; fileRef = 09822BBA1DBF045F00662F49 /* JRQueueMgr.m */; };
-		09822BBC1DBF045F00662F49 /* JRQueueMgr.m in Sources */ = {isa = PBXBuildFile; fileRef = 09822BBA1DBF045F00662F49 /* JRQueueMgr.m */; };
 		09943EB51D630FB000C7164D /* JRDBMgrContextTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 09943EB41D630FB000C7164D /* JRDBMgrContextTests.m */; };
 		5A7AED821D05294B000AD4FE /* JRMiddleTable.m in Sources */ = {isa = PBXBuildFile; fileRef = 5A7AED811D05294B000AD4FE /* JRMiddleTable.m */; };
 		5AA3DB331D067DD800795E80 /* JRDBTestJRDBMgr.m in Sources */ = {isa = PBXBuildFile; fileRef = 5AA3DB321D067DD800795E80 /* JRDBTestJRDBMgr.m */; };
@@ -58,8 +56,6 @@
 		09822BB31DBEF58600662F49 /* JRPersistentHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRPersistentHandler.h; sourceTree = "<group>"; };
 		09822BB41DBF00D400662F49 /* FMDatabase+JRPersistentHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "FMDatabase+JRPersistentHandler.h"; sourceTree = "<group>"; };
 		09822BB51DBF00D400662F49 /* FMDatabase+JRPersistentHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "FMDatabase+JRPersistentHandler.m"; sourceTree = "<group>"; };
-		09822BB91DBF045F00662F49 /* JRQueueMgr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRQueueMgr.h; sourceTree = "<group>"; };
-		09822BBA1DBF045F00662F49 /* JRQueueMgr.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRQueueMgr.m; sourceTree = "<group>"; };
 		09943EB41D630FB000C7164D /* JRDBMgrContextTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRDBMgrContextTests.m; sourceTree = "<group>"; };
 		2CE99294CEA1A2C1C484D937 /* libPods-JRDBTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-JRDBTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4C07B4AAB655E10433E17527 /* Pods-JRDB.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-JRDB.release.xcconfig"; path = "Pods/Target Support Files/Pods-JRDB/Pods-JRDB.release.xcconfig"; sourceTree = "<group>"; };
@@ -234,8 +230,6 @@
 				5ACBEEEA1CE1B91F00371E01 /* JRSqlGenerator.m */,
 				5AC8B3301CE1DA2500079BC8 /* NSObject+JRDB.h */,
 				5AC8B3311CE1DA2500079BC8 /* NSObject+JRDB.m */,
-				09822BB91DBF045F00662F49 /* JRQueueMgr.h */,
-				09822BBA1DBF045F00662F49 /* JRQueueMgr.m */,
 				09822BB31DBEF58600662F49 /* JRPersistentHandler.h */,
 				09822BB41DBF00D400662F49 /* FMDatabase+JRPersistentHandler.h */,
 				09822BB51DBF00D400662F49 /* FMDatabase+JRPersistentHandler.m */,
@@ -474,7 +468,6 @@
 				5A7AED821D05294B000AD4FE /* JRMiddleTable.m in Sources */,
 				A8C6B41D1DF71B77003A57B3 /* JRPersistentUtil.m in Sources */,
 				A80015F71D0EEC29000EA41A /* JRActivatedProperty.m in Sources */,
-				09822BBB1DBF045F00662F49 /* JRQueueMgr.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -487,7 +480,6 @@
 				5ACBEECB1CE1B3A500371E01 /* JRDBTests.m in Sources */,
 				A822B2F81DD8505B00A07ED4 /* JRDBTestByKiwi.m in Sources */,
 				5AE115421D364ED400886657 /* JRDBChainTest.m in Sources */,
-				09822BBC1DBF045F00662F49 /* JRQueueMgr.m in Sources */,
 				09822BB71DBF00D400662F49 /* FMDatabase+JRPersistentHandler.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

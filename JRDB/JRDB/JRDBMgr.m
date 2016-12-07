@@ -21,13 +21,12 @@ static NSString * const jrdb_class_registered_key = @"jrdb_class_registered_key"
     id<JRPersistentHandler> _defaultDB;
     NSMutableArray<Class<JRPersistent>> *_clazzArray;
 }
-
+/** 对应的数据库路径，和所管理的连接数 */
+@property (nonatomic, strong) NSMutableDictionary<NSString *, NSMutableArray<id<JRPersistentHandler>> *> *handlers;
 
 @end
 
 @implementation JRDBMgr
-
-@synthesize dbs = _dbs;
 
 #pragma mark - life
 
@@ -36,44 +35,51 @@ static JRDBMgr *__shareInstance;
 + (instancetype)allocWithZone:(struct _NSZone *)zone {
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        
         __shareInstance = [super allocWithZone:zone];
-        __shareInstance->_clazzArray = [NSMutableArray array];
-        
-#ifdef DEBUG
-        __shareInstance->_debugMode = YES;
-#endif
     });
     return __shareInstance;
 }
 
 + (instancetype)shareInstance {
+    if (__shareInstance) return __shareInstance;
     return [[self alloc] init];
+}
+
+- (instancetype)init {
+    if (self = [super init]) {
+        _clazzArray = [NSMutableArray arrayWithCapacity:1];
+        _maxConnectionCount = 5;
+#ifdef DEBUG
+        _debugMode = YES;
+#endif
+    }
+    return self;
 }
 
 #pragma mark - database operation
 
-+ (id<JRPersistentHandler>)defaultDB {
-    return [[self shareInstance] defaultDB];
-}
-
-- (id<JRPersistentHandler>)databaseWithPath:(NSString *)path {
-    id<JRPersistentHandler> db = self.dbs[path];
-    if (!db) {
-        db = [FMDatabase databaseWithPath:path];
-        if (db) {
-            [self.dbs setObject:db forKey:path];
-            [db jr_openSynchronized:YES];
+- (id<JRPersistentHandler>)getHandler {
+    @synchronized (self) {
+        NSString *path = self.defaultDatabasePath;
+        NSMutableArray<id<JRPersistentHandler>> *connections = self.handlers[path];
+        if (!connections) {
+            connections = [NSMutableArray arrayWithCapacity:1];
+            _handlers[path] = connections;
         }
+        
+        if (connections.count < _maxConnectionCount) {
+            FMDatabase *db = [FMDatabase databaseWithPath:path];
+            [db open];
+            [connections addObject:db];
+        }
+        return connections[(int)arc4random_uniform((int)_handlers.count)];
     }
-    return db;
 }
 
 - (void)deleteDatabaseWithPath:(NSString *)path {
-    id<JRPersistentHandler> db = self.dbs[path];
-    if (db) {
-        [db jr_closeSynchronized:YES];
-    }
+    [self.handlers[path] enumerateObjectsUsingBlock:^(id<JRPersistentHandler>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [obj jr_closeSynchronized:YES];
+    }];
     NSFileManager *mgr = [NSFileManager defaultManager];
     [mgr removeItemAtPath:path error:nil];
 }
@@ -97,44 +103,46 @@ static JRDBMgr *__shareInstance;
     return _clazzArray;
 }
 
-- (void)closeDatabase:(id<JRPersistentHandler>)database {
-    [self closeDatabaseWithPath:database.handlerIdentifier];
-}
-
 - (void)closeDatabaseWithPath:(NSString *)path {
-    [self.dbs[path] jr_closeSynchronized:YES];
+    [self.handlers[path] enumerateObjectsUsingBlock:^(id<JRPersistentHandler>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [obj jr_closeSynchronized:YES];
+    }];
 }
 
 - (void)close {
-    [self.dbs enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, id<JRPersistentHandler> _Nonnull obj, BOOL * _Nonnull stop) {
-        [self closeDatabase:obj];
+    [self.handlers enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, NSMutableArray<id<JRPersistentHandler>> * _Nonnull obj, BOOL * _Nonnull stop) {
+       [obj enumerateObjectsUsingBlock:^(id<JRPersistentHandler>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+           [obj jr_closeSynchronized:YES];
+       }];
     }];
 }
 
 #pragma mark - lazy load
 
-- (id<JRPersistentHandler>)defaultDB {
-    if (!_defaultDB) {
-        _defaultDB = [self databaseWithPath:[self _defaultPath]];
+@synthesize defaultDatabasePath = _defaultDatabasePath;
+
+- (NSString *)defaultDatabasePath {
+    if (!_defaultDatabasePath) {
+        _defaultDatabasePath = [self _defaultPath];
     }
-    return _defaultDB;
+    return _defaultDatabasePath;
 }
 
-- (void)setDefaultDB:(id<JRPersistentHandler>)defaultDB {
-    if (_defaultDB == defaultDB) {
-        return;
-    }
-    [self closeDatabase:_defaultDB];
-    _defaultDB = defaultDB;
-    [_defaultDB jr_openSynchronized:YES];
+- (void)setDefaultDatabasePath:(NSString *)defaultDatabasePath {
+    NSString *oldPath = _defaultDatabasePath;
+    _defaultDatabasePath = [defaultDatabasePath copy];
+    [self closeDatabaseWithPath:oldPath];
 }
 
-- (NSMutableDictionary<NSString *,id<JRPersistentHandler>> *)dbs {
-    if (!_dbs) {
-        _dbs = [NSMutableDictionary dictionary];
+- (NSMutableDictionary<NSString *, NSMutableArray<id<JRPersistentHandler>> *> *)handlers {
+    if (!_handlers) {
+        _handlers = [[NSMutableDictionary<NSString *, NSMutableArray<id<JRPersistentHandler>> *> alloc] init];
     }
-    return _dbs;
+    return _handlers;
 }
+
+
+#pragma mark - private method
 
 - (void)clearMidTableRubbishDataForDB:(id<JRPersistentHandler>)db {
     
@@ -150,9 +158,6 @@ static JRDBMgr *__shareInstance;
         }
     }];
 }
-
-
-#pragma mark - private method
 
 - (NSString *)_defaultPath {
     NSFileManager *mgr = [NSFileManager defaultManager];

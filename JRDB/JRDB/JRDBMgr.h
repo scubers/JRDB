@@ -16,9 +16,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface JRDBMgr : NSObject
 
-@property (nonatomic, strong, readonly) NSMutableDictionary<NSString *, id<JRPersistentHandler>> * dbs;///< managered dbs
+@property (nonatomic, strong, nullable) NSString *defaultDatabasePath;///< default database path
 
-@property (nonatomic, strong, nullable) id<JRPersistentHandler> defaultDB;///< default db
+@property (nonatomic, assign) int maxConnectionCount;///< connetion count, 5 by default
 
 @property (nonatomic, assign) BOOL debugMode;///< print sql if YES;
 
@@ -26,28 +26,23 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark - database operation
 
-+ (id<JRPersistentHandler>)defaultDB;
-- (id<JRPersistentHandler> _Nullable)databaseWithPath:(NSString * _Nullable)path;
+/** get a database handler from the connection pool */
+- (id<JRPersistentHandler>)getHandler;
+
+/** physicaly delete the database */
 - (void)deleteDatabaseWithPath:(NSString * _Nullable)path;
 
 #pragma mark - logic operation
 
-/**
- 在这里注册的类，使用本框架的只能操作已注册的类
- @param clazz 类名
- */
+/** register classes, you can only use the class that registered here */
 - (void)registerClazz:(Class<JRPersistent>)clazz;
 - (void)registerClazzes:(NSArray<Class<JRPersistent>> *)clazzArray;
-- (NSArray<Class> *)registeredClazz;
 
+- (NSArray<Class<JRPersistent>> *)registeredClazz;
 
-/**
- 关闭所有的数据库以及队列, 一般使用在app退出
- */
+/** close the database, you should call this when app exit */
 - (void)close;
 - (void)closeDatabaseWithPath:(NSString *)path;
-- (void)closeDatabase:(id<JRPersistentHandler>)database;
-
 
 /**
  清理中间表的缓存垃圾

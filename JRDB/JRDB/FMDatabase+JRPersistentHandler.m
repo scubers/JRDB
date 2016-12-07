@@ -6,7 +6,6 @@
 //  Copyright © 2016年 Jrwong. All rights reserved.
 //
 
-#import "JRQueueMgr.h"
 #import "JRPersistent.h"
 #import "NSObject+JRDB.h"
 #import "JRMiddleTable.h"
@@ -15,6 +14,7 @@
 #import "FMDatabase+JRPersistentHandler.h"
 #import "JRPersistentUtil.h"
 #import "JRActivatedProperty.h"
+#import <objc/runtime.h>
 
 #define AssertRegisteredClazz(clazz) NSAssert([clazz isRegistered], @"class: %@ should be registered in JRDBMgr", clazz)
 
@@ -44,15 +44,16 @@
     }] boolValue];
 }
 
-- (NSString *)handlerIdentifier {
+- (NSString *)jr_handlerIdentifier {
     return self.databasePath;
 }
 
 - (void)jr_inQueue:(void (^)(id<JRPersistentBaseHandler> _Nonnull))block {
-    dispatch_queue_t queue = [[JRQueueMgr shared] queueWithIdentifier:self.handlerIdentifier];
-    dispatch_sync(queue, ^{
+    NSOperation *operation = [NSBlockOperation blockOperationWithBlock:^{
         block(self);
-    });
+    }];
+    [self.jr_operationQueue addOperation:operation];
+    [operation waitUntilFinished];
 }
 
 - (BOOL)jr_inTransaction:(void (^)(id<JRPersistentBaseHandler> _Nonnull, BOOL * _Nonnull))block {
@@ -73,6 +74,7 @@
     return !rollback;
 }
 
+
 - (BOOL)jr_executeUseTransaction:(BOOL)useTransaction block:(BOOL (^)(id<JRPersistentBaseHandler> _Nonnull))block {
     if (useTransaction) {
         if ([self inTransaction]) {
@@ -84,7 +86,9 @@
             return NO;
         }
     }
+    
     BOOL flag = block(self);
+    
     if (useTransaction) {
         if (flag) {
             return [self commit];
@@ -97,7 +101,7 @@
 }
 
 - (id)jr_executeSync:(BOOL)sync block:(id  _Nullable (^)(id<JRPersistentBaseHandler> _Nonnull))block {
-    if (sync && ![[JRQueueMgr shared] isInCurrentQueue:self.handlerIdentifier]) {
+    if (sync && ![[NSOperationQueue currentQueue] isEqual:self.jr_operationQueue]) {
         __block id result;
         [self jr_inQueue:^(id<JRPersistentBaseHandler>  _Nonnull handler) {
             result = block(handler);
@@ -114,6 +118,16 @@
 
 - (id _Nonnull)jr_executeQuery:(JRSql * _Nonnull)sql {
     return [self executeQuery:sql.sqlString withArgumentsInArray:sql.args];
+}
+
+- (NSOperationQueue *)jr_operationQueue {
+    NSOperationQueue *queue = objc_getAssociatedObject(self, _cmd);
+    if (!queue) {
+        queue = [[NSOperationQueue alloc] init];
+        queue.maxConcurrentOperationCount = 1;
+        objc_setAssociatedObject(self, _cmd, queue, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    }
+    return queue;
 }
 
 @end

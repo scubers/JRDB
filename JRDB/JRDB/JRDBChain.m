@@ -52,13 +52,15 @@
         _isRecursive    = NO;
         _useTransaction = YES;
         _isSync         = YES;
-        _db             = [JRDBMgr defaultDB];
         _limitIn        = (JRLimit){-1, -1};
     }
     return self;
 }
 
 - (JRDBResult *)exe {
+    
+    if (!_db) _db = [JRDBMgr shareInstance].getHandler; // 延迟加载数据库
+    
     if (!self.target && !self.targetArray.count && !self.targetClazz) {
         NSLog(@"chain excute error, target or targetArray or targetClazz is nil");
         return nil;

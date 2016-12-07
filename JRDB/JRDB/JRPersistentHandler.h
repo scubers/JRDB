@@ -33,7 +33,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @required
 
-- (NSString *)handlerIdentifier;
+@property (nonatomic, strong) NSOperationQueue *jr_operationQueue;
+
+- (NSString *)jr_handlerIdentifier;
 
 - (BOOL)jr_openSynchronized:(BOOL)synchronized;
 

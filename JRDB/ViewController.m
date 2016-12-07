@@ -41,13 +41,12 @@
 }
 
 - (void)testOneToManySave {
-    id<JRPersistentHandler> db = [[JRDBMgr shareInstance] databaseWithPath:@"/Users/mac/Desktop/test.sqlite"];
+    [[JRDBMgr shareInstance] setDefaultDatabasePath:@"/Users/mac/Desktop/test.sqlite"];
     [[JRDBMgr shareInstance] registerClazzes:@[
                                                [Person class],
                                                [Card class],
                                                [Money class],
                                                ]];
-    [JRDBMgr shareInstance].defaultDB = db;
     [JRDBMgr shareInstance].debugMode = NO;
 
     Person *p = [self createPerson:1 name:nil];

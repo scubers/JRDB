@@ -74,9 +74,9 @@ class AViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 //        let db = JRDBMgr.shareInstance().createDB(withPath: "/Users/mac/Desktop/test.sqlite")
-        let db = JRDBMgr.shareInstance().database(withPath: "/Users/mac/Desktop/test.sqlite")
-        JRDBMgr.shareInstance().defaultDB = db
-        
+        JRDBMgr.shareInstance().defaultDatabasePath = "/Users/mac/Desktop/test.sqlite";
+        let db = JRDBMgr.shareInstance().getHandler()
+        print(db);
 //        test1Cycle()
 //        testFindByID()
 //        testThreeNodeCycle()
