@@ -12,6 +12,8 @@ GitHub: [sucbers](https://github.com/scubers)
 
 Feedback: [jr-wong@qq.com](mailto:jrwong@qq.com)
 
+有问题或者bug欢迎随时issues我，或者邮件。感谢使用
+
 ---
 
 # 描述（Description）
@@ -121,16 +123,16 @@ pod 'JRDB'
 # 表操作（TableOperation）
 
 ### 建表 
-`J_CreateTable(Person).updateResult`
+`J_CreateTable(Person)`
 ### 更新表
 
 - 更新表时只会添加字段，不会删除或更新字段名，有需要的话需要自行写sql语句解决
 
-`J_UpdateTable(Person).updateResult`
+`J_UpdateTable(Person)`
 ### 删除表
-`J_DropTable(Person).updateResult`
+`J_DropTable(Person)`
 ### 重建表
-`J_TruncateTable(Person).updateResult`
+`J_TruncateTable(Person)`
 
 ---
 
