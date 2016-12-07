@@ -11,6 +11,7 @@
 #import "JRDBResult.h"
 #import "JRSqlGenerator.h"
 #import "JRPersistentHandler.h"
+#import "JRDBChainCondition.h"
 
 @class JRDBChain;
 
@@ -20,9 +21,9 @@
 #define J_SelectCount(_arg_)    ([JRDBChain new].CountSelect([_arg_ class]))
 #define J_SelectColumns(...)    ([JRDBChain new].ColumnsSelect(_variableListToArray(__VA_ARGS__, 0)))
 
-#define J_Insert(...)           ([JRDBChain new].Insert(_variableListToArray(__VA_ARGS__, 0)))
-#define J_Update(...)           ([JRDBChain new].Update(_variableListToArray(__VA_ARGS__, 0)))
-#define J_Delete(...)           ([JRDBChain new].Delete(_variableListToArray(__VA_ARGS__, 0)))
+#define J_Insert(...) ([JRDBChain new].Insert(_variableListToArray(__VA_ARGS__, 0)))
+#define J_Update(...) ([JRDBChain new].Update(_variableListToArray(__VA_ARGS__, 0)))
+#define J_Delete(...) ([JRDBChain new].Delete(_variableListToArray(__VA_ARGS__, 0)))
 #define J_SaveOrUpdate(...)     ([JRDBChain new].SaveOrUpdate(_variableListToArray(__VA_ARGS__, 0)))
 
 #define J_DeleteAll(_arg_)      ([JRDBChain new].DeleteAll([_arg_ class]))
@@ -32,16 +33,16 @@
 #define J_DropTable(_arg_)      ([JRDBChain new].DropTable([_arg_ class])).updateResult
 #define J_TruncateTable(_arg_)  ([JRDBChain new].TruncateTable([_arg_ class])).updateResult
 
-#define ParamsJ(...)            Params((_variableListToArray(__VA_ARGS__, 0)))
-#define ColumnsJ(...)           Columns((_variableListToArray(__VA_ARGS__, 0)))
-#define IgnoreJ(...)            Ignore((_variableListToArray(__VA_ARGS__, 0)))
+#define ParamsJ(...)  Params((_variableListToArray(__VA_ARGS__, 0)))
+#define ColumnsJ(...) Columns((_variableListToArray(__VA_ARGS__, 0)))
+#define IgnoreJ(...)  Ignore((_variableListToArray(__VA_ARGS__, 0)))
 
-#define FromJ(_arg_)            From([_arg_ class])
-#define WhereJ(_arg_)           Where(@#_arg_)
-#define OrderJ(_prop_)          Order(J(_prop_))
-#define GroupJ(_prop_)          Group(J(_prop_))
+#define FromJ(_arg_)  From([_arg_ class])
+#define WhereJ(_arg_) Where(@#_arg_)
+#define OrderJ(_prop_)Order(J(_prop_))
+#define GroupJ(_prop_)Group(J(_prop_))
 
-#define J(_prop_)               (((void)(NO && ((void)[((id)[NSObject new]) _prop_], NO)), @#_prop_))
+#define J(_prop_)     (((void)(NO && ((void)[((id)[NSObject new]) _prop_], NO)), @#_prop_))
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -57,7 +58,7 @@ static inline NSArray * _Nonnull _variableListToArray(id _Nullable first, ...) {
     while( (arg = va_arg(valist,id)) )
     {
         if ( arg ){
-            [args addObject:arg];
+  [args addObject:arg];
         }
     }
     return [args copy];
@@ -135,8 +136,8 @@ typedef struct {
 // value param
 @property (nonatomic, copy, readonly) JRObjectBlockDefine(T, From);///< sepecific a class for operation
 
-@property (nonatomic, strong, readonly, nullable) NSString          *limitString;
-@property (nonatomic, assign, readonly          ) JRLimit           limitIn;
+@property (nonatomic, strong, readonly, nullable) NSString*limitString;
+@property (nonatomic, assign, readonly) JRLimit limitIn;
 @property (nonatomic, strong, readonly) JRLimitBlock      Limit;///< limit condition: Limit(start, length)
 
 
@@ -144,50 +145,50 @@ typedef struct {
 @property (nonatomic, copy, readonly  ) JRObjectBlockDefine(T, InDB);///< the database : parameter is id<JRPersistentBaseHandler>: InDB(db)
 
 
-@property (nonatomic, strong, readonly, nullable) NSString          *orderBy;
+@property (nonatomic, strong, readonly, nullable) NSString*orderBy;
 @property (nonatomic, copy, readonly) JRObjectBlockDefine(T, Order);///< orderBy condition: parameter is NSString: Order(@"_age")
 
-@property (nonatomic, strong, readonly, nullable) NSString          *groupBy;
+@property (nonatomic, strong, readonly, nullable) NSString*groupBy;
 @property (nonatomic, copy, readonly) JRObjectBlockDefine(T, Group);///< groupBy condition: parameter is NSString: Group(@"_age")
 
-@property (nonatomic, strong, readonly, nullable) NSString          *whereString;
+@property (nonatomic, strong, readonly, nullable) NSString*whereString;
 @property (nonatomic, copy, readonly) JRObjectBlockDefine(T, Where);///< where condition: parameter is NSString: Where(@"_age > ? and _name like 'L%'")
 
-@property (nonatomic, strong, readonly, nullable) NSString          *whereId;
+@property (nonatomic, strong, readonly, nullable) NSString*whereId;
 @property (nonatomic, copy, readonly) JRObjectBlockDefine(T, WhereIdIs);///< whereIdIs condition: parameter is NSString: WhereIdIs(@"xxxxxxxxxx")
 
-@property (nonatomic, strong, readonly, nullable) id                wherePK;
+@property (nonatomic, strong, readonly, nullable) id      wherePK;
 @property (nonatomic, copy, readonly) JRObjectBlockDefine(T, WherePKIs);///< wehrePKIs condition: parameter is id: WherePKIs(obj)
 
-@property (nonatomic, assign, readonly          ) BOOL              isRecursive;
+@property (nonatomic, assign, readonly) BOOL    isRecursive;
 @property (nonatomic, copy, readonly) JRBoolBlockDefine(T, Recursive);///< recursive condition, if the operation should recursive, NO by default
 - (instancetype)Recursively;///< equal to Recursive(YES)
 - (instancetype)UnRecursively;///< equal to Recursive(NO)
 
-@property (nonatomic, assign, readonly          ) BOOL              isSync;
+@property (nonatomic, assign, readonly) BOOL    isSync;
 @property (nonatomic, copy, readonly) JRBoolBlockDefine(T, Sync);///< sync condition, if the operation should execute on sepecific serial queue and wait on current thread, YES by default
 - (instancetype)UnSafely;///< equal to Sync(NO)
 - (instancetype)Safely;///< equal to Sync(YES)
 
 
-@property (nonatomic, assign, readonly          ) BOOL              isDesc;
+@property (nonatomic, assign, readonly) BOOL    isDesc;
 @property (nonatomic, copy, readonly) JRBoolBlockDefine(T, Desc);///< desc condition, NO by default
 - (instancetype)Descend;///< equal to Desc(YES)
 - (instancetype)Ascend;///< equal to Desc(NO)
 
-@property (nonatomic, assign, readonly          ) BOOL              useTransaction;
+@property (nonatomic, assign, readonly) BOOL    useTransaction;
 @property (nonatomic, copy, readonly) JRBoolBlockDefine(T, Transaction);///< useTransaction , YES by default
 - (instancetype)NoTransaction;///< equal to Transaction(NO)
 - (instancetype)Transactional;///< equal to Transaction(YES)
 
 // array param
-@property (nonatomic, strong, readonly, nullable) NSArray           *parameters;
+@property (nonatomic, strong, readonly, nullable) NSArray *parameters;
 @property (nonatomic, copy, readonly) JRArrayBlockDefine(T, Params);
 
-@property (nonatomic, strong, readonly, nullable) NSArray           *columnsArray;
+@property (nonatomic, strong, readonly, nullable) NSArray *columnsArray;
 @property (nonatomic, copy, readonly) JRArrayBlockDefine(T, Columns);
 
-@property (nonatomic, strong, readonly, nullable) NSArray           *ignoreArray;
+@property (nonatomic, strong, readonly, nullable) NSArray *ignoreArray;
 @property (nonatomic, copy, readonly) JRArrayBlockDefine(T, Ignore);
 
 
@@ -212,6 +213,12 @@ typedef struct {
 @property (nonatomic, copy, readonly) JRClassBlockDefine(T, DropTable);///< DropTableBlock parameter is Class<JRPersistent>: DropTable([Person class])
 @property (nonatomic, copy, readonly) JRClassBlockDefine(T, TruncateTable);///< TruncateTableBlock parameter is Class<JRPersistent>: TruncateTable([Person class])
 
+#pragma mark conditions
+
+@property (nonatomic, strong) NSMutableArray<JRDBChainCondition *> *conditions;
+
+- (JRDBChainCondition *(^)(NSString *propName))And;
+- (JRDBChainCondition *(^)(id param))Or;
 
 /**
  the method that execute the operation

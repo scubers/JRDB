@@ -13,7 +13,7 @@
 #import "JRSqlGenerator.h"
 #import "NSObject+Reflect.h"
 #import "JRActivatedProperty.h"
-#
+#import "JRPersistentUtil.h"
 
 @implementation JRSql
 
@@ -426,16 +426,30 @@ void SqlLog(id sql) {
     NSAssert(!(chain.whereString.length && chain.wherePK), @"where condition should not hold more than one!!!");
     NSAssert(!(chain.whereId.length && chain.wherePK), @"where condition should not hold more than one!!!");
     
-    if (chain.whereString.length) {
+    
+    if (chain.whereString.length) { // where 语句
         [sqlString appendFormat:@" and (%@)", chain.whereString];
         [argList addObjectsFromArray:chain.parameters];
-    } else if (chain.whereId.length) {
+        
+    } else if (chain.whereId.length) {// where id = ? 语句
         [sqlString appendFormat:@" and ( %@ = ?)", DBIDKey];
         [argList addObject:chain.whereId];
-    } else if (chain.wherePK) {
+        
+    } else if (chain.wherePK) { // where pk = ? 语句
         NSString *pk = [chain.targetClazz jr_primaryKey];
         [sqlString appendFormat:@" and ( %@ = ?)", pk];
         [argList addObject:chain.wherePK];
+        
+    } else if (chain.conditions.count) {
+        [chain.conditions enumerateObjectsUsingBlock:^(JRDBChainCondition * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            NSString *sql = [NSString stringWithFormat:@" %@ (%@ %@ ?) "
+                             , obj.typeString
+                             , [JRPersistentUtil activityWithPropertyName:obj.propName inClass:chain.targetClazz]
+                             , [obj operatorString]
+                             ];
+            [sqlString appendFormat:@"%@", sql];
+            [argList addObject:obj.param];
+        }];
     }
     
     // group

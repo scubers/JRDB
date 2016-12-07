@@ -387,6 +387,28 @@ static inline JRBoolBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *key
     return self.Desc(NO);
 }
 
+#pragma mark - conditions
+
+- (NSMutableArray<JRDBChainCondition *> *)conditions {
+    if (!_conditions) {
+        _conditions = [NSMutableArray array];
+    }
+    return _conditions;
+}
+
+- (JRDBChainCondition * _Nonnull (^)(NSString * _Nonnull))And {
+    JRDBChainCondition *con = [JRDBChainCondition chainConditionWithChain:self type:JRDBChainConditionType_And];
+    [self.conditions addObject:con];
+    return con.key;
+}
+
+- (JRDBChainCondition * _Nonnull (^)(id _Nonnull))Or {
+    JRDBChainCondition *con = [JRDBChainCondition chainConditionWithChain:self type:JRDBChainConditionType_Or];
+    NSAssert(self.conditions.count, @" warning: 'Or' operator should not be the first condition!!!");
+    [self.conditions addObject:con];
+    return con.key;
+}
+
 #pragma mark - Other method
 
 - (BOOL)isQuerySingle {
@@ -523,7 +545,6 @@ static inline JRBoolBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *key
         return NO;
     }
 }
-
 
 - (id)_handleQueryResult:(NSArray *)result {
     return self.operation == CSelectSingle ? [result firstObject] : result;

@@ -12,6 +12,15 @@
 
 #import <Kiwi/Kiwi.h>
 
+// J_Select(Person)
+// .and.key(name).eq("name")
+// .and.key(name1).nq("name")
+// .and.key(name2).like("name")
+// .or.key("age").gt(10)
+// .or.key("number").lt(11)
+// .list;
+//
+
 Person *createPerson(int base, NSString *name) {
     Person *p = [[Person alloc] init];
     p.name = name;
@@ -165,9 +174,35 @@ describe(@"operation test", ^{
                                                 J(i_string),
                                                 ]);
                 [[theValue(ret) should] beYes];
+                
             });
             
+        });
+        
+        context(@"select", ^{
+            beforeEach(^{
+                for(int i = 0; i < 20; i++) {
+                    Person *p = createPerson(i, [NSString stringWithFormat:@"person__%d", i]);
+                    BOOL result = J_Insert(p).updateResult;
+                    [[theValue(result) should] beYes];
+                }
+            });
             
+            it(@"condition select", ^{
+                NSArray<Person *> *ps = J_Select(Person).And(@"name").like(@"%1%").Or(@"name").like(@"%7%").list;
+                [ps enumerateObjectsUsingBlock:^(Person * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                    BOOL result = [obj.name containsString:@"1"]|| [obj.name containsString:@"7"];
+                    [[theValue(result) should] beYes];
+                }];
+            });
+            
+            it(@"test select", ^{
+                NSArray<Person *> *ps = J_Select(Person).And(@"name").like(@"%1%").Or(@"name").like(@"%7%").list;
+                [ps enumerateObjectsUsingBlock:^(Person * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                    BOOL result = [obj.name containsString:@"1"]|| [obj.name containsString:@"7"];
+                    [[theValue(result) should] beYes];
+                }];
+            });
         });
         
         context(@"delete", ^{
