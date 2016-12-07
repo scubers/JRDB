@@ -20,7 +20,7 @@
 - (void)setUp {
     [super setUp];
     [JRDBMgr defaultDB];
-    id<JRPersistentHandler> db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/mac/Desktop/test.sqlite"];
+    id<JRPersistentHandler> db = [[JRDBMgr shareInstance] databaseWithPath:@"/Users/mac/Desktop/test.sqlite"];
     [[JRDBMgr shareInstance] registerClazzes:@[
                                                [Person class],
                                                [Card class],
@@ -44,11 +44,11 @@
 
 - (void)testDeleteDB {
     
-    [[JRDBMgr shareInstance] deleteDBWithPath:[[JRDBMgr defaultDB] handlerIdentifier]];
+    [[JRDBMgr shareInstance] deleteDatabaseWithPath:[[JRDBMgr defaultDB] handlerIdentifier]];
 }
 
 - (void)testUpdateDB {
-    [[JRDBMgr shareInstance] updateDefaultDB];
+    
 }
 
 - (void)testClearMidRubbishData {

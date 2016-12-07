@@ -6,7 +6,6 @@
 //  Copyright © 2016年 Jrwong. All rights reserved.
 //
 
-#import "JRUtils.h"
 #import "JRQueueMgr.h"
 #import "JRPersistent.h"
 #import "NSObject+JRDB.h"
@@ -14,6 +13,8 @@
 #import "JRSqlGenerator.h"
 #import "JRFMDBResultSetHandler.h"
 #import "FMDatabase+JRPersistentHandler.h"
+#import "JRPersistentUtil.h"
+#import "JRActivatedProperty.h"
 
 #define AssertRegisteredClazz(clazz) NSAssert([clazz isRegistered], @"class: %@ should be registered in JRDBMgr", clazz)
 
@@ -229,7 +230,7 @@
             }
             
             JRSql *sql = [JRSqlGenerator sql4Insert:one toDB:(FMDatabase *)handler table:nil];
-            [one setID:[JRUtils uuid]];
+            [one setID:[JRPersistentUtil uuid]];
             [sql.args insertObject:one.ID atIndex:0];
             BOOL ret = [handler jr_executeUpdate:sql];
             
@@ -503,7 +504,7 @@
         
         id value = [((NSObject *)obj) valueForKey:key];
         if (value) {
-            NSString *identifier = [JRUtils uuid];
+            NSString *identifier = [JRPersistentUtil uuid];
             if ([*stack containsObject:value]) {
                 [value jr_addDidFinishBlock:^(id<JRPersistent>  _Nonnull object) {
                     [object jr_removeDidFinishBlockForIdentifier:identifier];
@@ -592,7 +593,7 @@
             
             NSMutableString *ids = [NSMutableString string];
             if (subids.count) {
-                [ids appendFormat:@" and _id not in ("];
+                [ids appendFormat:@" and %@ not in (", DBIDKey];
                 [subids enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                     [ids appendFormat:@"? %@", idx == subids.count - 1 ? @")" : @","];
                 }];
@@ -600,7 +601,10 @@
             
             NSString *sqlString =
             [NSString stringWithFormat:@"update %@ set %@ = null where %@ = ? %@ ;"
-             , [clazz jr_tableName], ParentLinkColumn(key), ParentLinkColumn(key), ids];
+             , [clazz jr_tableName]
+             , [JRPersistentUtil activityWithPropertyName:key inClass:clazz].dataBaseName
+             , [JRPersistentUtil activityWithPropertyName:key inClass:clazz].dataBaseName
+             , ids];
             NSArray *params = [@[[obj ID]] arrayByAddingObjectsFromArray:subids];
             JRSql *sql = [JRSql sql:sqlString args:params];
             
@@ -771,7 +775,8 @@
                 [[[one class] jr_oneToManyLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull clazz, BOOL * _Nonnull stop) {
                     
                     if ([one class] == clazz) {// 同类父子关系
-                        NSString *condition = [NSString stringWithFormat:@"%@ = ?", ParentLinkColumn(key)];
+                        NSString *condition = [NSString stringWithFormat:@"%@ = ?"
+                                               , [JRPersistentUtil activityWithPropertyName:key inClass:clazz].dataBaseName];
                         JRSql *sql = [JRSqlGenerator sql4GetColumns:nil
                                                         byCondition:condition
                                                              params:@[[one ID]]
@@ -904,7 +909,8 @@
             
             NSMutableArray *subList = [NSMutableArray array];
             if ([obj class] == clazz) { // 父子关系 同个类
-                NSString *condition = [NSString stringWithFormat:@"%@ = ?", ParentLinkColumn(key)];
+                NSString *condition = [NSString stringWithFormat:@"%@ = ?"
+                                       , [JRPersistentUtil activityWithPropertyName:key inClass:clazz].dataBaseName];
                 JRSql *sql = [JRSqlGenerator sql4GetColumns:nil
                                                 byCondition:condition
                                                      params:@[[obj ID]]

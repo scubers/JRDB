@@ -15,10 +15,18 @@
     return @"my_money";
 }
 
+- (BOOL)isEqual:(id)object {
+    return [[self ID] isEqual:[object ID]];
+}
+
 @end
 
 
 @implementation Card
+
+- (BOOL)isEqual:(id)object {
+    return [[self ID] isEqual:[object ID]];
+}
 
 + (NSString *)jr_tableName {
     return @"my_card";
@@ -40,6 +48,10 @@
 @end
 
 @implementation Person
+
+- (BOOL)isEqual:(id)object {
+    return [[self ID] isEqual:[object ID]];
+}
 
 + (NSString *)jr_tableName {
     return @"my_person";
@@ -67,6 +79,14 @@
              @"money" : [Money class],
              @"children" : [Person class],
              @"nnnn" : [Person class],
+             };
+}
+
++ (NSDictionary<NSString *,NSString *> *)jr_databaseNameMap {
+    return @{
+             @"money" : @"aaa_money",
+             @"children" : @"aaa_children",
+             @"k_data" : @"aaa_k_data",
              };
 }
 

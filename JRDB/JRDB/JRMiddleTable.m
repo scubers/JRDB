@@ -109,7 +109,16 @@
     return
     
     [_db jr_inTransaction:^(FMDatabase * _Nonnull db, BOOL * _Nonnull rollBack) {
-        NSString *sql = [NSString stringWithFormat:@"delete from %@ where (%@ not in (select _id from %@)) or (%@ not in (select _id from %@))", [self tableName], MiddleColumn4Clazz(_clazz1), [_clazz1 jr_tableName], MiddleColumn4Clazz(_clazz2), [_clazz2 jr_tableName]];
+        NSString *sql =
+        [NSString stringWithFormat:@"delete from %@ where (%@ not in (select %@ from %@)) or (%@ not in (select %@ from %@))"
+         , [self tableName]
+         , MiddleColumn4Clazz(_clazz1)
+         , DBIDKey
+         , [_clazz1 jr_tableName]
+         , MiddleColumn4Clazz(_clazz2)
+         , DBIDKey
+         , [_clazz2 jr_tableName]];
+        
         *rollBack = ![db executeUpdate:sql];
     }];
     

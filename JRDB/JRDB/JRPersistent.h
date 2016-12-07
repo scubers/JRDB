@@ -14,6 +14,10 @@
 #define SingleLinkColumn(property) [NSString stringWithFormat:@"_single_link_%@", property]
 #define ParentLinkColumn(property) [NSString stringWithFormat:@"_parent_link_%@", property]
 
+#define DBIDKey @"_ID"
+
+#define isID(name) ([name.uppercaseString isEqualToString:DBIDKey] || [name.uppercaseString isEqualToString:DBIDKey])
+
 @class JRActivatedProperty, JRDBChain;
 
 NS_ASSUME_NONNULL_BEGIN
@@ -68,6 +72,7 @@ typedef void(^JRDBDidFinishBlock)(id<JRPersistent> obj);
  */
 + (NSDictionary<NSString *, Class<JRPersistent>> * _Nullable)jr_oneToManyLinkedPropertyNames;
 
+
 /**
  *  返回自定义主键字段
  *
@@ -82,6 +87,8 @@ typedef void(^JRDBDidFinishBlock)(id<JRPersistent> obj);
  *  @return 主键值
  */
 - (id _Nullable)jr_customPrimarykeyValue;
+
+
 
 
 #pragma mark - operation
@@ -124,6 +131,13 @@ typedef void(^JRDBDidFinishBlock)(id<JRPersistent> obj);
  *  @return 主键值
  */
 - (id _Nullable)jr_primaryKeyValue;
+
+
+/**
+ 返回属性名对应的数据库字段
+
+ */
++ (NSDictionary<NSString *, NSString *> * _Nullable)jr_databaseNameMap;
 
 
 /**

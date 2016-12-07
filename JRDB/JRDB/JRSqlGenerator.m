@@ -10,11 +10,10 @@
 #import "JRDBChain.h"
 #import <FMDB/FMDB.h>
 #import "NSObject+JRDB.h"
-#import "JRReflectUtil.h"
 #import "JRSqlGenerator.h"
 #import "NSObject+Reflect.h"
 #import "JRActivatedProperty.h"
-
+#
 
 @implementation JRSql
 
@@ -66,7 +65,7 @@ void SqlLog(id sql) {
     NSString *tableName  = table ?: [self getTableNameForClazz:clazz];
     NSMutableString *sql = [NSMutableString string];
     
-    [sql appendFormat:@"create table if not exists %@ (_ID text primary key ", tableName];
+    [sql appendFormat:@"create table if not exists %@ (%@ text primary key ", tableName, DBIDKey];
 
     [ap enumerateObjectsUsingBlock:^(JRActivatedProperty * _Nonnull prop, NSUInteger idx, BOOL * _Nonnull stop) {
         // 如果是关键字'ID' 或 '_ID' 则继续循环
@@ -136,12 +135,13 @@ void SqlLog(id sql) {
 + (JRSql *)sql4Insert:(id<JRPersistent>)obj toDB:(FMDatabase * _Nonnull)db table:(NSString * _Nullable)table {
     
     NSString *tableName = table ?: [self getTableNameForClazz:[obj class]];
-    NSArray<JRActivatedProperty *> *ap = [JRReflectUtil activitedProperties4Clazz:[obj class]];
+//    NSArray<JRActivatedProperty *> *ap = [JRReflectUtil activitedProperties4Clazz:[obj class]];
+    NSArray<JRActivatedProperty *> *ap = [[obj class] jr_activatedProperties];
     NSMutableArray *argsList = [NSMutableArray array];
     NSMutableString *sql     = [NSMutableString string];
     NSMutableString *sql2    = [NSMutableString string];
     
-    [sql appendFormat:@" insert into %@ ('_ID' ", tableName];
+    [sql appendFormat:@" insert into %@ ('%@' ", tableName, DBIDKey];
     [sql2 appendFormat:@" values ( ? "];
     
     [ap enumerateObjectsUsingBlock:^(JRActivatedProperty * _Nonnull prop, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -224,7 +224,7 @@ void SqlLog(id sql) {
         // 如果是关键字'ID' 或 '_ID' 则继续循环
         if (isID(prop.ivarName)) {return;}
         // 是否在指定更新列中
-        if (columns.count && ![columns containsObject:prop.ivarName]) { return; }
+        if (columns.count && ![columns containsObject:prop.propertyName]) { return; }
         if (![db columnExists:prop.dataBaseName inTableWithName:tableName]) { return; }
         
         id value;
@@ -274,7 +274,7 @@ void SqlLog(id sql) {
 }
 
 + (JRSql * _Nonnull)sql4GetByIDWithClazz:(Class<JRPersistent> _Nonnull)clazz ID:(NSString *)ID table:(NSString * _Nullable)table {
-    NSString *condition = [NSString stringWithFormat:@"_ID=?"];
+    NSString *condition = [NSString stringWithFormat:@"%@=?", DBIDKey];
     return [self sql4GetColumns:nil
                     byCondition:condition
                          params:@[ID]
@@ -322,7 +322,9 @@ void SqlLog(id sql) {
 }
 
 + (JRSql *)sql4CountByID:(NSString *)ID clazz:(Class<JRPersistent>)clazz table:(NSString * _Nullable)table {
-    NSString *sql = [NSString stringWithFormat:@"select count(1) from %@ where _ID = ?", table ?: [self getTableNameForClazz:clazz]];
+    NSString *sql = [NSString stringWithFormat:@"select count(1) from %@ where %@ = ?"
+                     , table ?: [self getTableNameForClazz:clazz]
+                     , DBIDKey];
     JRSql *jrsql = [JRSql sql:sql args:@[ID]];
     SqlLog(jrsql);
     return jrsql;
@@ -355,7 +357,7 @@ void SqlLog(id sql) {
     [sqlString appendFormat:@" from %@ where 1=1 ", tableName];
 
     if (condition) {
-        [sqlString appendFormat:@"%@ ", condition];
+        [sqlString appendFormat:@" and (%@) ", condition];
     }
 
     if (params.count) {
@@ -377,35 +379,6 @@ void SqlLog(id sql) {
     SqlLog(jrsql);
     return jrsql;
 
-}
-
-#pragma mark - private method
-+ (NSString *)typeWithEncodeName:(NSString *)encode {
-    if (strcmp(encode.UTF8String, @encode(int)) == 0
-        || strcmp(encode.UTF8String, @encode(unsigned int)) == 0
-        || strcmp(encode.UTF8String, @encode(long)) == 0
-        || strcmp(encode.UTF8String, @encode(unsigned long)) == 0
-        ) {
-        return @"INTEGER";
-    }
-    if ([encode isEqualToString:[NSString stringWithUTF8String:@encode(float)]]
-        ||[encode isEqualToString:[NSString stringWithUTF8String:@encode(double)]]
-        ) {
-        return @"REAL";
-    }
-    if ([encode rangeOfString:@"String"].length) {
-        return @"TEXT";
-    }
-    if ([encode rangeOfString:@"NSNumber"].length) {
-        return @"REAL";
-    }
-    if ([encode rangeOfString:@"NSData"].length) {
-        return @"BLOB";
-    }
-    if ([encode rangeOfString:@"NSDate"].length) {
-        return @"TIMESTAMP";
-    }
-    return nil;
 }
 
 + (BOOL)isIgnoreProperty:(NSString *)property inClazz:(Class<JRPersistent>)clazz {
@@ -457,7 +430,7 @@ void SqlLog(id sql) {
         [sqlString appendFormat:@" and (%@)", chain.whereString];
         [argList addObjectsFromArray:chain.parameters];
     } else if (chain.whereId.length) {
-        [sqlString appendFormat:@" and ( _id = ?)"];
+        [sqlString appendFormat:@" and ( %@ = ?)", DBIDKey];
         [argList addObject:chain.whereId];
     } else if (chain.wherePK) {
         NSString *pk = [chain.targetClazz jr_primaryKey];

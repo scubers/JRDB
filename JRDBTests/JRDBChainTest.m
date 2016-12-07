@@ -60,7 +60,7 @@
 //- (instancetype)init {
 //    if (self = [super init]) {
 //        [JRDBMgr defaultDB];
-//        id<JRPersistentHandler> db = [[JRDBMgr shareInstance] databaseWithPath:@"/Users/Jrwong/Desktop/test.sqlite"];
+//        id<JRPersistentHandler> db = [[JRDBMgr shareInstance] databaseWithPath:@"/Users/mac/Desktop/test.sqlite"];
 //        [[JRDBMgr shareInstance] registerClazzes:@[
 //                                                   [Person class],
 //                                                   [Card class],
@@ -81,7 +81,7 @@
 //}
 //
 //- (void)tearDown {
-//    [self clearData];
+////    [self clearData];
 //    [super tearDown];
 //}
 //
@@ -166,7 +166,6 @@
 //    BOOL a = J_Insert(p).updateResult;
 //    [[theValue(a)should] beYes];
 //    NSArray<Person *> *arr = J_Select(Person).list;
-//
 //    [[theValue(arr.count)should]equal:@"111"];
 //    [[arr.firstObject.name should] equal:@"111"];
 //}
@@ -427,7 +426,6 @@
 //                    .Descend
 //                    .Recursively
 //                    .Safely
-//                    .Cached
 //                    .Transactional;
 //
 //    NSLog(@"%@", result);

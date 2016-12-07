@@ -7,32 +7,43 @@
 //
 
 #import "JRFMDBResultSetHandler.h"
-#import "JRReflectUtil.h"
 #import <objc/runtime.h>
 #import "NSObject+JRDB.h"
 #import "JRActivatedProperty.h"
 #import "JRDBChain.h"
 #import <FMDB/FMDB.h>
+#import "JRPersistentUtil.h"
 
 @implementation JRFMDBResultSetHandler
 
 + (NSArray<id<JRPersistent>> *)handleResultSet:(FMResultSet *)resultSet forClazz:(Class<JRPersistent>)clazz columns:(NSArray * _Nullable)columns {
     NSMutableArray *list = [NSMutableArray array];
     
-    NSArray<JRActivatedProperty *> *props = [clazz jr_activatedProperties];
+    NSArray<JRActivatedProperty *> *aps = [clazz jr_activatedProperties];
+    
+    
+    JRActivatedProperty *(^block)(NSString *name) = ^JRActivatedProperty *(NSString *name) {
+        for (JRActivatedProperty *prop in aps) {
+            if ([prop.propertyName isEqualToString:name]) {
+                return prop;
+            }
+        }
+        return nil;
+    };
+    
     
     while ([resultSet next]) {
         Class c = objc_getClass(class_getName(clazz));
         NSObject<JRPersistent> *obj = [[c alloc] init];
         
-        NSString *ID = [resultSet stringForColumn:@"_ID"];
+        NSString *ID = [resultSet stringForColumn:DBIDKey];
         [obj setID:ID];
         
-        [props enumerateObjectsUsingBlock:^(JRActivatedProperty * _Nonnull prop, NSUInteger idx, BOOL * _Nonnull stop) {
+        [aps enumerateObjectsUsingBlock:^(JRActivatedProperty * _Nonnull prop, NSUInteger idx, BOOL * _Nonnull stop) {
             if (isID(prop.ivarName)) { return; }
-            if (columns && ![columns containsObject:prop.ivarName]) { return; }
+            if (columns && ![columns containsObject:prop.propertyName]) { return; }
             
-            RetDataType type = [self typeWithEncode:prop.typeEncode];
+            RetDataType type = [JRPersistentUtil retDataTypeWithEncoding:prop.typeEncode.UTF8String];
             switch (type) {
                 case RetDataTypeNSData: {
                     id value = [resultSet dataForColumn:prop.dataBaseName];
@@ -102,7 +113,8 @@
 
         // 检查一对一关联的字段
         [[clazz jr_singleLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull clazz, BOOL * _Nonnull stop) {
-            int idx = [resultSet columnIndexForName:SingleLinkColumn(key)];
+            
+            int idx = [resultSet columnIndexForName:block(key).dataBaseName];
             if (idx >= 0) {
                 NSString *ID = [resultSet stringForColumnIndex:idx];
                 [obj jr_setSingleLinkID:ID forKey:key];
@@ -112,7 +124,7 @@
         // 一对多 父子关系  AModel -> NSArray<AModel *> *_aModels; 存储父对象字段
         [[clazz jr_oneToManyLinkedPropertyNames] enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, Class<JRPersistent>  _Nonnull subClazz, BOOL * _Nonnull stop) {
             if (clazz == subClazz) {
-                NSString *parentID = [resultSet stringForColumn:ParentLinkColumn(key)];
+                NSString *parentID = [resultSet stringForColumn:block(key).dataBaseName];
                 [obj jr_setParentLinkID:parentID forKey:key];
             }
         }];
@@ -123,44 +135,6 @@
     [resultSet close];
     return list;
 }
-
-+ (RetDataType)typeWithEncode:(NSString *)encode {
-    
-    if (strcmp(encode.UTF8String, @encode(int)) == 0
-        ||strcmp(encode.UTF8String, @encode(BOOL)) == 0) {
-        return RetDataTypeInt;
-    }
-    if (strcmp(encode.UTF8String, @encode(unsigned int)) == 0) {
-        return RetDataTypeUnsignedInt;
-    }
-    if (strcmp(encode.UTF8String, @encode(long)) == 0) {
-        return RetDataTypeLong;
-    }
-    if (strcmp(encode.UTF8String, @encode(unsigned long)) == 0){
-        return RetDataTypeUnsignedLong;
-    }
-    if (strcmp(encode.UTF8String, @encode(float)) == 0) {
-        return RetDataTypeFloat;
-    }
-    if (strcmp(encode.UTF8String, @encode(double)) == 0) {
-        return RetDataTypeDouble;
-    }
-    if ([encode rangeOfString:@"String"].length) {
-        return RetDataTypeString;
-    }
-    if ([encode rangeOfString:@"NSNumber"].length) {
-        return RetDataTypeNSNumber;
-    }
-    if ([encode rangeOfString:@"NSData"].length) {
-        return RetDataTypeNSData;
-    }
-    if ([encode rangeOfString:@"NSDate"].length) {
-        return RetDataTypeNSDate;
-    }
-    
-    return RetDataTypeUnsupport;
-}
-
 
 @end
 
@@ -185,7 +159,7 @@
         Class c = objc_getClass(class_getName(chain.targetClazz));
         NSObject<JRPersistent> *obj = [[c alloc] init];
 
-        NSString *ID = [resultSet stringForColumn:@"_ID"];
+        NSString *ID = [resultSet stringForColumn:DBIDKey];
         [obj setID:ID];
 
 
@@ -196,9 +170,9 @@
 
         [props enumerateObjectsUsingBlock:^(JRActivatedProperty * _Nonnull prop, NSUInteger idx, BOOL * _Nonnull stop) {
             if (isID(prop.ivarName)) { return; }
-            if (![selectCols containsObject:prop.ivarName]) { return; }
+            if (![selectCols containsObject:prop.propertyName]) { return; }
 
-            RetDataType type = [self typeWithEncode:prop.typeEncode];
+            RetDataType type = [JRPersistentUtil retDataTypeWithEncoding:prop.typeEncode.UTF8String];
             switch (type) {
                 case RetDataTypeNSData: {
                     id value = [resultSet dataForColumn:prop.dataBaseName];

@@ -9,7 +9,6 @@
 #import <XCTest/XCTest.h>
 #import "JRDB.h"
 #import "Person.h"
-#import "JRColumnSchema.h"
 #import "NSObject+Reflect.h"
 #import "JRDBChain.h"
 #import <objc/runtime.h>
@@ -26,7 +25,7 @@
 - (void)setUp {
     [super setUp];
     [JRDBMgr defaultDB];
-    id<JRPersistentHandler> db = [[JRDBMgr shareInstance] createDBWithPath:@"/Users/Jrwong/Desktop/test.sqlite"];
+    id<JRPersistentHandler> db = [[JRDBMgr shareInstance] databaseWithPath:@"/Users/Jrwong/Desktop/test.sqlite"];
     [[JRDBMgr shareInstance] registerClazzes:@[
                                                [Person class],
                                                [Card class],
@@ -233,7 +232,7 @@
     NSArray<Person *> *ps = [J_Select([Person class])
                              .Where(@"_b_unsigned_int > ? or _c_long = ?")
                              .Params(@6, @3000, nil)
-                             .Order(@"_ID")
+                             .Order(DBIDKey)
                              .Desc(YES)
                              exe:nil];
 #endif

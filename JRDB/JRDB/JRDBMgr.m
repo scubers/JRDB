@@ -7,7 +7,6 @@
 //
 
 #import "JRDBMgr.h"
-#import "JRReflectUtil.h"
 #import "JRSqlGenerator.h"
 #import "FMDatabase+JRPersistentHandler.h"
 #import "NSObject+JRDB.h"

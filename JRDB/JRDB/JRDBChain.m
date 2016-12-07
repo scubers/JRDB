@@ -429,8 +429,8 @@ static inline JRBoolBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *key
     }
     
     NSMutableArray *arr = [_selectColumns mutableCopy];
-    if (![arr containsObject:@"_ID"]) {
-        [arr addObject:@"_ID"];
+    if (![arr containsObject:DBIDKey]) {
+        [arr addObject:DBIDKey];
     }
     
     NSString *primaryKey = [((Class<JRPersistent>)self.targetClazz) jr_customPrimarykey];

@@ -22,6 +22,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 + (void)jr_configure;
 
++ (NSArray<JRActivatedProperty *> *)jr_activatedProperties;
+
 #pragma mark - convinence method
 
 - (void)jr_setSingleLinkID:(NSString * _Nullable)ID forKey:(NSString *)key;

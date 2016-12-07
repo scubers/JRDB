@@ -25,7 +25,7 @@ typedef NS_ENUM(NSInteger, JRRelation) {
 @property (nonatomic, copy   ) NSString   *dataBaseName;
 @property (nonatomic, copy   ) NSString   *dataBaseType;
 @property (nonatomic, copy   ) NSString   *typeEncode;
-@property (nonatomic, strong ) Class      clazz;
+@property (nonatomic, strong ) Class      clazz;///< 一对一，一对多，子节点对应的类
 
 + (instancetype)property:(NSString *)name relationShip:(JRRelation)relationShip;
 

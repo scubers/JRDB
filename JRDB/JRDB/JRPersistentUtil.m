@@ -12,18 +12,26 @@
 
 @implementation JRPersistentUtil
 
++ (NSString *)uuid {
+    CFUUIDRef uuidObject = CFUUIDCreate(kCFAllocatorDefault);
+    NSString *uuidStr = (NSString *)CFBridgingRelease(CFUUIDCreateString(kCFAllocatorDefault, uuidObject));
+    CFRelease(uuidObject);
+    return uuidStr;
+}
 
 + (NSArray<JRActivatedProperty *> *)allPropertesForClass:(Class<JRPersistent>)aClass {
+    
     NSMutableArray<OBJCProperty *> *ops = [self objcpropertyWithClass:aClass];
+    
     NSMutableArray<JRActivatedProperty *> *aps = [NSMutableArray array];
-
+    
     [ops enumerateObjectsUsingBlock:^(OBJCProperty * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        NSString *dataBaseType = [self dataBaseTypeWithEncodeName:obj.typeEncoding];
+        NSString *dataBaseType = [self dataBaseTypeWithEncoding:obj.typeEncoding.UTF8String];
         if (!dataBaseType) return ;
 
         JRActivatedProperty *p = [JRActivatedProperty property:obj.name relationShip:JRRelationNormal];
         p.dataBaseType = dataBaseType;
-        p.dataBaseName = obj.ivarName;
+        p.dataBaseName = [JRPersistentUtil columnNameWithPropertyName:obj.name inClass:aClass];
         p.ivarName = obj.ivarName;
         p.typeEncode = obj.typeEncoding;
         [aps addObject:p];
@@ -45,9 +53,9 @@
         }
 
         JRActivatedProperty *p = [JRActivatedProperty property:op.name relationShip:JRRelationOneToOne];
-        p.dataBaseType = [self dataBaseTypeWithEncodeName:[NSString stringWithUTF8String:@encode(NSString)]];
+        p.dataBaseType = [self dataBaseTypeWithEncoding:@encode(NSString)];
         p.clazz = clazz;
-        p.dataBaseName = SingleLinkColumn(key);
+        p.dataBaseName = SingleLinkColumn([JRPersistentUtil columnNameWithPropertyName:op.name inClass:aClass]);
         p.typeEncode = NSStringFromClass(clazz);
         p.ivarName = op.ivarName;
         [aps addObject:p];
@@ -70,11 +78,11 @@
 
         JRActivatedProperty *p = [JRActivatedProperty property:op.name
                                                   relationShip:aClass == subClazz ? JRRelationChildren : JRRelationOneToMany];
-        p.dataBaseType = [self dataBaseTypeWithEncodeName:[NSString stringWithUTF8String:@encode(NSString)]];
+        p.dataBaseType = [self dataBaseTypeWithEncoding:@encode(NSString)];
         p.clazz = subClazz;
         p.ivarName = op.ivarName;
         if (aClass == subClazz) {
-            p.dataBaseName = ParentLinkColumn(key);
+            p.dataBaseName = ParentLinkColumn([JRPersistentUtil columnNameWithPropertyName:op.name inClass:aClass]);
         }
         p.typeEncode = NSStringFromClass(subClazz);
         [aps addObject:p];
@@ -103,17 +111,18 @@
     return array;
 }
 
-+ (NSString *)dataBaseTypeWithEncodeName:(NSString *)encode {
-    if ([encode isEqualToString:[NSString stringWithUTF8String:@encode(int)]]
-        ||[encode isEqualToString:[NSString stringWithUTF8String:@encode(unsigned int)]]
-        ||[encode isEqualToString:[NSString stringWithUTF8String:@encode(long)]]
-        ||[encode isEqualToString:[NSString stringWithUTF8String:@encode(unsigned long)]]
-        ||[encode isEqualToString:[NSString stringWithUTF8String:@encode(BOOL)]]
++ (NSString *)dataBaseTypeWithEncoding:(const char *)encoding {
+    NSString *encode = [NSString stringWithUTF8String:encoding];
+    if (strcmp(encoding, @encode(int)) == 0
+        || strcmp(encoding, @encode(unsigned int)) == 0
+        || strcmp(encoding, @encode(long)) == 0
+        || strcmp(encoding, @encode(unsigned long)) == 0
+        || strcmp(encoding, @encode(BOOL)) == 0
         ) {
         return @"INTEGER";
     }
-    if ([encode isEqualToString:[NSString stringWithUTF8String:@encode(float)]]
-        ||[encode isEqualToString:[NSString stringWithUTF8String:@encode(double)]]
+    if (strcmp(encoding, @encode(float)) == 0
+        || strcmp(encoding, @encode(double)) == 0
         ) {
         return @"REAL";
     }
@@ -128,6 +137,66 @@
     }
     if ([encode rangeOfString:@"NSDate"].length) {
         return @"TIMESTAMP";
+    }
+    return nil;
+}
+
+/**
+ 根据encode获取数据结果类型
+ 
+ @param encoding encoding description
+ */
++ (RetDataType)retDataTypeWithEncoding:(const char *)encoding {
+    
+    NSString *encode = [NSString stringWithUTF8String:encoding];
+    
+    if (strcmp(encoding, @encode(int)) == 0
+        ||strcmp(encoding, @encode(BOOL)) == 0) {
+        return RetDataTypeInt;
+    }
+    if (strcmp(encoding, @encode(unsigned int)) == 0) {
+        return RetDataTypeUnsignedInt;
+    }
+    if (strcmp(encoding, @encode(long)) == 0) {
+        return RetDataTypeLong;
+    }
+    if (strcmp(encoding, @encode(unsigned long)) == 0){
+        return RetDataTypeUnsignedLong;
+    }
+    if (strcmp(encoding, @encode(float)) == 0) {
+        return RetDataTypeFloat;
+    }
+    if (strcmp(encoding, @encode(double)) == 0) {
+        return RetDataTypeDouble;
+    }
+    if ([encode rangeOfString:@"String"].length) {
+        return RetDataTypeString;
+    }
+    if ([encode rangeOfString:@"NSNumber"].length) {
+        return RetDataTypeNSNumber;
+    }
+    if ([encode rangeOfString:@"NSData"].length) {
+        return RetDataTypeNSData;
+    }
+    if ([encode rangeOfString:@"NSDate"].length) {
+        return RetDataTypeNSDate;
+    }
+    
+    return RetDataTypeUnsupport;
+
+}
+
++ (NSString *)columnNameWithPropertyName:(NSString *)propertyName inClass:(Class<JRPersistent>)aClass {
+    NSDictionary *map = [aClass jr_databaseNameMap];
+    return map[propertyName]?:propertyName;
+}
+
++ (JRActivatedProperty *)activityWithPropertyName:(NSString *)name inClass:(Class<JRPersistent>)aClass {
+    NSArray<JRActivatedProperty *> *aps = [aClass jr_activatedProperties];
+    for (JRActivatedProperty *prop in aps) {
+        if ([prop.propertyName isEqualToString:name]) {
+            return prop;
+        }
     }
     return nil;
 }

@@ -41,7 +41,7 @@
 #define OrderJ(_prop_)          Order(J(_prop_))
 #define GroupJ(_prop_)          Group(J(_prop_))
 
-#define J(_prop_)               (((void)(NO && ((void)[((id)[NSObject new]) _prop_], NO)), @"_"#_prop_))
+#define J(_prop_)               (((void)(NO && ((void)[((id)[NSObject new]) _prop_], NO)), @#_prop_))
 
 NS_ASSUME_NONNULL_BEGIN
 

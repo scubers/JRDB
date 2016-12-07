@@ -19,7 +19,6 @@
 #import "JRReflectable.h"
 #import "NSObject+Reflect.h"
 #import "OBJCProperty.h"
-#import "JRUtils.h"
 #import "JRMiddleTable.h"
 #import "JRDBChain.h"
 #import "JRActivatedProperty.h"

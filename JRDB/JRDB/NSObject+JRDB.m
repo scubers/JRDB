@@ -75,7 +75,7 @@
     if ([self jr_customPrimarykey]) {
         return [self jr_customPrimarykey];
     }
-    return @"_ID";
+    return DBIDKey;
 }
 
 - (id)jr_primaryKeyValue {
@@ -83,6 +83,10 @@
         return [self jr_customPrimarykeyValue];
     }
     return [self ID];
+}
+
++ (NSDictionary<NSString *,NSString *> *)jr_databaseNameMap {
+    return @{};
 }
 
 - (void)jr_addDidFinishBlock:(JRDBDidFinishBlock _Nullable)block forIdentifier:(NSString * _Nonnull)identifier; {
