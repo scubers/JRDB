@@ -56,10 +56,26 @@
     };
 }
 
+- (JRDBChain * _Nonnull (^)(NSNumber * _Nonnull))gtOrEq {
+    return ^JRDBChain *(id param) {
+        self->_param = param;
+        self->_operator = JRDBChainConditionOperator_GreaterThanOrEqual;
+        return self.chain;
+    };
+}
+
 - (JRDBChain *(^)(NSNumber *param))lt {
     return ^JRDBChain *(id param) {
         self->_param = param;
         self->_operator = JRDBChainConditionOperator_LessThan;
+        return self.chain;
+    };
+}
+
+- (JRDBChain * _Nonnull (^)(NSNumber * _Nonnull))ltOrEq {
+    return ^JRDBChain *(id param) {
+        self->_param = param;
+        self->_operator = JRDBChainConditionOperator_LessThanOrEqual;
         return self.chain;
     };
 }
@@ -71,7 +87,9 @@
 - (NSString *)operatorString {
     switch (_operator) {
         case JRDBChainConditionOperator_LessThan:return @"<";
+        case JRDBChainConditionOperator_LessThanOrEqual:return @"<=";
         case JRDBChainConditionOperator_GreaterThan:return @">";
+        case JRDBChainConditionOperator_GreaterThanOrEqual:return @">=";
         case JRDBChainConditionOperator_Like:return @"like";
         case JRDBChainConditionOperator_NotEqual:return @"<>";
         case JRDBChainConditionOperator_Equal:return @"=";

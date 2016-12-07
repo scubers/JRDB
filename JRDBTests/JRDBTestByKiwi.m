@@ -87,7 +87,6 @@ BOOL matchObjects(id obj1, id obj2, NSArray<NSString *> *columns) {
 }
 
 SPEC_BEGIN(JRDBTestTest)
-
 describe(@"operation test", ^{
 
     let(db, ^id{
@@ -195,15 +194,16 @@ describe(@"operation test", ^{
                     [[theValue(result) should] beYes];
                 }];
             });
-            
             it(@"test select", ^{
-                NSArray<Person *> *ps = J_Select(Person).And(@"name").like(@"%1%").Or(@"name").like(@"%7%").list;
-                [ps enumerateObjectsUsingBlock:^(Person * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                    BOOL result = [obj.name containsString:@"1"]|| [obj.name containsString:@"7"];
-                    [[theValue(result) should] beYes];
-                }];
+                NSArray<Person *> *ps =
+                J_Select(Person).From(
+                                      J_Select(Person).And(J(a_int)).gt(@10).OrderJ(a_int).Descend
+                                      ).And(J(a_int)).ltOrEq(@15).list;
+                NSLog(@"%@", ps);
+                
             });
         });
+        
         
         context(@"delete", ^{
             

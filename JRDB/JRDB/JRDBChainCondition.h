@@ -31,7 +31,9 @@ typedef NS_ENUM(NSInteger, JRDBChainConditionOperator) {
     JRDBChainConditionOperator_NotEqual,
     JRDBChainConditionOperator_Like,
     JRDBChainConditionOperator_GreaterThan,
+    JRDBChainConditionOperator_GreaterThanOrEqual,
     JRDBChainConditionOperator_LessThan,
+    JRDBChainConditionOperator_LessThanOrEqual,
 };
 
 @interface JRDBChainCondition : NSObject
@@ -61,9 +63,13 @@ typedef NS_ENUM(NSInteger, JRDBChainConditionOperator) {
 
 /** greater than operator */
 - (JRDBChain *(^)(NSNumber *param))gt;
+/** greater than or equal operator */
+- (JRDBChain *(^)(NSNumber *param))gtOrEq;
 
 /** less than operator */
 - (JRDBChain *(^)(NSNumber *param))lt;
+/** less than or equal operator */
+- (JRDBChain *(^)(NSNumber *param))ltOrEq;
 
 - (NSString *)operatorString;
 - (NSString *)typeString;

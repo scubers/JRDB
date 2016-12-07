@@ -444,7 +444,7 @@ void SqlLog(id sql) {
         [chain.conditions enumerateObjectsUsingBlock:^(JRDBChainCondition * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             NSString *sql = [NSString stringWithFormat:@" %@ (%@ %@ ?) "
                              , obj.typeString
-                             , [JRPersistentUtil activityWithPropertyName:obj.propName inClass:chain.targetClazz]
+                             , [JRPersistentUtil activityWithPropertyName:obj.propName inClass:chain.targetClazz].dataBaseName
                              , [obj operatorString]
                              ];
             [sqlString appendFormat:@"%@", sql];
