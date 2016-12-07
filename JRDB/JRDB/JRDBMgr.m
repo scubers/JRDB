@@ -14,11 +14,8 @@
 #import <UIKit/UIKit.h>
 #import "JRMiddleTable.h"
 
-static NSString * const jrdb_class_registered_key = @"jrdb_class_registered_key";
-
 @interface JRDBMgr()
 {
-    id<JRPersistentHandler> _defaultDB;
     NSMutableArray<Class<JRPersistent>> *_clazzArray;
 }
 /** 对应的数据库路径，和所管理的连接数 */
@@ -71,7 +68,7 @@ static JRDBMgr *__shareInstance;
             id<JRPersistentHandler> db = [FMDatabase databaseWithPath:path];
             [connections addObject:db];
         }
-        id<JRPersistentHandler> handler = connections[(int)arc4random_uniform((int)_handlers.count)];
+        id<JRPersistentHandler> handler = connections[(int)arc4random_uniform((int)connections.count)];
         [handler jr_openSynchronized:YES];
         return handler;
     }

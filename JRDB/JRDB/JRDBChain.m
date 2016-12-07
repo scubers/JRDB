@@ -159,7 +159,7 @@ static inline void __operationCheck(JRDBChain *self) {
     }
 }
 
-static inline JRClassBlock __setTargetClassToSelf(JRDBChain *self, ChainOperation operation) {
+- (JRClassBlock)__setTargetClassToSelfWithOperation:(ChainOperation)operation block:(void (^)(Class clazz))block {
     return ^(Class clazz) {
         __operationCheck(self);
         self->_operation = operation;
@@ -169,30 +169,42 @@ static inline JRClassBlock __setTargetClassToSelf(JRDBChain *self, ChainOperatio
 }
 
 - (JRClassBlock)CreateTable {
-    return __setTargetClassToSelf(self, CCreateTable);
+    return [self __setTargetClassToSelfWithOperation:CCreateTable block:^(__unsafe_unretained Class clazz) {
+
+    }];
 }
 
 - (JRClassBlock)UpdateTable {
-    return __setTargetClassToSelf(self, CUpdateTable);
+    return [self __setTargetClassToSelfWithOperation:CUpdateTable block:^(__unsafe_unretained Class clazz) {
+
+    }];
 }
 
 - (JRClassBlock)DropTable {
-    return __setTargetClassToSelf(self, CDropTable);
+    return [self __setTargetClassToSelfWithOperation:CDropTable block:^(__unsafe_unretained Class clazz) {
+
+    }];
 }
 
 - (JRClassBlock)TruncateTable {
-    return __setTargetClassToSelf(self, CTruncateTable);
+    return [self __setTargetClassToSelfWithOperation:CTruncateTable block:^(__unsafe_unretained Class clazz) {
+
+    }];
 }
 
 - (JRClassBlock)DeleteAll {
-    return __setTargetClassToSelf(self, CDeleteAll);
+    return [self __setTargetClassToSelfWithOperation:CDeleteAll block:^(__unsafe_unretained Class clazz) {
+
+    }];
 }
 
 - (JRClassBlock)Select {
-    return __setTargetClassToSelf(self, CSelect);
+    return [self __setTargetClassToSelfWithOperation:CSelect block:^(__unsafe_unretained Class clazz) {
+
+    }];
 }
 
-static inline JRArrayBlock __setTargetArrayToSelf(JRDBChain *self, ChainOperation operation) {
+- (JRArrayBlock)__setTargetArrayToSelfWithOperation:(ChainOperation)operation block:(void (^)(id obj))block {
     return ^(NSArray *array) {
         __operationCheck(self);
         self->_operation = operation;
@@ -209,22 +221,30 @@ static inline JRArrayBlock __setTargetArrayToSelf(JRDBChain *self, ChainOperatio
 }
 
 - (JRArrayBlock)Insert {
-    return __setTargetArrayToSelf(self, CInsert);
+    return [self __setTargetArrayToSelfWithOperation:CInsert block:^(id obj) {
+
+    }];
 }
 
 - (JRArrayBlock)Update {
-    return __setTargetArrayToSelf(self, CUpdate);
+    return [self __setTargetArrayToSelfWithOperation:CUpdate block:^(id obj) {
+
+    }];
 }
 
 - (JRArrayBlock)Delete {
-    return __setTargetArrayToSelf(self, CDelete);
+    return [self __setTargetArrayToSelfWithOperation:CDelete block:^(id obj) {
+
+    }];
 }
 
 - (JRArrayBlock)SaveOrUpdate {
-    return __setTargetArrayToSelf(self, CSaveOrUpdate);
+    return [self __setTargetArrayToSelfWithOperation:CSaveOrUpdate block:^(id obj) {
+
+    }];
 }
 
-static inline JRObjectBlock __setTargetToSelf(JRDBChain *self, ChainOperation operation) {
+- (JRObjectBlock)__setTargetToSelfWithOperation:(ChainOperation)operation block:(void (^)(id obj))block {
     return ^(id one) {
         __operationCheck(self);
         self->_operation = operation;
@@ -234,19 +254,27 @@ static inline JRObjectBlock __setTargetToSelf(JRDBChain *self, ChainOperation op
 }
 
 - (JRObjectBlock)InsertOne {
-    return __setTargetToSelf(self, CInsert);
+    return [self __setTargetToSelfWithOperation:CInsert block:^(id obj) {
+
+    }];
 }
 
 - (JRObjectBlock)UpdateOne {
-    return __setTargetToSelf(self, CUpdate);
+    return [self __setTargetToSelfWithOperation:CUpdate block:^(id obj) {
+
+    }];
 }
 
 - (JRObjectBlock)DeleteOne {
-    return __setTargetToSelf(self, CDelete);
+    return [self __setTargetToSelfWithOperation:CDelete block:^(id obj) {
+
+    }];
 }
 
 - (JRObjectBlock)SaveOrUpdateOne {
-    return __setTargetToSelf(self, CSaveOrUpdate);
+    return [self __setTargetToSelfWithOperation:CSaveOrUpdate block:^(id obj) {
+
+    }];
 }
 
 #pragma mark - customized query
@@ -290,66 +318,93 @@ static inline JRObjectBlock __setTargetToSelf(JRDBChain *self, ChainOperation op
     };
 }
 
-static inline JRObjectBlock __setObjectPropertyToSelf(JRDBChain *self, NSString *keypath) {
+- (JRObjectBlock)__setObjectPropertyToSelfWithKeypath:(NSString *)keypath block:(void (^)(id obj))block {
     return ^(id value) {
-        if (
-            (![keypath isEqualToString:J(columnsArray)]
-             &&![keypath isEqualToString:J(ignoreArray)]
-             )
-            &&!value) {
-            NSLog(@"passing a nil value to keypath: %@", keypath);
-            assert(NO);
-        }
         [self setValue:value forKey:keypath];
+        if (block) {
+            block(value);
+        }
         return self;
     };
 }
 
 - (JRObjectBlock)InDB {
-    return __setObjectPropertyToSelf(self, J(db));
+    return [self __setObjectPropertyToSelfWithKeypath:J(db) block:^(id obj) {
+        if (!obj) {
+            NSLog(@"[InDB] should no pass a nil value");
+            assert(false);
+        }
+    }];
 }
 
 - (JRObjectBlock)Group {
-    return __setObjectPropertyToSelf(self, J(groupBy));
+    return [self __setObjectPropertyToSelfWithKeypath:J(groupBy) block:^(id obj) {
+
+    }];
 }
 
 - (JRObjectBlock)Order {
-    return __setObjectPropertyToSelf(self, J(orderBy));
+    return [self __setObjectPropertyToSelfWithKeypath:J(orderBy) block:^(id obj) {
+
+    }];
 }
 
 - (JRObjectBlock)Where {
-    return __setObjectPropertyToSelf(self, J(whereString));
+    return [self __setObjectPropertyToSelfWithKeypath:J(whereString) block:^(id obj) {
+
+    }];
 }
 
 - (JRObjectBlock)WhereIdIs {
-    return __setObjectPropertyToSelf(self, J(whereId));
+    return [self __setObjectPropertyToSelfWithKeypath:J(whereId) block:^(id obj) {
+        if (!obj) {
+            NSLog(@"[WhereIdIs] should no pass a nil value");
+            assert(false);
+        }
+    }];
 }
 
 - (JRObjectBlock)WherePKIs {
-    return __setObjectPropertyToSelf(self, J(wherePK));
+    return [self __setObjectPropertyToSelfWithKeypath:J(wherePK) block:^(id obj) {
+        if (!obj) {
+            NSLog(@"[WherePKIs] pk should no be nil");
+            assert(false);
+        }
+    }];
 }
 
 - (JRArrayBlock)Params {
-    return __setObjectPropertyToSelf(self, J(parameters));
+    return [self __setObjectPropertyToSelfWithKeypath:J(parameters) block:^(id obj) {
+
+    }];
 }
 
 - (JRArrayBlock)Columns {
-    return __setObjectPropertyToSelf(self, J(columnsArray));
+    return [self __setObjectPropertyToSelfWithKeypath:J(columnsArray) block:^(id obj) {
+
+    }];
 }
 
 - (JRArrayBlock)Ignore {
-    return __setObjectPropertyToSelf(self, J(ignoreArray));
+    return [self __setObjectPropertyToSelfWithKeypath:J(ignoreArray) block:^(id obj) {
+
+    }];
 }
 
-static inline JRBoolBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *keypath) {
+- (JRBoolBlock)__setBoolPropertyToSelfWithKeypath:(NSString *)keypath block:(void (^)(BOOL value))block {
     return ^(BOOL value) {
         [self setValue:@(value) forKey:keypath];
+        if (block) {
+            block(value);
+        }
         return self;
     };
 }
 
 - (JRBoolBlock)Recursive {
-    return __setBoolPropertyToSelf(self, J(isRecursive));
+    return [self __setBoolPropertyToSelfWithKeypath:J(isRecursive) block:^(BOOL value) {
+
+    }];
 }
 - (instancetype)Recursively {
     return self.Recursive(YES);
@@ -359,7 +414,9 @@ static inline JRBoolBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *key
 }
 
 - (JRBoolBlock)Sync {
-    return __setBoolPropertyToSelf(self, J(isSync));
+    return [self __setBoolPropertyToSelfWithKeypath:J(isSync) block:^(BOOL value) {
+
+    }];
 }
 - (instancetype)UnSafely {
     return self.Sync(NO);
@@ -369,7 +426,9 @@ static inline JRBoolBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *key
 }
 
 - (JRBoolBlock)Transaction {
-    return __setBoolPropertyToSelf(self, J(useTransaction));
+    return [self __setBoolPropertyToSelfWithKeypath:J(useTransaction) block:^(BOOL value) {
+
+    }];
 }
 - (instancetype)NoTransaction {
     return self.Transaction(NO);
@@ -379,7 +438,9 @@ static inline JRBoolBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *key
 }
 
 - (JRBoolBlock)Desc {
-    return __setBoolPropertyToSelf(self, J(isDesc));
+    return [self __setBoolPropertyToSelfWithKeypath:J(isDesc) block:^(BOOL value) {
+
+    }];
 }
 - (instancetype)Descend {
     return self.Desc(YES);
@@ -405,7 +466,6 @@ static inline JRBoolBlock __setBoolPropertyToSelf(JRDBChain *self, NSString *key
 
 - (JRDBChainCondition * _Nonnull (^)(id _Nonnull))Or {
     JRDBChainCondition *con = [JRDBChainCondition chainConditionWithChain:self type:JRDBChainConditionType_Or];
-    NSAssert(self.conditions.count, @" warning: 'Or' operator should not be the first condition!!!");
     [self.conditions addObject:con];
     return con.key;
 }
