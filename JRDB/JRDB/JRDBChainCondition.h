@@ -62,14 +62,14 @@ typedef NS_ENUM(NSInteger, JRDBChainConditionOperator) {
 - (JRDBChain *(^)(id param))like;
 
 /** greater than operator */
-- (JRDBChain *(^)(NSNumber *param))gt;
+- (JRDBChain *(^)(id param))gt;
 /** greater than or equal operator */
-- (JRDBChain *(^)(NSNumber *param))gtOrEq;
+- (JRDBChain *(^)(id param))gtOrEq;
 
 /** less than operator */
-- (JRDBChain *(^)(NSNumber *param))lt;
+- (JRDBChain *(^)(id param))lt;
 /** less than or equal operator */
-- (JRDBChain *(^)(NSNumber *param))ltOrEq;
+- (JRDBChain *(^)(id param))ltOrEq;
 
 - (NSString *)operatorString;
 - (NSString *)typeString;

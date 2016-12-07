@@ -48,7 +48,7 @@
     };
 }
 
-- (JRDBChain *(^)(NSNumber *param))gt {
+- (JRDBChain * _Nonnull (^)(id _Nonnull))gt {
     return ^JRDBChain *(id param) {
         self->_param = param;
         self->_operator = JRDBChainConditionOperator_GreaterThan;
@@ -56,7 +56,7 @@
     };
 }
 
-- (JRDBChain * _Nonnull (^)(NSNumber * _Nonnull))gtOrEq {
+- (JRDBChain * _Nonnull (^)(id _Nonnull))gtOrEq {
     return ^JRDBChain *(id param) {
         self->_param = param;
         self->_operator = JRDBChainConditionOperator_GreaterThanOrEqual;
@@ -64,7 +64,7 @@
     };
 }
 
-- (JRDBChain *(^)(NSNumber *param))lt {
+- (JRDBChain * _Nonnull (^)(id _Nonnull))lt {
     return ^JRDBChain *(id param) {
         self->_param = param;
         self->_operator = JRDBChainConditionOperator_LessThan;
@@ -72,7 +72,7 @@
     };
 }
 
-- (JRDBChain * _Nonnull (^)(NSNumber * _Nonnull))ltOrEq {
+- (JRDBChain * _Nonnull (^)(id _Nonnull))ltOrEq {
     return ^JRDBChain *(id param) {
         self->_param = param;
         self->_operator = JRDBChainConditionOperator_LessThanOrEqual;

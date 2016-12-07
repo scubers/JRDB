@@ -45,7 +45,7 @@ static JRDBMgr *__shareInstance;
 - (instancetype)init {
     if (self = [super init]) {
         _clazzArray = [NSMutableArray arrayWithCapacity:1];
-        _maxConnectionCount = 5;
+        _maxConnectionCount = 1;
 #ifdef DEBUG
         _debugMode = YES;
 #endif

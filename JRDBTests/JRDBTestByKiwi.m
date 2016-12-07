@@ -91,16 +91,14 @@ SPEC_BEGIN(JRDBTestTest)
 
 describe(@"operation test", ^{
 
-    let(db, ^id{
+    beforeAll(^{
         [[JRDBMgr shareInstance] setDefaultDatabasePath:@"/Users/Jrwong/Desktop/test11.sqlite"];
-        id<JRPersistentHandler> db = [[JRDBMgr shareInstance] getHandler];
         [[JRDBMgr shareInstance] registerClazzes:@[
                                                    [Person class],
                                                    [Card class],
                                                    [Money class],
                                                    ]];
         [JRDBMgr shareInstance].debugMode = YES;
-        return db;
     });
 
     
@@ -187,6 +185,7 @@ describe(@"operation test", ^{
             beforeEach(^{
                 for(int i = 0; i < 20; i++) {
                     Person *p = createPerson(i, [NSString stringWithFormat:@"person__%d", i]);
+                    p.m_date = [NSDate dateWithTimeIntervalSinceNow:60 * 60 * 24 * (-i)];
                     BOOL result = J_Insert(p).updateResult;
                     [[theValue(result) should] beYes];
                 }
@@ -199,16 +198,15 @@ describe(@"operation test", ^{
                     [[theValue(result) should] beYes];
                 }];
             });
-            it(@"test select", ^{
-                NSArray<Person *> *ps =
-                J_Select(Person).From(
-                                      J_Select(Person).And(J(a_int)).gt(@10).OrderJ(a_int).Descend
-                                      ).And(J(a_int)).ltOrEq(@15).list;
+
+            it(@"date selecet", ^{
+                NSArray<Person *> *ps = J_Select(Person).AndJ(m_date).lt([NSDate dateWithTimeIntervalSinceNow:60*60*24*(-4)]).list;
                 NSLog(@"%@", ps);
                 
             });
         });
-        
+
+
         
         context(@"delete", ^{
             

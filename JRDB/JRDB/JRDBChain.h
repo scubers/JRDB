@@ -21,9 +21,9 @@
 #define J_SelectCount(_arg_)    ([JRDBChain new].CountSelect([_arg_ class]))
 #define J_SelectColumns(...)    ([JRDBChain new].ColumnsSelect(_variableListToArray(__VA_ARGS__, 0)))
 
-#define J_Insert(...) ([JRDBChain new].Insert(_variableListToArray(__VA_ARGS__, 0)))
-#define J_Update(...) ([JRDBChain new].Update(_variableListToArray(__VA_ARGS__, 0)))
-#define J_Delete(...) ([JRDBChain new].Delete(_variableListToArray(__VA_ARGS__, 0)))
+#define J_Insert(...)           ([JRDBChain new].Insert(_variableListToArray(__VA_ARGS__, 0)))
+#define J_Update(...)           ([JRDBChain new].Update(_variableListToArray(__VA_ARGS__, 0)))
+#define J_Delete(...)           ([JRDBChain new].Delete(_variableListToArray(__VA_ARGS__, 0)))
 #define J_SaveOrUpdate(...)     ([JRDBChain new].SaveOrUpdate(_variableListToArray(__VA_ARGS__, 0)))
 
 #define J_DeleteAll(_arg_)      ([JRDBChain new].DeleteAll([_arg_ class]))
@@ -33,18 +33,18 @@
 #define J_DropTable(_arg_)      ([JRDBChain new].DropTable([_arg_ class])).updateResult
 #define J_TruncateTable(_arg_)  ([JRDBChain new].TruncateTable([_arg_ class])).updateResult
 
-#define ParamsJ(...)  Params((_variableListToArray(__VA_ARGS__, 0)))
-#define ColumnsJ(...) Columns((_variableListToArray(__VA_ARGS__, 0)))
-#define IgnoreJ(...)  Ignore((_variableListToArray(__VA_ARGS__, 0)))
+#define ParamsJ(...)            Params((_variableListToArray(__VA_ARGS__, 0)))
+#define ColumnsJ(...)           Columns((_variableListToArray(__VA_ARGS__, 0)))
+#define IgnoreJ(...)            Ignore((_variableListToArray(__VA_ARGS__, 0)))
 
-#define FromJ(_arg_)   From([_arg_ class])
-#define WhereJ(_arg_)  Where(@#_arg_)
-#define OrderJ(_prop_) Order(J(_prop_))
-#define GroupJ(_prop_) Group(J(_prop_))
-#define AndJ(_prop_)   And(J(_prop_))
-#define OrJ(_prop_)    Or(J(_prop_))
+#define FromJ(_arg_)            From([_arg_ class])
+#define WhereJ(_arg_)           Where(@#_arg_)
+#define OrderJ(_prop_)          Order(J(_prop_))
+#define GroupJ(_prop_)          Group(J(_prop_))
+#define AndJ(_prop_)            And(J(_prop_))
+#define OrJ(_prop_)             Or(J(_prop_))
 
-#define J(_prop_)     (((void)(NO && ((void)(@selector(_prop_)), NO)), @#_prop_))
+#define J(_prop_)               (((void)(NO && ((void)(@selector(_prop_)), NO)), @#_prop_))
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -241,7 +241,8 @@ typedef struct {
 - (JRObjectBlock)WhereJ NS_SWIFT_UNAVAILABLE("macro method");///< will not execute cause the macro
 - (JRObjectBlock)OrderJ NS_SWIFT_UNAVAILABLE("macro method");///< will not execute cause the macro
 - (JRObjectBlock)GroupJ NS_SWIFT_UNAVAILABLE("macro method");///< will not execute cause the macro
-
+- (JRDBChainCondition *(^)(NSString *propName))AndJ NS_SWIFT_UNAVAILABLE("macro method");///< will not execute cause the macro
+- (JRDBChainCondition *(^)(id param))OrJ NS_SWIFT_UNAVAILABLE("macro method");///< will not execute cause the macro
 @end
 
 
