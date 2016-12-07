@@ -10,8 +10,7 @@
 
 #import <Foundation/Foundation.h>
 #import "JRPersistent.h"
-
-@class FMDatabase;
+#import "JRPersistentHandler.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -23,7 +22,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly, strong) Class<JRPersistent> clazz1;
 @property (nonatomic, readonly, strong) Class<JRPersistent> clazz2;
 
-@property (nonatomic, readonly, strong) FMDatabase *db;
+@property (nonatomic, readonly, strong) id<JRPersistentHandler> db;
 
 /**
  *  创建中建表对象
@@ -32,7 +31,7 @@ NS_ASSUME_NONNULL_BEGIN
  *  @param clazz2
  *  @param db
  */
-+ (instancetype _Nullable)table4Clazz:(Class<JRPersistent>)clazz1 andClazz:(Class<JRPersistent>)clazz2 db:(FMDatabase *)db;
++ (instancetype _Nullable)table4Clazz:(Class<JRPersistent>)clazz1 andClazz:(Class<JRPersistent>)clazz2 db:(id<JRPersistentHandler>)db;
 
 - (NSString *)tableName;
 

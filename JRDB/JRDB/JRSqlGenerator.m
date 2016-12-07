@@ -8,7 +8,6 @@
 
 #import "JRDBMgr.h"
 #import "JRDBChain.h"
-#import <FMDB/FMDB.h>
 #import "NSObject+JRDB.h"
 #import "JRSqlGenerator.h"
 #import "NSObject+Reflect.h"
@@ -91,10 +90,10 @@ void SqlLog(id sql) {
 }
 
 // {alter 'tableName' add column xx}
-+ (NSArray<JRSql *> *)updateTableSql4Clazz:(Class<JRPersistent>)clazz inDB:(FMDatabase *)db table:(NSString * _Nullable)table {
++ (NSArray<JRSql *> *)updateTableSql4Clazz:(Class<JRPersistent>)clazz inDB:(id<JRPersistentHandler>)db table:(NSString * _Nullable)table {
     NSString *tableName  = table ?: [self getTableNameForClazz:clazz];
     // 检测表是否存在, 不存在则直接返回创建表语句
-    if (![db tableExists:tableName]) { return @[[self createTableSql4Clazz:clazz table:tableName]]; }
+    if (![db jr_tableExists:tableName]) { return @[[self createTableSql4Clazz:clazz table:tableName]]; }
 
     NSArray<JRActivatedProperty *> *ap = [clazz jr_activatedProperties];
     NSMutableArray *sqls = [NSMutableArray array];
@@ -102,7 +101,7 @@ void SqlLog(id sql) {
     [ap enumerateObjectsUsingBlock:^(JRActivatedProperty * _Nonnull prop, NSUInteger idx, BOOL * _Nonnull stop) {
         // 如果是关键字'ID' 或 '_ID' 则继续循环
         if (isID(prop.ivarName)) {return;}
-        if ([db columnExists:prop.dataBaseName inTableWithName:tableName]) { return; }
+        if ([db jr_columnExists:prop.dataBaseName inTable:tableName]) { return; }
 
         JRSql *jrsql;
         switch (prop.relateionShip) {
@@ -132,7 +131,7 @@ void SqlLog(id sql) {
 }
 
 // insert into tablename (_ID) values (?)
-+ (JRSql *)sql4Insert:(id<JRPersistent>)obj toDB:(FMDatabase * _Nonnull)db table:(NSString * _Nullable)table {
++ (JRSql *)sql4Insert:(id<JRPersistent>)obj toDB:(id<JRPersistentHandler>)db table:(NSString * _Nullable)table {
     
     NSString *tableName = table ?: [self getTableNameForClazz:[obj class]];
 //    NSArray<JRActivatedProperty *> *ap = [JRReflectUtil activitedProperties4Clazz:[obj class]];
@@ -147,7 +146,7 @@ void SqlLog(id sql) {
     [ap enumerateObjectsUsingBlock:^(JRActivatedProperty * _Nonnull prop, NSUInteger idx, BOOL * _Nonnull stop) {
         // 如果是关键字'ID' 或 '_ID' 则继续循环
         if (isID(prop.ivarName)) {return;}
-        if (![db columnExists:prop.dataBaseName inTableWithName:tableName]) { return; }
+        if (![db jr_columnExists:prop.dataBaseName inTable:tableName]) { return; }
         
         // 拼接语句
         [sql appendFormat:@" , %@", prop.dataBaseName];
@@ -210,7 +209,7 @@ void SqlLog(id sql) {
 }
 
 // update 'tableName' set name = 'abc' where xx = xx
-+ (JRSql *)sql4Update:(id<JRPersistent>)obj columns:(NSArray<NSString *> *)columns toDB:(FMDatabase * _Nonnull)db table:(NSString * _Nullable)table {
++ (JRSql *)sql4Update:(id<JRPersistent>)obj columns:(NSArray<NSString *> *)columns toDB:(id<JRPersistentHandler>)db table:(NSString * _Nullable)table {
     
     NSArray<JRActivatedProperty *> *ap = [[obj class] jr_activatedProperties];
     
@@ -225,7 +224,7 @@ void SqlLog(id sql) {
         if (isID(prop.ivarName)) {return;}
         // 是否在指定更新列中
         if (columns.count && ![columns containsObject:prop.propertyName]) { return; }
-        if (![db columnExists:prop.dataBaseName inTableWithName:tableName]) { return; }
+        if (![db jr_columnExists:prop.dataBaseName inTable:tableName]) { return; }
         
         id value;
         switch (prop.relateionShip) {

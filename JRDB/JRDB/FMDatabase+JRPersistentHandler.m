@@ -44,6 +44,30 @@
     }] boolValue];
 }
 
+- (BOOL)jr_startTransaction {
+    return [self beginTransaction];
+}
+
+- (BOOL)jr_commitTransction {
+    return [self commit];
+}
+
+- (BOOL)jr_rollbackTransction {
+    return [self rollback];
+}
+
+- (BOOL)jr_isTransactioning {
+    return [self inTransaction];
+}
+
+- (BOOL)jr_tableExists:(NSString *)tableName {
+    return [self tableExists:tableName];
+}
+
+- (BOOL)jr_columnExists:(NSString *)column inTable:(NSString *)tableName {
+    return [self columnExists:column inTableWithName:tableName];
+}
+
 - (NSString *)jr_handlerIdentifier {
     return self.databasePath;
 }
@@ -116,8 +140,16 @@
     return [self executeUpdate:sql.sqlString withArgumentsInArray:sql.args];
 }
 
+- (BOOL)jr_executeUpdate:(NSString *)sql params:(NSArray *)params {
+    return [self executeUpdate:sql withArgumentsInArray:params];
+}
+
 - (id _Nonnull)jr_executeQuery:(JRSql * _Nonnull)sql {
     return [self executeQuery:sql.sqlString withArgumentsInArray:sql.args];
+}
+
+- (id)jr_executeQuery:(NSString *)sql params:(NSArray *)params {
+    return [self executeQuery:sql withArgumentsInArray:params];
 }
 
 - (NSOperationQueue *)jr_operationQueue {

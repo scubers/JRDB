@@ -9,10 +9,6 @@
 #import <Foundation/Foundation.h>
 #import "JRPersistent.h"
 
-#define JR_DEFAULTDB [JRDBMgr defaultDB]
-
-@class FMDatabase;
-
 NS_ASSUME_NONNULL_BEGIN
 
 @interface NSObject (JRDB) <JRPersistent>

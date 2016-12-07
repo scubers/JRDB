@@ -16,7 +16,7 @@
 
 @implementation JRMiddleTable
 
-+ (instancetype)table4Clazz:(Class<JRPersistent>)clazz1 andClazz:(Class<JRPersistent>)clazz2 db:(FMDatabase *)db {
++ (instancetype)table4Clazz:(Class<JRPersistent>)clazz1 andClazz:(Class<JRPersistent>)clazz2 db:(id<JRPersistentHandler>)db {
     JRMiddleTable *t = [JRMiddleTable new];
     t->_db = db;
     t->_clazz1 = clazz1;
@@ -25,7 +25,7 @@
 }
 
 - (NSString *)tableName {
-    if ([_db tableExists:MiddleTableName(_clazz1, _clazz2)]) {
+    if ([_db jr_tableExists:MiddleTableName(_clazz1, _clazz2)]) {
         return MiddleTableName(_clazz1, _clazz2);
     }
     return MiddleTableName(_clazz2, _clazz1);
@@ -33,9 +33,9 @@
 
 - (BOOL)saveIDs:(NSArray<NSString *> *)IDs withClazz:(Class<JRPersistent>)withClazz forID:(NSString *)ID withIDClazz:(Class<JRPersistent>)IDClazz {
 
-    NSAssert([_db inTransaction], @"should in a transaction");
+    NSAssert([_db jr_isTransactioning], @"should in a transaction");
     
-    if (![_db tableExists:[self tableName]]) {
+    if (![_db jr_tableExists:[self tableName]]) {
         // TODO: createTable
         if (![self _createTable]) {
             return NO;
@@ -62,19 +62,19 @@
     __block BOOL flag = YES;
     [array enumerateObjectsUsingBlock:^(NSString * _Nonnull aID, NSUInteger idx, BOOL * _Nonnull stop) {
         NSString *sql = [NSString stringWithFormat:@"insert into %@ (%@, %@) values(?, ?)", [self tableName], MiddleColumn4Clazz(withClazz), MiddleColumn4Clazz(IDClazz)];
-        flag = [_db executeUpdate:sql withArgumentsInArray:@[aID, ID]];
+        flag = [_db jr_executeUpdate:sql params:@[aID, ID]];
         *stop = !flag;
     }];
     return flag;
 }
 
 - (NSArray<NSString *> *)anotherClazzIDsWithID:(NSString *)ID clazz:(Class<JRPersistent>)clazz {
-    if (![_db tableExists:[self tableName]]) {
+    if (![_db jr_tableExists:[self tableName]]) {
         return @[];
     }
     // TODO: 查询
     NSString *sql = [NSString stringWithFormat:@"select * from %@ where %@ = ?", [self tableName], MiddleColumn4Clazz(clazz)];
-    FMResultSet *resultSet = [_db executeQuery:sql withArgumentsInArray:@[ID]];
+    FMResultSet *resultSet = [_db jr_executeQuery:sql params:@[ID]];
     
     NSMutableArray *array = [NSMutableArray array];
     while ([resultSet next]) {
@@ -99,9 +99,9 @@
 }
 
 - (BOOL)deleteID:(NSString *)ID forClazz:(Class<JRPersistent>)clazz {
-    if (![_db tableExists:[self tableName]]) { return YES; }
+    if (![_db jr_tableExists:[self tableName]]) { return YES; }
     NSString *sql = [NSString stringWithFormat:@"delete from %@ where %@ = ?;", [self tableName], MiddleColumn4Clazz(clazz)];
-    return [_db executeUpdate:sql withArgumentsInArray:@[ID]];
+    return [_db jr_executeUpdate:sql params:@[ID]];
 }
 
 - (BOOL)cleanRubbishData {
@@ -127,7 +127,7 @@
 #pragma mark - Private Method
 - (BOOL)_createTable {
     NSString *sql = [NSString stringWithFormat:@"create table if not exists %@ (%@ TEXT, %@ TEXT)", [self tableName], MiddleColumn4Clazz(_clazz1), MiddleColumn4Clazz(_clazz2)];
-    return [_db executeUpdate:sql];
+    return [_db jr_executeUpdate:sql params:nil];
 }
 
 @end

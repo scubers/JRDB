@@ -10,8 +10,6 @@
 #import "JRPersistentHandler.h"
 #import <Foundation/Foundation.h>
 
-@class JRDBQueue;
-
 NS_ASSUME_NONNULL_BEGIN
 
 @interface JRDBMgr : NSObject
@@ -49,7 +47,7 @@ NS_ASSUME_NONNULL_BEGIN
 
  @param db
  */
-- (void)clearMidTableRubbishDataForDB:(id<JRPersistentHandler>)db;
+- (void)clearMidTableRubbishData;
 
 
 @end

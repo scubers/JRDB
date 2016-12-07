@@ -87,29 +87,29 @@ BOOL matchObjects(id obj1, id obj2, NSArray<NSString *> *columns) {
 }
 
 SPEC_BEGIN(JRDBTestTest)
+
+
 describe(@"operation test", ^{
 
     let(db, ^id{
-        id<JRPersistentHandler> db = [[JRDBMgr shareInstance] databaseWithPath:@"/Users/mac/Desktop/test11.sqlite"];
+        [[JRDBMgr shareInstance] setDefaultDatabasePath:@"/Users/mac/Desktop/test11.sqlite"];
+        id<JRPersistentHandler> db = [[JRDBMgr shareInstance] getHandler];
         [[JRDBMgr shareInstance] registerClazzes:@[
                                                    [Person class],
                                                    [Card class],
                                                    [Money class],
                                                    ]];
-        [JRDBMgr shareInstance].defaultDB = db;
-
         [JRDBMgr shareInstance].debugMode = YES;
         return db;
     });
 
-    
     
     afterEach(^{
         [JRDBMgr shareInstance].debugMode = NO;
         J_DeleteAll(Person).updateResult;
         J_DeleteAll(Card).updateResult;
         J_DeleteAll(Money).updateResult;
-        [[JRDBMgr shareInstance] clearMidTableRubbishDataForDB:db];
+        [[JRDBMgr shareInstance] clearMidTableRubbishData];
         J_DropTable(Person);
         J_DropTable(Card);
         J_DropTable(Money);
@@ -121,10 +121,12 @@ describe(@"operation test", ^{
         
         context(@"table operation", ^{
             it(@"create Table", ^{
-                J_CreateTable(Person);
-                [[@([db tableExists:[Person jr_tableName]]) should] beYes];
+                BOOL result = J_CreateTable(Person);
+                [[theValue(result) should] beYes];
+                [[theValue([[[JRDBMgr shareInstance] getHandler] jr_tableExists:[Person jr_tableName]]) should] beYes];
             });
         });
+        
         
         context(@"save", ^{
             it(@"save one", ^{
@@ -144,14 +146,17 @@ describe(@"operation test", ^{
                 [[theValue(J_Select(Person).list.count) should] equal:@10];
             });
         });
-        
+
         context(@"update", ^{
             
             beforeEach(^{
+                NSMutableArray *arr = [NSMutableArray array];
                 for(int i = 0; i < 10; i++) {
                     Person *p = createPerson(i, nil);
-                    J_Insert(p).updateResult;
+                    [arr addObject:p];
                 }
+                BOOL result = J_Insert(arr).updateResult;
+                [[theValue(result) should] beYes];
             });
             
             
@@ -188,7 +193,7 @@ describe(@"operation test", ^{
             });
             
             it(@"condition select", ^{
-                NSArray<Person *> *ps = J_Select(Person).And(@"name").like(@"%1%").Or(@"name").like(@"%7%").list;
+                NSArray<Person *> *ps = J_Select(Person).AndJ(name).like(@"%1%").OrJ(name).like(@"%7%").list;
                 [ps enumerateObjectsUsingBlock:^(Person * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                     BOOL result = [obj.name containsString:@"1"]|| [obj.name containsString:@"7"];
                     [[theValue(result) should] beYes];
@@ -223,171 +228,171 @@ describe(@"operation test", ^{
         });
     });
 
-    // MARK: 关联操作
-    context(@"recursive operation", ^{
-        
-        it(@"save child", ^{
-            Person *p = createPerson(0, nil);
-            Person *p1 = createPerson(1, nil);
-            p.son = p1;
-     
-            
-            BOOL result = J_Insert(p).Recursively.updateResult;
-            [[theValue(result) should] beYes];
-            
-            Person *person = J_Select(Person).Recursively.WhereIdIs(p.ID).object;
-            
-            result = matchObjects(person.son, p1, @[
-                                           J(name),
-                                           J(bbbbb),
-                                           J(c_long),
-                                           J(d_long_long),
-                                           ]);
-            
-            [[theValue(result) should] beYes];
-            
-        });
-        
-        it(@"save one to one", ^{
-            Person *p = createPerson(0, nil);
-            Card *c = createCard(@"123");
-            p.card = c;
-            c.person = p;
-     
-            
-            BOOL result = J_Insert(p).Recursively.updateResult;
-            [[theValue(result) should] beYes];
-            
-            Person *person = J_Select(Person).Recursively.WhereIdIs(p.ID).object;
-            
-            result = matchObjects(person.card, c, @[
-                                                    J(serialNumber),
-                                                    J(person),
-                                                    ]);
-            [[theValue(result) should] beYes];
-            
-            result = matchObjects(c.person, p, @[
-                                                    J(name),
-                                                    J(card),
-                                                    ]);
-            [[theValue(result) should] beYes];
-        });
-        
-        it(@"save one to one three cycle", ^{
-            Person *p = createPerson(0, nil);
-            Person *p1 = createPerson(1, nil);
-            Person *p2 = createPerson(2, nil);
-            
-            p.son = p1;
-            p1.son = p2;
-            p2.son = p;
-            
-            
-            BOOL result = J_Insert(p).Recursively.updateResult;
-            [[theValue(result) should] beYes];
-            
-            Person *person = J_Select(Person).Recursively.WhereIdIs(p.ID).object;
-            
-            
-            result = matchObjects(person.son, p1, @[
-                                                 J(name),
-                                                 J(card),
-                                                 ]);
-            [[theValue(result) should] beYes];
-            
-            result = matchObjects(person.son.son, p2, @[
-                                                 J(name),
-                                                 J(card),
-                                                 ]);
-            [[theValue(result) should] beYes];
-            
-            result = matchObjects(person.son.son.son, p, @[
-                                                 J(name),
-                                                 J(card),
-                                                 ]);
-            [[theValue(result) should] beYes];
-        });
-        
-        it(@"save one to many", ^{
-            int count = 10;
-            Person *p = createPerson(0, nil);
-
-            for (int i = 0; i < count; i++) {
-                Person *p1 = createPerson(1 + i, nil);
-                [p.children addObject:p1];
-            }
-            
-            BOOL result = J_Insert(p).Recursively.updateResult;
-            [[theValue(result) should] beYes];
-            
-            Person *person = J_Select(Person).Recursively.WhereIdIs(p.ID).object;
-            
-            [[theValue(person.children.count) should] equal:@(count)];
-            
-            [person.children enumerateObjectsUsingBlock:^(Person * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                
-                BOOL result = matchObjects(obj, p.children[idx]
-                                      , @[
-                                          J(name),
-                                          J(bbbbb),
-                                          J(c_long),
-                                          J(d_long_long),
-                                          ]);
-                [[theValue(result) should] beYes];
-            }];
-            
-        });
-        
-        it(@"save one to many 2", ^{
-            int count = 10;
-            Person *p = createPerson(0, nil);
-            
-            for (int i = 0; i < count; i++) {
-                Money *m = createMoney(i);
-                [p.money addObject:m];
-            }
-            
-            BOOL result = J_Insert(p).Recursively.updateResult;
-            [[theValue(result) should] beYes];
-            
-            Person *person = J_Select(Person).Recursively.WhereIdIs(p.ID).object;
-            [[theValue(person.money.count) should] equal:@(count)];
-            
-            [person.money enumerateObjectsUsingBlock:^(Money * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                
-                BOOL result = matchObjects(obj, p.money[idx]
-                                           , @[
-                                               @"value",
-                                               ]);
-                [[theValue(result) should] beYes];
-            }];
-            
-        });
-        
-        it(@"update many", ^{
-            int count = 10;
-            Person *p = createPerson(0, nil);
-            
-            for (int i = 0; i < count; i++) {
-                Money *m = createMoney(i);
-                [p.money addObject:m];
-            }
-            
-            BOOL result = J_Insert(p).Recursively.updateResult;
-            [[theValue(result) should] beYes];
-            
-            Person *person = J_Select(Person).WhereIdIs(p.ID).Recursively.object;
-            [[theValue(person.money.count) should] equal:@(count)];
-            person.money = nil;
-
-            
-            result = J_Update(person).Recursively.updateResult;
-            [[theValue(result) should] beYes];
-            
-            person = J_Select(Person).WhereIdIs(p.ID).Recursively.object;
-            [[theValue(person.money.count) should] equal:@0];
-        });
-    });
+//    // MARK: 关联操作
+//    context(@"recursive operation", ^{
+//        
+//        it(@"save child", ^{
+//            Person *p = createPerson(0, nil);
+//            Person *p1 = createPerson(1, nil);
+//            p.son = p1;
+//     
+//            
+//            BOOL result = J_Insert(p).Recursively.updateResult;
+//            [[theValue(result) should] beYes];
+//            
+//            Person *person = J_Select(Person).Recursively.WhereIdIs(p.ID).object;
+//            
+//            result = matchObjects(person.son, p1, @[
+//                                           J(name),
+//                                           J(bbbbb),
+//                                           J(c_long),
+//                                           J(d_long_long),
+//                                           ]);
+//            
+//            [[theValue(result) should] beYes];
+//            
+//        });
+//        
+//        it(@"save one to one", ^{
+//            Person *p = createPerson(0, nil);
+//            Card *c = createCard(@"123");
+//            p.card = c;
+//            c.person = p;
+//     
+//            
+//            BOOL result = J_Insert(p).Recursively.updateResult;
+//            [[theValue(result) should] beYes];
+//            
+//            Person *person = J_Select(Person).Recursively.WhereIdIs(p.ID).object;
+//            
+//            result = matchObjects(person.card, c, @[
+//                                                    J(serialNumber),
+//                                                    J(person),
+//                                                    ]);
+//            [[theValue(result) should] beYes];
+//            
+//            result = matchObjects(c.person, p, @[
+//                                                    J(name),
+//                                                    J(card),
+//                                                    ]);
+//            [[theValue(result) should] beYes];
+//        });
+//        
+//        it(@"save one to one three cycle", ^{
+//            Person *p = createPerson(0, nil);
+//            Person *p1 = createPerson(1, nil);
+//            Person *p2 = createPerson(2, nil);
+//            
+//            p.son = p1;
+//            p1.son = p2;
+//            p2.son = p;
+//            
+//            
+//            BOOL result = J_Insert(p).Recursively.updateResult;
+//            [[theValue(result) should] beYes];
+//            
+//            Person *person = J_Select(Person).Recursively.WhereIdIs(p.ID).object;
+//            
+//            
+//            result = matchObjects(person.son, p1, @[
+//                                                 J(name),
+//                                                 J(card),
+//                                                 ]);
+//            [[theValue(result) should] beYes];
+//            
+//            result = matchObjects(person.son.son, p2, @[
+//                                                 J(name),
+//                                                 J(card),
+//                                                 ]);
+//            [[theValue(result) should] beYes];
+//            
+//            result = matchObjects(person.son.son.son, p, @[
+//                                                 J(name),
+//                                                 J(card),
+//                                                 ]);
+//            [[theValue(result) should] beYes];
+//        });
+//        
+//        it(@"save one to many", ^{
+//            int count = 10;
+//            Person *p = createPerson(0, nil);
+//
+//            for (int i = 0; i < count; i++) {
+//                Person *p1 = createPerson(1 + i, nil);
+//                [p.children addObject:p1];
+//            }
+//            
+//            BOOL result = J_Insert(p).Recursively.updateResult;
+//            [[theValue(result) should] beYes];
+//            
+//            Person *person = J_Select(Person).Recursively.WhereIdIs(p.ID).object;
+//            
+//            [[theValue(person.children.count) should] equal:@(count)];
+//            
+//            [person.children enumerateObjectsUsingBlock:^(Person * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+//                
+//                BOOL result = matchObjects(obj, p.children[idx]
+//                                      , @[
+//                                          J(name),
+//                                          J(bbbbb),
+//                                          J(c_long),
+//                                          J(d_long_long),
+//                                          ]);
+//                [[theValue(result) should] beYes];
+//            }];
+//            
+//        });
+//        
+//        it(@"save one to many 2", ^{
+//            int count = 10;
+//            Person *p = createPerson(0, nil);
+//            
+//            for (int i = 0; i < count; i++) {
+//                Money *m = createMoney(i);
+//                [p.money addObject:m];
+//            }
+//            
+//            BOOL result = J_Insert(p).Recursively.updateResult;
+//            [[theValue(result) should] beYes];
+//            
+//            Person *person = J_Select(Person).Recursively.WhereIdIs(p.ID).object;
+//            [[theValue(person.money.count) should] equal:@(count)];
+//            
+//            [person.money enumerateObjectsUsingBlock:^(Money * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+//                
+//                BOOL result = matchObjects(obj, p.money[idx]
+//                                           , @[
+//                                               @"value",
+//                                               ]);
+//                [[theValue(result) should] beYes];
+//            }];
+//            
+//        });
+//        
+//        it(@"update many", ^{
+//            int count = 10;
+//            Person *p = createPerson(0, nil);
+//            
+//            for (int i = 0; i < count; i++) {
+//                Money *m = createMoney(i);
+//                [p.money addObject:m];
+//            }
+//            
+//            BOOL result = J_Insert(p).Recursively.updateResult;
+//            [[theValue(result) should] beYes];
+//            
+//            Person *person = J_Select(Person).WhereIdIs(p.ID).Recursively.object;
+//            [[theValue(person.money.count) should] equal:@(count)];
+//            person.money = nil;
+//
+//            
+//            result = J_Update(person).Recursively.updateResult;
+//            [[theValue(result) should] beYes];
+//            
+//            person = J_Select(Person).WhereIdIs(p.ID).Recursively.object;
+//            [[theValue(person.money.count) should] equal:@0];
+//        });
+//    });
 });
 
 SPEC_END

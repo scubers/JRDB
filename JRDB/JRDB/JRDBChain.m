@@ -13,7 +13,6 @@
 #import "JRSqlGenerator.h"
 #import "JRActivatedProperty.h"
 
-#import "FMDatabase+JRPersistentHandler.h"
 #import "JRFMDBResultSetHandler.h"
 
 #pragma clang diagnostic push

@@ -68,11 +68,12 @@ static JRDBMgr *__shareInstance;
         }
         
         if (connections.count < _maxConnectionCount) {
-            FMDatabase *db = [FMDatabase databaseWithPath:path];
-            [db open];
+            id<JRPersistentHandler> db = [FMDatabase databaseWithPath:path];
             [connections addObject:db];
         }
-        return connections[(int)arc4random_uniform((int)_handlers.count)];
+        id<JRPersistentHandler> handler = connections[(int)arc4random_uniform((int)_handlers.count)];
+        [handler jr_openSynchronized:YES];
+        return handler;
     }
 }
 
@@ -144,15 +145,17 @@ static JRDBMgr *__shareInstance;
 
 #pragma mark - private method
 
-- (void)clearMidTableRubbishDataForDB:(id<JRPersistentHandler>)db {
+- (void)clearMidTableRubbishData {
     
+    id<JRPersistentHandler> handler = [self getHandler];
     [_clazzArray enumerateObjectsUsingBlock:^(Class<JRPersistent>  _Nonnull clazz, NSUInteger idx, BOOL * _Nonnull stop) {
         
         if (idx == _clazzArray.count - 1) { return ; }
         
         for (NSUInteger i = idx + 1; i < _clazzArray.count; i++) {
-            JRMiddleTable *mid = [JRMiddleTable table4Clazz:clazz andClazz:_clazzArray[i] db:((FMDatabase *)db)];
-            if ([((FMDatabase *)db) tableExists:[mid tableName]]) {
+            
+            JRMiddleTable *mid = [JRMiddleTable table4Clazz:clazz andClazz:_clazzArray[i] db:handler];
+            if ([handler jr_tableExists:[mid tableName]]) {
                 [mid cleanRubbishData];
             }
         }

@@ -19,15 +19,12 @@
 
 - (void)setUp {
     [super setUp];
-    [JRDBMgr defaultDB];
-    id<JRPersistentHandler> db = [[JRDBMgr shareInstance] databaseWithPath:@"/Users/mac/Desktop/test.sqlite"];
+    [[JRDBMgr shareInstance] setDefaultDatabasePath:@"/Users/mac/Desktop/test.sqlite"];
     [[JRDBMgr shareInstance] registerClazzes:@[
                                                [Person class],
                                                [Card class],
                                                [Money class],
                                                ]];
-    [JRDBMgr shareInstance].defaultDB = db;
-    
     NSLog(@"%@", [[JRDBMgr shareInstance] registeredClazz]);
 }
 
@@ -44,7 +41,7 @@
 
 - (void)testDeleteDB {
     
-    [[JRDBMgr shareInstance] deleteDatabaseWithPath:[[JRDBMgr defaultDB] handlerIdentifier]];
+    [[JRDBMgr shareInstance] deleteDatabaseWithPath:[JRDBMgr shareInstance].defaultDatabasePath];
 }
 
 - (void)testUpdateDB {
@@ -52,7 +49,6 @@
 }
 
 - (void)testClearMidRubbishData {
-    [[JRDBMgr shareInstance] clearMidTableRubbishDataForDB:[JRDBMgr defaultDB]];
 }
 
 @end

@@ -34,12 +34,22 @@ NS_ASSUME_NONNULL_BEGIN
 @required
 
 @property (nonatomic, strong) NSOperationQueue *jr_operationQueue;
+@property (nonatomic, assign, readonly) BOOL jr_isTransactioning;
 
 - (NSString *)jr_handlerIdentifier;
 
 - (BOOL)jr_openSynchronized:(BOOL)synchronized;
 
 - (BOOL)jr_closeSynchronized:(BOOL)synchronized;
+
+- (BOOL)jr_startTransaction;
+- (BOOL)jr_commitTransction;
+- (BOOL)jr_rollbackTransction;
+
+
+- (BOOL)jr_tableExists:(NSString *)tableName;
+
+- (BOOL)jr_columnExists:(NSString *)column inTable:(NSString *)tableName;
 
 /**
  使用block来进行队列操作，后台操作，线程安全
@@ -80,6 +90,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param sql
  */
 - (BOOL)jr_executeUpdate:(JRSql *)sql;
+- (BOOL)jr_executeUpdate:(NSString *)sql params:(NSArray * _Nullable)params;
 
 /**
  执行sql 查询
@@ -87,6 +98,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param sql
  */
 - (id)jr_executeQuery:(JRSql *)sql;
+- (id)jr_executeQuery:(NSString *)sql params:(NSArray * _Nullable)params;
 
 @end
 

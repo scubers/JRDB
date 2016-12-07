@@ -37,12 +37,13 @@
 #define ColumnsJ(...) Columns((_variableListToArray(__VA_ARGS__, 0)))
 #define IgnoreJ(...)  Ignore((_variableListToArray(__VA_ARGS__, 0)))
 
-#define FromJ(_arg_)  From([_arg_ class])
-#define WhereJ(_arg_) Where(@#_arg_)
-#define OrderJ(_prop_)Order(J(_prop_))
-#define GroupJ(_prop_)Group(J(_prop_))
+#define FromJ(_arg_)   From([_arg_ class])
+#define WhereJ(_arg_)  Where(@#_arg_)
+#define OrderJ(_prop_) Order(J(_prop_))
+#define GroupJ(_prop_) Group(J(_prop_))
+#define AndJ(_prop_)   And(J(_prop_))
+#define OrJ(_prop_)    Or(J(_prop_))
 
-//#define J(_prop_)     (((void)(NO && ((void)[((id)[NSObject new]) _prop_], NO)), @#_prop_))
 #define J(_prop_)     (((void)(NO && ((void)(@selector(_prop_)), NO)), @#_prop_))
 
 NS_ASSUME_NONNULL_BEGIN

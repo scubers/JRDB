@@ -24,14 +24,12 @@
 
 - (void)setUp {
     [super setUp];
-    [JRDBMgr defaultDB];
-    id<JRPersistentHandler> db = [[JRDBMgr shareInstance] databaseWithPath:@"/Users/Jrwong/Desktop/test.sqlite"];
+    [[JRDBMgr shareInstance] setDefaultDatabasePath:@"/Users/mac/Desktop/test.sqlite"];
     [[JRDBMgr shareInstance] registerClazzes:@[
                                                [Person class],
                                                [Card class],
                                                [Money class],
                                                ]];
-    [JRDBMgr shareInstance].defaultDB = db;
     
 //    [JRDBMgr shareInstance].debugMode = NO;
     NSLog(@"%@", [[JRDBMgr shareInstance] registeredClazz]);
@@ -221,7 +219,7 @@
 
 - (void)testSaveOrUpdateOne {
     Person *p = [self createPerson:100 name:nil];
-    [[JRDBMgr defaultDB] jr_saveOrUpdateOne:p useTransaction:YES synchronized:YES];
+    [[JRDBMgr shareInstance].getHandler jr_saveOrUpdateOne:p useTransaction:YES synchronized:YES];
 }
 
 #pragma mark - test find 

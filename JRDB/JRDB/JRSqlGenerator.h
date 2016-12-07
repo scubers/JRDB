@@ -8,8 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "JRPersistent.h"
-
-@class FMDatabase;
+#import "JRPersistentHandler.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -65,14 +64,14 @@ typedef NS_ENUM(NSInteger, DBType) {
  *
  *  @return sql数组
  */
-+ (NSArray<JRSql *> *)updateTableSql4Clazz:(Class<JRPersistent>)clazz inDB:(FMDatabase *)db table:(NSString * _Nullable)table;
++ (NSArray<JRSql *> *)updateTableSql4Clazz:(Class<JRPersistent>)clazz inDB:(id<JRPersistentHandler>)db table:(NSString * _Nullable)table;
 
 #pragma mark - insert
 
 /**
  *  返回占位符的sql insert into tablename values (name= ? , name2 = ?,)
  */
-+ (JRSql *)sql4Insert:(id<JRPersistent>)obj toDB:(FMDatabase *)db table:(NSString * _Nullable)table;
++ (JRSql *)sql4Insert:(id<JRPersistent>)obj toDB:(id<JRPersistentHandler>)db table:(NSString * _Nullable)table;
 
 #pragma mark - update
 /**
@@ -81,7 +80,7 @@ typedef NS_ENUM(NSInteger, DBType) {
  */
 + (JRSql *)sql4Update:(id<JRPersistent>)obj
               columns:(NSArray<NSString *> * _Nullable)columns
-                 toDB:(FMDatabase *)db
+                 toDB:(id<JRPersistentHandler>)db
                 table:(NSString * _Nullable)table;
 
 
