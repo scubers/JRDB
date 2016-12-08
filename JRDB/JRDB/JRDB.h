@@ -21,6 +21,7 @@
 #import "OBJCProperty.h"
 #import "JRMiddleTable.h"
 #import "JRDBChain.h"
+#import "JRDBChainCondition.h"
 #import "JRActivatedProperty.h"
 #import "NSObject+JRDB.h"
 
