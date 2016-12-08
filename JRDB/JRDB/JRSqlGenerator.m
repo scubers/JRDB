@@ -271,7 +271,7 @@
 
 + (JRSql *)sql4GetByPrimaryKeyWithClazz:(Class<JRPersistent>)clazz primaryKey:(id _Nonnull)primaryKey table:(NSString * _Nullable)table {
 
-    NSString *condition = [NSString stringWithFormat:@"%@=?", [clazz jr_primaryKey]];
+    NSString *condition = [NSString stringWithFormat:@"%@=?", [JRPersistentUtil getPrimaryKeyByName:[clazz jr_primaryKey] inClass:clazz]];
     return [self sql4GetColumns:nil
                     byCondition:condition
                          params:@[primaryKey]

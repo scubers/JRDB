@@ -17,7 +17,7 @@ Feedback: [jr-wong@qq.com](mailto:jrwong@qq.com)
 # 2.0更新
 
 
-* 数据库字段名，从默认的_ivar名 改为 property名 :  _name -> name
+> * 数据库字段名，从默认的_ivar名 改为 property名 :  _name -> name
 * 数据库操作对象获取改为连接池： [JRDBMgr defaultDB] -> [JRDBMgr shareInstance].getHandler
 * 抛弃缓存功能
 * 新增And, Or查询语句
@@ -31,14 +31,10 @@ Feedback: [jr-wong@qq.com](mailto:jrwong@qq.com)
 > - 使用协议，不用继承基类，对任意NSObject可以进行入库操作
 > - Objective-C（Swift 请移步 [Swift扩展](https://github.com/scubers/JRDBSwift)）
 
-> ~~支持数据类型：基本数据类型（int，double，等），String，NSData，NSNumber，NSDate~~
-
-> ~~注：swift的基本数据类型，不支持**Option**类型，既不支持Int？Int！等，对象类型支持**Option**类型~~
-
 ---
 
 # 目录（Index）
-- [安装](#installationId) 
+> - [安装](#installationId) 
 - [表操作](#tableId)  
 - [保存](#saveId)
 - [更新](#updateId)
