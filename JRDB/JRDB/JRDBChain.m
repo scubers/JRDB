@@ -622,8 +622,8 @@ static inline void __operationCheck(JRDBChain *self) {
     else if (self.ignoreArray.count) {
         Class<JRPersistent> clazz = self.targetClazz;
         [[clazz jr_activatedProperties] enumerateObjectsUsingBlock:^(JRActivatedProperty * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            if (![self.ignoreArray containsObject:obj.ivarName]) {
-                [columns addObject:obj.ivarName];
+            if (![self.ignoreArray containsObject:obj.propertyName]) {
+                [columns addObject:obj.propertyName];
             }
         }];
     }

@@ -38,8 +38,14 @@ static NSRegularExpression *_reg;
     
     NSMutableArray<JRActivatedProperty *> *aps = [NSMutableArray array];
     
+    NSArray *exclude = [aClass jr_excludePropertyNames];
+    
     [ops enumerateObjectsUsingBlock:^(OBJCProperty * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        
+        if ([exclude containsObject:obj.name]) return;
+        
         NSString *dataBaseType = [self dataBaseTypeWithEncoding:obj.typeEncoding.UTF8String];
+        
         if (!dataBaseType) return ;
 
         JRActivatedProperty *p = [JRActivatedProperty property:obj.name relationShip:JRRelationNormal];
@@ -113,8 +119,8 @@ static NSRegularExpression *_reg;
     NSMutableArray<OBJCProperty *> *array = [NSMutableArray array];
 
     [[aClass objc_properties] enumerateObjectsUsingBlock:^(OBJCProperty * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        if ([[aClass jr_excludePropertyNames] containsObject:obj.ivarName]) {return ;}
-        if (!obj.ivarName.length) { return; }
+        if ([[aClass jr_excludePropertyNames] containsObject:obj.name]) {return ;}
+        if (!obj.ivarName.length) { return; } // 是否只有属性，没有变量
         [array addObject:obj];
     }];
 
