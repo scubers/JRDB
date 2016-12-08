@@ -21,9 +21,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-
-void SqlLog(id sql);
-
 typedef NS_ENUM(NSInteger, DBType) {
     DBTypeNull = 1,
     DBTypeInteger,

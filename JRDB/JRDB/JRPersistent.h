@@ -16,7 +16,7 @@
 
 #define DBIDKey @"_ID"
 
-#define isID(name) ([name.uppercaseString isEqualToString:DBIDKey] || [name.uppercaseString isEqualToString:DBIDKey])
+#define isID(name) ([[name uppercaseString] isEqualToString:DBIDKey] || [[name uppercaseString] isEqualToString:DBIDKey])
 
 @class JRActivatedProperty, JRDBChain;
 
@@ -35,8 +35,6 @@ typedef void(^JRDBDidFinishBlock)(id<JRPersistent> obj);
 
 + (void)setRegistered:(BOOL)registered;
 + (BOOL)isRegistered;
-
-@property (nonatomic, getter=isCacheHit, readonly) BOOL cacheHit NS_DEPRECATED_IOS(1_0, 10_0, "no cached in version 2.0.0");
 
 @optional
 

@@ -60,6 +60,15 @@ NS_ASSUME_NONNULL_BEGIN
  */
 + (JRActivatedProperty *)activityWithPropertyName:(NSString *)name inClass:(Class<JRPersistent>)aClass;
 
+
+/**
+ 获取pk的数据库名
+
+ @param name name description
+ @param aClass aClass description
+ */
++ (NSString *)getPrimaryKeyByName:(NSString *)name inClass:(Class<JRPersistent>)aClass;
+
 @end
 
 NS_ASSUME_NONNULL_END

@@ -16,7 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, strong, nullable) NSString *defaultDatabasePath;///< default database path
 
-@property (nonatomic, assign) int maxConnectionCount;///< connetion count, 5 by default
+@property (nonatomic, assign) int maxConnectionCount;///< connetion count, 1 by default
 
 @property (nonatomic, assign) BOOL debugMode;///< print sql if YES;
 
@@ -41,14 +41,6 @@ NS_ASSUME_NONNULL_BEGIN
 /** close the database, you should call this when app exit */
 - (void)close;
 - (void)closeDatabaseWithPath:(NSString *)path;
-
-/**
- 清理中间表的缓存垃圾
-
- @param db
- */
-- (void)clearMidTableRubbishData;
-
 
 @end
 

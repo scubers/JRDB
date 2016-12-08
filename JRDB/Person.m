@@ -84,19 +84,21 @@
 
 + (NSDictionary<NSString *,NSString *> *)jr_databaseNameMap {
     return @{
+             @"a_int" : @"aaaaa_a_int",
              @"money" : @"aaa_money",
              @"children" : @"aaa_children",
              @"k_data" : @"aaa_k_data",
+             @"i_string" : @"aaa_i_string",
              };
 }
 
-//+ (NSString *)jr_customPrimarykey {
-//    return @"i_string";
-//}
-//
-//- (id)jr_customPrimarykeyValue {
-//    return self.i_string;
-//}
++ (NSString *)jr_customPrimarykey {
+    return @"i_string";
+}
+
+- (id)jr_customPrimarykeyValue {
+    return self.i_string;
+}
 
 - (NSMutableArray<Money *> *)money {
     if (!_money) {

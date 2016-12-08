@@ -12,6 +12,19 @@
 
 @implementation JRPersistentUtil
 
+static NSRegularExpression *_reg;
++ (Class)getClassFromEncode:(NSString *)encode {
+    if (!_reg) {
+        NSError *error;
+        _reg = [[NSRegularExpression alloc] initWithPattern:@"\\b\\w+\\b" options:NSRegularExpressionCaseInsensitive error:&error];
+    }
+    NSArray<NSTextCheckingResult *> *arr = [_reg matchesInString:encode options:NSMatchingReportProgress range:NSMakeRange(0, encode.length)];
+    if (arr.count) {
+        return NSClassFromString([encode substringWithRange:arr.firstObject.range]);
+    }
+    return nil;
+}
+
 + (NSString *)uuid {
     CFUUIDRef uuidObject = CFUUIDCreate(kCFAllocatorDefault);
     NSString *uuidStr = (NSString *)CFBridgingRelease(CFUUIDCreateString(kCFAllocatorDefault, uuidObject));
@@ -112,7 +125,10 @@
 }
 
 + (NSString *)dataBaseTypeWithEncoding:(const char *)encoding {
+    
     NSString *encode = [NSString stringWithUTF8String:encoding];
+    
+    
     if (strcmp(encoding, @encode(int)) == 0
         || strcmp(encoding, @encode(unsigned int)) == 0
         || strcmp(encoding, @encode(long)) == 0
@@ -126,16 +142,19 @@
         ) {
         return @"REAL";
     }
-    if ([encode rangeOfString:@"String"].length) {
+    
+    Class clazz = [self getClassFromEncode:encode];
+    
+    if (clazz && [clazz isSubclassOfClass:[NSString class]]) {
         return @"TEXT";
     }
-    if ([encode rangeOfString:@"NSNumber"].length) {
+    if (clazz && [clazz isSubclassOfClass:[NSNumber class]]) {
         return @"REAL";
     }
-    if ([encode rangeOfString:@"NSData"].length) {
+    if (clazz && [clazz isSubclassOfClass:[NSData class]]) {
         return @"BLOB";
     }
-    if ([encode rangeOfString:@"NSDate"].length) {
+    if (clazz && [clazz isSubclassOfClass:[NSDate class]]) {
         return @"TIMESTAMP";
     }
     return nil;
@@ -169,16 +188,19 @@
     if (strcmp(encoding, @encode(double)) == 0) {
         return RetDataTypeDouble;
     }
-    if ([encode rangeOfString:@"String"].length) {
+    
+    Class clazz = [self getClassFromEncode:encode];
+    
+    if (clazz && [clazz isSubclassOfClass:[NSString class]]) {
         return RetDataTypeString;
     }
-    if ([encode rangeOfString:@"NSNumber"].length) {
+    if (clazz && [clazz isSubclassOfClass:[NSNumber class]]) {
         return RetDataTypeNSNumber;
     }
-    if ([encode rangeOfString:@"NSData"].length) {
+    if (clazz && [clazz isSubclassOfClass:[NSData class]]) {
         return RetDataTypeNSData;
     }
-    if ([encode rangeOfString:@"NSDate"].length) {
+    if (clazz && [clazz isSubclassOfClass:[NSDate class]]) {
         return RetDataTypeNSDate;
     }
     
@@ -192,13 +214,23 @@
 }
 
 + (JRActivatedProperty *)activityWithPropertyName:(NSString *)name inClass:(Class<JRPersistent>)aClass {
-    NSArray<JRActivatedProperty *> *aps = [aClass jr_activatedProperties];
-    for (JRActivatedProperty *prop in aps) {
-        if ([prop.propertyName isEqualToString:name]) {
-            return prop;
-        }
+    NSMutableDictionary<NSString *, JRActivatedProperty *> *dict = objc_getAssociatedObject(aClass, _cmd);
+    if (!dict) {
+        NSArray<JRActivatedProperty *> *aps = [aClass jr_activatedProperties];
+        dict = [NSMutableDictionary dictionary];
+        [aps enumerateObjectsUsingBlock:^(JRActivatedProperty * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            dict[obj.propertyName] = obj;
+        }];
+        objc_setAssociatedObject(aClass, _cmd, dict, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
-    return nil;
+    return dict[name];
+}
+
++ (NSString *)getPrimaryKeyByName:(NSString *)name inClass:(Class<JRPersistent>)aClass {
+    if (isID(name)) {
+        return DBIDKey;
+    }
+    return [self activityWithPropertyName:name inClass:aClass].dataBaseName;
 }
 
 @end

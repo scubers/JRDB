@@ -46,9 +46,6 @@ static JRDBMgr *__shareInstance;
     if (self = [super init]) {
         _clazzArray = [NSMutableArray arrayWithCapacity:1];
         _maxConnectionCount = 1;
-#ifdef DEBUG
-        _debugMode = YES;
-#endif
     }
     return self;
 }
@@ -139,25 +136,11 @@ static JRDBMgr *__shareInstance;
     return _handlers;
 }
 
+- (void)setDebugMode:(BOOL)debugMode {
+    _debugMode = debugMode;
+}
 
 #pragma mark - private method
-
-- (void)clearMidTableRubbishData {
-    
-    id<JRPersistentHandler> handler = [self getHandler];
-    [_clazzArray enumerateObjectsUsingBlock:^(Class<JRPersistent>  _Nonnull clazz, NSUInteger idx, BOOL * _Nonnull stop) {
-        
-        if (idx == _clazzArray.count - 1) { return ; }
-        
-        for (NSUInteger i = idx + 1; i < _clazzArray.count; i++) {
-            
-            JRMiddleTable *mid = [JRMiddleTable table4Clazz:clazz andClazz:_clazzArray[i] db:handler];
-            if ([handler jr_tableExists:[mid tableName]]) {
-                [mid cleanRubbishData];
-            }
-        }
-    }];
-}
 
 - (NSString *)_defaultPath {
     NSFileManager *mgr = [NSFileManager defaultManager];

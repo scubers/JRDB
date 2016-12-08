@@ -15,6 +15,15 @@
 #import "JRPersistentUtil.h"
 #import "JRActivatedProperty.h"
 #import <objc/runtime.h>
+#import "JRDBMgr.h"
+
+void SqlLog(id sql) {
+#ifdef DEBUG
+    if ([JRDBMgr shareInstance].debugMode) {
+        NSLog(@"%@", sql);
+    }
+#endif
+}
 
 #define AssertRegisteredClazz(clazz) NSAssert([clazz isRegistered], @"class: %@ should be registered in JRDBMgr", clazz)
 
@@ -137,18 +146,22 @@
 }
 
 - (BOOL)jr_executeUpdate:(JRSql * _Nonnull)sql {
+    SqlLog(sql);
     return [self executeUpdate:sql.sqlString withArgumentsInArray:sql.args];
 }
 
 - (BOOL)jr_executeUpdate:(NSString *)sql params:(NSArray *)params {
+    SqlLog(sql);
     return [self executeUpdate:sql withArgumentsInArray:params];
 }
 
 - (id _Nonnull)jr_executeQuery:(JRSql * _Nonnull)sql {
+    SqlLog(sql);
     return [self executeQuery:sql.sqlString withArgumentsInArray:sql.args];
 }
 
 - (id)jr_executeQuery:(NSString *)sql params:(NSArray *)params {
+    SqlLog(sql);
     return [self executeQuery:sql withArgumentsInArray:params];
 }
 
@@ -354,7 +367,6 @@
             }
             
             JRSql *sql = [JRSqlGenerator sql4Update:updateObj columns:columns toDB:self table:nil];
-            [sql.args addObject:[updateObj jr_primaryKeyValue]];
             
             BOOL ret = [self jr_executeUpdate:sql];
             if (ret) {
@@ -410,7 +422,6 @@
             }
             
             JRSql *sql = [JRSqlGenerator sql4Delete:one table:nil];
-            [sql.args addObject:[one jr_primaryKeyValue]];
             BOOL ret = [handler jr_executeUpdate:sql];
             if (ret) {
                 // 保存完，执行block
@@ -691,6 +702,23 @@
         }
     }];
     return obj;
+}
+
+#pragma mark clean middle table 
+- (void)jr_clearRubbinshData {
+    NSArray<Class<JRPersistent>> *clazzes = [[JRDBMgr shareInstance] registeredClazz];
+    [clazzes enumerateObjectsUsingBlock:^(Class<JRPersistent>  _Nonnull clazz, NSUInteger idx, BOOL * _Nonnull stop) {
+        
+        if (idx == clazzes.count - 1) { return ; }
+        
+        for (NSUInteger i = idx + 1; i < clazzes.count; i++) {
+            
+            JRMiddleTable *mid = [JRMiddleTable table4Clazz:clazz andClazz:clazzes[i] db:self];
+            if ([self jr_tableExists:[mid tableName]]) {
+                [mid cleanRubbishData];
+            }
+        }
+    }];
 }
 
 #pragma mark save

@@ -62,7 +62,6 @@ void randomChangePerson(Person *p) {
     p.d_long_long = 98778;
     p.f_unsigned_long_long = 23425435;
     p.h_double = 9874.4545;
-    p.i_string = @"98ujgoijg";
     p.j_number = @23556754;
     p.k_data = [NSData data];
     p.l_date = [NSDate date];
@@ -89,10 +88,11 @@ BOOL matchObjects(id obj1, id obj2, NSArray<NSString *> *columns) {
 SPEC_BEGIN(JRDBTestTest)
 
 
+
 describe(@"operation test", ^{
 
     beforeAll(^{
-        [[JRDBMgr shareInstance] setDefaultDatabasePath:@"/Users/Jrwong/Desktop/test11.sqlite"];
+        [[JRDBMgr shareInstance] setDefaultDatabasePath:@"/Users/mac/Desktop/test11.sqlite"];
         [[JRDBMgr shareInstance] registerClazzes:@[
                                                    [Person class],
                                                    [Card class],
@@ -107,7 +107,7 @@ describe(@"operation test", ^{
         J_DeleteAll(Person).updateResult;
         J_DeleteAll(Card).updateResult;
         J_DeleteAll(Money).updateResult;
-        [[JRDBMgr shareInstance] clearMidTableRubbishData];
+        [[[JRDBMgr shareInstance] getHandler] jr_clearRubbinshData];
         J_DropTable(Person);
         J_DropTable(Card);
         J_DropTable(Money);
@@ -124,6 +124,7 @@ describe(@"operation test", ^{
                 [[theValue([[[JRDBMgr shareInstance] getHandler] jr_tableExists:[Person jr_tableName]]) should] beYes];
             });
         });
+       
         
         
         context(@"save", ^{
@@ -178,8 +179,8 @@ describe(@"operation test", ^{
                 [[theValue(ret) should] beYes];
                 
             });
-            
         });
+        
         
         context(@"select", ^{
             beforeEach(^{
@@ -204,8 +205,23 @@ describe(@"operation test", ^{
                 NSLog(@"%@", ps);
                 
             });
+            
+            it(@"order", ^{
+                NSArray<Person *> *ps = J_Select(Person).OrderJ(a_int).Descend.list;
+                [ps enumerateObjectsUsingBlock:^(Person * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                    if (idx == ps.count - 1) return ;
+                    [[theValue(obj.a_int > ps[idx + 1].a_int) should] beYes];
+                }];
+                NSLog(@"%@", ps);
+            });
+            
+            it(@"where pk is", ^{
+                NSArray<Person *> *ps = J_Select(Person).list;
+                Person *p = J_Select(Person).WherePKIs(ps.firstObject.jr_primaryKeyValue).object;
+                
+                [[theValue([ps.firstObject.jr_primaryKeyValue isEqual:p.jr_primaryKeyValue]) should] beYes];
+            });
         });
-
 
         
         context(@"delete", ^{
@@ -221,6 +237,43 @@ describe(@"operation test", ^{
                 NSArray<Person *> *persons = J_Select(Person).list;
                 BOOL ret = J_Delete([persons subarrayWithRange:NSMakeRange(0, 5)]).updateResult;
                 [[theValue(ret) should] beYes];
+            });
+            
+        });
+        
+        context(@"transaction", ^{
+            
+            it(@"roll back", ^{
+                id<JRPersistentHandler> handler = [[JRDBMgr shareInstance] getHandler];
+                
+                Person *p = createPerson(1, nil);
+                
+                BOOL shouldRullback = YES;
+                [handler jr_inTransaction:^(id<JRPersistentBaseHandler>  _Nonnull handler, BOOL * _Nonnull rollBack) {
+                    BOOL flag = J_Insert(p).InDB(handler).updateResult;
+                    [[theValue(flag)should]beYes];
+                    *rollBack = shouldRullback;
+                }];
+                
+                Person *person = J_Select(Person).WhereIdIs(p.ID).object;
+                
+                if (shouldRullback) {
+                    [[person should] beNil];
+                } else {
+                    [[person shouldNot] beNil];
+                }
+                
+            });
+            
+            it(@"multiple thread", ^{
+                for (int i = 0; i < 10; i++) {
+                    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+                        Person *p = createPerson(i, nil);
+                        BOOL flag = J_Insert(p).updateResult;
+                        [[theValue(flag) should]beYes];
+                    });
+                }
+                sleep(5000);
             });
             
         });

@@ -21,7 +21,7 @@ typedef NS_ENUM(NSInteger, JRDBResultType) {
 @interface JRDBResult : NSObject
 
 + (instancetype)resultWithBool:(BOOL)flag;
-+ (instancetype)resultWithArray:(NSArray<JRPersistent> *)array;
++ (instancetype)resultWithArray:(NSArray<id<JRPersistent>> *)array;
 + (instancetype)resultWithObject:(id<JRPersistent>)object;
 + (instancetype)resultWithCount:(NSUInteger)count;
 
@@ -29,7 +29,7 @@ typedef NS_ENUM(NSInteger, JRDBResultType) {
 @property (nonatomic, assign, readonly) JRDBResultType type;
 @property (nonatomic, assign, readonly) BOOL flag;
 @property (nonatomic, assign, readonly) NSUInteger count;
-@property (nonatomic, strong, readonly) NSArray<JRPersistent> *list;
+@property (nonatomic, strong, readonly) NSArray<id<JRPersistent>> *list;
 @property (nonatomic, strong, readonly, nullable) id<JRPersistent> object;
 
 

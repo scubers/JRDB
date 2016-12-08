@@ -533,6 +533,8 @@ static inline void __operationCheck(JRDBChain *self) {
 - (JRObjectBlock)WhereJ {return nil;}
 - (JRObjectBlock)OrderJ {return nil;}
 - (JRObjectBlock)GroupJ {return nil;}
+- (JRDBChainCondition * (^)(NSString *))AndJ {return nil;}
+- (JRDBChainCondition * (^)(id))OrJ {return nil;}
 
 #pragma clang diagnostic pop
 

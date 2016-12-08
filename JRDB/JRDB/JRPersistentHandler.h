@@ -256,6 +256,13 @@ NS_ASSUME_NONNULL_BEGIN
 
 @required
 
+
+/**
+ 删除数据库中的中间表垃圾数据
+
+ */
+- (void)jr_clearRubbinshData;
+
 #pragma mark  save
 
 /**

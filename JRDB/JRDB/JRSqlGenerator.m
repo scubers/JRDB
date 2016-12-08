@@ -40,15 +40,6 @@
 @end
 
 
-void SqlLog(id sql) {
-#ifdef DEBUG
-    if ([JRDBMgr shareInstance].debugMode) {
-        NSLog(@"%@", sql);
-    }
-#endif
-}
-
-
 @implementation JRSqlGenerator
 
 + (NSString *)getTableNameForClazz:(Class<JRPersistent>)clazz {
@@ -85,7 +76,6 @@ void SqlLog(id sql) {
 
     [sql appendString:@");"];
     JRSql *jrsql = [JRSql sql:sql args:nil];
-    SqlLog(jrsql);
     return jrsql;
 }
 
@@ -117,8 +107,6 @@ void SqlLog(id sql) {
         }
     }];
 
-    
-    SqlLog(sqls);
     return sqls;
 }
 
@@ -126,7 +114,6 @@ void SqlLog(id sql) {
 + (JRSql *)dropTableSql4Clazz:(Class<JRPersistent>)clazz table:(NSString * _Nullable)table{
     NSString *sql = [NSString stringWithFormat:@"drop table if exists %@ ;", table ?: [self getTableNameForClazz:clazz]];
     JRSql *jrsql = [JRSql sql:sql args:nil];
-    SqlLog(jrsql);
     return jrsql;
 }
 
@@ -188,14 +175,12 @@ void SqlLog(id sql) {
     [sql appendString:sql2];
 
     JRSql *jrsql = [JRSql sql:sql args:argsList];
-    SqlLog(jrsql);
     return jrsql;
 }
 
 + (JRSql *)sql4Delete:(id<JRPersistent>)obj table:(NSString * _Nullable)table {
-    NSString *sql = [NSString stringWithFormat:@"delete from %@ where %@ = ? ;", table ?: [self getTableNameForClazz:[obj class]], [[obj class] jr_primaryKey]];
-    JRSql *jrsql = [JRSql sql:sql args:nil];
-    SqlLog(jrsql);
+    NSString *sql = [NSString stringWithFormat:@"delete from %@ where %@ = ? ;", table ?: [self getTableNameForClazz:[obj class]], [JRPersistentUtil getPrimaryKeyByName:[[obj class] jr_primaryKey] inClass:[obj class]]];
+    JRSql *jrsql = [JRSql sql:sql args:@[[obj jr_primaryKeyValue]]];
     return jrsql;
 
 }
@@ -203,7 +188,6 @@ void SqlLog(id sql) {
 + (JRSql *)sql4DeleteAll:(Class<JRPersistent>)clazz table:(NSString * _Nullable)table {
     NSString *sql = [NSString stringWithFormat:@"delete from %@", table ?: [self getTableNameForClazz:clazz]];
     JRSql *jrsql = [JRSql sql:sql args:nil];
-    SqlLog(jrsql);
     return jrsql;
 
 }
@@ -264,10 +248,10 @@ void SqlLog(id sql) {
         sql = [[sql substringToIndex:sql.length - 1] mutableCopy];
     }
     
-    [sql appendFormat:@" where %@ = ? ;", [[obj class] jr_primaryKey]];
+    [sql appendFormat:@" where %@ = ? ;", [JRPersistentUtil getPrimaryKeyByName:[[obj class] jr_primaryKey] inClass:[obj class]]];
+    [argsList addObject:[obj jr_primaryKeyValue]];
 
     JRSql *jrsql = [JRSql sql:sql args:argsList];
-    SqlLog(jrsql);
     return jrsql;
 
 }
@@ -314,9 +298,10 @@ void SqlLog(id sql) {
 #pragma mark - convenience
 
 + (JRSql *)sql4CountByPrimaryKey:(id)pk clazz:(Class<JRPersistent>)clazz table:(NSString * _Nullable)table {
-    NSString *sql = [NSString stringWithFormat:@"select count(1) from %@ where %@ = ?", table ?: [self getTableNameForClazz:clazz], [clazz jr_primaryKey]];
+    
+    
+    NSString *sql = [NSString stringWithFormat:@"select count(1) from %@ where %@ = ?", table ?: [self getTableNameForClazz:clazz], [JRPersistentUtil getPrimaryKeyByName:[clazz jr_primaryKey] inClass:clazz]];
     JRSql *jrsql = [JRSql sql:sql args:@[pk]];
-    SqlLog(jrsql);
     return jrsql;
 }
 
@@ -325,7 +310,6 @@ void SqlLog(id sql) {
                      , table ?: [self getTableNameForClazz:clazz]
                      , DBIDKey];
     JRSql *jrsql = [JRSql sql:sql args:@[ID]];
-    SqlLog(jrsql);
     return jrsql;
 }
 
@@ -364,9 +348,15 @@ void SqlLog(id sql) {
     }
 
     // group
-    if (groupBy.length) { [sqlString appendFormat:@" group by %@ ", groupBy]; }
+    if (groupBy.length) {
+        JRActivatedProperty *ap = [JRPersistentUtil activityWithPropertyName:groupBy inClass:clazz];
+        [sqlString appendFormat:@" group by %@ ", ap.dataBaseName?:groupBy];
+    }
     // orderby
-    if (orderBy.length) { [sqlString appendFormat:@" order by %@ ", orderBy]; }
+    if (orderBy.length) {
+        JRActivatedProperty *ap = [JRPersistentUtil activityWithPropertyName:orderBy inClass:clazz];
+        [sqlString appendFormat:@" order by %@ ", ap.dataBaseName?:orderBy];
+    }
     // desc asc
     if (isDesc && orderBy.length) {[sqlString appendString:@" desc "];}
     // limit
@@ -375,7 +365,6 @@ void SqlLog(id sql) {
     [sqlString appendString:@";"];
 
     JRSql *jrsql = [JRSql sql:sqlString args:argList];
-    SqlLog(jrsql);
     return jrsql;
 
 }
@@ -435,8 +424,7 @@ void SqlLog(id sql) {
         [argList addObject:chain.whereId];
         
     } else if (chain.wherePK) { // where pk = ? 语句
-        NSString *pk = [chain.targetClazz jr_primaryKey];
-        [sqlString appendFormat:@" and ( %@ = ?)", pk];
+        [sqlString appendFormat:@" and ( %@ = ?)", [JRPersistentUtil getPrimaryKeyByName:[chain.targetClazz jr_primaryKey] inClass:chain.targetClazz]];
         [argList addObject:chain.wherePK];
         
     } else if (chain.conditions.count) {
@@ -452,9 +440,15 @@ void SqlLog(id sql) {
     }
     
     // group
-    if (chain.groupBy.length) { [sqlString appendFormat:@" group by %@ ", chain.groupBy]; }
+    if (chain.groupBy.length) {
+        JRActivatedProperty *ap = [JRPersistentUtil activityWithPropertyName:chain.groupBy inClass:chain.targetClazz];
+        [sqlString appendFormat:@" group by %@ ", ap.dataBaseName?:chain.groupBy];
+    }
     // orderby
-    if (chain.orderBy.length) { [sqlString appendFormat:@" order by %@ ", chain.orderBy]; }
+    if (chain.orderBy.length) {
+        JRActivatedProperty *ap = [JRPersistentUtil activityWithPropertyName:chain.orderBy inClass:chain.targetClazz];
+        [sqlString appendFormat:@" order by %@ ", ap.dataBaseName?:chain.orderBy];
+    }
     // desc asc
     if (chain.isDesc && chain.orderBy.length) {[sqlString appendString:@" desc "];}
     // limit
@@ -464,7 +458,6 @@ void SqlLog(id sql) {
 //    [sqlString appendString:@";"];
     
     JRSql *jrsql = [JRSql sql:sqlString args:argList];
-    SqlLog(jrsql);
     return jrsql;
 }
 
