@@ -190,9 +190,9 @@ void SqlLog(id sql) {
  */
 - (BOOL)jr_createTable4Clazz:(Class<JRPersistent> _Nonnull)clazz synchronized:(BOOL)synchronized {
     AssertRegisteredClazz(clazz);
-    return [self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentBaseHandler>  _Nonnull handler) {
+    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentBaseHandler>  _Nonnull handler) {
         return @([handler jr_executeUpdate:[JRSqlGenerator createTableSql4Clazz:clazz table:nil]]);
-    }];
+    }] boolValue];
 }
 
 
@@ -205,12 +205,11 @@ void SqlLog(id sql) {
  */
 - (BOOL)jr_truncateTable4Clazz:(Class<JRPersistent> _Nonnull)clazz synchronized:(BOOL)synchronized {
     AssertRegisteredClazz(clazz);
-    return [self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentBaseHandler>  _Nonnull handler) {
+    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentBaseHandler>  _Nonnull handler) {
         BOOL flag = [handler jr_executeUpdate:[JRSqlGenerator dropTableSql4Clazz:clazz table:nil]];
         if (!flag) return @(flag);
         return @([[handler jr_getOperationHandler] jr_createTable4Clazz:clazz synchronized:synchronized]);
-        
-    }];
+    }] boolValue];
 }
 
 
@@ -221,7 +220,7 @@ void SqlLog(id sql) {
  */
 - (BOOL)jr_updateTable4Clazz:(Class<JRPersistent> _Nonnull)clazz synchronized:(BOOL)synchronized {
     AssertRegisteredClazz(clazz);
-    return [self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentBaseHandler>  _Nonnull handler) {
+    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentBaseHandler>  _Nonnull handler) {
         NSArray *sqls = [JRSqlGenerator updateTableSql4Clazz:clazz inDB:(FMDatabase *)handler table:nil];
         BOOL flag = YES;
         for (JRSql *sql in sqls) {
@@ -231,7 +230,7 @@ void SqlLog(id sql) {
             }
         }
         return @(flag);
-    }];
+    }] boolValue];
 }
 
 /**
@@ -241,9 +240,9 @@ void SqlLog(id sql) {
  */
 - (BOOL)jr_dropTable4Clazz:(Class<JRPersistent> _Nonnull)clazz synchronized:(BOOL)synchronized {
     AssertRegisteredClazz(clazz);
-    return [self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentBaseHandler>  _Nonnull handler) {
+    return [[self jr_executeSync:synchronized block:^id _Nullable(id<JRPersistentBaseHandler>  _Nonnull handler) {
         return @([self jr_executeUpdate:[JRSqlGenerator dropTableSql4Clazz:clazz table:nil]]);
-    }];
+    }] boolValue];
 }
 
 /**
