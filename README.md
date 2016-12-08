@@ -98,7 +98,7 @@ pod 'JRDB'
 
 默认类名为表明，可以自定义表名，在主类中重写一下方法即可
 
-```objc
+```objc 
 + (NSString *)jr_customTableName {
     return @"my_tableName";
 }
