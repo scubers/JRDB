@@ -65,10 +65,6 @@
         return nil;
     }
     
-    if ([self isQuerySingle]) {
-        _operation = CSelectSingle;
-    }
-    
     id result;
     switch (_operation) {
         case CSelect:
@@ -79,14 +75,14 @@
             else
                 result = [self jr_executeQueryChain];
         }
-        break;
+            break;
             
         case CSelectCustomized:
         case CSelectCount:
         {
             result = [self jr_executeCustomizedQueryChain];
         }
-        break;
+            break;
             
         case CCreateTable:
         case CDropTable:
@@ -103,8 +99,10 @@
         }
     }
     
+    ChainOperation op = [self getRealOperationWithResult:result];
+    
     JRDBResult *finalResult;
-    switch (self.operation) {
+    switch (op) {
         case CSelectCount:
             finalResult = [JRDBResult resultWithCount:[result unsignedIntegerValue]];
             break;
@@ -114,7 +112,7 @@
             finalResult = [JRDBResult resultWithArray:[result copy]];
             break;
         case CSelectSingle:
-            finalResult = [JRDBResult resultWithObject:result];
+            finalResult = [JRDBResult resultWithObject:[result firstObject]];
             break;
             
         case CCreateTable:
@@ -133,6 +131,21 @@
     }
     
     return finalResult;
+}
+
+- (ChainOperation)getRealOperationWithResult:(id)result {
+    switch (_operation) {
+        case CSelectCustomized:
+        case CSelect: {
+            if (_wherePK || _whereId) {
+                return CSelectSingle;
+            }
+            break;
+        }
+        default:
+            break;
+    }
+    return _operation;
 }
 
 - (BOOL)updateResult {
@@ -170,37 +183,37 @@ static inline void __operationCheck(JRDBChain *self) {
 
 - (JRClassBlock)CreateTable {
     return [self __setTargetClassToSelfWithOperation:CCreateTable block:^(__unsafe_unretained Class clazz) {
-
+        
     }];
 }
 
 - (JRClassBlock)UpdateTable {
     return [self __setTargetClassToSelfWithOperation:CUpdateTable block:^(__unsafe_unretained Class clazz) {
-
+        
     }];
 }
 
 - (JRClassBlock)DropTable {
     return [self __setTargetClassToSelfWithOperation:CDropTable block:^(__unsafe_unretained Class clazz) {
-
+        
     }];
 }
 
 - (JRClassBlock)TruncateTable {
     return [self __setTargetClassToSelfWithOperation:CTruncateTable block:^(__unsafe_unretained Class clazz) {
-
+        
     }];
 }
 
 - (JRClassBlock)DeleteAll {
     return [self __setTargetClassToSelfWithOperation:CDeleteAll block:^(__unsafe_unretained Class clazz) {
-
+        
     }];
 }
 
 - (JRClassBlock)Select {
     return [self __setTargetClassToSelfWithOperation:CSelect block:^(__unsafe_unretained Class clazz) {
-
+        
     }];
 }
 
@@ -222,25 +235,25 @@ static inline void __operationCheck(JRDBChain *self) {
 
 - (JRArrayBlock)Insert {
     return [self __setTargetArrayToSelfWithOperation:CInsert block:^(id obj) {
-
+        
     }];
 }
 
 - (JRArrayBlock)Update {
     return [self __setTargetArrayToSelfWithOperation:CUpdate block:^(id obj) {
-
+        
     }];
 }
 
 - (JRArrayBlock)Delete {
     return [self __setTargetArrayToSelfWithOperation:CDelete block:^(id obj) {
-
+        
     }];
 }
 
 - (JRArrayBlock)SaveOrUpdate {
     return [self __setTargetArrayToSelfWithOperation:CSaveOrUpdate block:^(id obj) {
-
+        
     }];
 }
 
@@ -255,25 +268,25 @@ static inline void __operationCheck(JRDBChain *self) {
 
 - (JRObjectBlock)InsertOne {
     return [self __setTargetToSelfWithOperation:CInsert block:^(id obj) {
-
+        
     }];
 }
 
 - (JRObjectBlock)UpdateOne {
     return [self __setTargetToSelfWithOperation:CUpdate block:^(id obj) {
-
+        
     }];
 }
 
 - (JRObjectBlock)DeleteOne {
     return [self __setTargetToSelfWithOperation:CDelete block:^(id obj) {
-
+        
     }];
 }
 
 - (JRObjectBlock)SaveOrUpdateOne {
     return [self __setTargetToSelfWithOperation:CSaveOrUpdate block:^(id obj) {
-
+        
     }];
 }
 
@@ -339,19 +352,19 @@ static inline void __operationCheck(JRDBChain *self) {
 
 - (JRObjectBlock)Group {
     return [self __setObjectPropertyToSelfWithKeypath:J(groupBy) block:^(id obj) {
-
+        
     }];
 }
 
 - (JRObjectBlock)Order {
     return [self __setObjectPropertyToSelfWithKeypath:J(orderBy) block:^(id obj) {
-
+        
     }];
 }
 
 - (JRObjectBlock)Where {
     return [self __setObjectPropertyToSelfWithKeypath:J(whereString) block:^(id obj) {
-
+        
     }];
 }
 
@@ -375,19 +388,19 @@ static inline void __operationCheck(JRDBChain *self) {
 
 - (JRArrayBlock)Params {
     return [self __setObjectPropertyToSelfWithKeypath:J(parameters) block:^(id obj) {
-
+        
     }];
 }
 
 - (JRArrayBlock)Columns {
     return [self __setObjectPropertyToSelfWithKeypath:J(columnsArray) block:^(id obj) {
-
+        
     }];
 }
 
 - (JRArrayBlock)Ignore {
     return [self __setObjectPropertyToSelfWithKeypath:J(ignoreArray) block:^(id obj) {
-
+        
     }];
 }
 
@@ -403,7 +416,7 @@ static inline void __operationCheck(JRDBChain *self) {
 
 - (JRBoolBlock)Recursive {
     return [self __setBoolPropertyToSelfWithKeypath:J(isRecursive) block:^(BOOL value) {
-
+        
     }];
 }
 - (instancetype)Recursively {
@@ -415,7 +428,7 @@ static inline void __operationCheck(JRDBChain *self) {
 
 - (JRBoolBlock)Sync {
     return [self __setBoolPropertyToSelfWithKeypath:J(isSync) block:^(BOOL value) {
-
+        
     }];
 }
 - (instancetype)UnSafely {
@@ -427,7 +440,7 @@ static inline void __operationCheck(JRDBChain *self) {
 
 - (JRBoolBlock)Transaction {
     return [self __setBoolPropertyToSelfWithKeypath:J(useTransaction) block:^(BOOL value) {
-
+        
     }];
 }
 - (instancetype)NoTransaction {
@@ -439,7 +452,7 @@ static inline void __operationCheck(JRDBChain *self) {
 
 - (JRBoolBlock)Desc {
     return [self __setBoolPropertyToSelfWithKeypath:J(isDesc) block:^(BOOL value) {
-
+        
     }];
 }
 - (instancetype)Descend {
@@ -471,10 +484,6 @@ static inline void __operationCheck(JRDBChain *self) {
 }
 
 #pragma mark - Other method
-
-- (BOOL)isQuerySingle {
-    return _whereId.length || _wherePK;
-}
 
 - (JRSql *)querySql {
     return [JRSqlGenerator sql4Chain:self];
@@ -542,8 +551,7 @@ static inline void __operationCheck(JRDBChain *self) {
 
 - (id)jr_executeQueryChain {
     NSAssert(!self.selectColumns.count, @"selectColumns should not has count in normal query");
-    id result = [_db jr_getByJRSql:self.querySql sync:self.isSync resultClazz:self.targetClazz columns:self.selectColumns];
-    return [self _handleQueryResult:result];
+    return [_db jr_getByJRSql:self.querySql sync:self.isSync resultClazz:self.targetClazz columns:self.selectColumns];
 }
 
 - (id)jr_executeCustomizedQueryChain {
@@ -609,10 +617,6 @@ static inline void __operationCheck(JRDBChain *self) {
     }
 }
 
-- (id)_handleQueryResult:(NSArray *)result {
-    return self.operation == CSelectSingle ? [result firstObject] : result;
-}
-
 - (NSArray *)_needUpdateColumns {
     NSAssert(!(self.columnsArray.count && self.ignoreArray.count), @"colums and ignore should not use at the same chain !!");
     NSMutableArray *columns = [NSMutableArray array];
@@ -637,8 +641,7 @@ static inline void __operationCheck(JRDBChain *self) {
 
 - (id)jr_executeQueryChainRecusively {
     NSAssert(!self.selectColumns.count, @"selectColumns should not has count in normal query");
-    id result = [_db jr_findByJRSql:self.querySql sync:self.isSync resultClazz:self.targetClazz columns:self.selectColumns];
-    return [self _handleQueryResult:result];
+    return [_db jr_findByJRSql:self.querySql sync:self.isSync resultClazz:self.targetClazz columns:self.selectColumns];
 }
 
 - (BOOL)jr_executeUpdateChainRecusively {

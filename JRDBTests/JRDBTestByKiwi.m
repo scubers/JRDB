@@ -88,6 +88,7 @@ BOOL matchObjects(id obj1, id obj2, NSArray<NSString *> *columns) {
 SPEC_BEGIN(JRDBTestTest)
 
 
+
 describe(@"operation test", ^{
 
     beforeAll(^{
