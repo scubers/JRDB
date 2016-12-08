@@ -61,7 +61,7 @@
     return 0;
 }
 
-- (NSArray<JRPersistent> *)list {
+- (NSArray<id<JRPersistent>> *)list {
     if (self.type == JRDBResultType_list) {
         return _list;
     }
