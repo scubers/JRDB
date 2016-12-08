@@ -68,7 +68,7 @@
 }
 
 + (NSString *)jr_tableName {
-    return [self jr_tableName]?:[self shortClazzName];
+    return [self jr_customTableName]?:[self shortClazzName];
 }
 
 + (NSString *)jr_primaryKey {
