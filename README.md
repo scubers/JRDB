@@ -14,6 +14,15 @@ Feedback: [jr-wong@qq.com](mailto:jrwong@qq.com)
 
 有问题或者bug欢迎随时issues我，或者邮件。感谢使用
 
+# 2.0更新
+
+
+> * 数据库字段名，从默认的_ivar名 改为 property名 :  _name -> name
+* 数据库操作对象获取改为连接池： [JRDBMgr defaultDB] -> [JRDBMgr shareInstance].getHandler
+* 抛弃缓存功能
+* 新增And, Or查询语句
+ 
+
 ---
 
 # 描述（Description）
@@ -22,14 +31,10 @@ Feedback: [jr-wong@qq.com](mailto:jrwong@qq.com)
 > - 使用协议，不用继承基类，对任意NSObject可以进行入库操作
 > - Objective-C（Swift 请移步 [Swift扩展](https://github.com/scubers/JRDBSwift)）
 
-> ~~支持数据类型：基本数据类型（int，double，等），String，NSData，NSNumber，NSDate~~
-
-> ~~注：swift的基本数据类型，不支持**Option**类型，既不支持Int？Int！等，对象类型支持**Option**类型~~
-
 ---
 
 # 目录（Index）
-- [安装](#installationId) 
+> - [安装](#installationId) 
 - [表操作](#tableId)  
 - [保存](#saveId)
 - [更新](#updateId)
@@ -52,7 +57,35 @@ pod 'JRDB'
 <a id="startId"></a>
 # 开始（Start）
 
-## 注册
+## JRDBMgr 使用
+
+### 设置数据库路径
+
+```objc
+[[JRDBMgr shareInstance] setDefaultDatabasePath:@"/Users/mac/Desktop/test11.sqlite"];
+```
+
+### 是否打印sql语句
+
+```objc
+[JRDBMgr shareInstance].debugMode = YES;
+```
+
+### 获取处理器
+
+- 从连接池中获取数据库处理器
+
+```objc
+[[JRDBMgr shareInstance] getHandler]; 
+```
+
+### 关闭数据库
+
+```objc
+[[JRDBMgr shareInstance] close]; 
+```
+
+### 注册
 - 需要使用本库的类都需要注册。
 
 ```objc
@@ -60,6 +93,17 @@ pod 'JRDB'
                                            [Person class],
                                            ]];
 ```
+
+## 表名
+
+默认类名为表明，可以自定义表名，在主类中重写一下方法即可
+
+```objc
++ (NSString *)jr_tableName {
+    return @"my_tableName";
+}
+```
+
 ## 主键
 默认每个对象入库都会持有一个ID `[person ID]` , 作为数据库的主键，库通过这个 `ID` 来识别对象是否与数据库关联，所以不是必要时，不要操作此属性
 
@@ -71,7 +115,7 @@ pod 'JRDB'
 ```objc
 /// 自定义主键的对应的属性 （需要是属性的全名）
 + (NSString *)jr_customPrimarykey {
-    return @"_name";
+    return @"name"; // 对应property的属性名
 }
 /// 自定义主键属性值
 - (id)jr_customPrimarykeyValue {
@@ -94,6 +138,24 @@ pod 'JRDB'
 [p jr_primaryKeyValue];
 ```
 
+## 自定义字段名
+
+默认使用Property的属性名进行字段名定义，可以对每个地段进行自定义数据库字段名，在主类中重写以下方法即可
+
+* **无返回字段默认使用property属性名当做数据库列名**
+
+```objc
++ (NSDictionary<NSString *,NSString *> *)jr_databaseNameMap {
+    return @{
+             @"name" : @"db_name",
+             @"age" : @"db_age",
+             @"height" : @"db_height",
+             };
+}
+```
+
+
+
 ## 忽略字段
 
 默认非数据库基本类型都会忽略不入库。
@@ -113,7 +175,7 @@ pod 'JRDB'
 /// 忽略age属性，不做入库操作
 + (NSArray *)jr_excludePropertyNames {
     return @[
-             @"_age",
+             @"age",
              ];
 }
 ```
@@ -142,7 +204,7 @@ pod 'JRDB'
 ```objc
     
 BOOL result = J_Insert(p)
-					.InDB([JRDBMgr defaultDB]) // by Default
+					.InDB([JRDBMgr shareInstance].getHandler) // by Default
 					.Recursive(NO)  		       // by default
 					.Sync(YES)			       // by default
 					.Transaction(YES)	       // by default
@@ -167,15 +229,15 @@ BOOL result = J_Insert(@[p1, p2, p3]).updateResult;
 ```objc
 
 BOOL result = J_Update(p)
-					.Columns(@[@"_age", @"_name"])  // 更新指定列
-				//	.Ignore(@[@"_age", @"_name"])   // 忽略指定列
-					.InDB([JRDBMgr defaultDB])      // by default
+					.Columns(@[@"age", @"name"])  // 更新指定列
+				//	.Ignore(@[@"age", @"name"])   // 忽略指定列
+					.InDB([JRDBMgr shareInstance].getHandler)      // by default
 					.Recursive(NO)                  // by default
 					.Sync(YES)                      // by default
 					.Transaction(YES)               // by default
 					.updateResult;                  // 执行
 					
-BOOL result = J_Update(p).Ignore(@[@"_phone"]).updateResult;
+BOOL result = J_Update(p).Ignore(@[@"phone"]).updateResult;
 
 // 更新数组
 BOOL result = J_Update(p1, p2).updateResult;
@@ -192,7 +254,7 @@ BOOL result = J_Update(@[p1, p2, p3]).updateResult;
 ```objc
 // 删除
 BOOL result = J_Delete(p)
-					.InDB([JRDBMgr defaultDB])      // by default
+					.InDB([JRDBMgr shareInstance].getHandler)      // by default
 					.Recursive(NO)                  // by default
 					.Sync(YES)                      // by default
 					.Transaction(YES)               // by default
@@ -203,31 +265,41 @@ BOOL result = J_Delete(p)
 # 查询（Query）
 
 ```objc
+
+// 条件查询
+
+// And Or 对应Property中的属性名
+
+NSArray<Person *> = J_Select(Person) // select * from person [where 1=1]
+						.And(@"age").lt(@10) // and age < 10
+						.Or(@"height").gt(@120) // or height > 120
+						.Or(@"name").like(@"Wang%") // or name like 'Wang%'
+						.And(@"weight").nq(@200) // and weight <> 200
+						.list
+
 // 普通查询
 NSArray<Person *> *result =
 				    J_Select(Person)    // 指定查询对象
 				    .Recursive(YES)		// 默认 可省略
 				    .Sync(YES)			// 默认 可省略
-				    .Cache(NO)			// 默认 可省略
 				    .Desc(NO)           // 默认 可省略
-				    .Where(@"_name like ? and _height > ?")// 条件语句 可省略
+				    .Where(@"name like ? and height > ?")  // 对应数据库中的字段名
 				    .Params(@[@"L%", @150])                // 对应条件语句的 ? 可省略
-				    .Group(@"_level")                      // Group 语句对应的字段 可省略
-				    .Order(@"_age")                        // Order 语句对应的字段 可省略
+				    .Group(@"level")                      // Group 可省略
+				    .Order(@"age")                        // Order 可省略
 				    .Limit(0, 10)                          // 分页 start, length 可省略
 				    .list;
 
 // 自定义查询
 NSArray<Person *> *result1 =
-						J_SelectColumns(@[@"_age", @"_name"])
+						J_SelectColumns(@[@"age", @"name"])
 						.From([Person class])
 						.Recursive(YES)   // 在自定义查询中不会起作用
 						.Sync(YES)		  //  默认 可省略
-						.Cache(NO)		  // 在自定义查询中不会起作用
-						.Where(@"_name like ? and _height > ?")
+						.Where(@"name like ? and height > ?") // 对应数据库中的字段名
 						.Params(@[@"L%", @150])
-						.Group(@"_level")
-						.Order(@"_age")
+						.Group(@"level") // 对应数据库中的字段名
+						.Order(@"age") // 对应数据库中的字段名
 						.Limit(0, 10)
 						.Desc(NO)
 						.list;
@@ -236,11 +308,10 @@ NSUInteger count =
 				J_SelectCount(Person) // 查询哪个类
 				.Recursive(YES)   // 在自定义查询中不会起作用
 				.Sync(YES)		  //  默认 可省略
-				.Cache(NO)		  // 在自定义查询中不会起作用
-				.Where(@"_name like ? and _height > ?")
+				.Where(@"name like ? and height > ?")
 				.Params(@[@"L%", @150])
-				.Group(@"_level")
-				.Order(@"_age")
+				.Group(@"level")
+				.Order(@"age")
 				.Limit(0, 10)
 				.Desc(NO)
 				.count;
@@ -252,15 +323,23 @@ NSUInteger count =
 
 | 配置        	| 功能		|参数类型| 
 |:-------------:|------------| -------- |
-| InDB		| [JRDBMgr defaultDB] by default;|FMDatabase * |
-| From		| 自定义查询时指定的类名|Class |
+| InDB		| [JRDBMgr shareInstance].getHandler by default;|id\<JRPersistentHandler\> |
+| From		| 自定义查询时指定的类名 <br/> or 子查询的Chain对象 |Class \| JRDBChain * |
 | Recursive		| NO by default;<br/> NO:效率高，<br/>YES：[关联操作](#linkId)效率低|YES or NO|
 | Transaction		| YES by default;<br/> NO:本操作不包含事务，外界需要事务支持<br/>YES：包含事务|YES or NO|
 | Sync     		| YES by default;<br/>YES:阻塞本线程，线程安全同步执行数据库操作；<br/>NO：在本线程执行数据库操作，线程不安全	|YES or NO|
-| Cache		| NO by default	|YES or NO|
-| Where		| Where 后面的条件筛选语句，使用 ？作为参数占位符| NSString * |
+| Where		| Where 后面的条件筛选语句，使用 ？作为参数占位符<br/>使用的字段需要与数据库字段相同| NSString * |
 | WhereIdIs	| 等同于 Where(@" _id = ?")| NSString * |
 | WherePKIs	| 等同于 Where(@"<#primary key#> = ?")| id |
+| And			| And语句，跟着属性名 And(@"name")| NSString |
+| Or			| Or语句，跟着属性名 Or(@"age")| NSString |
+| eq			| eq语句，跟着参数 eq(@10) 相当于SQL语句的 「=」| id |
+| nq			| nq语句，跟着参数 nq(@10) 相当于SQL语句的 「<>」| id |
+| gt			| gt语句，跟着参数 eq(@10) 相当于SQL语句的 「>」| id |
+| lt			| lt语句，跟着参数 eq(@10) 相当于SQL语句的 「<」| id |
+| gtOrEq		| gtOrEq语句，跟着参数 eq(@10) 相当于SQL语句的 「>=」| id |
+| ltOrEq		| ltOrEq语句，跟着参数 eq(@10) 相当于SQL语句的 「<=」| id |
+| like			| like语句，跟着参数 eq(@10) 相当于SQL语句的 「like」| id |
 | Params		| Where 语句占位符对应的参数| NSArray * | 
 | Columns		| 更新时候指定更新的列| NSArray * | 
 | Ignore		| 更新时指定忽略的列| NSArray * | 
@@ -301,15 +380,15 @@ NSUInteger count =
 /// 单个对象关联
 + (NSDictionary<NSString *,Class<JRPersistent>> *)jr_singleLinkedPropertyNames {
     return @{
-             @"_card" : [Card class],
+             @"card" : [Card class],
              };
 }
 
 /// 数组对象关联
 + (NSDictionary<NSString *,Class<JRPersistent>> *)jr_oneToManyLinkedPropertyNames {
     return @{
-             @"_money" : [Money class],
-             @"_children" : [Person class],
+             @"money" : [Money class],
+             @"children" : [Person class],
              };
 }
 
@@ -378,17 +457,17 @@ NSArray<Person *> *list = J_Select(Person).Recursive(YES).list;
 
 - 使用宏，让调用变成更智能
  	- `From([Person class]) --> FromJ(Person)`
-	- `Where(@"_name = ?") --> WhereJ(_name = ?)`
-	- `Order(@"_name") --> OrderJ(name)`
-	- `Group(@"_name") --> GroupJ(name)`
+	- `Where(@"name = ?") --> WhereJ(_name = ?)`
+	- `Order(@"name") --> OrderJ(name)`
+	- `Group(@"name") --> GroupJ(name)`
 	- `Params(@[@"jack", @"mark"]) --> ParamsJ(@"jack", @"mark")`
-	- `Ignore(@[@"_name", @"_age"]) --> IgnoreJ(@"_name", @"_age")`
-	- `Columns(@[@"_name", @"_age"]) --> ColumnsJ(@"_name", @"_age")`
+	- `Ignore(@[@"name", @"age"]) --> IgnoreJ(@"name", @"age")`
+	- `Columns(@[@"name", @"age"]) --> ColumnsJ(@"name", @"age")`
 	
 ```
 // example
 NSArray *result = J_Select(Person)
-                    .WhereJ(_name like ? and _height > ?)
+                    .WhereJ(name like ? and height > ?)
                     .ParamsJ(@"a%", @100)
                     .GroupJ(h_double)
                     .OrderJ(d_long_long)
@@ -477,3 +556,7 @@ NSArray<Person *> *list =J_Select(Person)
 ![abc](https://raw.githubusercontent.com/scubers/JRDB/master/generic_tip.png)
 
 通过泛型，查询出来后，编译器直接识别结果为对应对象，减少强转操作。
+
+---
+
+# 更多使用 请查看 JRPersistentHandler.h
