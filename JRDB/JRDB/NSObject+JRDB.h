@@ -11,7 +11,13 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface NSObject (JRDB) <JRPersistent>
+@interface NSObject (JRPersistent) <JRPersistent>
+
+@end
+
+/********************************************************/
+
+@interface NSObject (JRDB)
 
 /**
  *  注册的时候自动调用, 刷新 - [jr_activatedProperties];
@@ -27,9 +33,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)jr_setParentLinkID:(NSString * _Nullable)ID forKey:(NSString *)key;
 - (NSString * _Nullable)jr_parentLinkIDforKey:(NSString *)key;
-
-
-- (NSMutableDictionary<NSString *,JRDBDidFinishBlock> *)jr_finishBlocks;
 
 #pragma mark - save or update
 
