@@ -9,14 +9,28 @@
 #import <Foundation/Foundation.h>
 #import "JRReflectable.h"
 
-#define EXE_BLOCK(block, ...) if(block){block(__VA_ARGS__);}
 
-#define SingleLinkColumn(property) [NSString stringWithFormat:@"_single_link_%@", property]
-#define ParentLinkColumn(property) [NSString stringWithFormat:@"_parent_link_%@", property]
+#define J(_prop_)              (((void)(NO && ((void)(@selector(_prop_)), NO)), @#_prop_))
+
+
+#define JR_CUSTOM_PRIMARY_KEY(_key_) \
+        + (NSString *)jr_customPrimarykey {\
+            return ((void)(NO && ((void)([[[self alloc] init] _key_]), NO)), @#_key_);\
+        }\
+        - (id)jr_customPrimarykeyValue {\
+            return [self valueForKey:@#_key_];\
+        }
+
+#define JR_CUSTOM_TABLE_NAME(_tableName_)\
+        + (NSString *)jr_customTableName {\
+            return @#_tableName_;\
+        }
+
 
 #define DBIDKey @"_ID"
-
 #define isID(name) ([[name uppercaseString] isEqualToString:DBIDKey] || [[name uppercaseString] isEqualToString:DBIDKey])
+#define SingleLinkColumn(property) [NSString stringWithFormat:@"_single_link_%@", property]
+#define ParentLinkColumn(property) [NSString stringWithFormat:@"_parent_link_%@", property]
 
 @class JRActivatedProperty, JRDBChain;
 

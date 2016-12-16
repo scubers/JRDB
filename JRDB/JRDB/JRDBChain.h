@@ -44,8 +44,6 @@
 #define AndJ(_prop_)            And(J(_prop_))
 #define OrJ(_prop_)             Or(J(_prop_))
 
-#define J(_prop_)               (((void)(NO && ((void)(@selector(_prop_)), NO)), @#_prop_))
-
 NS_ASSUME_NONNULL_BEGIN
 
 static inline NSArray * _Nonnull _variableListToArray(id _Nullable first, ...) {
