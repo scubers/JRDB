@@ -43,6 +43,5 @@ git push
 git tag -m "update podspec" $thisTag
 git push --tags
 
-
-
-pod repo push PrivatePods --sources=$sources
+# pod repo push PrivatePods --sources=$sources
+pod trunk push $podSpecName.podspec
