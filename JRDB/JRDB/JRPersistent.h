@@ -125,7 +125,7 @@ typedef void(^JRDBDidFinishBlock)(id<JRPersistent> obj);
 /**
  便捷方法 @see + [jr_tableName] 若jr_tableName未返回或者为空，则返回本类名为表名
 
- @return
+ @return 表名
  */
 + (NSString *)jr_tableName;
 

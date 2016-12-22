@@ -100,28 +100,28 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  *  关联查询
  *
- *  @param ID
+ *  @param ID description
  */
 + (instancetype _Nullable)jr_findByID:(NSString *)ID;
 
 /**
  *  关联查询
  *
- *  @param primaryKey
+ *  @param primaryKey description
  */
 + (instancetype _Nullable)jr_findByPrimaryKey:(id)primaryKey;
 
 /**
  *  关联查询
  *
- *  @return
+ *  @return 查询结果
  */
 + (NSArray<id<JRPersistent>> *)jr_findAll;
 
 /**
  *  非关联查询
  *
- *  @param ID
+ *  @param ID description
  *
  */
 + (instancetype _Nullable)jr_getByID:(NSString *)ID;
@@ -129,7 +129,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  *  非关联查询
  *
- *  @param primaryKey
+ *  @param primaryKey description
  */
 + (instancetype _Nullable)jr_getByPrimaryKey:(id)primaryKey;
 

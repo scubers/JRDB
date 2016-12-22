@@ -28,8 +28,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  *  替换本类的方法
  *
- *  @param selector
- *  @param aSelector
+ *  @param selector description
+ *  @param aSelector description
  *
  *  @return ret
  */

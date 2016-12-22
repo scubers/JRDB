@@ -262,7 +262,7 @@ void SqlLog(id sql) {
 /**
  *  只保存one
  *
- *  @param one
+ *  @param one description
  */
 - (BOOL)jr_saveOne:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized {
     AssertRegisteredClazz([one class]);
@@ -306,7 +306,7 @@ void SqlLog(id sql) {
 /**
  *  保存数组
  *
- *  @param objects
+ *  @param objects description
  *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
  */
 - (BOOL)jr_saveObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized {
@@ -329,7 +329,7 @@ void SqlLog(id sql) {
 /**
  *  更新one
  *
- *  @param one
+ *  @param one description
  *  @param columns 需要更新的字段
  */
 - (BOOL)jr_updateOne:(id<JRPersistent> _Nonnull)one columns:(NSArray<NSString *> * _Nullable)columns useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized {
@@ -382,7 +382,7 @@ void SqlLog(id sql) {
 /**
  *  更新array
  *
- *  @param objects
+ *  @param objects description
  *  @param columns 需要更新的字段
  *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
  */
@@ -405,7 +405,7 @@ void SqlLog(id sql) {
 /**
  *  删除one，可选择自带事务或者自行在外层包裹事务
  *
- *  @param one
+ *  @param one description
  *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
  */
 - (BOOL)jr_deleteOne:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized{
@@ -436,7 +436,7 @@ void SqlLog(id sql) {
 /**
  *  删除array，可选择自带事务或者自行在外层包裹事务
  *
- *  @param objects
+ *  @param objects description
  *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
  */
 - (BOOL)jr_deleteObjects:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized {
@@ -725,7 +725,7 @@ void SqlLog(id sql) {
 /**
  *  关联保存保存one
  *
- *  @param one
+ *  @param one description
  */
 - (BOOL)jr_saveOneRecursively:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized {
     
@@ -748,7 +748,7 @@ void SqlLog(id sql) {
 /**
  *  保存数组
  *
- *  @param objects
+ *  @param objects description
  *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
  */
 - (BOOL)jr_saveObjectsRecursively:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized {
@@ -770,7 +770,7 @@ void SqlLog(id sql) {
 /**
  *  更新one
  *
- *  @param one
+ *  @param one description
  *  @param columns 需要更新的字段
  */
 - (BOOL)jr_updateOneRecursively:(id<JRPersistent> _Nonnull)one columns:(NSArray<NSString *> * _Nullable)columns useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized {
@@ -812,7 +812,7 @@ void SqlLog(id sql) {
 /**
  *  更新array
  *
- *  @param objects
+ *  @param objects description
  *  @param columns 需要更新的字段
  *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
  */
@@ -835,7 +835,7 @@ void SqlLog(id sql) {
 /**
  *  删除one，可选择自带事务或者自行在外层包裹事务
  *
- *  @param one
+ *  @param one description
  *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
  */
 - (BOOL)jr_deleteOneRecursively:(id<JRPersistent> _Nonnull)one useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized{
@@ -877,7 +877,7 @@ void SqlLog(id sql) {
 /**
  *  删除array，可选择自带事务或者自行在外层包裹事务
  *
- *  @param objects
+ *  @param objects description
  *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
  */
 - (BOOL)jr_deleteObjectsRecursively:(NSArray<id<JRPersistent>> * _Nonnull)objects useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized {

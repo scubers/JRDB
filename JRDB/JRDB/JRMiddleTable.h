@@ -27,9 +27,9 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  *  创建中建表对象
  *
- *  @param clazz1
- *  @param clazz2
- *  @param db
+ *  @param clazz1 description
+ *  @param clazz2 description
+ *  @param db description
  */
 + (instancetype _Nullable)table4Clazz:(Class<JRPersistent>)clazz1 andClazz:(Class<JRPersistent>)clazz2 db:(id<JRPersistentHandler>)db;
 
@@ -62,10 +62,10 @@ NS_ASSUME_NONNULL_BEGIN
  *   对JRPersistent的封装
  *  （把之前的关系全删了，重新保存）
  *
- *  @param objs
- *  @param obj
+ *  @param objs description
+ *  @param obj description
  *
- *  @return 
+ *  @return description
  */
 - (BOOL)saveObjs:(NSArray<id<JRPersistent>> *)objs forObj:(id<JRPersistent>)obj;
 
@@ -75,7 +75,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  *  自身自带事务
  *
- *  @return 
+ *  @return description
  */
 - (BOOL)cleanRubbishData;
 

@@ -70,7 +70,7 @@ NS_ASSUME_NONNULL_BEGIN
  您不会用到此方法, 擅自使用会造成数据库lock @see jr_inTransaction
  当前线程执行某个block, block 执行是必须有事务，useTransaction可以使用默认事务
 
- @param block
+ @param block description
  @param useTransaction 是否使用默认事务 NO:需要自己开启和提交事务
  */
 - (BOOL)jr_executeUseTransaction:(BOOL)useTransaction block:(BOOL (^)(id<JRPersistentBaseHandler> handler))block;
@@ -79,7 +79,7 @@ NS_ASSUME_NONNULL_BEGIN
  任务是否同步执行
 
  @param sync  是否同步执行
- @param block
+ @param block description
 
  */
 - (id _Nullable)jr_executeSync:(BOOL)sync block:(id _Nullable (^)(id<JRPersistentBaseHandler> handler))block;
@@ -87,7 +87,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  执行sql 更新
 
- @param sql
+ @param sql description
  */
 - (BOOL)jr_executeUpdate:(JRSql *)sql;
 - (BOOL)jr_executeUpdate:(NSString *)sql params:(NSArray * _Nullable)params;
@@ -95,7 +95,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  执行sql 查询
 
- @param sql
+ @param sql description
  */
 - (id)jr_executeQuery:(JRSql *)sql;
 - (id)jr_executeQuery:(NSString *)sql params:(NSArray * _Nullable)params;
@@ -159,14 +159,14 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  *  只保存one
  *
- *  @param one
+ *  @param one description
  */
 - (BOOL)jr_saveOne:(id<JRPersistent>)one useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized;
 
 /**
  *  保存数组
  *
- *  @param objects
+ *  @param objects description
  *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
  */
 - (BOOL)jr_saveObjects:(NSArray<id<JRPersistent>> *)objects useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized;
@@ -177,7 +177,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  *  更新one
  *
- *  @param one
+ *  @param one description
  *  @param columns 需要更新的字段
  */
 - (BOOL)jr_updateOne:(id<JRPersistent>)one columns:(NSArray<NSString *> * _Nullable)columns useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized;
@@ -186,7 +186,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  *  更新array
  *
- *  @param objects
+ *  @param objects description
  *  @param columns 需要更新的字段
  *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
  */
@@ -198,7 +198,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  *  删除one，可选择自带事务或者自行在外层包裹事务
  *
- *  @param one
+ *  @param one description
  *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
  */
 - (BOOL)jr_deleteOne:(id<JRPersistent>)one useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized;
@@ -207,7 +207,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  *  删除array，可选择自带事务或者自行在外层包裹事务
  *
- *  @param objects
+ *  @param objects description
  *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
  */
 - (BOOL)jr_deleteObjects:(NSArray<id<JRPersistent>> *)objects useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized;
@@ -268,14 +268,14 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  *  关联保存保存one
  *
- *  @param one
+ *  @param one description
  */
 - (BOOL)jr_saveOneRecursively:(id<JRPersistent>)one useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized;
 
 /**
  *  保存数组
  *
- *  @param objects
+ *  @param objects description
  *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
  */
 - (BOOL)jr_saveObjectsRecursively:(NSArray<id<JRPersistent>> *)objects useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized;
@@ -286,7 +286,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  *  更新one
  *
- *  @param one
+ *  @param one description
  *  @param columns 需要更新的字段
  */
 - (BOOL)jr_updateOneRecursively:(id<JRPersistent>)one columns:(NSArray<NSString *> * _Nullable)columns useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized;
@@ -295,7 +295,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  *  更新array
  *
- *  @param objects
+ *  @param objects description
  *  @param columns 需要更新的字段
  *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
  */
@@ -307,7 +307,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  *  删除one，可选择自带事务或者自行在外层包裹事务
  *
- *  @param one
+ *  @param one description
  *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
  */
 - (BOOL)jr_deleteOneRecursively:(id<JRPersistent>)one useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized;
@@ -315,7 +315,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  *  删除array，可选择自带事务或者自行在外层包裹事务
  *
- *  @param objects
+ *  @param objects description
  *  @param useTransaction 若外层有事务，请用NO，若没有，请用YES
  */
 - (BOOL)jr_deleteObjectsRecursively:(NSArray<id<JRPersistent>> *)objects useTransaction:(BOOL)useTransaction synchronized:(BOOL)synchronized;
