@@ -25,9 +25,8 @@ echo $podSpecName
 # 修改版本号
 sed -i "" "s/s.version *= *[\"\'][^\"]*[\"\']/s.version=\"$thisTag\"/g" $podSpecName.podspec
 
-# 验证连接资源
-sources="master,http://192.168.31.88:8686/r/PrivatePods.git"
-pod lib lint  --sources=$sources
+
+pod lib lint
 
 
 # 验证失败退出

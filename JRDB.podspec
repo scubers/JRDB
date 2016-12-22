@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 
     s.name                  = "JRDB"
-    s.version="2.0.6"
+    s.version="2.0.7"
     s.summary               = "iOS database lib depend on FMDB, whitch use like hibernate"
 
     s.homepage              = "https://github.com/scubers/JRDB"
