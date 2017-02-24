@@ -347,11 +347,11 @@ void SqlLog(id sql) {
             
             id<JRPersistent> updateObj;
             
+            NSObject<JRPersistent> *old = (NSObject<JRPersistent> *)
+            [self jr_getByPrimaryKey:[one jr_primaryKeyValue] clazz:[one class] synchronized:synchronized];
+
             if (columns.count) {
-                
-                NSObject<JRPersistent> *old = (NSObject<JRPersistent> *)
-                [self jr_getByPrimaryKey:[one jr_primaryKeyValue] clazz:[one class] synchronized:synchronized];
-                
+
                 if (!old) {
                     NSLog(@"The object doesn't exists in database");
                     return NO;
@@ -369,6 +369,8 @@ void SqlLog(id sql) {
             
             BOOL ret = [self jr_executeUpdate:sql];
             if (ret) {
+                // 执行更新完，确保指定对象具备数据库绑定ID
+                [one setID:old.ID];
                 // 保存完，执行block
                 if (ret) [one jr_executeFinishBlocks];
             }
