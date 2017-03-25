@@ -35,6 +35,7 @@
 		A876AB9ABC8BE60FC4881BA5 /* libPods-JRDB.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 632830974E0244C0E00157B4 /* libPods-JRDB.a */; };
 		A8A1B2251D033C8C00886403 /* NSObject+Reflect.m in Sources */ = {isa = PBXBuildFile; fileRef = A8A1B2241D033C8C00886403 /* NSObject+Reflect.m */; };
 		A8A1B2281D033CDC00886403 /* OBJCProperty.m in Sources */ = {isa = PBXBuildFile; fileRef = A8A1B2271D033CDC00886403 /* OBJCProperty.m */; };
+		A8ACF2CE1E7AC01D00B6D809 /* JRDBIndexingTest.m in Sources */ = {isa = PBXBuildFile; fileRef = A8ACF2CD1E7AC01D00B6D809 /* JRDBIndexingTest.m */; };
 		A8C6B41D1DF71B77003A57B3 /* JRPersistentUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = A8C6B41C1DF71B77003A57B3 /* JRPersistentUtil.m */; };
 /* End PBXBuildFile section */
 
@@ -102,6 +103,7 @@
 		A8A1B2261D033CDC00886403 /* OBJCProperty.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OBJCProperty.h; sourceTree = "<group>"; };
 		A8A1B2271D033CDC00886403 /* OBJCProperty.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OBJCProperty.m; sourceTree = "<group>"; };
 		A8A1B22C1D03D29900886403 /* JRReflectable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JRReflectable.h; sourceTree = "<group>"; };
+		A8ACF2CD1E7AC01D00B6D809 /* JRDBIndexingTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRDBIndexingTest.m; sourceTree = "<group>"; };
 		A8C6B41B1DF71B77003A57B3 /* JRPersistentUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRPersistentUtil.h; sourceTree = "<group>"; };
 		A8C6B41C1DF71B77003A57B3 /* JRPersistentUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JRPersistentUtil.m; sourceTree = "<group>"; };
 		C78394A58BF0B0CB70137A8B /* Pods-JRDBTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-JRDBTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-JRDBTests/Pods-JRDBTests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -206,6 +208,7 @@
 				5AA3DB321D067DD800795E80 /* JRDBTestJRDBMgr.m */,
 				5ACBEECC1CE1B3A500371E01 /* Info.plist */,
 				09943EB41D630FB000C7164D /* JRDBMgrContextTests.m */,
+				A8ACF2CD1E7AC01D00B6D809 /* JRDBIndexingTest.m */,
 			);
 			path = JRDBTests;
 			sourceTree = "<group>";
@@ -478,6 +481,7 @@
 				09943EB51D630FB000C7164D /* JRDBMgrContextTests.m in Sources */,
 				5AA3DB331D067DD800795E80 /* JRDBTestJRDBMgr.m in Sources */,
 				5ACBEECB1CE1B3A500371E01 /* JRDBTests.m in Sources */,
+				A8ACF2CE1E7AC01D00B6D809 /* JRDBIndexingTest.m in Sources */,
 				A822B2F81DD8505B00A07ED4 /* JRDBTestByKiwi.m in Sources */,
 				5AE115421D364ED400886657 /* JRDBChainTest.m in Sources */,
 				09822BB71DBF00D400662F49 /* FMDatabase+JRPersistentHandler.m in Sources */,
