@@ -109,8 +109,9 @@ typedef void(^JRDBDidFinishBlock)(id<JRPersistent> obj);
  *  完成save 或者 update 会调用
  * （注意：如果有事务操作，也会在执行当前sql语句之后执行，即使之后有可能会被回滚）
  *
- *  @param block 代码块
  */
+@property (nonatomic, strong, readonly) NSMutableDictionary<NSString *, JRDBDidFinishBlock> *jr_finishBlocks;
+
 - (void)jr_addDidFinishBlock:(JRDBDidFinishBlock _Nullable)block forIdentifier:(NSString *)identifier;
 - (void)jr_removeDidFinishBlockForIdentifier:(NSString *)identifier;
 
@@ -119,6 +120,20 @@ typedef void(^JRDBDidFinishBlock)(id<JRPersistent> obj);
  *  此方法不用自己调用，库会每次操作完调用一次
  */
 - (void)jr_executeFinishBlocks;
+
+/**
+ 返回属性名对应的数据库字段
+
+ */
++ (NSDictionary<NSString *, NSString *> * _Nullable)jr_databaseNameMap;
+
+
+/**
+ *  在注册之后，才会有值
+ *
+ *  @return 返回处于激活状态的属性数组
+ */
++ (NSArray<JRActivatedProperty *> * _Nullable)jr_activatedProperties;
 
 #pragma mark - convenience
 
@@ -144,20 +159,6 @@ typedef void(^JRDBDidFinishBlock)(id<JRPersistent> obj);
  */
 - (id _Nullable)jr_primaryKeyValue;
 
-
-/**
- 返回属性名对应的数据库字段
-
- */
-+ (NSDictionary<NSString *, NSString *> * _Nullable)jr_databaseNameMap;
-
-
-/**
- *  在注册之后，才会有值
- *
- *  @return 返回处于激活状态的属性数组
- */
-+ (NSArray<JRActivatedProperty *> * _Nullable)jr_activatedProperties;
 
 @end
 

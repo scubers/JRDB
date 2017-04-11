@@ -13,13 +13,7 @@
 #import "JRDBChain.h"
 #import "JRPersistentUtil.h"
 
-
-@implementation NSObject (JRDB)
-
-+ (void)jr_configure {
-    NSArray *activatedProp = [JRPersistentUtil allPropertesForClass:self];
-    objc_setAssociatedObject(self, @selector(jr_activatedProperties), activatedProp, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
+@implementation NSObject (JRPersistent)
 
 #pragma mark - protocol method
 
@@ -37,10 +31,6 @@
 
 + (BOOL)isRegistered {
     return [objc_getAssociatedObject(self, @selector(setRegistered:)) boolValue];
-}
-
-- (BOOL)isCacheHit {
-    return [objc_getAssociatedObject(self, _cmd) boolValue];
 }
 
 + (NSArray *)jr_excludePropertyNames {
@@ -65,24 +55,6 @@
 
 + (NSString *)jr_customTableName {
     return nil;
-}
-
-+ (NSString *)jr_tableName {
-    return [self jr_customTableName]?:[self shortClazzName];
-}
-
-+ (NSString *)jr_primaryKey {
-    if ([self jr_customPrimarykey]) {
-        return [self jr_customPrimarykey];
-    }
-    return DBIDKey;
-}
-
-- (id)jr_primaryKeyValue {
-    if ([[self class] jr_customPrimarykey]) {
-        return [self jr_customPrimarykeyValue];
-    }
-    return [self ID];
 }
 
 + (NSDictionary<NSString *,NSString *> *)jr_databaseNameMap {
@@ -112,6 +84,41 @@
     }
     return blocks;
 }
+
+
+#pragma mark convenience method
+
++ (NSString *)jr_tableName {
+    return [self jr_customTableName]?:[self shortClazzName];
+}
+
++ (NSString *)jr_primaryKey {
+    if ([self jr_customPrimarykey]) {
+        return [self jr_customPrimarykey];
+    }
+    return DBIDKey;
+}
+
+- (id)jr_primaryKeyValue {
+    if ([[self class] jr_customPrimarykey]) {
+        return [self jr_customPrimarykeyValue];
+    }
+    return [self ID];
+}
+
+
+@end
+
+/****************************************************************/
+
+
+@implementation NSObject (JRDB)
+
++ (void)jr_configure {
+    NSArray *activatedProp = [JRPersistentUtil allPropertesForClass:self];
+    objc_setAssociatedObject(self, @selector(jr_activatedProperties), activatedProp, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
 
 + (NSArray<JRActivatedProperty *> *)jr_activatedProperties {
     return objc_getAssociatedObject(self, _cmd);

@@ -53,14 +53,16 @@ static JRDBMgr *__shareInstance;
 #pragma mark - database operation
 
 - (id<JRPersistentHandler>)getHandler {
+    return [self getHandlerWithPath:self.defaultDatabasePath];
+}
+
+- (id<JRPersistentHandler>)getHandlerWithPath:(NSString *)path {
     @synchronized (self) {
-        NSString *path = self.defaultDatabasePath;
         NSMutableArray<id<JRPersistentHandler>> *connections = self.handlers[path];
         if (!connections) {
             connections = [NSMutableArray arrayWithCapacity:1];
             _handlers[path] = connections;
         }
-        
         if (connections.count < _maxConnectionCount) {
             id<JRPersistentHandler> db = [FMDatabase databaseWithPath:path];
             [connections addObject:db];
@@ -70,7 +72,6 @@ static JRDBMgr *__shareInstance;
         return handler;
     }
 }
-
 - (void)deleteDatabaseWithPath:(NSString *)path {
     [self.handlers[path] enumerateObjectsUsingBlock:^(id<JRPersistentHandler>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         [obj jr_closeSynchronized:YES];
