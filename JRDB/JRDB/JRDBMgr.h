@@ -24,8 +24,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark - database operation
 
-/** get a database handler from the connection pool */
+/** get a default database handler from the connection pool */
 - (id<JRPersistentHandler>)getHandler;
+/** get a sepecific database handler from the connection pool */
+- (id<JRPersistentHandler>)getHandlerWithPath:(NSString *)path;
 
 /** physicaly delete the database */
 - (void)deleteDatabaseWithPath:(NSString * _Nullable)path;
