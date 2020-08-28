@@ -512,7 +512,7 @@ static inline void __operationCheck(JRDBChain *self) {
     if (_limitIn.start < 0 || _limitIn.length < 0) {
         return nil;
     }
-    return [NSString stringWithFormat:@" limit %zd,%zd ", _limitIn.start, _limitIn.length];
+    return [NSString stringWithFormat:@" limit %lld,%lld ", _limitIn.start, _limitIn.length];
 }
 
 - (NSArray<NSString *> *)selectColumns {
