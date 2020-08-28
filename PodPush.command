@@ -12,7 +12,7 @@ then
 fi
 
 echo "--------tag list--------"
-git tag -l
+git tag -l|tail -n 10
 echo "--------tag list--------"
 
 echo "根据上面的tag输入新tag"
