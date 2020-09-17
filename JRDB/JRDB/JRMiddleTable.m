@@ -9,6 +9,7 @@
 #import "JRMiddleTable.h"
 #import "NSObject+Reflect.h"
 #import "FMDatabase+JRPersistentHandler.h"
+#import "JRSqlGenerator.h"
 
 #define MiddleTableName(clazz1,clazz2) [NSString stringWithFormat:@"%@_%@_Mid_Table", [clazz1 jr_tableName],[clazz2 jr_tableName]]
 #define MiddleColumn4Clazz(clazz) [NSString stringWithFormat:@"%@_ids", [clazz jr_tableName]]
@@ -108,7 +109,7 @@
     //delete from Person_money_mid_table where (person_ids not in (select _id from Person)) or (money_ids not in (select _id from Money))
     return
     
-    [_db jr_inTransaction:^(FMDatabase * _Nonnull db, BOOL * _Nonnull rollBack) {
+    [_db jr_inTransaction:^(id<JRPersistentBaseHandler> _Nonnull db, BOOL * _Nonnull rollBack) {
         NSString *sql =
         [NSString stringWithFormat:@"delete from %@ where (%@ not in (select %@ from %@)) or (%@ not in (select %@ from %@))"
          , [self tableName]
@@ -119,7 +120,9 @@
          , DBIDKey
          , [_clazz2 jr_tableName]];
         
-        *rollBack = ![db executeUpdate:sql];
+//        *rollBack = ![db executeUpdate:sql];
+        JRSql *jrsql = [JRSql sql:sql args:@[]];
+        [db jr_executeUpdate: jrsql];
     }];
     
 }

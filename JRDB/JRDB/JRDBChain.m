@@ -556,7 +556,7 @@ static inline void __operationCheck(JRDBChain *self) {
 
 - (id)jr_executeCustomizedQueryChain {
     return
-    [_db jr_executeSync:self.isSync block:^id _Nullable(id<JRPersistentHandler>  _Nonnull handler) {
+    [_db jr_executeSync:self.isSync block:^id _Nullable(id<JRPersistentBaseHandler>  _Nonnull handler) {
         FMResultSet *resultSet = [handler jr_executeQuery:self.querySql];
         id result = [JRFMDBResultSetHandler handleResultSet:resultSet forChain:self];
         return result;
